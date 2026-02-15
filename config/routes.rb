@@ -1,16 +1,38 @@
 Rails.application.routes.draw do
-  get "home/index"
-  root "home#index"
-  # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
-
-  # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
-  # Can be used by load balancers and uptime monitors to verify that the app is live.
+  # Health check
   get "up" => "rails/health#show", as: :rails_health_check
 
-  # Render dynamic PWA files from app/views/pwa/* (remember to link manifest in application.html.erb)
-  # get "manifest" => "rails/pwa#manifest", as: :pwa_manifest
-  # get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker
+  # === Tenant subdomain routes ===
+  constraints subdomain: /.+/ do
+    devise_for :users
 
-  # Defines the root path route ("/")
-  # root "posts#index"
+    namespace :admin do
+      root "dashboard#index"
+    end
+
+    namespace :employee_portal, path: "portal" do
+      root "dashboard#index"
+    end
+
+    root "admin/dashboard#index", as: :tenant_root
+  end
+
+  # === Root domain routes (no subdomain) ===
+  root "home#index"
+  get "signup", to: "signups#new"
+  post "signup", to: "signups#create"
+
+  # Platform admin
+  namespace :platform_admin do
+    get "login", to: "sessions#new"
+    post "login", to: "sessions#create"
+    delete "logout", to: "sessions#destroy"
+
+    root "dashboard#index"
+    resources :tenants, only: [:index, :show, :edit, :update] do
+      member do
+        patch :toggle_status
+      end
+    end
+  end
 end
