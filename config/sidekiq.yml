@@ -1,0 +1,6 @@
+:concurrency: 5
+:queues:
+  - [payroll, 3]
+  - [mailers, 2]
+  - [default, 1]
+  - [scheduled, 1]

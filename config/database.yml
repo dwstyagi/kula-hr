@@ -85,20 +85,5 @@ test:
 # for a full overview on how database connection configuration can be specified.
 #
 production:
-  primary: &primary_production
-    <<: *default
-    database: hrms_production
-    username: hrms
-    password: <%= ENV["HRMS_DATABASE_PASSWORD"] %>
-  cache:
-    <<: *primary_production
-    database: hrms_production_cache
-    migrations_paths: db/cache_migrate
-  queue:
-    <<: *primary_production
-    database: hrms_production_queue
-    migrations_paths: db/queue_migrate
-  cable:
-    <<: *primary_production
-    database: hrms_production_cable
-    migrations_paths: db/cable_migrate
+  <<: *default
+  DATABASE_URL: <%= ENV["DATABASE_URL"] %>
