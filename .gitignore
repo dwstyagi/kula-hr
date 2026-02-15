@@ -34,4 +34,5 @@
 /config/*.key
 
 docs/
-
+/app/assets/builds/*
+!/app/assets/builds/.keep
