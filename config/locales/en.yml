@@ -28,4 +28,5 @@
 #       enabled: "ON"
 
 en:
+  app_name: "Kula HR"
   hello: "Hello world"

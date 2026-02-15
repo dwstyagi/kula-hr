@@ -3,9 +3,9 @@
   <nav class="flex items-center justify-between p-6 lg:px-8" aria-label="Global">
     <div class="flex lg:flex-1">
       <a href="#" class="-m-1.5 p-1.5 flex items-center gap-2">
-        <span class="sr-only">HRMS</span>
-        <div class="h-8 w-8 rounded bg-blue-600 flex items-center justify-center text-white font-bold text-xl">H</div>
-        <span class="font-bold text-xl tracking-tight text-gray-900">HRMS</span>
+        <span class="sr-only"><%= t('app_name') %></span>
+        <div class="h-8 w-8 rounded bg-blue-600 flex items-center justify-center text-white font-bold text-xl">K</div>
+        <span class="font-bold text-xl tracking-tight text-gray-900"><%= t('app_name') %></span>
       </a>
     </div>
     <div class="flex lg:hidden">
@@ -259,7 +259,7 @@
   <div class="bg-blue-600">
     <div class="px-6 py-24 sm:px-6 sm:py-32 lg:px-8">
       <div class="mx-auto max-w-2xl text-center">
-        <h2 class="text-3xl font-bold tracking-tight text-white sm:text-4xl">Boost your productivity.<br>Start using HRMS today.</h2>
+        <h2 class="text-3xl font-bold tracking-tight text-white sm:text-4xl">Boost your productivity.<br>Start using <%= t('app_name') %> today.</h2>
         <p class="mx-auto mt-6 max-w-xl text-lg leading-8 text-blue-100">Join over 4,000+ companies already managing their workforce smarter, faster, and better.</p>
         <div class="mt-10 flex items-center justify-center gap-x-6">
           <a href="#" class="rounded-md bg-white px-3.5 py-2.5 text-sm font-semibold text-blue-600 shadow-sm hover:bg-blue-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white transition">Get started</a>
@@ -277,8 +277,8 @@
     <div class="xl:grid xl:grid-cols-3 xl:gap-8">
       <div class="space-y-8">
         <div class="flex items-center gap-2">
-            <div class="h-8 w-8 rounded bg-white/10 flex items-center justify-center text-white font-bold text-xl">H</div>
-            <span class="font-bold text-xl tracking-tight text-white">HRMS</span>
+            <div class="h-8 w-8 rounded bg-white/10 flex items-center justify-center text-white font-bold text-xl">K</div>
+            <span class="font-bold text-xl tracking-tight text-white"><%= t('app_name') %></span>
         </div>
         <p class="text-sm leading-6 text-gray-300">Making the world a better place through constructing elegant hierarchies.</p>
         <div class="flex space-x-6">
@@ -335,7 +335,7 @@
       </div>
     </div>
     <div class="mt-16 border-t border-white/10 pt-8 sm:mt-20 lg:mt-24">
-      <p class="text-xs leading-5 text-gray-400">&copy; 2026 HRMS, Inc. All rights reserved.</p>
+      <p class="text-xs leading-5 text-gray-400">&copy; 2026 <%= t('app_name') %>, Inc. All rights reserved.</p>
     </div>
   </div>
 </footer>
