@@ -37,8 +37,11 @@ Rails.application.configure do
   # Make template changes take effect immediately.
   config.action_mailer.perform_caching = false
 
-  # Set localhost to be used by links generated in mailer templates.
-  config.action_mailer.default_url_options = { host: "localhost", port: 3000 }
+  # Set lvh.me to be used by links generated in mailer templates (supports subdomains).
+  config.action_mailer.default_url_options = { host: "lvh.me", port: 3000 }
+
+  # Allow subdomain requests via lvh.me
+  config.hosts << ".lvh.me"
 
   # Print deprecation notices to the Rails logger.
   config.active_support.deprecation = :log

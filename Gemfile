@@ -41,6 +41,38 @@ gem "thruster", require: false
 # Use Active Storage variants [https://guides.rubyonrails.org/active_storage_overview.html#transforming-images]
 gem "image_processing", "~> 1.2"
 
+# Multi-tenancy
+gem "acts_as_tenant"
+
+# Authentication
+gem "devise"
+gem "devise_invitable"
+
+# Authorization & roles
+gem "rolify"
+gem "pundit"
+
+# State machine
+gem "aasm"
+
+# Audit trail
+gem "paper_trail"
+
+# Pagination
+gem "pagy"
+
+# PDF generation
+gem "prawn"
+gem "prawn-table"
+
+# CSV/Excel
+gem "roo"
+gem "caxlsx"
+
+# Charts
+gem "chartkick"
+gem "groupdate"
+
 group :development, :test do
   gem "dotenv-rails", require: "dotenv/load"
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
