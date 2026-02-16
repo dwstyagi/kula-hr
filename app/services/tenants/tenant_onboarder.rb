@@ -113,21 +113,21 @@ module Tenants
 
     def seed_professional_tax_slabs(tenant)
       slabs = case @form.state
-              when "Maharashtra"
-                [
-                  { salary_from: 0, salary_to: 7_500, tax_amount: 0, month: nil },
-                  { salary_from: 7_501, salary_to: 10_000, tax_amount: 175, month: nil },
-                  { salary_from: 10_001, salary_to: 999_999, tax_amount: 200, month: nil },
-                  { salary_from: 10_001, salary_to: 999_999, tax_amount: 300, month: "february" }
-                ]
-              when "Karnataka"
-                [
-                  { salary_from: 0, salary_to: 15_000, tax_amount: 0, month: nil },
-                  { salary_from: 15_001, salary_to: 999_999, tax_amount: 200, month: nil }
-                ]
-              else
-                []
-              end
+      when "Maharashtra"
+        [
+          { salary_from: 0, salary_to: 7_500, tax_amount: 0, month: nil },
+          { salary_from: 7_501, salary_to: 10_000, tax_amount: 175, month: nil },
+          { salary_from: 10_001, salary_to: 999_999, tax_amount: 200, month: nil },
+          { salary_from: 10_001, salary_to: 999_999, tax_amount: 300, month: "february" }
+        ]
+      when "Karnataka"
+        [
+          { salary_from: 0, salary_to: 15_000, tax_amount: 0, month: nil },
+          { salary_from: 15_001, salary_to: 999_999, tax_amount: 200, month: nil }
+        ]
+      else
+        []
+      end
 
       slabs.each do |attrs|
         ProfessionalTaxSlab.create!(attrs.merge(tenant: tenant, state: @form.state))

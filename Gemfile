@@ -92,6 +92,10 @@ group :development, :test do
   gem "factory_bot_rails"
   gem "faker"
   gem "pry-rails"
+  gem "ruby-lsp"
+  gem "rubocop"
+  gem "rubocop-rails"
+  gem "rubocop-performance"
 end
 
 group :development do

@@ -11,6 +11,6 @@ class CreateLeaveTypes < ActiveRecord::Migration[8.1]
       t.timestamps
     end
 
-    add_index :leave_types, [:tenant_id, :code], unique: true
+    add_index :leave_types, [ :tenant_id, :code ], unique: true
   end
 end

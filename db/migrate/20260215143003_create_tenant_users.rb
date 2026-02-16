@@ -7,6 +7,6 @@ class CreateTenantUsers < ActiveRecord::Migration[8.1]
       t.timestamps
     end
 
-    add_index :tenant_users, [:tenant_id, :user_id], unique: true
+    add_index :tenant_users, [ :tenant_id, :user_id ], unique: true
   end
 end

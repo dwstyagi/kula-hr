@@ -7,6 +7,6 @@ class CreateDesignations < ActiveRecord::Migration[8.1]
       t.timestamps
     end
 
-    add_index :designations, [:tenant_id, :name], unique: true
+    add_index :designations, [ :tenant_id, :name ], unique: true
   end
 end

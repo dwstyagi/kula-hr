@@ -1,6 +1,6 @@
 module Platform
   class TenantsController < BaseController
-    before_action :set_tenant, only: [:show, :edit, :update, :toggle_status]
+    before_action :set_tenant, only: [ :show, :edit, :update, :toggle_status ]
 
     def index
       @pagy, @tenants = pagy(:offset, Tenant.order(created_at: :desc), limit: 25)
@@ -22,10 +22,10 @@ module Platform
 
     def toggle_status
       new_status = case @tenant.status
-                   when "trial", "suspended" then "active"
-                   when "active" then "suspended"
-                   else @tenant.status
-                   end
+      when "trial", "suspended" then "active"
+      when "active" then "suspended"
+      else @tenant.status
+      end
 
       if @tenant.update(status: new_status)
         redirect_to platform_admin_tenants_path, notice: "#{@tenant.name} is now #{new_status}."
