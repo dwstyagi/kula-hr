@@ -8,6 +8,7 @@ class Tenant < ApplicationRecord
   has_many :salary_components, dependent: :destroy
   has_many :leave_types, dependent: :destroy
   has_many :professional_tax_slabs, dependent: :destroy
+  has_many :employees, dependent: :destroy
   has_one :payroll_setting, dependent: :destroy
 
   RESERVED_SUBDOMAINS = %w[www admin api app mail ftp smtp pop imap blog support help

@@ -7,6 +7,7 @@ class User < ApplicationRecord
 
   has_many :tenant_users, dependent: :destroy
   has_many :tenants, through: :tenant_users
+  has_one :employee, dependent: :destroy
 
   validates :first_name, presence: true
   validates :last_name, presence: true
