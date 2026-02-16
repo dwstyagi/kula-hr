@@ -23,13 +23,13 @@ Rails.application.routes.draw do
   post "signup", to: "signups#create"
 
   # Platform admin
-  namespace :platform_admin do
+  scope :platform_admin, module: "platform", as: "platform_admin" do
     get "login", to: "sessions#new"
     post "login", to: "sessions#create"
     delete "logout", to: "sessions#destroy"
 
     root "dashboard#index"
-    resources :tenants, only: [:index, :show, :edit, :update] do
+    resources :tenants, only: [ :index, :show, :edit, :update ] do
       member do
         patch :toggle_status
       end
