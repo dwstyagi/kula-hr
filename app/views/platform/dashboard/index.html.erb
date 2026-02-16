@@ -1,0 +1,33 @@
+<% content_for(:page_title, "Dashboard") %>
+
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+  <div class="bg-white rounded-lg border border-gray-200 p-6">
+    <p class="text-sm font-medium text-gray-500">Total Tenants</p>
+    <p class="text-3xl font-bold text-gray-900 mt-2"><%= @stats.total_tenants %></p>
+  </div>
+
+  <div class="bg-white rounded-lg border border-gray-200 p-6">
+    <p class="text-sm font-medium text-gray-500">Active Tenants</p>
+    <p class="text-3xl font-bold text-green-600 mt-2"><%= @stats.active_tenants %></p>
+  </div>
+
+  <div class="bg-white rounded-lg border border-gray-200 p-6">
+    <p class="text-sm font-medium text-gray-500">Trial Tenants</p>
+    <p class="text-3xl font-bold text-yellow-600 mt-2"><%= @stats.trial_tenants %></p>
+  </div>
+
+  <div class="bg-white rounded-lg border border-gray-200 p-6">
+    <p class="text-sm font-medium text-gray-500">Suspended Tenants</p>
+    <p class="text-3xl font-bold text-red-600 mt-2"><%= @stats.suspended_tenants %></p>
+  </div>
+
+  <div class="bg-white rounded-lg border border-gray-200 p-6">
+    <p class="text-sm font-medium text-gray-500">Signups This Month</p>
+    <p class="text-3xl font-bold text-blue-600 mt-2"><%= @stats.signups_this_month %></p>
+  </div>
+
+  <div class="bg-white rounded-lg border border-gray-200 p-6">
+    <p class="text-sm font-medium text-gray-500">Total Users</p>
+    <p class="text-3xl font-bold text-gray-900 mt-2"><%= @stats.total_users %></p>
+  </div>
+</div>

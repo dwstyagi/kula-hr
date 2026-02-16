@@ -1,0 +1,86 @@
+<div class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+  <div class="max-w-lg w-full">
+    <div class="text-center mb-8">
+      <div class="flex justify-center">
+        <div class="h-12 w-12 rounded bg-blue-600 flex items-center justify-center text-white font-bold text-2xl">K</div>
+      </div>
+      <h2 class="mt-6 text-3xl font-bold text-gray-900">Create your account</h2>
+      <p class="mt-2 text-sm text-gray-600">Start your free trial. No credit card required.</p>
+    </div>
+
+    <div class="bg-white rounded-lg border border-gray-200 p-8">
+      <%= form_with model: @signup_form, url: signup_path, class: "space-y-6" do |f| %>
+        <% if @signup_form.errors.any? %>
+          <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+            <ul class="list-disc list-inside text-sm text-red-700">
+              <% @signup_form.errors.full_messages.each do |msg| %>
+                <li><%= msg %></li>
+              <% end %>
+            </ul>
+          </div>
+        <% end %>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Company Name</label>
+          <%= f.text_field :company_name, class: "mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:outline-none sm:text-sm", placeholder: "Acme Corporation" %>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Subdomain</label>
+          <div class="mt-1 flex rounded-lg shadow-sm">
+            <%= f.text_field :subdomain, class: "block w-full rounded-l-lg border border-r-0 border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-blue-500 focus:outline-none sm:text-sm", placeholder: "acme" %>
+            <span class="inline-flex items-center rounded-r-lg border border-l-0 border-gray-300 bg-gray-50 px-3 text-sm text-gray-500">.lvh.me</span>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700">First Name</label>
+            <%= f.text_field :first_name, class: "mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:outline-none sm:text-sm" %>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700">Last Name</label>
+            <%= f.text_field :last_name, class: "mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:outline-none sm:text-sm" %>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Email</label>
+          <%= f.email_field :email, class: "mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:outline-none sm:text-sm", placeholder: "you@company.com" %>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700">Password</label>
+            <%= f.password_field :password, class: "mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:outline-none sm:text-sm" %>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700">Confirm Password</label>
+            <%= f.password_field :password_confirmation, class: "mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:outline-none sm:text-sm" %>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700">State</label>
+          <%= f.select :state,
+              ["Maharashtra", "Karnataka", "Tamil Nadu", "Delhi", "Telangana", "Gujarat", "Rajasthan",
+               "Uttar Pradesh", "West Bengal", "Madhya Pradesh", "Kerala", "Haryana", "Punjab", "Bihar",
+               "Odisha", "Andhra Pradesh", "Jharkhand", "Assam", "Chhattisgarh", "Uttarakhand", "Goa",
+               "Himachal Pradesh", "Tripura", "Meghalaya", "Manipur", "Nagaland", "Mizoram",
+               "Arunachal Pradesh", "Sikkim"],
+              { prompt: "Select your state" },
+              class: "mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:outline-none sm:text-sm" %>
+        </div>
+
+        <button type="submit"
+                class="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+          Create Account
+        </button>
+      <% end %>
+    </div>
+
+    <p class="mt-4 text-center text-sm text-gray-600">
+      Already have an account? Log in at your company's subdomain.
+    </p>
+  </div>
+</div>

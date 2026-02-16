@@ -1,0 +1,54 @@
+<% content_for(:page_title, @tenant.name) %>
+
+<div class="max-w-3xl">
+  <div class="bg-white rounded-lg border border-gray-200 p-6 mb-6">
+    <div class="flex items-center justify-between mb-6">
+      <h2 class="text-lg font-semibold text-gray-900">Company Details</h2>
+      <%= link_to "Edit", edit_platform_admin_tenant_path(@tenant),
+          class: "text-sm text-blue-600 hover:text-blue-900" %>
+    </div>
+
+    <dl class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
+      <div>
+        <dt class="text-sm font-medium text-gray-500">Name</dt>
+        <dd class="mt-1 text-sm text-gray-900"><%= @tenant.name %></dd>
+      </div>
+      <div>
+        <dt class="text-sm font-medium text-gray-500">Subdomain</dt>
+        <dd class="mt-1 text-sm text-gray-900"><code class="bg-gray-100 px-2 py-0.5 rounded"><%= @tenant.subdomain %></code></dd>
+      </div>
+      <div>
+        <dt class="text-sm font-medium text-gray-500">Status</dt>
+        <dd class="mt-1">
+          <% color = case @tenant.status
+                     when "active" then "green"
+                     when "trial" then "yellow"
+                     when "suspended" then "red"
+                     else "gray"
+                     end %>
+          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-<%= color %>-100 text-<%= color %>-800">
+            <%= @tenant.status.capitalize %>
+          </span>
+        </dd>
+      </div>
+      <div>
+        <dt class="text-sm font-medium text-gray-500">State</dt>
+        <dd class="mt-1 text-sm text-gray-900"><%= @tenant.state || "—" %></dd>
+      </div>
+      <div>
+        <dt class="text-sm font-medium text-gray-500">GSTIN</dt>
+        <dd class="mt-1 text-sm text-gray-900"><%= @tenant.gstin || "—" %></dd>
+      </div>
+      <div>
+        <dt class="text-sm font-medium text-gray-500">PAN</dt>
+        <dd class="mt-1 text-sm text-gray-900"><%= @tenant.pan || "—" %></dd>
+      </div>
+      <div>
+        <dt class="text-sm font-medium text-gray-500">Created</dt>
+        <dd class="mt-1 text-sm text-gray-900"><%= @tenant.created_at.strftime("%b %d, %Y at %I:%M %p") %></dd>
+      </div>
+    </dl>
+  </div>
+
+  <%= link_to "Back to Tenants", platform_admin_tenants_path, class: "text-sm text-gray-600 hover:text-gray-900" %>
+</div>

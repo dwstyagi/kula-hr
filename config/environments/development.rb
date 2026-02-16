@@ -40,7 +40,8 @@ Rails.application.configure do
   # Set lvh.me to be used by links generated in mailer templates (supports subdomains).
   config.action_mailer.default_url_options = { host: "lvh.me", port: 3000 }
 
-  # Allow subdomain requests via lvh.me
+  # Allow lvh.me and all subdomains
+  config.hosts << "lvh.me"
   config.hosts << ".lvh.me"
 
   # Print deprecation notices to the Rails logger.
