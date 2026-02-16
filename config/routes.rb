@@ -8,6 +8,8 @@ Rails.application.routes.draw do
 
     namespace :admin do
       root "dashboard#index"
+      resources :departments
+      resources :designations
     end
 
     namespace :employee_portal, path: "portal" do

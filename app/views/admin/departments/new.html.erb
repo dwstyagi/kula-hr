@@ -1,0 +1,6 @@
+<%= turbo_frame_tag "department_form" do %>
+  <div class="bg-white rounded-lg border border-gray-200 p-6 mb-6">
+    <h2 class="text-lg font-semibold text-gray-900 mb-4">New Department</h2>
+    <%= render "form", department: @department, url: admin_departments_path %>
+  </div>
+<% end %>

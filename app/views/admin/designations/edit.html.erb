@@ -1,0 +1,8 @@
+<%= turbo_frame_tag @designation do %>
+  <tr>
+    <td colspan="2" class="px-6 py-4">
+      <h3 class="text-sm font-semibold text-gray-900 mb-3">Edit Designation</h3>
+      <%= render "form", designation: @designation, url: admin_designation_path(@designation), method: :patch %>
+    </td>
+  </tr>
+<% end %>

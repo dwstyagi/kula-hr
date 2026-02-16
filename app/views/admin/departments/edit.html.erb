@@ -1,0 +1,8 @@
+<%= turbo_frame_tag @department do %>
+  <tr>
+    <td colspan="2" class="px-6 py-4">
+      <h3 class="text-sm font-semibold text-gray-900 mb-3">Edit Department</h3>
+      <%= render "form", department: @department, url: admin_department_path(@department), method: :patch %>
+    </td>
+  </tr>
+<% end %>
