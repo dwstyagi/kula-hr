@@ -2,13 +2,15 @@ class ApplicationController < ActionController::Base
   include Pundit::Authorization
   include Pagy::Method
 
+  set_current_tenant_through_filter
+
   allow_browser versions: :modern
   stale_when_importmap_changes
 
   before_action :set_current_tenant_from_subdomain
 
-  after_action :verify_authorized, except: :index, unless: :skip_pundit?
-  after_action :verify_policy_scoped, only: :index, unless: :skip_pundit?
+  after_action :verify_authorized, unless: :skip_authorization_verification?
+  after_action :verify_policy_scoped, unless: :skip_policy_scope_verification?
 
   rescue_from Pundit::NotAuthorizedError, with: :user_not_authorized
 
@@ -27,6 +29,14 @@ class ApplicationController < ActionController::Base
 
   def skip_pundit?
     devise_controller? || self.class.to_s.start_with?("Platform::")
+  end
+
+  def skip_authorization_verification?
+    skip_pundit? || action_name == "index"
+  end
+
+  def skip_policy_scope_verification?
+    skip_pundit? || action_name != "index"
   end
 
   def user_not_authorized
