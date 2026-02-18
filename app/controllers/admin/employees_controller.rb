@@ -3,9 +3,16 @@ module Admin
     before_action :set_employee, only: [ :show, :edit, :update, :destroy ]
 
     def index
+      @departments = Department.order(:name)
+
       @employees = policy_scope(Employee)
                      .includes(:department, :designation)
                      .order(created_at: :desc)
+
+      @employees = @employees.where("lower(first_name || ' ' || last_name) LIKE :q OR lower(employee_code) LIKE :q", q: "%#{params[:q].to_s.downcase.strip}%") if params[:q].present?
+      @employees = @employees.where(department_id: params[:department_id]) if params[:department_id].present?
+      @employees = @employees.where(employment_status: params[:status]) if params[:status].present?
+
       @pagy, @employees = pagy(:offset, @employees, limit: 25)
     end
 
