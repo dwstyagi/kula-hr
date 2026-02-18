@@ -1,0 +1,178 @@
+<%= form_with model: [:admin, employee], url: url, method: local_assigns[:method] || :post, class: "space-y-8" do |f| %>
+  <% if employee.errors.any? %>
+    <div class="rounded-lg bg-red-50 p-4">
+      <div class="flex">
+        <svg class="h-5 w-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+        </svg>
+        <div class="ml-3">
+          <h3 class="text-sm font-medium text-red-800">Please fix the following errors:</h3>
+          <ul class="mt-2 text-sm text-red-700 list-disc list-inside">
+            <% employee.errors.full_messages.each do |msg| %>
+              <li><%= msg %></li>
+            <% end %>
+          </ul>
+        </div>
+      </div>
+    </div>
+  <% end %>
+
+  <%# Personal Information %>
+  <div class="bg-white rounded-lg border border-gray-200 p-6">
+    <h3 class="text-lg font-semibold text-gray-900 mb-4">Personal Information</h3>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div>
+        <%= f.label :first_name, class: "block text-sm font-medium text-gray-700 mb-1" %>
+        <%= f.text_field :first_name, class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm", required: true %>
+      </div>
+      <div>
+        <%= f.label :last_name, class: "block text-sm font-medium text-gray-700 mb-1" %>
+        <%= f.text_field :last_name, class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm", required: true %>
+      </div>
+      <div>
+        <%= f.label :email, class: "block text-sm font-medium text-gray-700 mb-1" %>
+        <%= f.email_field :email, class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm", required: true, disabled: employee.persisted? %>
+        <% if employee.persisted? %>
+          <p class="mt-1 text-xs text-gray-500">Email cannot be changed after creation.</p>
+        <% end %>
+      </div>
+      <div>
+        <%= f.label :phone, class: "block text-sm font-medium text-gray-700 mb-1" %>
+        <%= f.telephone_field :phone, class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm" %>
+      </div>
+      <div>
+        <%= f.label :date_of_birth, class: "block text-sm font-medium text-gray-700 mb-1" %>
+        <%= f.date_field :date_of_birth, class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm" %>
+      </div>
+      <div>
+        <%= f.label :gender, class: "block text-sm font-medium text-gray-700 mb-1" %>
+        <%= f.select :gender, Employee::GENDERS.map { |g| [g.titleize, g] }, { include_blank: "Select gender" }, class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm" %>
+      </div>
+    </div>
+  </div>
+
+  <%# Employment Details %>
+  <div class="bg-white rounded-lg border border-gray-200 p-6">
+    <h3 class="text-lg font-semibold text-gray-900 mb-4">Employment Details</h3>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div>
+        <%= f.label :joining_date, class: "block text-sm font-medium text-gray-700 mb-1" %>
+        <%= f.date_field :joining_date, class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm", required: true %>
+      </div>
+      <div>
+        <%= f.label :confirmation_date, class: "block text-sm font-medium text-gray-700 mb-1" %>
+        <%= f.date_field :confirmation_date, class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm" %>
+      </div>
+      <div>
+        <%= f.label :employment_status, class: "block text-sm font-medium text-gray-700 mb-1" %>
+        <%= f.select :employment_status, Employee::EMPLOYMENT_STATUSES.map { |s| [s.titleize, s] }, {}, class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm" %>
+      </div>
+      <div>
+        <%= f.label :department_id, "Department", class: "block text-sm font-medium text-gray-700 mb-1" %>
+        <%= f.collection_select :department_id, @departments, :id, :name, { include_blank: "Select department" }, class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm" %>
+      </div>
+      <div>
+        <%= f.label :designation_id, "Designation", class: "block text-sm font-medium text-gray-700 mb-1" %>
+        <%= f.collection_select :designation_id, @designations, :id, :name, { include_blank: "Select designation" }, class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm" %>
+      </div>
+      <div>
+        <%= f.label :reporting_manager_id, "Reporting Manager", class: "block text-sm font-medium text-gray-700 mb-1" %>
+        <%= f.collection_select :reporting_manager_id, @managers, :id, :full_name, { include_blank: "Select manager" }, class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm" %>
+      </div>
+    </div>
+  </div>
+
+  <%# Bank Details %>
+  <div class="bg-white rounded-lg border border-gray-200 p-6">
+    <h3 class="text-lg font-semibold text-gray-900 mb-4">Bank Details</h3>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div>
+        <%= f.label :bank_name, class: "block text-sm font-medium text-gray-700 mb-1" %>
+        <%= f.text_field :bank_name, class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm" %>
+      </div>
+      <div>
+        <%= f.label :bank_account_number, class: "block text-sm font-medium text-gray-700 mb-1" %>
+        <%= f.text_field :bank_account_number, class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm" %>
+      </div>
+      <div>
+        <%= f.label :ifsc_code, "IFSC Code", class: "block text-sm font-medium text-gray-700 mb-1" %>
+        <%= f.text_field :ifsc_code, class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm" %>
+      </div>
+    </div>
+  </div>
+
+  <%# Statutory Details %>
+  <div class="bg-white rounded-lg border border-gray-200 p-6">
+    <h3 class="text-lg font-semibold text-gray-900 mb-4">Statutory Details</h3>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div>
+        <%= f.label :pan_number, "PAN Number", class: "block text-sm font-medium text-gray-700 mb-1" %>
+        <%= f.text_field :pan_number, class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm uppercase", placeholder: "ABCDE1234F" %>
+      </div>
+      <div>
+        <%= f.label :aadhaar_number, "Aadhaar Number", class: "block text-sm font-medium text-gray-700 mb-1" %>
+        <%= f.text_field :aadhaar_number, class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm", placeholder: "123456789012" %>
+      </div>
+      <div>
+        <%= f.label :uan_number, "UAN (PF)", class: "block text-sm font-medium text-gray-700 mb-1" %>
+        <%= f.text_field :uan_number, class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm" %>
+      </div>
+      <div>
+        <%= f.label :esi_number, "ESI Number", class: "block text-sm font-medium text-gray-700 mb-1" %>
+        <%= f.text_field :esi_number, class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm" %>
+      </div>
+    </div>
+  </div>
+
+  <%# Address %>
+  <div class="bg-white rounded-lg border border-gray-200 p-6">
+    <h3 class="text-lg font-semibold text-gray-900 mb-4">Address</h3>
+    <div class="grid grid-cols-1 gap-6">
+      <div>
+        <%= f.label :current_address, class: "block text-sm font-medium text-gray-700 mb-1" %>
+        <%= f.text_area :current_address, rows: 2, class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm" %>
+      </div>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
+      <div>
+        <%= f.label :city, class: "block text-sm font-medium text-gray-700 mb-1" %>
+        <%= f.text_field :city, class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm" %>
+      </div>
+      <div>
+        <%= f.label :state, class: "block text-sm font-medium text-gray-700 mb-1" %>
+        <%= f.text_field :state, class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm" %>
+      </div>
+      <div>
+        <%= f.label :pincode, class: "block text-sm font-medium text-gray-700 mb-1" %>
+        <%= f.text_field :pincode, class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm", placeholder: "400001" %>
+      </div>
+    </div>
+  </div>
+
+  <%# Emergency Contact %>
+  <div class="bg-white rounded-lg border border-gray-200 p-6">
+    <h3 class="text-lg font-semibold text-gray-900 mb-4">Emergency Contact</h3>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div>
+        <%= f.label :emergency_contact_name, "Name", class: "block text-sm font-medium text-gray-700 mb-1" %>
+        <%= f.text_field :emergency_contact_name, class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm" %>
+      </div>
+      <div>
+        <%= f.label :emergency_contact_phone, "Phone", class: "block text-sm font-medium text-gray-700 mb-1" %>
+        <%= f.telephone_field :emergency_contact_phone, class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm" %>
+      </div>
+      <div>
+        <%= f.label :emergency_contact_relation, "Relation", class: "block text-sm font-medium text-gray-700 mb-1" %>
+        <%= f.text_field :emergency_contact_relation, class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm", placeholder: "e.g. Spouse, Parent" %>
+      </div>
+    </div>
+  </div>
+
+  <%# Submit %>
+  <div class="flex items-center gap-3">
+    <%= f.submit employee.persisted? ? "Update Employee" : "Create Employee",
+        class: "px-6 py-2.5 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 cursor-pointer" %>
+    <%= link_to "Cancel", employee.persisted? ? admin_employee_path(employee) : admin_employees_path,
+        class: "px-6 py-2.5 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200" %>
+  </div>
+<% end %>

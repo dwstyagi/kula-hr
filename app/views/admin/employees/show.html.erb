@@ -1,0 +1,147 @@
+<div class="max-w-4xl mx-auto">
+  <%# Header %>
+  <div class="flex items-center justify-between mb-6">
+    <div class="flex items-center gap-4">
+      <div class="h-14 w-14 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-xl">
+        <%= @employee.first_name.first %><%= @employee.last_name.first %>
+      </div>
+      <div>
+        <h1 class="text-2xl font-bold text-gray-900"><%= @employee.full_name %></h1>
+        <p class="text-sm text-gray-500"><%= @employee.employee_code %> &middot; <%= @employee.designation&.name || "No designation" %></p>
+      </div>
+    </div>
+    <div class="flex items-center gap-2">
+      <%= link_to "Edit", edit_admin_employee_path(@employee),
+          class: "px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700" %>
+      <%= link_to "Back", admin_employees_path,
+          class: "px-4 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200" %>
+    </div>
+  </div>
+
+  <div class="space-y-6">
+    <%# Personal Information %>
+    <div class="bg-white rounded-lg border border-gray-200 p-6">
+      <h3 class="text-lg font-semibold text-gray-900 mb-4">Personal Information</h3>
+      <dl class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+        <div>
+          <dt class="text-xs font-medium text-gray-500 uppercase">Email</dt>
+          <dd class="mt-1 text-sm text-gray-900"><%= @employee.email %></dd>
+        </div>
+        <div>
+          <dt class="text-xs font-medium text-gray-500 uppercase">Phone</dt>
+          <dd class="mt-1 text-sm text-gray-900"><%= @employee.phone.presence || "—" %></dd>
+        </div>
+        <div>
+          <dt class="text-xs font-medium text-gray-500 uppercase">Date of Birth</dt>
+          <dd class="mt-1 text-sm text-gray-900"><%= @employee.date_of_birth&.strftime("%d %b %Y") || "—" %></dd>
+        </div>
+        <div>
+          <dt class="text-xs font-medium text-gray-500 uppercase">Gender</dt>
+          <dd class="mt-1 text-sm text-gray-900"><%= @employee.gender&.titleize || "—" %></dd>
+        </div>
+      </dl>
+    </div>
+
+    <%# Employment Details %>
+    <div class="bg-white rounded-lg border border-gray-200 p-6">
+      <h3 class="text-lg font-semibold text-gray-900 mb-4">Employment Details</h3>
+      <dl class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+        <div>
+          <dt class="text-xs font-medium text-gray-500 uppercase">Status</dt>
+          <dd class="mt-1">
+            <% status_colors = { "active" => "bg-green-100 text-green-800", "probation" => "bg-yellow-100 text-yellow-800", "notice_period" => "bg-orange-100 text-orange-800", "resigned" => "bg-red-100 text-red-800", "terminated" => "bg-gray-100 text-gray-800" } %>
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium <%= status_colors[@employee.employment_status] %>">
+              <%= @employee.employment_status.titleize %>
+            </span>
+          </dd>
+        </div>
+        <div>
+          <dt class="text-xs font-medium text-gray-500 uppercase">Joining Date</dt>
+          <dd class="mt-1 text-sm text-gray-900"><%= @employee.joining_date.strftime("%d %b %Y") %></dd>
+        </div>
+        <div>
+          <dt class="text-xs font-medium text-gray-500 uppercase">Department</dt>
+          <dd class="mt-1 text-sm text-gray-900"><%= @employee.department&.name || "—" %></dd>
+        </div>
+        <div>
+          <dt class="text-xs font-medium text-gray-500 uppercase">Designation</dt>
+          <dd class="mt-1 text-sm text-gray-900"><%= @employee.designation&.name || "—" %></dd>
+        </div>
+        <div>
+          <dt class="text-xs font-medium text-gray-500 uppercase">Reporting Manager</dt>
+          <dd class="mt-1 text-sm text-gray-900"><%= @employee.reporting_manager&.full_name || "—" %></dd>
+        </div>
+        <div>
+          <dt class="text-xs font-medium text-gray-500 uppercase">Confirmation Date</dt>
+          <dd class="mt-1 text-sm text-gray-900"><%= @employee.confirmation_date&.strftime("%d %b %Y") || "—" %></dd>
+        </div>
+      </dl>
+    </div>
+
+    <%# Bank Details %>
+    <div class="bg-white rounded-lg border border-gray-200 p-6">
+      <h3 class="text-lg font-semibold text-gray-900 mb-4">Bank Details</h3>
+      <dl class="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-4">
+        <div>
+          <dt class="text-xs font-medium text-gray-500 uppercase">Bank Name</dt>
+          <dd class="mt-1 text-sm text-gray-900"><%= @employee.bank_name.presence || "—" %></dd>
+        </div>
+        <div>
+          <dt class="text-xs font-medium text-gray-500 uppercase">Account Number</dt>
+          <dd class="mt-1 text-sm text-gray-900"><%= @employee.bank_account_number.presence || "—" %></dd>
+        </div>
+        <div>
+          <dt class="text-xs font-medium text-gray-500 uppercase">IFSC Code</dt>
+          <dd class="mt-1 text-sm text-gray-900"><%= @employee.ifsc_code.presence || "—" %></dd>
+        </div>
+      </dl>
+    </div>
+
+    <%# Statutory Details %>
+    <div class="bg-white rounded-lg border border-gray-200 p-6">
+      <h3 class="text-lg font-semibold text-gray-900 mb-4">Statutory Details</h3>
+      <dl class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+        <div>
+          <dt class="text-xs font-medium text-gray-500 uppercase">PAN Number</dt>
+          <dd class="mt-1 text-sm text-gray-900"><%= @employee.pan_number.presence || "—" %></dd>
+        </div>
+        <div>
+          <dt class="text-xs font-medium text-gray-500 uppercase">Aadhaar Number</dt>
+          <dd class="mt-1 text-sm text-gray-900"><%= @employee.aadhaar_number.presence || "—" %></dd>
+        </div>
+        <div>
+          <dt class="text-xs font-medium text-gray-500 uppercase">UAN (PF)</dt>
+          <dd class="mt-1 text-sm text-gray-900"><%= @employee.uan_number.presence || "—" %></dd>
+        </div>
+        <div>
+          <dt class="text-xs font-medium text-gray-500 uppercase">ESI Number</dt>
+          <dd class="mt-1 text-sm text-gray-900"><%= @employee.esi_number.presence || "—" %></dd>
+        </div>
+      </dl>
+    </div>
+
+    <%# Address & Emergency Contact %>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div class="bg-white rounded-lg border border-gray-200 p-6">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">Address</h3>
+        <% if @employee.current_address.present? %>
+          <p class="text-sm text-gray-900"><%= @employee.current_address %></p>
+          <p class="text-sm text-gray-900"><%= [@employee.city, @employee.state, @employee.pincode].compact_blank.join(", ") %></p>
+        <% else %>
+          <p class="text-sm text-gray-500">No address provided.</p>
+        <% end %>
+      </div>
+
+      <div class="bg-white rounded-lg border border-gray-200 p-6">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">Emergency Contact</h3>
+        <% if @employee.emergency_contact_name.present? %>
+          <p class="text-sm text-gray-900"><%= @employee.emergency_contact_name %></p>
+          <p class="text-sm text-gray-500"><%= @employee.emergency_contact_relation %></p>
+          <p class="text-sm text-gray-900 mt-1"><%= @employee.emergency_contact_phone %></p>
+        <% else %>
+          <p class="text-sm text-gray-500">No emergency contact provided.</p>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,76 @@
+<div class="max-w-7xl mx-auto">
+  <div class="flex items-center justify-between mb-6">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-900">Employees</h1>
+      <p class="text-sm text-gray-500 mt-1"><%= @employees.size %> employee<%= @employees.size == 1 ? "" : "s" %></p>
+    </div>
+    <%= link_to new_admin_employee_path,
+        class: "inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700" do %>
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+      </svg>
+      Add Employee
+    <% end %>
+  </div>
+
+  <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
+    <% if @employees.any? %>
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Employee</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Code</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Department</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Designation</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-200">
+          <% @employees.each do |employee| %>
+            <tr class="hover:bg-gray-50">
+              <td class="px-6 py-4">
+                <div class="flex items-center gap-3">
+                  <div class="h-9 w-9 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-semibold text-sm">
+                    <%= employee.first_name.first %><%= employee.last_name.first %>
+                  </div>
+                  <div>
+                    <p class="text-sm font-medium text-gray-900"><%= employee.full_name %></p>
+                    <p class="text-xs text-gray-500"><%= employee.email %></p>
+                  </div>
+                </div>
+              </td>
+              <td class="px-6 py-4 text-sm text-gray-500"><%= employee.employee_code %></td>
+              <td class="px-6 py-4 text-sm text-gray-500"><%= employee.department&.name || "—" %></td>
+              <td class="px-6 py-4 text-sm text-gray-500"><%= employee.designation&.name || "—" %></td>
+              <td class="px-6 py-4">
+                <% status_colors = { "active" => "bg-green-100 text-green-800", "probation" => "bg-yellow-100 text-yellow-800", "notice_period" => "bg-orange-100 text-orange-800", "resigned" => "bg-red-100 text-red-800", "terminated" => "bg-gray-100 text-gray-800" } %>
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium <%= status_colors[employee.employment_status] %>">
+                  <%= employee.employment_status.titleize %>
+                </span>
+              </td>
+              <td class="px-6 py-4 text-right space-x-2">
+                <%= link_to "View", admin_employee_path(employee), class: "text-sm text-blue-600 hover:text-blue-800" %>
+                <%= link_to "Edit", edit_admin_employee_path(employee), class: "text-sm text-gray-600 hover:text-gray-800" %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+
+      <% if @pagy.pages > 1 %>
+        <div class="px-6 py-3 border-t border-gray-200 flex justify-center">
+          <%== pagy_nav(@pagy) %>
+        </div>
+      <% end %>
+    <% else %>
+      <div class="p-12 text-center">
+        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+        </svg>
+        <h3 class="mt-2 text-sm font-medium text-gray-900">No employees</h3>
+        <p class="mt-1 text-sm text-gray-500">Get started by adding your first employee.</p>
+      </div>
+    <% end %>
+  </div>
+</div>

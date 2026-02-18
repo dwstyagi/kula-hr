@@ -54,9 +54,9 @@ class Employee < ApplicationRecord
 
     next_number = if last_code&.match?(/\AEMP\d+\z/)
                     last_code.delete_prefix("EMP").to_i + 1
-                  else
-                    1
-                  end
+    else
+      1
+    end
 
     self.employee_code = "EMP#{next_number.to_s.rjust(4, '0')}"
   end
