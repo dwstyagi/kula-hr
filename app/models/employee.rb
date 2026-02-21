@@ -1,7 +1,7 @@
 class Employee < ApplicationRecord
   acts_as_tenant :tenant
   belongs_to :tenant
-  belongs_to :user
+  belongs_to :user, optional: true
   belongs_to :department, optional: true
   belongs_to :designation, optional: true
   belongs_to :reporting_manager, class_name: "Employee", optional: true

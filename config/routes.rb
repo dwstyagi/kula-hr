@@ -18,7 +18,13 @@ Rails.application.routes.draw do
           post :resend_invite
         end
       end
-      resources :imports, only: [ :new, :create ]
+      resources :imports, only: [ :new, :create ] do
+        collection do
+          get  :preview
+          post :confirm
+          get  :download_errors
+        end
+      end
     end
 
     namespace :employee_portal, path: "portal" do

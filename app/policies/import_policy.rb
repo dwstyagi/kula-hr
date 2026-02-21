@@ -1,9 +1,6 @@
 class ImportPolicy < ApplicationPolicy
-  def new?
-    admin_or_hr?
-  end
-
-  def create?
-    admin_or_hr?
-  end
+  def new?             = admin_or_hr?
+  def preview?         = admin_or_hr?
+  def create?          = admin_or_hr?
+  def download_errors? = admin_or_hr?
 end
