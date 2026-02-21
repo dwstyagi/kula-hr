@@ -25,13 +25,13 @@
       <h1 class="text-2xl font-bold text-gray-900">Employees</h1>
     </div>
     <div class="flex items-center gap-2">
-      <%= link_to template_admin_employees_path, format: :xlsx,
+      <%= link_to export_admin_employees_path(q: params[:q], department_id: params[:department_id], status: params[:status]),
           class: "inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50",
-          data: { turbo: "false" } do %>
-        <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          data: { turbo: false } do %>
+        <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
         </svg>
-        Download Template
+        Export
       <% end %>
       <%= link_to new_admin_import_path,
           class: "inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50",

@@ -11,6 +11,10 @@ class EmployeePolicy < ApplicationPolicy
     admin_or_hr?
   end
 
+  def export?
+    admin_or_hr?
+  end
+
   def destroy?
     super_admin?
   end

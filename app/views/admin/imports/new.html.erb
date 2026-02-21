@@ -16,13 +16,13 @@
   <div class="bg-blue-50 border border-blue-200 rounded-lg p-5 mb-6">
     <h3 class="text-sm font-semibold text-blue-900 mb-3">Before you upload</h3>
     <ol class="space-y-2 text-sm text-blue-800 list-decimal list-inside">
-      <li>Download the official template from the Employees page</li>
+      <li>Download the official template using the link below</li>
       <li>Fill in employee details — required fields: First name, Last name, Email, Joining date, Status</li>
       <li>Delete the sample and notes rows, keep only the header row and your data</li>
       <li>Save as <strong>.xlsx</strong> and upload below</li>
     </ol>
     <%= link_to template_admin_employees_path, format: :xlsx,
-        class: "inline-flex items-center gap-2 mt-3 text-sm font-medium text-blue-700 hover:text-blue-900",
+        class: "inline-flex items-center gap-2 mt-4 px-4 py-2 bg-white border border-blue-300 text-blue-700 text-sm font-medium rounded-lg hover:bg-blue-50",
         data: { turbo: "false" } do %>
       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
