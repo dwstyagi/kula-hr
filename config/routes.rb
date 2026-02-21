@@ -18,6 +18,7 @@ Rails.application.routes.draw do
           post :resend_invite
         end
       end
+      resources :imports, only: [ :new, :create ]
     end
 
     namespace :employee_portal, path: "portal" do
