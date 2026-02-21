@@ -11,6 +11,9 @@ Rails.application.routes.draw do
       resources :departments
       resources :designations
       resources :employees do
+        collection do
+          get :template
+        end
         member do
           post :resend_invite
         end

@@ -2,6 +2,15 @@ module Admin
   class EmployeesController < BaseController
     before_action :set_employee, only: [ :show, :edit, :update, :destroy, :resend_invite ]
 
+    def template
+      authorize Employee, :template?
+      package = Employees::TemplateGenerator.new.call
+      send_data package.to_stream.read,
+                filename: "employees_import_template.xlsx",
+                type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                disposition: "attachment"
+    end
+
     def index
       @departments = Department.order(:name)
 

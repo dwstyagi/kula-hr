@@ -7,6 +7,10 @@ class EmployeePolicy < ApplicationPolicy
     admin_or_hr?
   end
 
+  def template?
+    admin_or_hr?
+  end
+
   def destroy?
     super_admin?
   end
