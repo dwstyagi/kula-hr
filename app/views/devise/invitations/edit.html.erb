@@ -1,0 +1,124 @@
+<% tenant = ActsAsTenant.current_tenant %>
+
+<div class="min-h-screen bg-linear-to-br from-blue-50 via-white to-slate-50 flex items-center justify-center px-4 py-12">
+  <div class="w-full max-w-md">
+
+    <%# Card %>
+    <div class="bg-white rounded-2xl shadow-xl shadow-blue-100/50 border border-gray-100 overflow-hidden">
+
+      <%# Header %>
+      <div class="bg-linear-to-r from-blue-600 to-blue-700 px-8 py-8 text-center">
+        <div class="inline-flex items-center gap-1 mb-4">
+          <span class="text-2xl font-black text-white tracking-tight">Kula</span>
+          <span class="text-2xl font-light text-blue-200 tracking-tight">HR</span>
+        </div>
+        <div class="h-14 w-14 rounded-full bg-white/20 flex items-center justify-center mx-auto mb-3">
+          <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>
+          </svg>
+        </div>
+        <h1 class="text-xl font-bold text-white">Set your password</h1>
+        <p class="text-blue-200 text-sm mt-1">
+          Welcome to
+          <% if tenant %>
+            <span class="text-white font-medium"><%= tenant.name %></span>
+          <% else %>
+            Kula HR
+          <% end %>
+        </p>
+      </div>
+
+      <%# Form %>
+      <div class="px-8 py-8">
+
+        <%# Greeting %>
+        <div class="mb-6 p-4 bg-blue-50 rounded-xl border border-blue-100">
+          <p class="text-sm text-blue-800">
+            Hi <strong><%= resource.first_name %></strong>, you've been invited to join the team.
+            Set a password below to activate your account.
+          </p>
+        </div>
+
+        <%= form_for resource, as: resource_name,
+            url: invitation_path(resource_name),
+            html: { method: :put, class: "space-y-5" } do |f| %>
+
+          <%= f.hidden_field :invitation_token %>
+
+          <%# Error messages %>
+          <% if resource.errors.any? %>
+            <div class="rounded-xl bg-red-50 border border-red-200 p-4">
+              <div class="flex gap-3">
+                <svg class="h-5 w-5 text-red-400 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                </svg>
+                <ul class="text-sm text-red-700 space-y-1">
+                  <% resource.errors.full_messages.each do |msg| %>
+                    <li><%= msg %></li>
+                  <% end %>
+                </ul>
+              </div>
+            </div>
+          <% end %>
+
+          <%# Password %>
+          <div>
+            <%= f.label :password, class: "block text-sm font-medium text-gray-700 mb-1.5" do %>
+              Password
+            <% end %>
+            <div class="relative">
+              <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                <svg class="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                </svg>
+              </div>
+              <%= f.password_field :password,
+                  autofocus: true,
+                  autocomplete: "new-password",
+                  placeholder: "Minimum 8 characters",
+                  class: "w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-gray-400 transition" %>
+            </div>
+          </div>
+
+          <%# Password Confirmation %>
+          <div>
+            <%= f.label :password_confirmation, class: "block text-sm font-medium text-gray-700 mb-1.5" do %>
+              Confirm password
+            <% end %>
+            <div class="relative">
+              <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                <svg class="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                </svg>
+              </div>
+              <%= f.password_field :password_confirmation,
+                  autocomplete: "new-password",
+                  placeholder: "Re-enter your password",
+                  class: "w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-gray-400 transition" %>
+            </div>
+          </div>
+
+          <%# Submit %>
+          <%= f.submit "Activate My Account",
+              class: "w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-xl shadow-sm shadow-blue-200 transition cursor-pointer" %>
+
+        <% end %>
+
+      </div>
+
+      <%# Footer %>
+      <div class="px-8 py-4 bg-gray-50 border-t border-gray-100 text-center">
+        <p class="text-xs text-gray-400">
+          By activating your account you agree to Kula HR's terms of service.
+        </p>
+      </div>
+
+    </div>
+
+    <%# Help text %>
+    <p class="text-center text-xs text-gray-400 mt-6">
+      Having trouble? Contact your HR administrator.
+    </p>
+
+  </div>
+</div>

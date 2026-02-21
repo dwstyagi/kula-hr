@@ -1,6 +1,6 @@
 module Admin
   class EmployeesController < BaseController
-    before_action :set_employee, only: [ :show, :edit, :update, :destroy ]
+    before_action :set_employee, only: [ :show, :edit, :update, :destroy, :resend_invite ]
 
     def index
       @departments = Department.order(:name)
@@ -31,22 +31,33 @@ module Admin
       authorize @employee
 
       ActiveRecord::Base.transaction do
-        user = User.create!(
-          first_name: @employee.first_name,
-          last_name: @employee.last_name,
-          email: @employee.email,
-          password: SecureRandom.hex(8)
+        user = User.invite!(
+          {
+            first_name: @employee.first_name,
+            last_name: @employee.last_name,
+            email: @employee.email
+          },
+          current_user
         )
+
+        raise ActiveRecord::RecordInvalid.new(user) if user.errors.any?
+
         TenantUser.create!(tenant: ActsAsTenant.current_tenant, user: user)
         user.assign_role(:employee)
         @employee.user = user
         @employee.save!
       end
 
-      redirect_to admin_employee_path(@employee), notice: "Employee created successfully."
+      redirect_to admin_employee_path(@employee), notice: "Employee created and invitation sent to #{@employee.email}."
     rescue ActiveRecord::RecordInvalid
       load_form_options
       render :new, status: :unprocessable_content
+    end
+
+    def resend_invite
+      authorize @employee
+      @employee.user.invite!(current_user)
+      redirect_to admin_employee_path(@employee), notice: "Invitation resent to #{@employee.email}."
     end
 
     def edit

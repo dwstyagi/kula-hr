@@ -4,7 +4,8 @@
       <h1 class="text-2xl font-bold text-gray-900">Employees</h1>
     </div>
     <%= link_to new_admin_employee_path,
-        class: "inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700" do %>
+        class: "inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700",
+        data: { turbo_frame: "_top" } do %>
       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
       </svg>
@@ -95,8 +96,8 @@
                   </span>
                 </td>
                 <td class="px-6 py-4 text-right space-x-2">
-                  <%= link_to "View", admin_employee_path(employee), class: "text-sm text-blue-600 hover:text-blue-800" %>
-                  <%= link_to "Edit", edit_admin_employee_path(employee), class: "text-sm text-gray-600 hover:text-gray-800" %>
+                  <%= link_to "View", admin_employee_path(employee), class: "text-sm text-blue-600 hover:text-blue-800", data: { turbo_frame: "_top" } %>
+                  <%= link_to "Edit", edit_admin_employee_path(employee), class: "text-sm text-gray-600 hover:text-gray-800", data: { turbo_frame: "_top" } %>
                 </td>
               </tr>
             <% end %>
