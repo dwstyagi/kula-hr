@@ -42,7 +42,7 @@ module Admin
       @employees = @employees.where(department_id: params[:department_id]) if params[:department_id].present?
       @employees = @employees.where(employment_status: params[:status]) if params[:status].present?
 
-      @pagy, @employees = pagy(:offset, @employees, limit: 25)
+      @pagy, @employees = pagy(:offset, @employees, limit: 10)
     end
 
     def show

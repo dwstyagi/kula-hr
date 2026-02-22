@@ -3,7 +3,7 @@ module Admin
     before_action :set_department, only: [ :edit, :update, :destroy ]
 
     def index
-      @departments = policy_scope(Department).order(:name)
+      @pagy, @departments = pagy(:offset, policy_scope(Department).order(:name), limit: 10)
     end
 
     def new

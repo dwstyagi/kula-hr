@@ -3,7 +3,7 @@ module Admin
     before_action :set_designation, only: [ :edit, :update, :destroy ]
 
     def index
-      @designations = policy_scope(Designation).order(:name)
+      @pagy, @designations = pagy(:offset, policy_scope(Designation).order(:name), limit: 10)
     end
 
     def new
