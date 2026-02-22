@@ -4,7 +4,7 @@ class EmployeeSalary < ApplicationRecord
   belongs_to :employee
   belongs_to :salary_structure
 
-  validates :annual_ctc, presence: true, numericality: { greater_than: 0 }
+  validates :annual_ctc, presence: true, numericality: { greater_than_or_equal_to: 100_000 }
   validates :effective_from, presence: true
   validate :effective_to_after_effective_from
 

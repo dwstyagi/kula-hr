@@ -13,7 +13,7 @@ RSpec.describe EmployeeSalary, type: :model do
 
   describe "validations" do
     it { is_expected.to validate_presence_of(:annual_ctc) }
-    it { is_expected.to validate_numericality_of(:annual_ctc).is_greater_than(0) }
+    it { is_expected.to validate_numericality_of(:annual_ctc).is_greater_than_or_equal_to(100_000) }
     it { is_expected.to validate_presence_of(:effective_from) }
 
     it "validates effective_to is after effective_from" do

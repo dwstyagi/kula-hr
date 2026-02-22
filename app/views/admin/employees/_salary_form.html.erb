@@ -1,0 +1,57 @@
+<div data-controller="ctc-calculator" data-ctc-calculator-url-value="<%= admin_salary_breakup_path %>">
+
+  <%= form_with model: employee_salary, url: url, method: :post, class: "space-y-4" do |f| %>
+    <% if employee_salary.errors.any? %>
+      <div class="rounded-lg bg-red-50 p-4">
+        <div class="flex">
+          <svg class="h-5 w-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+          </svg>
+          <div class="ml-3">
+            <ul class="text-sm text-red-700 list-disc list-inside">
+              <% employee_salary.errors.full_messages.each do |msg| %>
+                <li><%= msg %></li>
+              <% end %>
+            </ul>
+          </div>
+        </div>
+      </div>
+    <% end %>
+
+    <div class="bg-white rounded-lg border border-gray-200 p-6">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div>
+          <%= f.label :salary_structure_id, "Salary Structure", class: "block text-sm font-medium text-gray-700 mb-1" %>
+          <%= f.collection_select :salary_structure_id, salary_structures, :id, :name,
+              { include_blank: "Select a structure..." },
+              class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm",
+              data: { ctc_calculator_target: "structureSelect", action: "change->ctc-calculator#calculate" } %>
+        </div>
+
+        <div>
+          <%= f.label :annual_ctc, "Annual CTC (₹)", class: "block text-sm font-medium text-gray-700 mb-1" %>
+          <%= f.number_field :annual_ctc, step: "0.01", min: "100000",
+              placeholder: "e.g. 1200000",
+              class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm",
+              data: { ctc_calculator_target: "ctcInput", action: "input->ctc-calculator#calculate" } %>
+        </div>
+
+        <div>
+          <%= f.label :effective_from, "Effective From", class: "block text-sm font-medium text-gray-700 mb-1" %>
+          <%= f.date_field :effective_from,
+              class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm" %>
+        </div>
+      </div>
+    </div>
+
+    <%# Live breakup rendered here by Stimulus %>
+    <div data-ctc-calculator-target="breakup"></div>
+
+    <div class="flex items-center gap-3">
+      <%= f.submit submit_label,
+          class: "px-6 py-2.5 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 cursor-pointer" %>
+      <%= link_to "Cancel", admin_employee_path(employee),
+          class: "px-6 py-2.5 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200" %>
+    </div>
+  <% end %>
+</div>

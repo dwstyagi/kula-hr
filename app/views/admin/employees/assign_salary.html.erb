@@ -1,0 +1,17 @@
+<div class="max-w-4xl mx-auto">
+  <div class="mb-6">
+    <h1 class="text-2xl font-bold text-gray-900">Assign Salary</h1>
+    <p class="mt-1 text-sm text-gray-500">
+      Assign a salary structure and CTC to
+      <span class="font-medium text-gray-700"><%= @employee.full_name %></span>
+      (<%= @employee.employee_code %>)
+    </p>
+  </div>
+
+  <%= render "salary_form",
+       employee: @employee,
+       employee_salary: @employee_salary,
+       salary_structures: @salary_structures,
+       url: assign_salary_admin_employee_path(@employee),
+       submit_label: "Assign Salary" %>
+</div>

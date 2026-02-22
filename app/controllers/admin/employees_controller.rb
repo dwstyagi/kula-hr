@@ -1,6 +1,6 @@
 module Admin
   class EmployeesController < BaseController
-    before_action :set_employee, only: [ :show, :edit, :update, :destroy, :resend_invite ]
+    before_action :set_employee, only: [ :show, :edit, :update, :destroy, :resend_invite, :assign_salary, :create_salary, :revise_salary, :create_revision ]
 
     def template
       authorize Employee, :template?
@@ -47,6 +47,8 @@ module Admin
 
     def show
       authorize @employee
+      @current_salary = @employee.current_salary
+      @salary_history = @employee.employee_salaries.history.includes(:salary_structure)
     end
 
     def new
@@ -111,6 +113,54 @@ module Admin
       redirect_to admin_employees_path, notice: "Employee deleted successfully."
     end
 
+    def assign_salary
+      authorize @employee
+      @employee_salary = EmployeeSalary.new(effective_from: Date.today)
+      @salary_structures = SalaryStructure.active.order(:name)
+    end
+
+    def create_salary
+      authorize @employee
+      @employee_salary = @employee.employee_salaries.build(salary_params.merge(tenant: ActsAsTenant.current_tenant))
+
+      if @employee_salary.save
+        redirect_to admin_employee_path(@employee, tab: "salary"), notice: "Salary assigned successfully."
+      else
+        @salary_structures = SalaryStructure.active.order(:name)
+        render :assign_salary, status: :unprocessable_content
+      end
+    end
+
+    def revise_salary
+      authorize @employee
+      @current_salary = @employee.current_salary
+      redirect_to assign_salary_admin_employee_path(@employee), alert: "No current salary to revise." and return unless @current_salary
+
+      @employee_salary = EmployeeSalary.new(
+        salary_structure_id: @current_salary.salary_structure_id,
+        effective_from: Date.today
+      )
+      @salary_structures = SalaryStructure.active.order(:name)
+    end
+
+    def create_revision
+      authorize @employee
+      @current_salary = @employee.current_salary
+      redirect_to admin_employee_path(@employee), alert: "No current salary to revise." and return unless @current_salary
+
+      ActiveRecord::Base.transaction do
+        @current_salary.update!(effective_to: salary_params[:effective_from].to_date - 1.day)
+        @employee.employee_salaries.create!(salary_params.merge(tenant: ActsAsTenant.current_tenant))
+      end
+
+      redirect_to admin_employee_path(@employee, tab: "salary"), notice: "Salary revised successfully."
+    rescue ActiveRecord::RecordInvalid => e
+      @employee_salary = EmployeeSalary.new(salary_params)
+      @salary_structures = SalaryStructure.active.order(:name)
+      flash.now[:alert] = e.record.errors.full_messages.join(", ")
+      render :revise_salary, status: :unprocessable_content
+    end
+
     private
 
     def set_employee
@@ -121,6 +171,10 @@ module Admin
       @departments = Department.order(:name)
       @designations = Designation.order(:name)
       @managers = Employee.where.not(id: @employee.id).order(:first_name)
+    end
+
+    def salary_params
+      params.require(:employee_salary).permit(:salary_structure_id, :annual_ctc, :effective_from)
     end
 
     def employee_params

@@ -15,6 +15,22 @@ class EmployeePolicy < ApplicationPolicy
     admin_or_hr?
   end
 
+  def assign_salary?
+    admin_or_hr?
+  end
+
+  def create_salary?
+    admin_or_hr?
+  end
+
+  def revise_salary?
+    admin_or_hr?
+  end
+
+  def create_revision?
+    admin_or_hr?
+  end
+
   def destroy?
     super_admin?
   end

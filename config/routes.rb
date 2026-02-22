@@ -29,8 +29,13 @@ Rails.application.routes.draw do
         end
         member do
           post :resend_invite
+          get :assign_salary
+          post :assign_salary, action: :create_salary
+          get :revise_salary
+          post :revise_salary, action: :create_revision
         end
       end
+      get "salary_breakup", to: "salary_breakup#show"
       resources :imports, only: [ :new, :create ] do
         collection do
           get  :preview
