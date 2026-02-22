@@ -93,6 +93,11 @@
             class="py-3 px-1 border-b-2 text-sm font-medium whitespace-nowrap border-transparent text-gray-500">
           Salary
         </button>
+        <button data-tabs-target="tab" data-tab="leave"
+            data-action="click->tabs#switch"
+            class="py-3 px-1 border-b-2 text-sm font-medium whitespace-nowrap border-transparent text-gray-500">
+          Leave
+        </button>
       </nav>
     </div>
 
@@ -323,6 +328,59 @@
           </div>
         </div>
       <% end %>
+    </div>
+
+    <%# Leave Panel %>
+    <div data-tabs-target="panel" data-panel="leave" class="hidden space-y-6">
+      <div class="bg-white rounded-lg border border-gray-200 p-6">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-base font-semibold text-gray-900">
+            Leave Balances
+            <span class="text-xs font-normal text-gray-400 ml-1"><%= LeaveBalance.current_financial_year %></span>
+          </h3>
+        </div>
+
+        <% if @leave_balances.any? %>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <% @leave_balances.each do |balance| %>
+              <div class="rounded-lg border border-gray-200 p-4">
+                <div class="flex items-center justify-between mb-2">
+                  <span class="text-sm font-medium text-gray-900"><%= balance.leave_type.name %></span>
+                  <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-mono font-medium bg-gray-100 text-gray-600">
+                    <%= balance.leave_type.code %>
+                  </span>
+                </div>
+
+                <% used_pct = balance.total_days > 0 ? (balance.used_days / balance.total_days * 100).round : 0 %>
+                <div class="w-full bg-gray-100 rounded-full h-1.5 mb-2">
+                  <div class="h-1.5 rounded-full <%= used_pct > 80 ? 'bg-red-500' : 'bg-blue-500' %>"
+                       style="width: <%= used_pct %>%"></div>
+                </div>
+
+                <div class="flex items-end justify-between">
+                  <div>
+                    <p class="text-2xl font-bold text-gray-900"><%= balance.remaining_days.to_i %></p>
+                    <p class="text-xs text-gray-400">remaining of <%= balance.total_days.to_i %></p>
+                  </div>
+                  <div class="text-right text-xs text-gray-400">
+                    <p><%= balance.used_days.to_i %> used</p>
+                    <% if balance.carried_forward_days > 0 %>
+                      <p class="text-blue-500"><%= balance.carried_forward_days.to_i %> carried</p>
+                    <% end %>
+                  </div>
+                </div>
+              </div>
+            <% end %>
+          </div>
+        <% else %>
+          <div class="py-10 text-center">
+            <svg class="mx-auto h-10 w-10 text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5"/>
+            </svg>
+            <p class="text-sm text-gray-500">No leave balances for the current financial year.</p>
+          </div>
+        <% end %>
+      </div>
     </div>
 
   </div>

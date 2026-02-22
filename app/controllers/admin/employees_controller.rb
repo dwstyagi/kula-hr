@@ -47,8 +47,9 @@ module Admin
 
     def show
       authorize @employee
-      @current_salary = @employee.current_salary
-      @salary_history = @employee.employee_salaries.history.includes(:salary_structure)
+      @current_salary  = @employee.current_salary
+      @salary_history  = @employee.employee_salaries.history.includes(:salary_structure)
+      @leave_balances  = @employee.leave_balances.current.includes(:leave_type).order("leave_types.name")
     end
 
     def new
@@ -74,6 +75,7 @@ module Admin
         @employee.user = user
         @employee.save!
         user.invite!(current_user)
+        Leave::LeaveBalanceAllocator.new(employee: @employee).call
       end
 
       redirect_to admin_employee_path(@employee), notice: "Employee created and invitation sent to #{@employee.email}."

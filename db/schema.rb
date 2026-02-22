@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_02_22_153754) do
+ActiveRecord::Schema[8.1].define(version: 2026_02_22_155337) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "pg_catalog.plpgsql"
@@ -92,6 +92,23 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_22_153754) do
     t.index ["tenant_id", "employee_code"], name: "index_employees_on_tenant_id_and_employee_code", unique: true
     t.index ["tenant_id"], name: "index_employees_on_tenant_id"
     t.index ["user_id"], name: "index_employees_on_user_id"
+  end
+
+  create_table "leave_balances", force: :cascade do |t|
+    t.decimal "carried_forward_days", precision: 5, scale: 1, default: "0.0", null: false
+    t.datetime "created_at", null: false
+    t.bigint "employee_id", null: false
+    t.string "financial_year", null: false
+    t.bigint "leave_type_id", null: false
+    t.decimal "remaining_days", precision: 5, scale: 1, default: "0.0", null: false
+    t.bigint "tenant_id", null: false
+    t.decimal "total_days", precision: 5, scale: 1, default: "0.0", null: false
+    t.datetime "updated_at", null: false
+    t.decimal "used_days", precision: 5, scale: 1, default: "0.0", null: false
+    t.index ["employee_id", "leave_type_id", "financial_year"], name: "idx_leave_bal_emp_type_fy", unique: true
+    t.index ["employee_id"], name: "index_leave_balances_on_employee_id"
+    t.index ["leave_type_id"], name: "index_leave_balances_on_leave_type_id"
+    t.index ["tenant_id"], name: "index_leave_balances_on_tenant_id"
   end
 
   create_table "leave_types", force: :cascade do |t|
@@ -274,6 +291,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_22_153754) do
   add_foreign_key "employees", "employees", column: "reporting_manager_id"
   add_foreign_key "employees", "tenants"
   add_foreign_key "employees", "users"
+  add_foreign_key "leave_balances", "employees"
+  add_foreign_key "leave_balances", "leave_types"
+  add_foreign_key "leave_balances", "tenants"
   add_foreign_key "leave_types", "tenants"
   add_foreign_key "payroll_settings", "tenants"
   add_foreign_key "professional_tax_slabs", "tenants"

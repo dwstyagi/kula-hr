@@ -8,6 +8,8 @@ class Employee < ApplicationRecord
 
   has_many :direct_reports, class_name: "Employee", foreign_key: :reporting_manager_id, dependent: :nullify, inverse_of: :reporting_manager
   has_many :employee_salaries, dependent: :destroy
+  has_many :leave_balances, dependent: :destroy
+  has_many :leave_requests, dependent: :destroy
 
   has_paper_trail
 
