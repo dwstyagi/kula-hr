@@ -7,7 +7,7 @@ module EmployeePortal
 
     def index
       @leave_requests = policy_scope(LeaveRequest)
-        .includes(:leave_type)
+        .includes(:leave_type, :approved_by)
         .order(created_at: :desc)
       @leave_balances = current_employee.leave_balances.current.includes(:leave_type).order("leave_types.name")
       skip_authorization
