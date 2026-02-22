@@ -2,9 +2,12 @@ Rails.application.routes.draw do
   # Health check
   get "up" => "rails/health#show", as: :rails_health_check
 
+  # Action Cable WebSocket
+  mount ActionCable.server => "/cable"
+
   # === Tenant subdomain routes ===
   constraints subdomain: /.+/ do
-    devise_for :users
+    devise_for :users, controllers: { sessions: "users/sessions" }
 
     namespace :admin do
       root "dashboard#index"
@@ -40,6 +43,13 @@ Rails.application.routes.draw do
           patch :toggle_active
         end
       end
+      resources :leave_requests, only: [ :index ] do
+        member do
+          patch :approve
+          patch :reject
+          patch :cancel
+        end
+      end
       get "salary_breakup", to: "salary_breakup#show"
       resources :imports, only: [ :new, :create ] do
         collection do
@@ -52,6 +62,11 @@ Rails.application.routes.draw do
 
     namespace :employee_portal, path: "portal" do
       root "dashboard#index"
+      resources :leave_requests, only: [ :index, :new, :create ] do
+        member do
+          patch :cancel
+        end
+      end
     end
 
     root "admin/dashboard#index", as: :tenant_root

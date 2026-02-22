@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_02_22_155337) do
+ActiveRecord::Schema[8.1].define(version: 2026_02_22_160011) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "pg_catalog.plpgsql"
@@ -109,6 +109,28 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_22_155337) do
     t.index ["employee_id"], name: "index_leave_balances_on_employee_id"
     t.index ["leave_type_id"], name: "index_leave_balances_on_leave_type_id"
     t.index ["tenant_id"], name: "index_leave_balances_on_tenant_id"
+  end
+
+  create_table "leave_requests", force: :cascade do |t|
+    t.datetime "approved_at"
+    t.bigint "approved_by_id"
+    t.datetime "created_at", null: false
+    t.bigint "employee_id", null: false
+    t.date "from_date", null: false
+    t.bigint "leave_type_id", null: false
+    t.decimal "number_of_days", precision: 5, scale: 1, null: false
+    t.text "reason"
+    t.text "rejection_reason"
+    t.integer "status", default: 0, null: false
+    t.bigint "tenant_id", null: false
+    t.date "to_date", null: false
+    t.datetime "updated_at", null: false
+    t.index ["approved_by_id"], name: "index_leave_requests_on_approved_by_id"
+    t.index ["employee_id", "from_date", "to_date"], name: "index_leave_requests_on_employee_id_and_from_date_and_to_date"
+    t.index ["employee_id"], name: "index_leave_requests_on_employee_id"
+    t.index ["leave_type_id"], name: "index_leave_requests_on_leave_type_id"
+    t.index ["tenant_id", "status"], name: "index_leave_requests_on_tenant_id_and_status"
+    t.index ["tenant_id"], name: "index_leave_requests_on_tenant_id"
   end
 
   create_table "leave_types", force: :cascade do |t|
@@ -294,6 +316,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_22_155337) do
   add_foreign_key "leave_balances", "employees"
   add_foreign_key "leave_balances", "leave_types"
   add_foreign_key "leave_balances", "tenants"
+  add_foreign_key "leave_requests", "employees"
+  add_foreign_key "leave_requests", "leave_types"
+  add_foreign_key "leave_requests", "tenants"
+  add_foreign_key "leave_requests", "users", column: "approved_by_id"
   add_foreign_key "leave_types", "tenants"
   add_foreign_key "payroll_settings", "tenants"
   add_foreign_key "professional_tax_slabs", "tenants"

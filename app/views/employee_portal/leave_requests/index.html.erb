@@ -1,0 +1,118 @@
+<div class="max-w-5xl mx-auto space-y-6">
+
+  <%# Balance Summary Cards %>
+  <div>
+    <div class="flex items-center justify-between mb-3">
+      <h2 class="text-lg font-semibold text-gray-900">My Leaves</h2>
+      <%= link_to new_employee_portal_leave_request_path,
+          class: "inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700" do %>
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+        </svg>
+        Apply Leave
+      <% end %>
+    </div>
+
+    <% if @leave_balances.any? %>
+      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+        <% @leave_balances.each do |balance| %>
+          <div class="bg-white rounded-lg border border-gray-200 p-4">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-xs font-medium text-gray-500"><%= balance.leave_type.name %></span>
+              <span class="text-xs font-mono bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded"><%= balance.leave_type.code %></span>
+            </div>
+            <% used_pct = balance.total_days > 0 ? (balance.used_days / balance.total_days * 100).round : 0 %>
+            <div class="w-full bg-gray-100 rounded-full h-1 mb-2">
+              <div class="h-1 rounded-full <%= used_pct > 80 ? 'bg-red-400' : 'bg-blue-500' %>"
+                   style="width: <%= used_pct %>%"></div>
+            </div>
+            <p class="text-2xl font-bold text-gray-900"><%= balance.remaining_days.to_i %></p>
+            <p class="text-xs text-gray-400">of <%= balance.total_days.to_i %> days</p>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+
+  <%# Request History %>
+  <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
+    <div class="px-6 py-4 border-b border-gray-100">
+      <h3 class="text-sm font-semibold text-gray-900">Request History</h3>
+    </div>
+
+    <% if @leave_requests.any? %>
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Dates</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Days</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Details</th>
+            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-200">
+          <% @leave_requests.each do |lr| %>
+            <tr class="hover:bg-gray-50">
+              <td class="px-6 py-4">
+                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-700">
+                  <%= lr.leave_type.code %>
+                </span>
+                <p class="text-xs text-gray-400 mt-0.5"><%= lr.leave_type.name %></p>
+              </td>
+              <td class="px-6 py-4 text-sm text-gray-700">
+                <%= lr.from_date.strftime("%d %b") %>
+                <% if lr.from_date != lr.to_date %>
+                  – <%= lr.to_date.strftime("%d %b %Y") %>
+                <% else %>
+                  <%= lr.from_date.strftime(", %Y") %>
+                <% end %>
+              </td>
+              <td class="px-6 py-4 text-sm font-medium text-gray-900"><%= lr.number_of_days.to_i %></td>
+              <td class="px-6 py-4">
+                <% badge = {
+                  "pending"   => ["bg-yellow-100 text-yellow-700", "⏳"],
+                  "approved"  => ["bg-green-100 text-green-700",  "✅"],
+                  "rejected"  => ["bg-red-100 text-red-700",      "❌"],
+                  "cancelled" => ["bg-gray-100 text-gray-500",    "—"]
+                } %>
+                <% color, icon = badge[lr.status] %>
+                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium <%= color %>">
+                  <%= icon %> <%= lr.status.titleize %>
+                </span>
+              </td>
+              <td class="px-6 py-4 text-xs text-gray-500 max-w-[180px]">
+                <% if lr.rejected? && lr.rejection_reason.present? %>
+                  <span class="text-red-500"><%= lr.rejection_reason %></span>
+                <% elsif lr.reason.present? %>
+                  <%= lr.reason %>
+                <% else %>
+                  —
+                <% end %>
+              </td>
+              <td class="px-6 py-4 text-right">
+                <% if lr.pending? %>
+                  <%= button_to cancel_employee_portal_leave_request_path(lr),
+                      method: :patch,
+                      class: "text-xs px-3 py-1.5 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 cursor-pointer",
+                      form: { data: { turbo_confirm: "Cancel this leave request?" } } do %>
+                    Cancel
+                  <% end %>
+                <% else %>
+                  <span class="text-gray-300 text-xs">—</span>
+                <% end %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    <% else %>
+      <div class="p-10 text-center">
+        <p class="text-sm text-gray-400">No leave requests yet.</p>
+        <%= link_to "Apply for your first leave →", new_employee_portal_leave_request_path,
+            class: "text-sm text-blue-600 hover:text-blue-800 mt-2 inline-block" %>
+      </div>
+    <% end %>
+  </div>
+</div>

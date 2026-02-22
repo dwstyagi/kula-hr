@@ -1,0 +1,87 @@
+<%# Build balances hash: leave_type_id => remaining_days (nil = unlimited/LOP) %>
+<% balances_data = @leave_balances.each_with_object({}) { |b, h| h[b.leave_type_id.to_s] = b.remaining_days } %>
+
+<div class="max-w-xl mx-auto">
+  <div class="flex items-center gap-3 mb-6">
+    <%= link_to employee_portal_leave_requests_path,
+        class: "text-gray-400 hover:text-gray-600" do %>
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+      </svg>
+    <% end %>
+    <h1 class="text-2xl font-bold text-gray-900">Apply for Leave</h1>
+  </div>
+
+  <div class="bg-white rounded-lg border border-gray-200 p-6"
+       data-controller="leave-calculator"
+       data-leave-calculator-balances-value="<%= balances_data.to_json %>">
+
+    <%= form_with model: @leave_request, url: employee_portal_leave_requests_path,
+                  class: "space-y-5" do |f| %>
+
+      <% if @leave_request.errors.any? %>
+        <div class="rounded-lg bg-red-50 p-4">
+          <ul class="text-sm text-red-700 list-disc list-inside space-y-1">
+            <% @leave_request.errors.full_messages.each do |msg| %>
+              <li><%= msg %></li>
+            <% end %>
+          </ul>
+        </div>
+      <% end %>
+
+      <div>
+        <%= f.label :leave_type_id, "Leave Type", class: "block text-sm font-medium text-gray-700 mb-1" %>
+        <%= f.select :leave_type_id,
+            @leave_types.map { |lt| [lt.name, lt.id] },
+            { include_blank: "Select leave type" },
+            class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm",
+            data: { leave_type: true, action: "change->leave-calculator#leaveTypeChanged" } %>
+        <p class="text-xs text-gray-400 mt-1">
+          Balance: <span data-leave-calculator-target="balance">—</span>
+        </p>
+      </div>
+
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <%= f.label :from_date, "From", class: "block text-sm font-medium text-gray-700 mb-1" %>
+          <%= f.date_field :from_date,
+              min: Date.today,
+              class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm",
+              data: { leave_calculator_target: "fromDate", action: "change->leave-calculator#recalculate" } %>
+        </div>
+        <div>
+          <%= f.label :to_date, "To", class: "block text-sm font-medium text-gray-700 mb-1" %>
+          <%= f.date_field :to_date,
+              min: Date.today,
+              class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm",
+              data: { leave_calculator_target: "toDate", action: "change->leave-calculator#recalculate" } %>
+        </div>
+      </div>
+
+      <div class="rounded-lg bg-gray-50 px-4 py-3 flex items-center justify-between">
+        <span class="text-sm text-gray-600">Working days requested</span>
+        <span class="text-sm font-semibold text-gray-900" data-leave-calculator-target="days">—</span>
+      </div>
+
+      <div class="hidden rounded-lg bg-amber-50 border border-amber-200 px-4 py-3 text-sm text-amber-700"
+           data-leave-calculator-target="warning">
+        ⚠ Requested days exceed your available balance.
+      </div>
+
+      <div>
+        <%= f.label :reason, "Reason", class: "block text-sm font-medium text-gray-700 mb-1" %>
+        <%= f.text_area :reason,
+            rows: 3,
+            class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm",
+            placeholder: "Optional — briefly describe the reason for your leave" %>
+      </div>
+
+      <div class="flex items-center gap-3 pt-1">
+        <%= f.submit "Submit Request",
+            class: "px-5 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 cursor-pointer" %>
+        <%= link_to "Cancel", employee_portal_leave_requests_path,
+            class: "px-4 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200" %>
+      </div>
+    <% end %>
+  </div>
+</div>

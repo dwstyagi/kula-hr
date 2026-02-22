@@ -1,26 +1,17 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title><%= content_for(:title) || "Employee Portal - Kula HR" %></title>
+    <title>Sign In — Kula HR</title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
     <link rel="icon" href="/favicon.ico" sizes="any">
     <link rel="icon" href="/icon.svg" type="image/svg+xml">
-    <link rel="apple-touch-icon" href="/icon.png">
     <%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
   </head>
-  <body class="bg-gray-50">
-    <div data-controller="notifications"></div>
+  <body class="bg-white min-h-screen">
     <%= render "shared/flash" %>
-    <%= render "shared/employee_portal_sidebar" %>
-
-    <div class="ml-64">
-      <%= render "shared/admin_topbar" %>
-      <main class="p-6">
-        <%= yield %>
-      </main>
-    </div>
+    <%= yield %>
   </body>
 </html>
