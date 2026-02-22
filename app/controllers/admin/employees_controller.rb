@@ -36,7 +36,7 @@ module Admin
 
       @employees = policy_scope(Employee)
                      .includes(:department, :designation)
-                     .order(created_at: :desc)
+                     .order(employee_code: :desc)
 
       @employees = @employees.where("lower(first_name || ' ' || last_name) LIKE :q OR lower(employee_code) LIKE :q", q: "%#{params[:q].to_s.downcase.strip}%") if params[:q].present?
       @employees = @employees.where(department_id: params[:department_id]) if params[:department_id].present?

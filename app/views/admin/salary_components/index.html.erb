@@ -1,0 +1,36 @@
+<div class="max-w-5xl mx-auto">
+  <div class="flex items-center justify-between mb-6">
+    <h1 class="text-2xl font-bold text-gray-900">Salary Components</h1>
+    <%= link_to new_admin_salary_component_path,
+        class: "inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700",
+        data: { turbo_frame: "salary_component_form" } do %>
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+      </svg>
+      Add Component
+    <% end %>
+  </div>
+
+  <%= turbo_frame_tag "salary_component_form" %>
+
+  <%# Earnings %>
+  <%= render "component_table",
+       title: "Earnings",
+       description: "Components that add to the employee's gross salary.",
+       components: @earnings,
+       color: "green" %>
+
+  <%# Deductions %>
+  <%= render "component_table",
+       title: "Deductions",
+       description: "Components deducted from the employee's gross salary.",
+       components: @deductions,
+       color: "red" %>
+
+  <%# Employer Contributions %>
+  <%= render "component_table",
+       title: "Employer Contributions",
+       description: "Company-paid contributions not included in employee's take-home.",
+       components: @employer_contributions,
+       color: "blue" %>
+</div>

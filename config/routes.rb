@@ -10,6 +10,11 @@ Rails.application.routes.draw do
       root "dashboard#index"
       resources :departments
       resources :designations
+      resources :salary_components do
+        member do
+          patch :toggle_active
+        end
+      end
       resources :employees do
         collection do
           get :template

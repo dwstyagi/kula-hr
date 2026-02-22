@@ -1,0 +1,6 @@
+<%= turbo_frame_tag "salary_component_form" do %>
+  <div class="bg-white rounded-lg border border-gray-200 p-6 mb-6">
+    <h2 class="text-lg font-semibold text-gray-900 mb-4">New Salary Component</h2>
+    <%= render "form", salary_component: @salary_component, url: admin_salary_components_path %>
+  </div>
+<% end %>

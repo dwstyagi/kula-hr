@@ -1,0 +1,73 @@
+<div class="mb-6">
+  <div class="flex items-center gap-2 mb-3">
+    <% dot_color = { "green" => "bg-green-500", "red" => "bg-red-500", "blue" => "bg-blue-500" }[color] %>
+    <span class="h-2.5 w-2.5 rounded-full <%= dot_color %>"></span>
+    <h2 class="text-lg font-semibold text-gray-900"><%= title %></h2>
+    <span class="text-xs text-gray-400 ml-1">(<%= components.size %>)</span>
+  </div>
+  <p class="text-sm text-gray-500 mb-3"><%= description %></p>
+
+  <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
+    <% if components.any? %>
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Calculation</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Taxable</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order</th>
+            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-200">
+          <% components.each do |component| %>
+            <%= turbo_frame_tag component do %>
+              <tr class="hover:bg-gray-50 <%= 'opacity-50' unless component.active? %>">
+                <td class="px-6 py-4 text-sm font-medium text-gray-900"><%= component.name %></td>
+                <td class="px-6 py-4">
+                  <% calc_styles = { "flat" => "bg-gray-100 text-gray-700", "percentage" => "bg-indigo-100 text-indigo-700" } %>
+                  <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium <%= calc_styles[component.calculation_type] %>">
+                    <%= component.calculation_type.capitalize %>
+                  </span>
+                </td>
+                <td class="px-6 py-4 text-sm text-gray-500">
+                  <% if component.taxable? %>
+                    <span class="text-amber-600">Yes</span>
+                  <% else %>
+                    <span class="text-gray-400">No</span>
+                  <% end %>
+                </td>
+                <td class="px-6 py-4">
+                  <% if component.active? %>
+                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-700">Active</span>
+                  <% else %>
+                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-500">Inactive</span>
+                  <% end %>
+                </td>
+                <td class="px-6 py-4 text-sm text-gray-500 font-mono"><%= component.sort_order %></td>
+                <td class="px-6 py-4 text-right space-x-2">
+                  <%= button_to component.active? ? "Deactivate" : "Activate",
+                      toggle_active_admin_salary_component_path(component),
+                      method: :patch,
+                      class: "text-sm #{component.active? ? 'text-amber-600 hover:text-amber-800' : 'text-green-600 hover:text-green-800'}" %>
+                  <%= link_to "Edit", edit_admin_salary_component_path(component),
+                      class: "text-sm text-blue-600 hover:text-blue-800",
+                      data: { turbo_frame: dom_id(component) } %>
+                  <%= button_to "Delete", admin_salary_component_path(component),
+                      method: :delete,
+                      class: "text-sm text-red-600 hover:text-red-800",
+                      form: { data: { turbo_confirm: "Delete '#{component.name}'?" } } %>
+                </td>
+              </tr>
+            <% end %>
+          <% end %>
+        </tbody>
+      </table>
+    <% else %>
+      <div class="p-8 text-center">
+        <p class="text-sm text-gray-500">No <%= title.downcase %> configured.</p>
+      </div>
+    <% end %>
+  </div>
+</div>
