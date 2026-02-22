@@ -35,7 +35,7 @@ module Admin
       @departments = Department.order(:name)
 
       @employees = policy_scope(Employee)
-                     .includes(:department, :designation)
+                     .includes(:department, :designation, :user)
                      .order(employee_code: :desc)
 
       @employees = @employees.where("lower(first_name || ' ' || last_name) LIKE :q OR lower(employee_code) LIKE :q", q: "%#{params[:q].to_s.downcase.strip}%") if params[:q].present?
@@ -62,21 +62,18 @@ module Admin
       authorize @employee
 
       ActiveRecord::Base.transaction do
-        user = User.invite!(
-          {
-            first_name: @employee.first_name,
-            last_name: @employee.last_name,
-            email: @employee.email
-          },
-          current_user
+        user = User.create!(
+          first_name: @employee.first_name,
+          last_name: @employee.last_name,
+          email: @employee.email,
+          password: SecureRandom.hex(20)
         )
-
-        raise ActiveRecord::RecordInvalid.new(user) if user.errors.any?
 
         TenantUser.create!(tenant: ActsAsTenant.current_tenant, user: user)
         user.assign_role(:employee)
         @employee.user = user
         @employee.save!
+        user.invite!(current_user)
       end
 
       redirect_to admin_employee_path(@employee), notice: "Employee created and invitation sent to #{@employee.email}."
@@ -87,8 +84,25 @@ module Admin
 
     def resend_invite
       authorize @employee
-      @employee.user.invite!(current_user)
-      redirect_to admin_employee_path(@employee), notice: "Invitation resent to #{@employee.email}."
+
+      if @employee.user
+        @employee.user.invite!(current_user)
+        redirect_to admin_employee_path(@employee), notice: "Invitation resent to #{@employee.email}."
+      else
+        ActiveRecord::Base.transaction do
+          user = User.create!(
+            first_name: @employee.first_name,
+            last_name: @employee.last_name,
+            email: @employee.email,
+            password: SecureRandom.hex(20)
+          )
+          TenantUser.create!(tenant: ActsAsTenant.current_tenant, user: user)
+          user.assign_role(:employee)
+          @employee.update!(user: user)
+          user.invite!(current_user)
+        end
+        redirect_to admin_employee_path(@employee), notice: "Invitation sent to #{@employee.email}."
+      end
     end
 
     def edit

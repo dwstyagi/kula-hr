@@ -120,7 +120,9 @@
                       <%= employee.first_name.first %><%= employee.last_name.first %>
                     </div>
                     <div>
-                      <p class="text-sm font-medium text-gray-900"><%= employee.full_name %></p>
+                      <%= link_to employee.full_name, admin_employee_path(employee),
+                          class: "text-sm font-medium text-blue-600 hover:text-blue-800 hover:underline",
+                          data: { turbo_frame: "_top" } %>
                       <p class="text-xs text-gray-500"><%= employee.email %></p>
                     </div>
                   </div>
@@ -129,10 +131,21 @@
                 <td class="px-6 py-4 text-sm text-gray-500"><%= employee.department&.name || "—" %></td>
                 <td class="px-6 py-4 text-sm text-gray-500"><%= employee.designation&.name || "—" %></td>
                 <td class="px-6 py-4">
-                  <% status_colors = { "active" => "bg-green-100 text-green-800", "probation" => "bg-yellow-100 text-yellow-800", "notice_period" => "bg-orange-100 text-orange-800", "resigned" => "bg-red-100 text-red-800", "terminated" => "bg-gray-100 text-gray-800" } %>
-                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium <%= status_colors[employee.employment_status] %>">
-                    <%= employee.employment_status.titleize %>
-                  </span>
+                  <div class="flex flex-wrap items-center gap-1.5">
+                    <% status_colors = { "active" => "bg-green-100 text-green-800", "probation" => "bg-yellow-100 text-yellow-800", "notice_period" => "bg-orange-100 text-orange-800", "resigned" => "bg-red-100 text-red-800", "terminated" => "bg-gray-100 text-gray-800" } %>
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium <%= status_colors[employee.employment_status] %>">
+                      <%= employee.employment_status.titleize %>
+                    </span>
+                    <% if employee.user&.invitation_accepted_at.present? %>
+                      <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700">Accepted</span>
+                    <% elsif employee.user&.invitation_sent_at.present? %>
+                      <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-700">Invite Pending</span>
+                    <% elsif employee.user.nil? %>
+                      <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">Not Invited</span>
+                    <% elsif employee.user.present? %>
+                      <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-700">Account Active</span>
+                    <% end %>
+                  </div>
                 </td>
                 <td class="px-6 py-4 text-right">
                   <div class="flex items-center justify-end gap-2">
