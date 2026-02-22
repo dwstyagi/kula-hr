@@ -1,12 +1,17 @@
 module Admin
   class SalaryComponentsController < BaseController
-    before_action :set_salary_component, only: [ :edit, :update, :destroy, :toggle_active ]
+    before_action :set_salary_component, only: [ :show, :edit, :update, :destroy, :toggle_active ]
 
     def index
       components = policy_scope(SalaryComponent).order(:sort_order, :name)
       @earnings = components.earnings
       @deductions = components.deductions
       @employer_contributions = components.employer_contributions
+    end
+
+    def show
+      authorize @salary_component
+      @used_in_structures = @salary_component.salary_structures.order(:name)
     end
 
     def new

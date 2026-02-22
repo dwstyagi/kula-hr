@@ -1,0 +1,10 @@
+<div class="max-w-2xl mx-auto">
+  <div class="mb-6">
+    <h1 class="text-2xl font-bold text-gray-900">New Salary Structure</h1>
+    <p class="mt-1 text-sm text-gray-500">Create a named template, then add salary components to it.</p>
+  </div>
+
+  <div class="bg-white rounded-lg border border-gray-200 p-6">
+    <%= render "form", salary_structure: @salary_structure, url: admin_salary_structures_path %>
+  </div>
+</div>

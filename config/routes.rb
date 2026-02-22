@@ -15,6 +15,13 @@ Rails.application.routes.draw do
           patch :toggle_active
         end
       end
+      resources :salary_structures do
+        member do
+          patch :toggle_active
+          post :add_component
+          delete :remove_component
+        end
+      end
       resources :employees do
         collection do
           get :template

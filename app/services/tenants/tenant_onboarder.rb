@@ -82,7 +82,7 @@ module Tenants
         { name: "DA", component_type: "earning", calculation_type: "percentage", taxable: true, sort_order: 3 },
         { name: "Conveyance Allowance", component_type: "earning", calculation_type: "flat", taxable: false, sort_order: 4 },
         { name: "Medical Allowance", component_type: "earning", calculation_type: "flat", taxable: false, sort_order: 5 },
-        { name: "Special Allowance", component_type: "earning", calculation_type: "flat", taxable: true, sort_order: 6 },
+        { name: "Special Allowance", component_type: "earning", calculation_type: "percentage", taxable: true, sort_order: 6 },
         # Deductions
         { name: "Employee PF", component_type: "deduction", calculation_type: "percentage", taxable: false, sort_order: 7 },
         { name: "ESI", component_type: "deduction", calculation_type: "percentage", taxable: false, sort_order: 8 },
