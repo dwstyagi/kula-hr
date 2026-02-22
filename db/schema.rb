@@ -10,11 +10,33 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_02_22_160011) do
+ActiveRecord::Schema[8.1].define(version: 2026_02_22_170000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
+
+  create_table "attendance_summaries", force: :cascade do |t|
+    t.decimal "approved_leaves", precision: 5, scale: 1, default: "0.0", null: false
+    t.datetime "created_at", null: false
+    t.decimal "days_present", precision: 5, scale: 1, default: "0.0", null: false
+    t.bigint "employee_id", null: false
+    t.decimal "half_days", precision: 5, scale: 1, default: "0.0", null: false
+    t.decimal "lop_days", precision: 5, scale: 1, default: "0.0", null: false
+    t.decimal "lop_leaves", precision: 5, scale: 1, default: "0.0", null: false
+    t.integer "month", null: false
+    t.decimal "paid_days", precision: 5, scale: 1, default: "0.0", null: false
+    t.integer "status", default: 0, null: false
+    t.bigint "tenant_id", null: false
+    t.decimal "total_working_days", precision: 5, scale: 1, default: "0.0", null: false
+    t.decimal "unapproved_absences", precision: 5, scale: 1, default: "0.0", null: false
+    t.datetime "updated_at", null: false
+    t.integer "year", null: false
+    t.index ["employee_id", "month", "year"], name: "idx_att_sum_emp_month_year", unique: true
+    t.index ["employee_id"], name: "index_attendance_summaries_on_employee_id"
+    t.index ["tenant_id", "month", "year"], name: "idx_att_sum_tenant_month_year"
+    t.index ["tenant_id"], name: "index_attendance_summaries_on_tenant_id"
+  end
 
   create_table "departments", force: :cascade do |t|
     t.datetime "created_at", null: false
@@ -303,6 +325,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_22_160011) do
     t.index ["item_type", "item_id"], name: "index_versions_on_item_type_and_item_id"
   end
 
+  add_foreign_key "attendance_summaries", "employees"
+  add_foreign_key "attendance_summaries", "tenants"
   add_foreign_key "departments", "tenants"
   add_foreign_key "designations", "tenants"
   add_foreign_key "employee_salaries", "employees"

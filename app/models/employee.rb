@@ -10,6 +10,7 @@ class Employee < ApplicationRecord
   has_many :employee_salaries, dependent: :destroy
   has_many :leave_balances, dependent: :destroy
   has_many :leave_requests, dependent: :destroy
+  has_many :attendance_summaries, dependent: :destroy
 
   has_paper_trail
 

@@ -50,6 +50,14 @@ Rails.application.routes.draw do
           patch :cancel
         end
       end
+      resources :attendance_summaries, only: [ :index, :show, :edit, :update ] do
+        collection do
+          post :generate
+          patch :lock_month
+          get  :download_template
+          post :upload_template
+        end
+      end
       get "salary_breakup", to: "salary_breakup#show"
       resources :imports, only: [ :new, :create ] do
         collection do
