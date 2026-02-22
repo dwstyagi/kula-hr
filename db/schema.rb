@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_02_21_160851) do
+ActiveRecord::Schema[8.1].define(version: 2026_02_22_052524) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "pg_catalog.plpgsql"
@@ -151,6 +151,27 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_21_160851) do
     t.index ["tenant_id"], name: "index_salary_components_on_tenant_id"
   end
 
+  create_table "salary_structure_components", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.bigint "salary_component_id", null: false
+    t.bigint "salary_structure_id", null: false
+    t.datetime "updated_at", null: false
+    t.decimal "value", precision: 10, scale: 2, null: false
+    t.index ["salary_component_id"], name: "index_salary_structure_components_on_salary_component_id"
+    t.index ["salary_structure_id", "salary_component_id"], name: "idx_structure_components_unique", unique: true
+    t.index ["salary_structure_id"], name: "index_salary_structure_components_on_salary_structure_id"
+  end
+
+  create_table "salary_structures", force: :cascade do |t|
+    t.boolean "active", default: true, null: false
+    t.datetime "created_at", null: false
+    t.string "name", null: false
+    t.bigint "tenant_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["tenant_id", "name"], name: "index_salary_structures_on_tenant_id_and_name", unique: true
+    t.index ["tenant_id"], name: "index_salary_structures_on_tenant_id"
+  end
+
   create_table "tenant_users", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.bigint "tenant_id", null: false
@@ -234,6 +255,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_21_160851) do
   add_foreign_key "payroll_settings", "tenants"
   add_foreign_key "professional_tax_slabs", "tenants"
   add_foreign_key "salary_components", "tenants"
+  add_foreign_key "salary_structure_components", "salary_components"
+  add_foreign_key "salary_structure_components", "salary_structures"
+  add_foreign_key "salary_structures", "tenants"
   add_foreign_key "tenant_users", "tenants"
   add_foreign_key "tenant_users", "users"
 end

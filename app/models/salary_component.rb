@@ -2,6 +2,9 @@ class SalaryComponent < ApplicationRecord
   acts_as_tenant :tenant
   belongs_to :tenant
 
+  has_many :salary_structure_components, dependent: :destroy
+  has_many :salary_structures, through: :salary_structure_components
+
   enum :component_type, { earning: "earning", deduction: "deduction", employer_contribution: "employer_contribution" }
   enum :calculation_type, { flat: "flat", percentage: "percentage" }
 
