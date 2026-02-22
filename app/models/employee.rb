@@ -7,6 +7,7 @@ class Employee < ApplicationRecord
   belongs_to :reporting_manager, class_name: "Employee", optional: true
 
   has_many :direct_reports, class_name: "Employee", foreign_key: :reporting_manager_id, dependent: :nullify, inverse_of: :reporting_manager
+  has_many :employee_salaries, dependent: :destroy
 
   has_paper_trail
 
@@ -37,6 +38,10 @@ class Employee < ApplicationRecord
 
   def full_name
     "#{first_name} #{last_name}"
+  end
+
+  def current_salary
+    employee_salaries.current.first
   end
 
   def active?

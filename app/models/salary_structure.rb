@@ -4,6 +4,7 @@ class SalaryStructure < ApplicationRecord
 
   has_many :salary_structure_components, dependent: :destroy
   has_many :salary_components, through: :salary_structure_components
+  has_many :employee_salaries, dependent: :restrict_with_error
 
   validates :name, presence: true, uniqueness: { scope: :tenant_id }
 
