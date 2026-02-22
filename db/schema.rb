@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_02_22_061833) do
+ActiveRecord::Schema[8.1].define(version: 2026_02_22_153754) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "pg_catalog.plpgsql"
@@ -99,6 +99,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_22_061833) do
     t.boolean "carry_forward", default: false
     t.string "code", null: false
     t.datetime "created_at", null: false
+    t.boolean "is_active", default: true, null: false
+    t.boolean "is_paid", default: true, null: false
     t.decimal "max_carry_forward", precision: 5, scale: 1, default: "0.0"
     t.string "name", null: false
     t.bigint "tenant_id", null: false
@@ -115,9 +117,11 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_22_061833) do
     t.decimal "pf_ceiling", precision: 10, scale: 2, default: "15000.0"
     t.decimal "pf_employee_rate", precision: 5, scale: 2, default: "12.0"
     t.decimal "pf_employer_rate", precision: 5, scale: 2, default: "12.0"
+    t.boolean "pro_rate_leaves", default: true, null: false
     t.string "state"
     t.bigint "tenant_id", null: false
     t.datetime "updated_at", null: false
+    t.string "week_off_pattern", default: "all_saturdays_sundays", null: false
     t.index ["tenant_id"], name: "index_payroll_settings_on_tenant_id", unique: true
   end
 

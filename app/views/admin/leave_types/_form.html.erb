@@ -1,0 +1,74 @@
+<%= form_with model: leave_type, url: url, method: local_assigns[:method] || :post, class: "space-y-4" do |f| %>
+  <% if leave_type.errors.any? %>
+    <div class="rounded-lg bg-red-50 p-4">
+      <div class="flex">
+        <svg class="h-5 w-5 text-red-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+        </svg>
+        <div class="ml-3">
+          <ul class="text-sm text-red-700 list-disc list-inside">
+            <% leave_type.errors.full_messages.each do |msg| %>
+              <li><%= msg %></li>
+            <% end %>
+          </ul>
+        </div>
+      </div>
+    </div>
+  <% end %>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div>
+      <%= f.label :name, class: "block text-sm font-medium text-gray-700 mb-1" %>
+      <%= f.text_field :name,
+          class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm",
+          autofocus: true, placeholder: "e.g. Maternity Leave" %>
+    </div>
+
+    <div>
+      <%= f.label :code, "Short Code", class: "block text-sm font-medium text-gray-700 mb-1" %>
+      <%= f.text_field :code,
+          class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm font-mono uppercase",
+          placeholder: "e.g. ML",
+          oninput: "this.value = this.value.toUpperCase()" %>
+    </div>
+
+    <div>
+      <%= f.label :annual_quota, "Days Per Year", class: "block text-sm font-medium text-gray-700 mb-1" %>
+      <%= f.number_field :annual_quota,
+          class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm",
+          min: 0, step: 1, placeholder: "0 = unlimited" %>
+    </div>
+
+    <div>
+      <%= f.label :max_carry_forward, "Max Carry Forward Days", class: "block text-sm font-medium text-gray-700 mb-1" %>
+      <%= f.number_field :max_carry_forward,
+          class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm",
+          min: 0, step: 1, placeholder: "0" %>
+      <p class="text-xs text-gray-400 mt-1">Only applies if carry forward is enabled.</p>
+    </div>
+  </div>
+
+  <div class="flex items-center gap-6">
+    <label class="flex items-center gap-2 cursor-pointer">
+      <%= f.check_box :carry_forward, class: "rounded border-gray-300 text-blue-600 shadow-sm focus:ring-blue-500" %>
+      <span class="text-sm text-gray-700">Allow Carry Forward</span>
+    </label>
+
+    <label class="flex items-center gap-2 cursor-pointer">
+      <%= f.check_box :is_paid, class: "rounded border-gray-300 text-blue-600 shadow-sm focus:ring-blue-500" %>
+      <span class="text-sm text-gray-700">Paid Leave</span>
+    </label>
+
+    <label class="flex items-center gap-2 cursor-pointer">
+      <%= f.check_box :is_active, class: "rounded border-gray-300 text-blue-600 shadow-sm focus:ring-blue-500" %>
+      <span class="text-sm text-gray-700">Active</span>
+    </label>
+  </div>
+
+  <div class="flex items-center gap-3 pt-2">
+    <%= f.submit leave_type.persisted? ? "Update Leave Type" : "Create Leave Type",
+        class: "px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 cursor-pointer" %>
+    <%= link_to "Cancel", admin_leave_types_path,
+        class: "px-4 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200" %>
+  </div>
+<% end %>

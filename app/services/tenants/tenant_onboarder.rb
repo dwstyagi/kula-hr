@@ -100,10 +100,10 @@ module Tenants
 
     def seed_leave_types(tenant)
       leave_types = [
-        { name: "Casual Leave", code: "CL", annual_quota: 12, carry_forward: false, max_carry_forward: 0 },
-        { name: "Sick Leave", code: "SL", annual_quota: 6, carry_forward: false, max_carry_forward: 0 },
-        { name: "Earned Leave", code: "EL", annual_quota: 15, carry_forward: true, max_carry_forward: 10 },
-        { name: "Loss of Pay", code: "LOP", annual_quota: 0, carry_forward: false, max_carry_forward: 0 }
+        { name: "Casual Leave",  code: "CL",  annual_quota: 12, carry_forward: false, max_carry_forward: 0,  is_paid: true,  is_active: true },
+        { name: "Sick Leave",    code: "SL",  annual_quota: 6,  carry_forward: false, max_carry_forward: 0,  is_paid: true,  is_active: true },
+        { name: "Earned Leave",  code: "EL",  annual_quota: 15, carry_forward: true,  max_carry_forward: 30, is_paid: true,  is_active: true },
+        { name: "Loss of Pay",   code: "LOP", annual_quota: 0,  carry_forward: false, max_carry_forward: 0,  is_paid: false, is_active: true }
       ]
 
       leave_types.each do |attrs|

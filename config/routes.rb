@@ -35,6 +35,11 @@ Rails.application.routes.draw do
           post :revise_salary, action: :create_revision
         end
       end
+      resources :leave_types do
+        member do
+          patch :toggle_active
+        end
+      end
       get "salary_breakup", to: "salary_breakup#show"
       resources :imports, only: [ :new, :create ] do
         collection do

@@ -1,0 +1,6 @@
+<%= turbo_frame_tag "leave_type_form" do %>
+  <div class="bg-white rounded-lg border border-gray-200 p-6 mb-6">
+    <h2 class="text-lg font-semibold text-gray-900 mb-4">New Leave Type</h2>
+    <%= render "form", leave_type: @leave_type, url: admin_leave_types_path %>
+  </div>
+<% end %>
