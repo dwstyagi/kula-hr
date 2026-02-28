@@ -1,0 +1,174 @@
+<% content_for :title, "Edit Tax Declaration — #{@declaration.financial_year}" %>
+
+<div class="max-w-3xl mx-auto"
+     data-controller="tax-declaration">
+
+  <%# ── Header ──────────────────────────────────────────────────────────── %>
+  <div class="flex items-center gap-3 mb-6">
+    <%= link_to employee_portal_tax_declaration_path,
+        class: "text-gray-400 hover:text-gray-600" do %>
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+      </svg>
+    <% end %>
+    <div>
+      <h1 class="text-2xl font-bold text-gray-900">Tax Declaration</h1>
+      <p class="text-sm text-gray-500">Financial Year <%= @declaration.financial_year %></p>
+    </div>
+  </div>
+
+  <%= form_with model: @declaration,
+                url: employee_portal_tax_declaration_path,
+                method: :patch,
+                class: "space-y-5" do |f| %>
+
+    <% if @declaration.errors.any? %>
+      <div class="rounded-lg bg-red-50 p-4">
+        <ul class="text-sm text-red-700 list-disc list-inside space-y-1">
+          <% @declaration.errors.full_messages.each do |msg| %>
+            <li><%= msg %></li>
+          <% end %>
+        </ul>
+      </div>
+    <% end %>
+
+    <%# ── Tax Regime ────────────────────────────────────────────────────── %>
+    <div class="bg-white rounded-lg border border-gray-200 p-6">
+      <h2 class="text-sm font-semibold text-gray-700 mb-4">Tax Regime</h2>
+      <div class="space-y-3">
+        <label class="flex items-start gap-3 p-3 rounded-lg border border-gray-200 cursor-pointer hover:bg-gray-50 has-[:checked]:border-blue-500 has-[:checked]:bg-blue-50">
+          <%= f.radio_button :regime, :old_regime,
+              class: "mt-0.5",
+              data: { action: "change->tax-declaration#toggleRegime" } %>
+          <div>
+            <span class="text-sm font-medium text-gray-900">Old Regime</span>
+            <p class="text-xs text-gray-500 mt-0.5">Higher slabs, but deductions allowed: 80C, 80D, HRA, home loan, NPS</p>
+          </div>
+        </label>
+
+        <label class="flex items-start gap-3 p-3 rounded-lg border border-gray-200 cursor-pointer hover:bg-gray-50 has-[:checked]:border-blue-500 has-[:checked]:bg-blue-50">
+          <%= f.radio_button :regime, :new_regime,
+              class: "mt-0.5",
+              data: { action: "change->tax-declaration#toggleRegime" } %>
+          <div>
+            <span class="text-sm font-medium text-gray-900">New Regime</span>
+            <p class="text-xs text-gray-500 mt-0.5">Lower slabs, standard deduction ₹75,000 only — no other deductions</p>
+          </div>
+        </label>
+      </div>
+    </div>
+
+    <%# ── Old Regime Sections (hidden when New Regime selected) ─────────── %>
+    <div data-tax-declaration-target="regimeSection"
+         class="<%= @declaration.regime_new_regime? ? 'hidden' : '' %> space-y-5">
+
+      <%# ── Section 80C ──────────────────────────────────────────────────── %>
+      <%= render "investment_section", f: f,
+          section: "80C",
+          label: "Section 80C",
+          description: "PPF, ELSS, LIC, NSC, tuition fees, home loan principal",
+          limit: 150_000 %>
+
+      <%# ── Section 80D ──────────────────────────────────────────────────── %>
+      <%= render "investment_section", f: f,
+          section: "80D",
+          label: "Section 80D — Medical Insurance",
+          description: "Health insurance for self, spouse, children, and parents",
+          limit: 50_000 %>
+
+      <%# ── Section 80CCD(1B) — NPS ───────────────────────────────────────── %>
+      <%= render "investment_section", f: f,
+          section: "80CCD1B",
+          label: "Section 80CCD(1B) — NPS",
+          description: "Additional NPS contribution over and above 80C",
+          limit: 50_000 %>
+
+      <%# ── Section 80E, 80TTA, 80G ──────────────────────────────────────── %>
+      <%= render "investment_section", f: f,
+          section: "80E",
+          label: "Section 80E — Education Loan Interest",
+          description: "Interest on education loan (no upper limit)",
+          limit: nil %>
+
+      <%= render "investment_section", f: f,
+          section: "80TTA",
+          label: "Section 80TTA — Savings Interest",
+          description: "Interest from savings bank accounts",
+          limit: 10_000 %>
+
+      <%# ── HRA ──────────────────────────────────────────────────────────── %>
+      <div class="bg-white rounded-lg border border-gray-200 p-6">
+        <div class="flex items-start gap-3 mb-4">
+          <%= f.check_box :claiming_hra,
+              class: "mt-0.5 rounded border-gray-300",
+              data: { action: "change->tax-declaration#toggleHra" } %>
+          <div>
+            <label class="text-sm font-semibold text-gray-700 cursor-pointer">HRA Exemption</label>
+            <p class="text-xs text-gray-500 mt-0.5">Check if you pay rent and receive HRA in your salary</p>
+          </div>
+        </div>
+
+        <div data-tax-declaration-target="hraFields"
+             class="<%= @declaration.claiming_hra? ? '' : 'hidden' %> space-y-4 border-t border-gray-100 pt-4">
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <%= f.label :monthly_rent, "Monthly Rent (₹)", class: "block text-sm font-medium text-gray-700 mb-1" %>
+              <%= f.number_field :monthly_rent, min: 0, step: 100,
+                  class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm" %>
+            </div>
+            <div>
+              <%= f.label :rental_city, "City Type", class: "block text-sm font-medium text-gray-700 mb-1" %>
+              <%= f.select :rental_city,
+                  [["Metro (Mumbai, Delhi, Kolkata, Chennai)", "metro"],
+                   ["Non-Metro", "non_metro"]],
+                  { include_blank: "Select city type" },
+                  class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm" %>
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <%= f.label :landlord_name, "Landlord Name", class: "block text-sm font-medium text-gray-700 mb-1" %>
+              <%= f.text_field :landlord_name,
+                  class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm" %>
+            </div>
+            <div>
+              <%= f.label :landlord_pan, "Landlord PAN", class: "block text-sm font-medium text-gray-700 mb-1" %>
+              <%= f.text_field :landlord_pan, placeholder: "Required if rent > ₹1L/year",
+                  class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm" %>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <%# ── Home Loan ─────────────────────────────────────────────────────── %>
+      <div class="bg-white rounded-lg border border-gray-200 p-6">
+        <h2 class="text-sm font-semibold text-gray-700 mb-1">Home Loan</h2>
+        <p class="text-xs text-gray-500 mb-4">Section 24(b) interest (max ₹2,00,000) and principal under 80C</p>
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <%= f.label :home_loan_interest, "Annual Interest Paid (₹)", class: "block text-sm font-medium text-gray-700 mb-1" %>
+            <%= f.number_field :home_loan_interest, min: 0, max: 200_000, step: 1000,
+                class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm" %>
+            <p class="text-xs text-gray-400 mt-1">Max deduction: ₹2,00,000</p>
+          </div>
+          <div>
+            <%= f.label :home_loan_principal, "Annual Principal Repaid (₹)", class: "block text-sm font-medium text-gray-700 mb-1" %>
+            <%= f.number_field :home_loan_principal, min: 0, step: 1000,
+                class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm" %>
+            <p class="text-xs text-gray-400 mt-1">Counted under 80C limit</p>
+          </div>
+        </div>
+      </div>
+
+    </div><%# end regime section %>
+
+    <%# ── Actions ────────────────────────────────────────────────────────── %>
+    <div class="flex items-center gap-3 pb-6">
+      <%= f.submit "Save Draft",
+          class: "px-5 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 cursor-pointer" %>
+      <%= link_to "Cancel", employee_portal_tax_declaration_path,
+          class: "px-4 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200" %>
+    </div>
+
+  <% end %>
+</div>

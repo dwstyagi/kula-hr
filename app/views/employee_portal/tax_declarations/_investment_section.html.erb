@@ -1,0 +1,74 @@
+<%# locals: (f:, section:, label:, description:, limit:) %>
+<div class="bg-white rounded-lg border border-gray-200 p-6">
+  <div class="flex items-start justify-between mb-1">
+    <h2 class="text-sm font-semibold text-gray-700"><%= label %></h2>
+    <% if limit %>
+      <span class="text-xs text-gray-400">Limit: ₹<%= number_with_delimiter(limit) %></span>
+    <% end %>
+  </div>
+  <p class="text-xs text-gray-500 mb-4"><%= description %></p>
+
+  <%# Existing investment rows for this section %>
+  <div data-investment-list="<%= section %>" class="space-y-2 mb-3">
+    <% @declaration.investment_declarations.select { |i| i.section == section }.each do |inv| %>
+      <% inv_index = inv.id %>
+      <div data-investment-row class="flex items-center gap-2">
+        <input type="hidden" name="tax_declaration[investment_declarations_attributes][<%= inv_index %>][id]" value="<%= inv.id %>">
+        <input type="hidden" name="tax_declaration[investment_declarations_attributes][<%= inv_index %>][section]" value="<%= section %>">
+        <input type="hidden" name="tax_declaration[investment_declarations_attributes][<%= inv_index %>][_destroy]" value="false">
+        <input type="text"
+               name="tax_declaration[investment_declarations_attributes][<%= inv_index %>][description]"
+               value="<%= inv.description %>"
+               placeholder="e.g. PPF, LIC Premium"
+               class="flex-1 rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm">
+        <input type="number"
+               name="tax_declaration[investment_declarations_attributes][<%= inv_index %>][declared_amount]"
+               value="<%= inv.declared_amount.to_i %>"
+               min="1" step="100"
+               placeholder="Amount"
+               class="w-36 rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm">
+        <button type="button"
+                class="text-red-400 hover:text-red-600"
+                data-action="click->tax-declaration#removeInvestment">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+    <% end %>
+  </div>
+
+  <%# Template for new rows (Stimulus clones this, replacing NEW_RECORD with a timestamp) %>
+  <template data-investment-template="<%= section %>">
+    <div data-investment-row class="flex items-center gap-2">
+      <input type="hidden" name="tax_declaration[investment_declarations_attributes][NEW_RECORD][section]" value="<%= section %>">
+      <input type="hidden" name="tax_declaration[investment_declarations_attributes][NEW_RECORD][_destroy]" value="false">
+      <input type="text"
+             name="tax_declaration[investment_declarations_attributes][NEW_RECORD][description]"
+             placeholder="e.g. PPF, LIC Premium"
+             class="flex-1 rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm">
+      <input type="number"
+             name="tax_declaration[investment_declarations_attributes][NEW_RECORD][declared_amount]"
+             min="1" step="100"
+             placeholder="Amount"
+             class="w-36 rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm">
+      <button type="button"
+              class="text-red-400 hover:text-red-600"
+              data-action="click->tax-declaration#removeInvestment">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
+    </div>
+  </template>
+
+  <button type="button"
+          class="text-sm text-blue-600 hover:text-blue-800 font-medium flex items-center gap-1"
+          data-action="click->tax-declaration#addInvestment"
+          data-section="<%= section %>">
+    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+    </svg>
+    Add investment
+  </button>
+</div>

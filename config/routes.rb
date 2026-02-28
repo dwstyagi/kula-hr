@@ -76,6 +76,9 @@ Rails.application.routes.draw do
           patch :cancel
         end
       end
+      resource :tax_declaration, only: [ :show, :edit, :update ] do
+        patch :submit, on: :member
+      end
     end
 
     root "admin/dashboard#index", as: :tenant_root

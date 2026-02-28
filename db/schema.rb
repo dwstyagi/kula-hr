@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_02_28_100002) do
+ActiveRecord::Schema[8.1].define(version: 2026_02_28_100004) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "pg_catalog.plpgsql"
@@ -117,6 +117,20 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_28_100002) do
     t.index ["tenant_id", "employee_code"], name: "index_employees_on_tenant_id_and_employee_code", unique: true
     t.index ["tenant_id"], name: "index_employees_on_tenant_id"
     t.index ["user_id"], name: "index_employees_on_user_id"
+  end
+
+  create_table "investment_declarations", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.decimal "declared_amount", precision: 10, scale: 2, null: false
+    t.string "description", null: false
+    t.string "section", null: false
+    t.bigint "tax_declaration_id", null: false
+    t.bigint "tenant_id", null: false
+    t.datetime "updated_at", null: false
+    t.decimal "verified_amount", precision: 10, scale: 2
+    t.index ["tax_declaration_id", "section"], name: "idx_inv_decl_td_section"
+    t.index ["tax_declaration_id"], name: "index_investment_declarations_on_tax_declaration_id"
+    t.index ["tenant_id"], name: "index_investment_declarations_on_tenant_id"
   end
 
   create_table "leave_balances", force: :cascade do |t|
@@ -263,6 +277,30 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_28_100002) do
     t.index ["tenant_id"], name: "index_salary_structures_on_tenant_id"
   end
 
+  create_table "tax_declarations", force: :cascade do |t|
+    t.boolean "claiming_hra", default: false, null: false
+    t.datetime "created_at", null: false
+    t.bigint "employee_id", null: false
+    t.decimal "estimated_annual_tax", precision: 12, scale: 2, default: "0.0"
+    t.decimal "estimated_monthly_tds", precision: 10, scale: 2, default: "0.0"
+    t.string "financial_year", null: false
+    t.decimal "home_loan_interest", precision: 10, scale: 2, default: "0.0"
+    t.decimal "home_loan_principal", precision: 10, scale: 2, default: "0.0"
+    t.string "landlord_name"
+    t.string "landlord_pan"
+    t.decimal "monthly_rent", precision: 10, scale: 2, default: "0.0"
+    t.integer "regime", default: 1, null: false
+    t.string "rental_city"
+    t.integer "status", default: 0, null: false
+    t.bigint "tenant_id", null: false
+    t.decimal "total_declared_investments", precision: 12, scale: 2, default: "0.0"
+    t.decimal "total_exempt_allowances", precision: 12, scale: 2, default: "0.0"
+    t.datetime "updated_at", null: false
+    t.index ["employee_id", "financial_year"], name: "idx_tax_decl_emp_fy", unique: true
+    t.index ["employee_id"], name: "index_tax_declarations_on_employee_id"
+    t.index ["tenant_id"], name: "index_tax_declarations_on_tenant_id"
+  end
+
   create_table "tenant_users", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.bigint "tenant_id", null: false
@@ -347,6 +385,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_28_100002) do
   add_foreign_key "employees", "employees", column: "reporting_manager_id"
   add_foreign_key "employees", "tenants"
   add_foreign_key "employees", "users"
+  add_foreign_key "investment_declarations", "tax_declarations"
+  add_foreign_key "investment_declarations", "tenants"
   add_foreign_key "leave_balances", "employees"
   add_foreign_key "leave_balances", "leave_types"
   add_foreign_key "leave_balances", "tenants"
@@ -361,6 +401,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_28_100002) do
   add_foreign_key "salary_structure_components", "salary_components"
   add_foreign_key "salary_structure_components", "salary_structures"
   add_foreign_key "salary_structures", "tenants"
+  add_foreign_key "tax_declarations", "employees"
+  add_foreign_key "tax_declarations", "tenants"
   add_foreign_key "tenant_users", "tenants"
   add_foreign_key "tenant_users", "users"
 end

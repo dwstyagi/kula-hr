@@ -25,6 +25,16 @@
       </svg>
       My Leaves
     <% end %>
+
+    <% if current_employee %>
+      <%= link_to employee_portal_tax_declaration_path,
+          class: "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium #{request.path.start_with?('/portal/tax_declaration') ? 'bg-blue-50 text-blue-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'}" do %>
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z"/>
+        </svg>
+        Tax Declaration
+      <% end %>
+    <% end %>
   </nav>
 
   <div class="p-4 border-t border-gray-200">
