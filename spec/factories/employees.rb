@@ -6,6 +6,9 @@ FactoryBot.define do
     sequence(:email)  { |n| "employee#{n}@example.com" }
     joining_date      { 1.year.ago.to_date }
     employment_status { "active" }
+    pf_applicable     { true }
+    pf_on_full_basic  { false }
+    pt_applicable     { true }
 
     trait :with_user do
       association :user
@@ -25,6 +28,18 @@ FactoryBot.define do
 
     trait :resigned do
       employment_status { "resigned" }
+    end
+
+    trait :pf_opted_out do
+      pf_applicable { false }
+    end
+
+    trait :pf_on_full_basic do
+      pf_on_full_basic { true }
+    end
+
+    trait :pt_opted_out do
+      pt_applicable { false }
     end
   end
 end
