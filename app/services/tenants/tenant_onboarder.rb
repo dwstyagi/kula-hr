@@ -121,26 +121,70 @@ module Tenants
       end
     end
 
+    MAHARASHTRA_SLABS = [
+      { salary_from: 0,      salary_to: 7_500,   tax_amount: 0,   month: nil },
+      { salary_from: 7_501,  salary_to: 10_000,  tax_amount: 175, month: nil },
+      { salary_from: 10_001, salary_to: 999_999, tax_amount: 200, month: nil },
+      { salary_from: 10_001, salary_to: 999_999, tax_amount: 300, month: "february" }
+    ].freeze
+
+    KARNATAKA_SLABS = [
+      { salary_from: 0,      salary_to: 15_000,  tax_amount: 0,   month: nil },
+      { salary_from: 15_001, salary_to: 999_999, tax_amount: 200, month: nil }
+    ].freeze
+
+    TELANGANA_SLABS = [
+      { salary_from: 0,      salary_to: 15_000,  tax_amount: 0,   month: nil },
+      { salary_from: 15_001, salary_to: 20_000,  tax_amount: 150, month: nil },
+      { salary_from: 20_001, salary_to: 999_999, tax_amount: 200, month: nil }
+    ].freeze
+
+    GUJARAT_SLABS = [
+      { salary_from: 0,      salary_to: 5_999,   tax_amount: 0,   month: nil },
+      { salary_from: 6_000,  salary_to: 8_999,   tax_amount: 80,  month: nil },
+      { salary_from: 9_000,  salary_to: 11_999,  tax_amount: 150, month: nil },
+      { salary_from: 12_000, salary_to: 999_999, tax_amount: 200, month: nil }
+    ].freeze
+
+    TAMIL_NADU_SLABS = [
+      { salary_from: 0,      salary_to: 21_000,  tax_amount: 0,    month: nil },
+      { salary_from: 21_001, salary_to: 30_000,  tax_amount: 135,  month: nil },
+      { salary_from: 30_001, salary_to: 45_000,  tax_amount: 315,  month: nil },
+      { salary_from: 45_001, salary_to: 60_000,  tax_amount: 690,  month: nil },
+      { salary_from: 60_001, salary_to: 75_000,  tax_amount: 1025, month: nil },
+      { salary_from: 75_001, salary_to: 999_999, tax_amount: 1250, month: nil }
+    ].freeze
+
+    ANDHRA_PRADESH_SLABS = [
+      { salary_from: 0,      salary_to: 15_000,  tax_amount: 0,   month: nil },
+      { salary_from: 15_001, salary_to: 20_000,  tax_amount: 150, month: nil },
+      { salary_from: 20_001, salary_to: 999_999, tax_amount: 200, month: nil }
+    ].freeze
+
+    WEST_BENGAL_SLABS = [
+      { salary_from: 0,      salary_to: 10_000,  tax_amount: 0,   month: nil },
+      { salary_from: 10_001, salary_to: 15_000,  tax_amount: 110, month: nil },
+      { salary_from: 15_001, salary_to: 25_000,  tax_amount: 130, month: nil },
+      { salary_from: 25_001, salary_to: 40_000,  tax_amount: 150, month: nil },
+      { salary_from: 40_001, salary_to: 999_999, tax_amount: 200, month: nil }
+    ].freeze
+
+    PT_SLABS_BY_STATE = {
+      "maharashtra"    => MAHARASHTRA_SLABS,
+      "karnataka"      => KARNATAKA_SLABS,
+      "telangana"      => TELANGANA_SLABS,
+      "gujarat"        => GUJARAT_SLABS,
+      "tamil_nadu"     => TAMIL_NADU_SLABS,
+      "andhra_pradesh" => ANDHRA_PRADESH_SLABS,
+      "west_bengal"    => WEST_BENGAL_SLABS
+    }.freeze
+
     def seed_professional_tax_slabs(tenant)
-      slabs = case @form.state
-      when "Maharashtra"
-        [
-          { salary_from: 0, salary_to: 7_500, tax_amount: 0, month: nil },
-          { salary_from: 7_501, salary_to: 10_000, tax_amount: 175, month: nil },
-          { salary_from: 10_001, salary_to: 999_999, tax_amount: 200, month: nil },
-          { salary_from: 10_001, salary_to: 999_999, tax_amount: 300, month: "february" }
-        ]
-      when "Karnataka"
-        [
-          { salary_from: 0, salary_to: 15_000, tax_amount: 0, month: nil },
-          { salary_from: 15_001, salary_to: 999_999, tax_amount: 200, month: nil }
-        ]
-      else
-        []
-      end
+      pt_state = @form.state.to_s.downcase.gsub(" ", "_")
+      slabs    = PT_SLABS_BY_STATE.fetch(pt_state, [])
 
       slabs.each do |attrs|
-        ProfessionalTaxSlab.create!(attrs.merge(tenant: tenant, state: @form.state))
+        ProfessionalTaxSlab.create!(attrs.merge(tenant: tenant, state: pt_state))
       end
     end
   end
