@@ -86,7 +86,7 @@ module Salary
       deductions = []
 
       # Employee PF: rate% of Basic, capped at ceiling
-      pf_base = [ basic_monthly, @settings.pf_ceiling ].min
+      pf_base = [ basic_monthly, @settings.pf_wage_ceiling ].min
       employee_pf = (pf_base * @settings.pf_employee_rate / 100).round(2)
       deductions << LineItem.new(name: "Employee PF", component_type: "deduction", monthly: employee_pf, annual: (employee_pf * 12).round(2))
 
@@ -109,7 +109,7 @@ module Salary
       contributions = []
 
       # Employer PF: rate% of Basic, capped at ceiling
-      pf_base = [ basic_monthly, @settings.pf_ceiling ].min
+      pf_base = [ basic_monthly, @settings.pf_wage_ceiling ].min
       employer_pf = (pf_base * @settings.pf_employer_rate / 100).round(2)
       contributions << LineItem.new(name: "Employer PF", component_type: "employer_contribution", monthly: employer_pf, annual: (employer_pf * 12).round(2))
 

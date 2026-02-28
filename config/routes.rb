@@ -58,6 +58,7 @@ Rails.application.routes.draw do
           post :upload_template
         end
       end
+      resource :payroll_setting, only: [ :show, :edit, :update ]
       get "salary_breakup", to: "salary_breakup#show"
       resources :imports, only: [ :new, :create ] do
         collection do

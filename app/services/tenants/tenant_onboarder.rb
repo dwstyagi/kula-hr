@@ -62,15 +62,25 @@ module Tenants
     end
 
     def seed_payroll_setting(tenant)
+      pt_state = @form.state.to_s.downcase.gsub(" ", "_")
+
       PayrollSetting.create!(
         tenant: tenant,
+        pf_enabled: true,
         pf_employee_rate: 12.0,
         pf_employer_rate: 12.0,
-        pf_ceiling: 15_000,
+        pf_wage_ceiling: 15_000,
+        pf_include_da: true,
+        pf_admin_charge_rate: 0.50,
+        pf_edli_rate: 0.50,
+        esi_enabled: true,
         esi_employee_rate: 0.75,
         esi_employer_rate: 3.25,
         esi_ceiling: 21_000,
-        state: @form.state
+        pt_enabled: PayrollSetting::SUPPORTED_PT_STATES.include?(pt_state),
+        pt_state: pt_state,
+        tds_enabled: true,
+        week_off_pattern: "all_saturdays_sundays"
       )
     end
 

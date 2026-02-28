@@ -1,0 +1,134 @@
+<div class="space-y-6 max-w-3xl">
+  <div>
+    <h1 class="text-2xl font-bold text-gray-900">Edit Payroll Settings</h1>
+    <p class="text-sm text-gray-500 mt-0.5">Configure statutory deduction rates for this organisation</p>
+  </div>
+
+  <%= form_with model: @payroll_setting, url: admin_payroll_setting_path, method: :patch, class: "space-y-6" do |f| %>
+    <% if @payroll_setting.errors.any? %>
+      <div class="rounded-lg bg-red-50 border border-red-200 p-4">
+        <p class="text-sm font-medium text-red-800 mb-1"><%= pluralize(@payroll_setting.errors.count, "error") %> prevented saving:</p>
+        <ul class="list-disc list-inside text-sm text-red-700 space-y-0.5">
+          <% @payroll_setting.errors.full_messages.each do |msg| %>
+            <li><%= msg %></li>
+          <% end %>
+        </ul>
+      </div>
+    <% end %>
+
+    <%# PF %>
+    <div class="bg-white rounded-xl border border-gray-200 p-6 space-y-5">
+      <h2 class="text-base font-semibold text-gray-900 border-b border-gray-100 pb-3">Provident Fund</h2>
+
+      <div class="flex items-center gap-3">
+        <%= f.check_box :pf_enabled, class: "h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" %>
+        <%= f.label :pf_enabled, "Enable PF", class: "text-sm font-medium text-gray-700" %>
+      </div>
+
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <%= f.label :pf_employee_rate, "Employee Rate (%)", class: "block text-sm font-medium text-gray-700 mb-1" %>
+          <%= f.number_field :pf_employee_rate, step: 0.01, min: 0, max: 100,
+                class: "w-full text-sm border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500" %>
+        </div>
+        <div>
+          <%= f.label :pf_employer_rate, "Employer Rate (%)", class: "block text-sm font-medium text-gray-700 mb-1" %>
+          <%= f.number_field :pf_employer_rate, step: 0.01, min: 0, max: 100,
+                class: "w-full text-sm border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500" %>
+        </div>
+        <div>
+          <%= f.label :pf_wage_ceiling, "Wage Ceiling (₹/month)", class: "block text-sm font-medium text-gray-700 mb-1" %>
+          <%= f.number_field :pf_wage_ceiling, step: 1, min: 1,
+                class: "w-full text-sm border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500" %>
+        </div>
+        <div class="flex items-center gap-3 pt-6">
+          <%= f.check_box :pf_include_da, class: "h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" %>
+          <%= f.label :pf_include_da, "Include DA in PF base", class: "text-sm font-medium text-gray-700" %>
+        </div>
+        <div>
+          <%= f.label :pf_admin_charge_rate, "Admin Charge Rate (%)", class: "block text-sm font-medium text-gray-700 mb-1" %>
+          <%= f.number_field :pf_admin_charge_rate, step: 0.01, min: 0,
+                class: "w-full text-sm border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500" %>
+        </div>
+        <div>
+          <%= f.label :pf_edli_rate, "EDLI Rate (%)", class: "block text-sm font-medium text-gray-700 mb-1" %>
+          <%= f.number_field :pf_edli_rate, step: 0.01, min: 0,
+                class: "w-full text-sm border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500" %>
+        </div>
+      </div>
+    </div>
+
+    <%# ESI %>
+    <div class="bg-white rounded-xl border border-gray-200 p-6 space-y-5">
+      <h2 class="text-base font-semibold text-gray-900 border-b border-gray-100 pb-3">ESI</h2>
+
+      <div class="flex items-center gap-3">
+        <%= f.check_box :esi_enabled, class: "h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" %>
+        <%= f.label :esi_enabled, "Enable ESI", class: "text-sm font-medium text-gray-700" %>
+      </div>
+
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <%= f.label :esi_employee_rate, "Employee Rate (%)", class: "block text-sm font-medium text-gray-700 mb-1" %>
+          <%= f.number_field :esi_employee_rate, step: 0.01, min: 0, max: 100,
+                class: "w-full text-sm border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500" %>
+        </div>
+        <div>
+          <%= f.label :esi_employer_rate, "Employer Rate (%)", class: "block text-sm font-medium text-gray-700 mb-1" %>
+          <%= f.number_field :esi_employer_rate, step: 0.01, min: 0, max: 100,
+                class: "w-full text-sm border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500" %>
+        </div>
+        <div>
+          <%= f.label :esi_ceiling, "Gross Ceiling (₹/month)", class: "block text-sm font-medium text-gray-700 mb-1" %>
+          <%= f.number_field :esi_ceiling, step: 1, min: 1,
+                class: "w-full text-sm border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500" %>
+        </div>
+      </div>
+    </div>
+
+    <%# Professional Tax %>
+    <div class="bg-white rounded-xl border border-gray-200 p-6 space-y-5">
+      <h2 class="text-base font-semibold text-gray-900 border-b border-gray-100 pb-3">Professional Tax</h2>
+
+      <div class="flex items-center gap-3">
+        <%= f.check_box :pt_enabled, class: "h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" %>
+        <%= f.label :pt_enabled, "Enable Professional Tax", class: "text-sm font-medium text-gray-700" %>
+      </div>
+
+      <div>
+        <%= f.label :pt_state, "State", class: "block text-sm font-medium text-gray-700 mb-1" %>
+        <%= f.select :pt_state,
+              PayrollSetting::SUPPORTED_PT_STATES.map { |s| [s.humanize, s] },
+              { include_blank: "— Select state —" },
+              class: "w-full text-sm border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500" %>
+        <p class="text-xs text-gray-500 mt-1">Slabs are auto-loaded based on state. Delhi has no Professional Tax.</p>
+      </div>
+    </div>
+
+    <%# TDS & Working Days %>
+    <div class="bg-white rounded-xl border border-gray-200 p-6 space-y-5">
+      <h2 class="text-base font-semibold text-gray-900 border-b border-gray-100 pb-3">TDS &amp; Working Days</h2>
+
+      <div class="flex items-center gap-3">
+        <%= f.check_box :tds_enabled, class: "h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" %>
+        <%= f.label :tds_enabled, "Enable TDS", class: "text-sm font-medium text-gray-700" %>
+      </div>
+
+      <div>
+        <%= f.label :week_off_pattern, "Week-off Pattern", class: "block text-sm font-medium text-gray-700 mb-1" %>
+        <%= f.select :week_off_pattern,
+              PayrollSetting::WEEK_OFF_PATTERNS.map { |p| [p.humanize, p] },
+              {},
+              class: "w-full text-sm border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500" %>
+      </div>
+    </div>
+
+    <%# Actions %>
+    <div class="flex items-center gap-3">
+      <%= f.submit "Save Settings",
+            class: "px-5 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 cursor-pointer" %>
+      <%= link_to "Cancel", admin_payroll_setting_path,
+            class: "px-5 py-2 text-sm font-medium text-gray-700 hover:text-gray-900" %>
+    </div>
+  <% end %>
+</div>

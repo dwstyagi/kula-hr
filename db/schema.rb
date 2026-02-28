@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_02_22_170000) do
+ActiveRecord::Schema[8.1].define(version: 2026_02_28_100001) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "pg_catalog.plpgsql"
@@ -175,11 +175,18 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_22_170000) do
     t.decimal "esi_ceiling", precision: 10, scale: 2, default: "21000.0"
     t.decimal "esi_employee_rate", precision: 5, scale: 2, default: "0.75"
     t.decimal "esi_employer_rate", precision: 5, scale: 2, default: "3.25"
-    t.decimal "pf_ceiling", precision: 10, scale: 2, default: "15000.0"
+    t.boolean "esi_enabled", default: true, null: false
+    t.decimal "pf_admin_charge_rate", precision: 5, scale: 2, default: "0.5", null: false
+    t.decimal "pf_edli_rate", precision: 5, scale: 2, default: "0.5", null: false
     t.decimal "pf_employee_rate", precision: 5, scale: 2, default: "12.0"
     t.decimal "pf_employer_rate", precision: 5, scale: 2, default: "12.0"
+    t.boolean "pf_enabled", default: true, null: false
+    t.boolean "pf_include_da", default: true, null: false
+    t.decimal "pf_wage_ceiling", precision: 10, scale: 2, default: "15000.0"
     t.boolean "pro_rate_leaves", default: true, null: false
-    t.string "state"
+    t.boolean "pt_enabled", default: true, null: false
+    t.string "pt_state"
+    t.boolean "tds_enabled", default: true, null: false
     t.bigint "tenant_id", null: false
     t.datetime "updated_at", null: false
     t.string "week_off_pattern", default: "all_saturdays_sundays", null: false
