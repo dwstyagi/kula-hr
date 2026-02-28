@@ -138,10 +138,10 @@ RSpec.describe Statutory::TdsCalculator do
     before { create_declaration({ regime: :old_regime }) }
 
     it "adds EPF (12% of annual basic) to 80C automatically" do
-      # monthly_basic = 33333 → EPF = 33333 × 12 × 12% = 47999.52 → 47999
-      # declared 80C = 0 → total = 47999 (under 1.5L cap)
+      # monthly_basic = 33333 → EPF = 33333 × 12 × 12% = 47999.52 → round(0) = 48000
+      # declared 80C = 0 → total = 48000 (under 1.5L cap)
       result = calc(annual_gross: 978_400, month: 4, monthly_basic: 33_333)
-      expect(result.section_80c).to eq(47_999)
+      expect(result.section_80c).to eq(48_000)
     end
   end
 
@@ -176,8 +176,9 @@ RSpec.describe Statutory::TdsCalculator do
     end
 
     it "gives full rebate when taxable income ≤ ₹5L" do
-      # annual_gross 978400, std 75k, 80C 150k, 80D 35k, 80CCD1B 50k → taxable ≈ 468400 ≤ 500k
-      result = calc(annual_gross: 978_400, month: 4)
+      # annual_gross 800000, std 75k, 80C 150k, 80D 35k, 80CCD1B 50k
+      # taxable = 800000 - 310000 = 490000 ≤ 500000 → full 87A rebate
+      result = calc(annual_gross: 800_000, month: 4)
       expect(result.taxable_income).to be <= 500_000
       expect(result.total_tax_with_cess).to eq(0)
       expect(result.monthly_tds).to eq(0)
@@ -190,7 +191,8 @@ RSpec.describe Statutory::TdsCalculator do
     before do
       create_declaration(regime: :old_regime, claiming_hra: true,
                          monthly_rent: 15_000, rental_city: "metro",
-                         landlord_name: "Ramesh Kumar")
+                         landlord_name: "Ramesh Kumar",
+                         landlord_pan: "ABCDE1234F")   # required: annual rent ₹1.8L > ₹1L
     end
 
     it "calculates HRA exemption as minimum of three values" do
