@@ -23,7 +23,7 @@ class ApplicationController < ActionController::Base
     if tenant
       set_current_tenant(tenant)
     else
-      redirect_to root_url(subdomain: nil), alert: "Company not found."
+      redirect_to root_url(subdomain: nil), alert: "Company not found.", allow_other_host: true
     end
   end
 
@@ -41,7 +41,7 @@ class ApplicationController < ActionController::Base
 
   def user_not_authorized
     flash[:alert] = "You are not authorized to perform this action."
-    redirect_back fallback_location: root_path
+    redirect_back fallback_location: root_path, allow_other_host: true
   end
 
   def after_sign_in_path_for(resource)
