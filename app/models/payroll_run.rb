@@ -15,7 +15,7 @@ class PayrollRun < ApplicationRecord
     scope: [ :tenant_id, :year ],
     message: "payroll already exists for this month and year"
   }
-  validate  :attendance_must_be_locked, on: :create
+  validate :attendance_must_be_locked, on: :create
 
   # ── Scopes ───────────────────────────────────────────────────────────────────
 

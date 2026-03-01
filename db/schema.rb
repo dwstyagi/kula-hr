@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_01_100001) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_01_100003) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "pg_catalog.plpgsql"
@@ -234,6 +234,46 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_01_100001) do
     t.index ["tenant_id"], name: "index_payroll_settings_on_tenant_id", unique: true
   end
 
+  create_table "payslip_line_items", force: :cascade do |t|
+    t.decimal "amount", precision: 12, scale: 2, null: false
+    t.string "category"
+    t.string "component_name", null: false
+    t.string "component_type", null: false
+    t.datetime "created_at", null: false
+    t.decimal "full_amount", precision: 12, scale: 2
+    t.bigint "payslip_id", null: false
+    t.integer "sort_order", default: 0
+    t.datetime "updated_at", null: false
+    t.index ["payslip_id", "component_type"], name: "index_payslip_line_items_on_payslip_id_and_component_type"
+    t.index ["payslip_id"], name: "index_payslip_line_items_on_payslip_id"
+  end
+
+  create_table "payslips", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.bigint "employee_id", null: false
+    t.decimal "employer_esi", precision: 10, scale: 2, default: "0.0"
+    t.decimal "employer_pf", precision: 10, scale: 2, default: "0.0"
+    t.decimal "gross_pay", precision: 12, scale: 2, default: "0.0", null: false
+    t.boolean "is_revised", default: false
+    t.decimal "lop_days", precision: 5, scale: 1, default: "0.0"
+    t.integer "month", null: false
+    t.decimal "net_pay", precision: 12, scale: 2, default: "0.0", null: false
+    t.decimal "paid_days", precision: 5, scale: 1, null: false
+    t.bigint "payroll_run_id", null: false
+    t.text "revision_notes"
+    t.string "status", default: "generated", null: false
+    t.bigint "tenant_id", null: false
+    t.decimal "total_deductions", precision: 12, scale: 2, default: "0.0", null: false
+    t.integer "total_working_days", null: false
+    t.datetime "updated_at", null: false
+    t.integer "year", null: false
+    t.index ["employee_id", "month", "year"], name: "index_payslips_on_employee_id_and_month_and_year"
+    t.index ["employee_id"], name: "index_payslips_on_employee_id"
+    t.index ["payroll_run_id", "employee_id"], name: "index_payslips_on_payroll_run_id_and_employee_id", unique: true
+    t.index ["payroll_run_id"], name: "index_payslips_on_payroll_run_id"
+    t.index ["tenant_id"], name: "index_payslips_on_tenant_id"
+  end
+
   create_table "platform_admins", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.citext "email", null: false
@@ -423,6 +463,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_01_100001) do
   add_foreign_key "payroll_runs", "users", column: "approved_by_id"
   add_foreign_key "payroll_runs", "users", column: "initiated_by_id"
   add_foreign_key "payroll_settings", "tenants"
+  add_foreign_key "payslip_line_items", "payslips"
+  add_foreign_key "payslips", "employees"
+  add_foreign_key "payslips", "payroll_runs"
+  add_foreign_key "payslips", "tenants"
   add_foreign_key "professional_tax_slabs", "tenants"
   add_foreign_key "salary_components", "tenants"
   add_foreign_key "salary_structure_components", "salary_components"
