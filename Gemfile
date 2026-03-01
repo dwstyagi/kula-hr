@@ -64,6 +64,7 @@ gem "pagy"
 # PDF generation
 gem "prawn"
 gem "prawn-table"
+gem "rubyzip"
 
 # CSV/Excel
 gem "roo"

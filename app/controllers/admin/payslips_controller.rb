@@ -1,7 +1,7 @@
 module Admin
   class PayslipsController < BaseController
     before_action :set_payroll_run, only: [ :index ]
-    before_action :set_payslip,     only: [ :show, :edit, :update ]
+    before_action :set_payslip,     only: [ :show, :edit, :update, :download ]
 
     # GET /admin/payroll_runs/:payroll_run_id/payslips
     def index
@@ -24,6 +24,14 @@ module Admin
     # GET /admin/payslips/:id
     def show
       authorize @payslip
+    end
+
+    # GET /admin/payslips/:id/download
+    def download
+      authorize @payslip, :show?
+      pdf = Payroll::PayslipPdfGenerator.new(payslip: @payslip).call
+      filename = "payslip_#{@payslip.employee.employee_code}_#{@payslip.period_label.gsub(' ', '_')}.pdf"
+      send_data pdf, filename: filename, type: "application/pdf", disposition: "attachment"
     end
 
     # GET /admin/payslips/:id/edit

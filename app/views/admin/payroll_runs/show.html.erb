@@ -109,14 +109,25 @@
       <% end %>
     </div>
 
-    <%# Link to payslips %>
-    <%= link_to admin_payroll_run_payslips_path(@payroll_run),
-          class: "bg-white rounded-xl border border-gray-200 p-4 flex items-center justify-between hover:bg-gray-50 transition-colors" do %>
-      <p class="text-sm font-medium text-gray-700">
-        Payslips
-        <span class="ml-2 text-xs font-normal text-gray-400"><%= @payroll_run.processed_employees %> generated</span>
-      </p>
-      <span class="text-xs text-blue-600 font-medium">Review individual payslips →</span>
-    <% end %>
+    <%# Link to payslips + bulk download %>
+    <div class="bg-white rounded-xl border border-gray-200 p-4 flex items-center justify-between">
+      <%= link_to admin_payroll_run_payslips_path(@payroll_run),
+            class: "flex items-center gap-3 hover:opacity-80 transition-opacity" do %>
+        <div>
+          <p class="text-sm font-medium text-gray-700">
+            Payslips
+            <span class="ml-2 text-xs font-normal text-gray-400"><%= @payroll_run.processed_employees %> generated</span>
+          </p>
+          <p class="text-xs text-blue-600 font-medium mt-0.5">Review individual payslips →</p>
+        </div>
+      <% end %>
+      <%= link_to download_payslips_admin_payroll_run_path(@payroll_run),
+            class: "inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 text-gray-700 text-xs font-medium rounded-lg hover:bg-gray-200 transition-colors" do %>
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3M3 17V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
+        </svg>
+        Download All (ZIP)
+      <% end %>
+    </div>
   <% end %>
 </div>

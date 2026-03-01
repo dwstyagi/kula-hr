@@ -2,7 +2,8 @@ module Admin
   class PayrollRunsController < BaseController
     before_action :set_payroll_run, only: [ :show, :process_payroll, :submit_for_review,
                                             :approve, :reject, :resubmit_for_review,
-                                            :reprocess, :mark_paid, :progress ]
+                                            :reprocess, :mark_paid, :progress,
+                                            :download_payslips ]
 
     # GET /admin/payroll_runs
     def index
@@ -119,6 +120,14 @@ module Admin
 
       redirect_to admin_payroll_run_path(@payroll_run),
                   notice: "Payroll marked as paid for #{@payroll_run.period_label}."
+    end
+
+    # GET /admin/payroll_runs/:id/download_payslips
+    def download_payslips
+      authorize @payroll_run, :show?
+      zip_path = Payroll::BulkPayslipPdfGenerator.new(payroll_run: @payroll_run).call
+      filename = "payslips_#{@payroll_run.period_label.gsub(' ', '_')}.zip"
+      send_file zip_path, filename: filename, type: "application/zip", disposition: "attachment"
     end
 
     # GET /admin/payroll_runs/:id/progress
