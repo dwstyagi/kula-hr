@@ -15,7 +15,8 @@ module Payroll
     end
 
     def call
-      @run.start_processing!
+      # Guard: if the job is retried and the run is already processing, continue
+      @run.start_processing! if @run.may_start_processing?
 
       employees = eligible_employees
       @run.update!(total_employees: employees.count)
@@ -42,9 +43,11 @@ module Payroll
       month_end   = month_start.end_of_month
 
       ActsAsTenant.with_tenant(@tenant) do
+        # Active + probation employees, plus anyone whose last working day falls in this month
         Employee.where(
-          "employment_status = ? OR (employment_status = ? AND exit_date BETWEEN ? AND ?)",
-          "active", "exited", month_start, month_end
+          "employment_status IN (?) OR " \
+          "(employment_status IN (?) AND last_working_date BETWEEN ? AND ?)",
+          %w[active probation], %w[resigned terminated], month_start, month_end
         )
       end
     end

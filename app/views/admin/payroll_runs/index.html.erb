@@ -1,0 +1,89 @@
+<div class="space-y-6">
+  <%# Header %>
+  <div class="flex items-center justify-between">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-900">Payroll Runs</h1>
+      <p class="text-sm text-gray-500 mt-0.5">Manage monthly payroll processing</p>
+    </div>
+    <%= link_to new_admin_payroll_run_path,
+          class: "inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700" do %>
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+      </svg>
+      Run Payroll
+    <% end %>
+  </div>
+
+  <%# Table %>
+  <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+    <% if @payroll_runs.any? %>
+      <table class="w-full text-sm table-fixed">
+        <colgroup>
+          <col class="w-36">
+          <col class="w-36">
+          <col class="w-28">
+          <col class="w-36">
+          <col class="w-40">
+          <col class="w-32">
+          <col class="w-12">
+        </colgroup>
+        <thead class="bg-gray-50 border-b border-gray-200">
+          <tr>
+            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Period</th>
+            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Employees</th>
+            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Net Pay</th>
+            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Initiated By</th>
+            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+            <th class="px-4 py-3"></th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+          <% @payroll_runs.each do |run| %>
+            <tr class="hover:bg-gray-50">
+              <td class="px-4 py-3 font-medium text-gray-900"><%= run.period_label %></td>
+              <td class="px-4 py-3"><%= render "status_badge", payroll_run: run %></td>
+              <td class="px-4 py-3 text-gray-600">
+                <% if run.processing? %>
+                  <%= run.processed_employees %> / <%= run.total_employees %>
+                <% else %>
+                  <%= run.processed_employees %>
+                <% end %>
+              </td>
+              <td class="px-4 py-3 text-left text-gray-900 font-medium">
+                <% if run.total_net_pay > 0 %>
+                  ₹<%= number_with_delimiter(run.total_net_pay.round(0)) %>
+                <% else %>
+                  <span class="text-gray-400">—</span>
+                <% end %>
+              </td>
+              <td class="px-4 py-3 text-gray-600"><%= run.initiated_by.full_name %></td>
+              <td class="px-4 py-3 text-gray-500"><%= run.created_at.strftime("%d %b %Y") %></td>
+              <td class="px-4 py-3 text-right">
+                <%= link_to admin_payroll_run_path(run),
+                      title: "View",
+                      class: "inline-flex items-center justify-center w-8 h-8 rounded-lg text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-colors" do %>
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                  </svg>
+                <% end %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    <% else %>
+      <div class="text-center py-16 text-gray-400">
+        <svg class="w-12 h-12 mx-auto mb-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 11h.01M12 11h.01M15 11h.01M4 19h16a2 2 0 002-2V7a2 2 0 00-2-2H4a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+        </svg>
+        <p class="font-medium">No payroll runs yet</p>
+        <p class="text-sm mt-1">Click "Run Payroll" to start your first payroll run.</p>
+      </div>
+    <% end %>
+  </div>
+</div>

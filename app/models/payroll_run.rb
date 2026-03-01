@@ -50,7 +50,7 @@ class PayrollRun < ApplicationRecord
 
     # under_review → approved (Super Admin only — enforced by Pundit)
     event :approve do
-      transitions from: :under_review, to: :approved, after: :record_approval
+      transitions from: :under_review, to: :approved
     end
 
     # under_review → rejected (Super Admin rejects with reason)
@@ -67,6 +67,11 @@ class PayrollRun < ApplicationRecord
     event :mark_paid do
       transitions from: :approved, to: :paid
     end
+  end
+
+  # Called from controller after approve! so we have access to current_user
+  def record_approval(approver)
+    update_columns(approved_by_id: approver.id, approved_at: Time.current)
   end
 
   # ── Helpers ──────────────────────────────────────────────────────────────────
@@ -86,21 +91,19 @@ class PayrollRun < ApplicationRecord
 
   private
 
-  # Guard: all active employees must have a locked attendance summary
-  # before a payroll run can be created for that month.
+  # Guard: all payroll-eligible employees must have a locked attendance summary.
+  # Eligible = active + probation (both statuses receive salary).
   def attendance_must_be_locked
-    active_count  = Employee.active.count
-    locked_count  = AttendanceSummary.where(month: month, year: year, status: :locked).count
+    eligible      = Employee.where(employment_status: %w[active probation])
+    eligible_count = eligible.count
+    locked_count  = AttendanceSummary.where(
+      employee: eligible, month: month, year: year, status: :locked
+    ).count
 
-    return if locked_count == active_count
+    return if locked_count == eligible_count
 
     errors.add(:base,
-      "Attendance not locked. #{locked_count}/#{active_count} employees locked for #{month_name} #{year}.")
-  end
-
-  # Callback: stamp who approved and when
-  def record_approval
-    update_columns(approved_by_id: Current.user&.id, approved_at: Time.current)
+      "Attendance not locked. #{locked_count}/#{eligible_count} employees locked for #{month_name} #{year}.")
   end
 
   # Callback: wipe all payslips and reset totals when reprocessing

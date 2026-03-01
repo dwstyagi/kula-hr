@@ -1,0 +1,16 @@
+<%
+  color_classes = {
+    "blue"   => "text-blue-600",
+    "green"  => "text-green-600",
+    "orange" => "text-orange-600",
+    "purple" => "text-purple-600",
+    "gray"   => "text-gray-700"
+  }
+  text_color = color_classes[color] || "text-gray-700"
+%>
+<div class="bg-white rounded-xl border border-gray-200 p-5">
+  <p class="text-xs font-medium text-gray-500 uppercase tracking-wider"><%= label %></p>
+  <p class="text-2xl font-bold mt-1 <%= text_color %>">
+    ₹<%= number_with_delimiter(value.to_f.round(0)) %>
+  </p>
+</div>

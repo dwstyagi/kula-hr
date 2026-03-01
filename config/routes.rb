@@ -1,3 +1,5 @@
+require "sidekiq/web"
+
 Rails.application.routes.draw do
   # Health check
   get "up" => "rails/health#show", as: :rails_health_check
@@ -59,6 +61,17 @@ Rails.application.routes.draw do
         end
       end
       resource :payroll_setting, only: [ :show, :edit, :update ]
+      resources :payroll_runs, only: [ :index, :new, :create, :show ] do
+        member do
+          post :process_payroll
+          patch :submit_for_review
+          patch :approve
+          patch :reject
+          patch :reprocess
+          patch :mark_paid
+          get  :progress
+        end
+      end
       get "salary_breakup", to: "salary_breakup#show"
       resources :imports, only: [ :new, :create ] do
         collection do
@@ -101,5 +114,15 @@ Rails.application.routes.draw do
         patch :toggle_status
       end
     end
+  end
+
+  # Sidekiq Web UI — only accessible to authenticated Platform Admins
+  PLATFORM_ADMIN_CONSTRAINT = lambda do |request|
+    request.session[:platform_admin_id].present? &&
+      PlatformAdmin.exists?(request.session[:platform_admin_id])
+  end
+
+  constraints(PLATFORM_ADMIN_CONSTRAINT) do
+    mount Sidekiq::Web => "/platform_admin/sidekiq"
   end
 end
