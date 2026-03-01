@@ -103,6 +103,11 @@ Rails.application.routes.draw do
       resource :tax_declaration, only: [ :show, :edit, :update ] do
         patch :submit, on: :member
       end
+      resources :payslips, only: [ :index, :show ] do
+        member do
+          get :download
+        end
+      end
     end
 
     root "admin/dashboard#index", as: :tenant_root
