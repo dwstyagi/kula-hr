@@ -1,0 +1,31 @@
+<h2>Payroll Processed — Some Employees Skipped</h2>
+
+<p>Hello,</p>
+
+<p>
+  Payroll for <strong><%= @payroll_run.period_label %></strong> completed, but
+  <strong><%= @errors.count %> employee(s)</strong> were skipped due to errors.
+</p>
+
+<table>
+  <tr><td>Period</td><td><%= @payroll_run.period_label %></td></tr>
+  <tr><td>Processed</td><td><%= @payroll_run.processed_employees %></td></tr>
+  <tr><td>Skipped</td><td><%= @errors.count %></td></tr>
+</table>
+
+<h3>Skipped Employees</h3>
+<table border="1" cellpadding="4">
+  <thead>
+    <tr><th>Employee</th><th>Reason</th></tr>
+  </thead>
+  <tbody>
+    <% @errors.each do |err| %>
+      <tr>
+        <td><%= err[:name] %></td>
+        <td><%= err[:error] %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<p>Please fix the issues and reprocess, or manually add the missing employees.</p>

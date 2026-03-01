@@ -1,0 +1,19 @@
+<h2>Payroll Processed Successfully</h2>
+
+<p>Hello,</p>
+
+<p>
+  Payroll for <strong><%= @payroll_run.period_label %></strong> has been processed
+  successfully for <strong><%= @tenant.company_name %></strong>.
+</p>
+
+<table>
+  <tr><td>Period</td><td><%= @payroll_run.period_label %></td></tr>
+  <tr><td>Employees Processed</td><td><%= @payroll_run.processed_employees %></td></tr>
+  <tr><td>Total Gross</td><td>₹<%= number_with_delimiter(@payroll_run.total_gross.round(0)) %></td></tr>
+  <tr><td>Total Net Pay</td><td>₹<%= number_with_delimiter(@payroll_run.total_net_pay.round(0)) %></td></tr>
+</table>
+
+<p>
+  Please log in to review the payslips and submit for approval.
+</p>
