@@ -74,7 +74,7 @@ module Statutory
 
       regime     = determine_regime
       deductions = calculate_deductions(regime)
-      taxable    = [@annual_gross - deductions[:total], 0].max.to_i
+      taxable    = [ @annual_gross - deductions[:total], 0 ].max.to_i
 
       annual_tax = calculate_tax(taxable, regime)
       cess       = (annual_tax * CESS_RATE / 100.0).round(0).to_i
@@ -158,21 +158,21 @@ module Statutory
       home_principal = @declaration.home_loan_principal.to_f
 
       total = declared.to_f + epf_auto + home_principal
-      [total, 150_000].min.to_i
+      [ total, 150_000 ].min.to_i
     end
 
     def calculate_80d
       declared = with_tenant do
         @declaration.investment_declarations.where(section: "80D").sum(:declared_amount)
       end
-      [declared.to_f, 50_000].min.to_i
+      [ declared.to_f, 50_000 ].min.to_i
     end
 
     def calculate_80ccd1b
       declared = with_tenant do
         @declaration.investment_declarations.where(section: "80CCD1B").sum(:declared_amount)
       end
-      [declared.to_f, 50_000].min.to_i
+      [ declared.to_f, 50_000 ].min.to_i
     end
 
     def calculate_hra_exemption
@@ -191,7 +191,7 @@ module Statutory
       #   3. 50% of basic (metro) or 40% of basic (non-metro)
       exemption = [
         annual_hra,
-        [annual_rent - (annual_basic * 0.10), 0].max,
+        [ annual_rent - (annual_basic * 0.10), 0 ].max,
         annual_basic * metro_pct / 100.0
       ].min
 
@@ -200,7 +200,7 @@ module Statutory
 
     def calculate_home_loan_interest
       interest = @declaration.home_loan_interest.to_f
-      [interest, 200_000].min.to_i   # Section 24(b) cap ₹2L
+      [ interest, 200_000 ].min.to_i   # Section 24(b) cap ₹2L
     end
 
     def calculate_other_deductions
@@ -225,7 +225,7 @@ module Statutory
 
         next if taxable_income <= lower
 
-        taxable_in_slab = [taxable_income, upper].min - lower
+        taxable_in_slab = [ taxable_income, upper ].min - lower
         tax += taxable_in_slab * rate / 100.0
       end
 
@@ -245,7 +245,7 @@ module Statutory
       remaining_months = months_remaining_in_fy
       return 0 if remaining_months <= 0
 
-      remaining_tax = [total_annual_tax - @ytd_tds_deducted, 0].max
+      remaining_tax = [ total_annual_tax - @ytd_tds_deducted, 0 ].max
       (remaining_tax / remaining_months).round(0).to_i
     end
 

@@ -12,7 +12,7 @@ class CreateInvestmentDeclarations < ActiveRecord::Migration[8.1]
       t.timestamps
     end
 
-    add_index :investment_declarations, [:tax_declaration_id, :section],
+    add_index :investment_declarations, [ :tax_declaration_id, :section ],
               name: "idx_inv_decl_td_section"
   end
 end

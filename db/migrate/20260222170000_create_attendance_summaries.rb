@@ -20,9 +20,9 @@ class CreateAttendanceSummaries < ActiveRecord::Migration[8.0]
       t.timestamps
     end
 
-    add_index :attendance_summaries, [:employee_id, :month, :year],
+    add_index :attendance_summaries, [ :employee_id, :month, :year ],
               unique: true, name: "idx_att_sum_emp_month_year"
-    add_index :attendance_summaries, [:tenant_id, :month, :year],
+    add_index :attendance_summaries, [ :tenant_id, :month, :year ],
               name: "idx_att_sum_tenant_month_year"
   end
 end

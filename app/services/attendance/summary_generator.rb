@@ -20,7 +20,7 @@ module Attendance
         lop_leave_days  = leave_days_for(employee, lop_only: true)
 
         # Default days_present: assume full attendance minus known leaves
-        default_present = [working_days - paid_leave_days, 0].max
+        default_present = [ working_days - paid_leave_days, 0 ].max
 
         summary = AttendanceSummary.find_or_initialize_by(
           tenant:   @tenant,
@@ -59,8 +59,8 @@ module Attendance
       end
 
       scope.sum do |req|
-        overlap_start = [req.from_date, start_date].max
-        overlap_end   = [req.to_date,   end_date].min
+        overlap_start = [ req.from_date, start_date ].max
+        overlap_end   = [ req.to_date,   end_date ].min
         business_days(overlap_start, overlap_end)
       end
     end

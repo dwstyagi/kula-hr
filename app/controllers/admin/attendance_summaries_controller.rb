@@ -1,13 +1,13 @@
 module Admin
   class AttendanceSummariesController < BaseController
     before_action :set_month_year
-    before_action :set_summary, only: [:show, :edit, :update]
+    before_action :set_summary, only: [ :show, :edit, :update ]
 
     def index
       authorize AttendanceSummary, :index?
       @summaries = policy_scope(AttendanceSummary)
         .for_month(@month, @year)
-        .includes(employee: [:department, :designation])
+        .includes(employee: [ :department, :designation ])
         .order("employees.last_name, employees.first_name")
 
       @all_locked    = @summaries.any? && @summaries.all?(&:locked?)

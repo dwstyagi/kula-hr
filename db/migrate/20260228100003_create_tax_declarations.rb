@@ -28,7 +28,7 @@ class CreateTaxDeclarations < ActiveRecord::Migration[8.1]
       t.timestamps
     end
 
-    add_index :tax_declarations, [:employee_id, :financial_year],
+    add_index :tax_declarations, [ :employee_id, :financial_year ],
               unique: true, name: "idx_tax_decl_emp_fy"
   end
 end

@@ -72,7 +72,7 @@ module Attendance
     private
 
     def error_result(msg)
-      Result.new(success: false, imported_count: 0, errors: [msg])
+      Result.new(success: false, imported_count: 0, errors: [ msg ])
     end
   end
 end

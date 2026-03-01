@@ -97,7 +97,7 @@ unless Tenant.exists?(subdomain: "acme")
 
         # Probation employees
         { first_name: "Pooja",   last_name: "Mehta",     email: "pooja.mehta@acme.com",       gender: "female", department: eng,  designation: d.("Software Engineer"),        joining_date: 2.months.ago.to_date,  employment_status: "probation", pan_number: "AAKPM8901Q", bank_name: "ICICI Bank",          bank_account_number: "345678901012",   ifsc_code: "ICIC0009012", manager_email: "vikram.malhotra@acme.com" },
-        { first_name: "Kiran",   last_name: "Joshi",     email: "kiran.joshi@acme.com",       gender: "male",   department: eng,  designation: d.("Intern"),                   joining_date: 1.month.ago.to_date,   employment_status: "probation", pan_number: "AALKJ2345R", bank_name: "State Bank of India", bank_account_number: "40890123456013", ifsc_code: "SBIN0009012", manager_email: "priya.patel@acme.com" },
+        { first_name: "Kiran",   last_name: "Joshi",     email: "kiran.joshi@acme.com",       gender: "male",   department: eng,  designation: d.("Intern"),                   joining_date: 1.month.ago.to_date,   employment_status: "probation", pan_number: "AALKJ2345R", bank_name: "State Bank of India", bank_account_number: "40890123456013", ifsc_code: "SBIN0009012", manager_email: "priya.patel@acme.com" }
       ]
 
       BANK_FIELDS = %i[bank_name bank_account_number ifsc_code].freeze

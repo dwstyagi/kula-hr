@@ -37,7 +37,7 @@ class Payroll::PayslipPdfGenerator
   def render_header(pdf)
     pdf.bounding_box([ 0, pdf.cursor ], width: pdf.bounds.width) do
       pdf.table(
-        [[ company_info_cell(pdf), slip_title_cell(pdf) ]],
+        [ [ company_info_cell(pdf), slip_title_cell(pdf) ] ],
         width: pdf.bounds.width,
         cell_style: { borders: [], padding: 0 }
       )

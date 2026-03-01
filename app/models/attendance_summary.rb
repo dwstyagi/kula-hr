@@ -7,7 +7,7 @@ class AttendanceSummary < ApplicationRecord
 
   validates :month, presence: true, inclusion: { in: 1..12 }
   validates :year,  presence: true
-  validates :employee_id, uniqueness: { scope: [:month, :year],
+  validates :employee_id, uniqueness: { scope: [ :month, :year ],
                                         message: "already has an attendance summary for this month" }
 
   scope :for_month, ->(month, year) { where(month: month, year: year) }
@@ -34,8 +34,8 @@ class AttendanceSummary < ApplicationRecord
   def recalculate_derived_fields
     effective_present = days_present + (half_days * 0.5)
     raw_absent = total_working_days - effective_present - approved_leaves - lop_leaves
-    self.unapproved_absences = [raw_absent, 0].max
+    self.unapproved_absences = [ raw_absent, 0 ].max
     self.lop_days             = unapproved_absences + lop_leaves
-    self.paid_days            = [total_working_days - lop_days, 0].max
+    self.paid_days            = [ total_working_days - lop_days, 0 ].max
   end
 end

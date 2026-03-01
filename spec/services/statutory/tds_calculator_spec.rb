@@ -99,7 +99,7 @@ RSpec.describe Statutory::TdsCalculator do
     before do
       create_declaration(
         { regime: :old_regime },
-        [{ section: "80C", description: "PPF", declared_amount: 50_000 }]
+        [ { section: "80C", description: "PPF", declared_amount: 50_000 } ]
       )
     end
 
@@ -122,7 +122,7 @@ RSpec.describe Statutory::TdsCalculator do
     before do
       create_declaration(
         { regime: :old_regime },
-        [{ section: "80C", description: "ELSS + LIC", declared_amount: 200_000 }]
+        [ { section: "80C", description: "ELSS + LIC", declared_amount: 200_000 } ]
       )
     end
 
@@ -151,7 +151,7 @@ RSpec.describe Statutory::TdsCalculator do
     before do
       create_declaration(
         { regime: :old_regime },
-        [{ section: "80D", description: "Health Insurance", declared_amount: 30_000 }]
+        [ { section: "80D", description: "Health Insurance", declared_amount: 30_000 } ]
       )
     end
 
