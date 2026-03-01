@@ -71,6 +71,7 @@ Rails.application.routes.draw do
           patch :mark_paid
           get  :progress
         end
+        resources :payslips, only: [ :index, :show, :edit, :update ], shallow: true
       end
       get "salary_breakup", to: "salary_breakup#show"
       resources :imports, only: [ :new, :create ] do

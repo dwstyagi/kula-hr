@@ -1,0 +1,169 @@
+<div class="space-y-6">
+  <%# Breadcrumb + header %>
+  <div>
+    <div class="flex items-center gap-2 text-sm text-gray-500 mb-1">
+      <%= link_to "Payroll Runs", admin_payroll_runs_path, class: "hover:text-gray-700" %>
+      <span>/</span>
+      <%= link_to @payroll_run.period_label, admin_payroll_run_path(@payroll_run), class: "hover:text-gray-700" %>
+      <span>/</span>
+      <%= link_to "Payslips", admin_payroll_run_payslips_path(@payroll_run), class: "hover:text-gray-700" %>
+      <span>/</span>
+      <%= link_to @payslip.employee.full_name, admin_payslip_path(@payslip), class: "hover:text-gray-700" %>
+      <span>/</span>
+      <span class="text-gray-900">Edit</span>
+    </div>
+    <h1 class="text-2xl font-bold text-gray-900">
+      Edit Payslip — <%= @payslip.employee.full_name %>
+    </h1>
+    <p class="text-sm text-gray-500 mt-0.5">
+      <%= @payslip.period_label %> &middot; <%= @payslip.employee.employee_code %>
+    </p>
+  </div>
+
+  <%= form_with url: admin_payslip_path(@payslip), method: :patch do |f| %>
+    <%# Flash error %>
+    <% if flash[:alert].present? %>
+      <div class="rounded-lg bg-red-50 border border-red-200 p-4 text-sm text-red-700">
+        <%= flash[:alert] %>
+      </div>
+    <% end %>
+
+    <%# Earnings table %>
+    <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+      <div class="bg-green-50 border-b border-gray-200 px-4 py-3 flex items-center justify-between">
+        <h2 class="text-sm font-semibold text-green-800">Earnings</h2>
+      </div>
+      <table class="w-full text-sm" id="earnings-table">
+        <thead class="bg-gray-50 border-b border-gray-100">
+          <tr>
+            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 w-1/2">Component</th>
+            <th class="px-4 py-2 text-right text-xs font-medium text-gray-500">Full Amount</th>
+            <th class="px-4 py-2 text-right text-xs font-medium text-gray-500">Earned Amount</th>
+            <th class="px-4 py-2 w-10"></th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-50" id="earnings-body">
+          <% @payslip.earnings.each do |item| %>
+            <tr id="line-item-<%= item.id %>">
+              <td class="px-4 py-2.5 text-gray-700"><%= item.component_name %></td>
+              <td class="px-4 py-2.5 text-right text-gray-400 text-xs">
+                <% if item.full_amount.present? %>
+                  ₹<%= number_with_delimiter(item.full_amount.round(0)) %>
+                <% else %>
+                  —
+                <% end %>
+              </td>
+              <td class="px-4 py-2.5 text-right">
+                <div class="flex items-center justify-end gap-1">
+                  <span class="text-gray-400">₹</span>
+                  <input type="number" step="0.01" min="0"
+                         name="line_items[<%= item.id %>][amount]"
+                         value="<%= item.amount.round(2) %>"
+                         class="w-32 text-right border border-gray-300 rounded-lg px-2 py-1 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                </div>
+              </td>
+              <td class="px-4 py-2.5 text-center">
+                <% if item.category == "variable" %>
+                  <label class="flex items-center justify-center cursor-pointer">
+                    <input type="checkbox" name="remove_line_items[]" value="<%= item.id %>"
+                           class="rounded border-gray-300 text-red-500 focus:ring-red-500">
+                  </label>
+                <% end %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+
+      <%# Add new earning row %>
+      <div class="border-t border-dashed border-gray-200 p-4" id="new-earnings-section">
+        <p class="text-xs text-gray-400 mb-3 uppercase tracking-wide">Add Earning</p>
+        <div class="flex items-center gap-2">
+          <input type="text" name="new_line_items[earning_1][component_name]"
+                 placeholder="Component name"
+                 class="flex-1 border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+          <input type="hidden" name="new_line_items[earning_1][component_type]" value="earning">
+          <div class="flex items-center gap-1">
+            <span class="text-gray-400 text-sm">₹</span>
+            <input type="number" step="0.01" min="0" name="new_line_items[earning_1][amount]"
+                   placeholder="0.00"
+                   class="w-32 text-right border border-gray-300 rounded-lg px-2 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <%# Deductions table %>
+    <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+      <div class="bg-red-50 border-b border-gray-200 px-4 py-3">
+        <h2 class="text-sm font-semibold text-red-800">Deductions</h2>
+      </div>
+      <table class="w-full text-sm">
+        <thead class="bg-gray-50 border-b border-gray-100">
+          <tr>
+            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 w-1/2">Component</th>
+            <th class="px-4 py-2 text-right text-xs font-medium text-gray-500">Amount</th>
+            <th class="px-4 py-2 w-10"></th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-50">
+          <% @payslip.deductions.each do |item| %>
+            <tr id="line-item-<%= item.id %>">
+              <td class="px-4 py-2.5 text-gray-700"><%= item.component_name %></td>
+              <td class="px-4 py-2.5 text-right">
+                <div class="flex items-center justify-end gap-1">
+                  <span class="text-gray-400">₹</span>
+                  <input type="number" step="0.01" min="0"
+                         name="line_items[<%= item.id %>][amount]"
+                         value="<%= item.amount.round(2) %>"
+                         class="w-32 text-right border border-gray-300 rounded-lg px-2 py-1 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                </div>
+              </td>
+              <td class="px-4 py-2.5 text-center">
+                <% if item.category == "variable" %>
+                  <label class="flex items-center justify-center cursor-pointer">
+                    <input type="checkbox" name="remove_line_items[]" value="<%= item.id %>"
+                           class="rounded border-gray-300 text-red-500 focus:ring-red-500">
+                  </label>
+                <% end %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+
+      <%# Add new deduction row %>
+      <div class="border-t border-dashed border-gray-200 p-4">
+        <p class="text-xs text-gray-400 mb-3 uppercase tracking-wide">Add Deduction</p>
+        <div class="flex items-center gap-2">
+          <input type="text" name="new_line_items[deduction_1][component_name]"
+                 placeholder="Component name"
+                 class="flex-1 border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+          <input type="hidden" name="new_line_items[deduction_1][component_type]" value="deduction">
+          <div class="flex items-center gap-1">
+            <span class="text-gray-400 text-sm">₹</span>
+            <input type="number" step="0.01" min="0" name="new_line_items[deduction_1][amount]"
+                   placeholder="0.00"
+                   class="w-32 text-right border border-gray-300 rounded-lg px-2 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <%# Revision notes %>
+    <div class="bg-white rounded-xl border border-gray-200 p-4">
+      <label class="block text-sm font-medium text-gray-700 mb-1">Revision Notes</label>
+      <textarea name="revision_notes" rows="3"
+                placeholder="Describe why this payslip was revised…"
+                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"><%= @payslip.revision_notes %></textarea>
+    </div>
+
+    <%# Actions %>
+    <div class="flex items-center gap-3">
+      <%= f.submit "Save Changes",
+            class: "px-5 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 cursor-pointer" %>
+      <%= link_to "Cancel", admin_payslip_path(@payslip),
+            class: "px-5 py-2 bg-white border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50" %>
+    </div>
+  <% end %>
+</div>

@@ -17,6 +17,10 @@ class Payslip < ApplicationRecord
   scope :revised,    -> { where(is_revised: true) }
   scope :locked,     -> { where(status: "locked") }
 
+  def locked?    = status == "locked"
+  def revised?   = status == "revised"
+  def generated? = status == "generated"
+
   # ── Scoped line item helpers ─────────────────────────────────────────────────
 
   def earnings

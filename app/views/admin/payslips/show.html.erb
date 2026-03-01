@@ -1,0 +1,169 @@
+<div class="space-y-6">
+  <%# Breadcrumb + header %>
+  <div class="flex items-start justify-between">
+    <div>
+      <div class="flex items-center gap-2 text-sm text-gray-500 mb-1">
+        <%= link_to "Payroll Runs", admin_payroll_runs_path, class: "hover:text-gray-700" %>
+        <span>/</span>
+        <%= link_to @payroll_run.period_label, admin_payroll_run_path(@payroll_run), class: "hover:text-gray-700" %>
+        <span>/</span>
+        <%= link_to "Payslips", admin_payroll_run_payslips_path(@payroll_run), class: "hover:text-gray-700" %>
+        <span>/</span>
+        <span class="text-gray-900"><%= @payslip.employee.full_name %></span>
+      </div>
+      <h1 class="text-2xl font-bold text-gray-900">
+        Payslip — <%= @payslip.employee.full_name %>
+      </h1>
+      <p class="text-sm text-gray-500 mt-0.5">
+        <%= @payslip.period_label %> &middot; <%= @payslip.employee.employee_code %>
+        <% if @payslip.is_revised? %>
+          &middot; <span class="text-amber-600 font-medium">Revised</span>
+        <% end %>
+      </p>
+    </div>
+
+    <div class="flex items-center gap-2">
+      <% if policy(@payslip).edit? %>
+        <%= link_to "Edit Payslip", edit_admin_payslip_path(@payslip),
+              class: "px-4 py-2 bg-amber-500 text-white text-sm font-medium rounded-lg hover:bg-amber-600" %>
+      <% end %>
+      <%= link_to "← All Payslips", admin_payroll_run_payslips_path(@payroll_run),
+            class: "px-4 py-2 bg-white border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50" %>
+    </div>
+  </div>
+
+  <%# Revision notes banner %>
+  <% if @payslip.is_revised? && @payslip.revision_notes.present? %>
+    <div class="rounded-lg bg-amber-50 border border-amber-200 p-4 text-sm text-amber-800">
+      <p class="font-medium">Revision Notes:</p>
+      <p class="mt-1"><%= @payslip.revision_notes %></p>
+    </div>
+  <% end %>
+
+  <%# Attendance snapshot %>
+  <div class="bg-white rounded-xl border border-gray-200 p-4">
+    <h2 class="text-sm font-semibold text-gray-700 mb-3">Attendance</h2>
+    <div class="grid grid-cols-3 gap-4 text-sm">
+      <div>
+        <p class="text-gray-400 text-xs uppercase tracking-wide">Working Days</p>
+        <p class="text-gray-900 font-medium mt-0.5"><%= @payslip.total_working_days %></p>
+      </div>
+      <div>
+        <p class="text-gray-400 text-xs uppercase tracking-wide">Paid Days</p>
+        <p class="text-gray-900 font-medium mt-0.5"><%= @payslip.paid_days %></p>
+      </div>
+      <div>
+        <p class="text-gray-400 text-xs uppercase tracking-wide">LOP Days</p>
+        <p class="mt-0.5">
+          <% if @payslip.lop_days > 0 %>
+            <span class="text-red-600 font-medium"><%= @payslip.lop_days %></span>
+          <% else %>
+            <span class="text-gray-300">—</span>
+          <% end %>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <%# Earnings + Deductions side by side %>
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <%# Earnings %>
+    <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+      <div class="bg-green-50 border-b border-gray-200 px-4 py-3">
+        <h2 class="text-sm font-semibold text-green-800">Earnings</h2>
+      </div>
+      <table class="w-full text-sm">
+        <thead class="bg-gray-50 border-b border-gray-100">
+          <tr>
+            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500">Component</th>
+            <th class="px-4 py-2 text-right text-xs font-medium text-gray-500">Full</th>
+            <th class="px-4 py-2 text-right text-xs font-medium text-gray-500">Earned</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-50">
+          <% @payslip.earnings.each do |item| %>
+            <tr>
+              <td class="px-4 py-2.5 text-gray-700"><%= item.component_name %></td>
+              <td class="px-4 py-2.5 text-right text-gray-400">
+                <% if item.full_amount.present? && item.full_amount != item.amount %>
+                  ₹<%= number_with_delimiter(item.full_amount.round(0)) %>
+                <% else %>
+                  —
+                <% end %>
+              </td>
+              <td class="px-4 py-2.5 text-right font-medium text-gray-900">
+                ₹<%= number_with_delimiter(item.amount.round(0)) %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+        <tfoot class="border-t-2 border-gray-200 bg-green-50">
+          <tr>
+            <td class="px-4 py-3 font-semibold text-green-900" colspan="2">Gross Pay</td>
+            <td class="px-4 py-3 text-right font-bold text-green-900">
+              ₹<%= number_with_delimiter(@payslip.gross_pay.round(0)) %>
+            </td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+
+    <%# Deductions %>
+    <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+      <div class="bg-red-50 border-b border-gray-200 px-4 py-3">
+        <h2 class="text-sm font-semibold text-red-800">Deductions</h2>
+      </div>
+      <table class="w-full text-sm">
+        <thead class="bg-gray-50 border-b border-gray-100">
+          <tr>
+            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500">Component</th>
+            <th class="px-4 py-2 text-right text-xs font-medium text-gray-500">Amount</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-50">
+          <% @payslip.deductions.each do |item| %>
+            <tr>
+              <td class="px-4 py-2.5 text-gray-700"><%= item.component_name %></td>
+              <td class="px-4 py-2.5 text-right font-medium text-gray-900">
+                ₹<%= number_with_delimiter(item.amount.round(0)) %>
+              </td>
+            </tr>
+          <% end %>
+          <% if @payslip.deductions.empty? %>
+            <tr>
+              <td colspan="2" class="px-4 py-4 text-center text-gray-400 text-xs">No deductions</td>
+            </tr>
+          <% end %>
+        </tbody>
+        <tfoot class="border-t-2 border-gray-200 bg-red-50">
+          <tr>
+            <td class="px-4 py-3 font-semibold text-red-900">Total Deductions</td>
+            <td class="px-4 py-3 text-right font-bold text-red-900">
+              ₹<%= number_with_delimiter(@payslip.total_deductions.round(0)) %>
+            </td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  </div>
+
+  <%# Net Pay + Employer Cost summary %>
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+    <div class="bg-white rounded-xl border border-gray-200 p-4">
+      <p class="text-xs text-gray-400 uppercase tracking-wide">Net Pay</p>
+      <p class="text-2xl font-bold text-gray-900 mt-1">₹<%= number_with_delimiter(@payslip.net_pay.round(0)) %></p>
+    </div>
+    <div class="bg-white rounded-xl border border-gray-200 p-4">
+      <p class="text-xs text-gray-400 uppercase tracking-wide">Employer PF</p>
+      <p class="text-2xl font-bold text-gray-600 mt-1">₹<%= number_with_delimiter(@payslip.employer_pf.round(0)) %></p>
+    </div>
+    <div class="bg-white rounded-xl border border-gray-200 p-4">
+      <p class="text-xs text-gray-400 uppercase tracking-wide">Employer ESI</p>
+      <p class="text-2xl font-bold text-gray-600 mt-1">₹<%= number_with_delimiter(@payslip.employer_esi.round(0)) %></p>
+    </div>
+    <div class="bg-white rounded-xl border border-gray-200 p-4">
+      <p class="text-xs text-gray-400 uppercase tracking-wide">CTC This Month</p>
+      <p class="text-2xl font-bold text-purple-700 mt-1">₹<%= number_with_delimiter(@payslip.ctc_this_month.round(0)) %></p>
+    </div>
+  </div>
+</div>

@@ -101,12 +101,14 @@
       <% end %>
     </div>
 
-    <%# Link to payslips — wired up in Module 6 %>
-    <div class="bg-white rounded-xl border border-gray-200 p-4">
-      <div class="flex items-center justify-between">
-        <p class="text-sm font-medium text-gray-700">Payslips</p>
-        <span class="text-xs text-gray-400">Review individual payslips →</span>
-      </div>
-    </div>
+    <%# Link to payslips %>
+    <%= link_to admin_payroll_run_payslips_path(@payroll_run),
+          class: "bg-white rounded-xl border border-gray-200 p-4 flex items-center justify-between hover:bg-gray-50 transition-colors" do %>
+      <p class="text-sm font-medium text-gray-700">
+        Payslips
+        <span class="ml-2 text-xs font-normal text-gray-400"><%= @payroll_run.processed_employees %> generated</span>
+      </p>
+      <span class="text-xs text-blue-600 font-medium">Review individual payslips →</span>
+    <% end %>
   <% end %>
 </div>
