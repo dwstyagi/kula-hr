@@ -1,0 +1,67 @@
+<%# ── Banner ── %>
+<div style="background:linear-gradient(135deg,#2563EB 0%,#3B82F6 100%);padding:36px 40px 32px;">
+  <table role="presentation" cellpadding="0" cellspacing="0" width="100%">
+    <tr>
+      <td>
+        <p style="margin:0 0 6px;font-size:12px;font-weight:600;color:#BFDBFE;letter-spacing:1px;text-transform:uppercase;">Action Required</p>
+        <h1 style="margin:0;font-size:26px;font-weight:700;color:#ffffff;line-height:1.2;">Payroll Awaiting Approval</h1>
+        <p style="margin:10px 0 0;font-size:15px;color:#DBEAFE;"><%= @payroll_run.period_label %> &middot; <%= @tenant.name %></p>
+      </td>
+      <td align="right" valign="top">
+        <div style="font-size:36px;line-height:1;">🔍</div>
+      </td>
+    </tr>
+  </table>
+</div>
+
+<%# ── Body ── %>
+<div style="padding:36px 40px;">
+  <p style="margin:0 0 24px;font-size:15px;color:#374151;line-height:1.6;">
+    Hi,<br><br>
+    <strong><%= @payroll_run.initiated_by.full_name %></strong> has submitted the
+    <strong><%= @payroll_run.period_label %></strong> payroll run at
+    <strong><%= @tenant.name %></strong> for your approval. Please review and approve or reject.
+  </p>
+
+  <%# Stats grid %>
+  <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="margin-bottom:28px;">
+    <tr>
+      <td width="33%" style="padding-right:6px;">
+        <div style="background:#EFF6FF;border:1px solid #BFDBFE;border-radius:10px;padding:14px 16px;text-align:center;">
+          <p style="margin:0 0 4px;font-size:11px;color:#2563EB;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">Employees</p>
+          <p style="margin:0;font-size:24px;font-weight:700;color:#1E3A8A;"><%= @payroll_run.processed_employees %></p>
+        </div>
+      </td>
+      <td width="33%" style="padding:0 3px;">
+        <div style="background:#EFF6FF;border:1px solid #BFDBFE;border-radius:10px;padding:14px 16px;text-align:center;">
+          <p style="margin:0 0 4px;font-size:11px;color:#2563EB;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">Net Pay</p>
+          <p style="margin:0;font-size:18px;font-weight:700;color:#1E3A8A;">₹<%= number_with_delimiter(@payroll_run.total_net_pay.round(0)) %></p>
+        </div>
+      </td>
+      <td width="33%" style="padding-left:6px;">
+        <div style="background:#<%= @payroll_run.payslips.revised.any? ? 'FFFBEB;border:1px solid #FDE68A' : 'EFF6FF;border:1px solid #BFDBFE' %>;border-radius:10px;padding:14px 16px;text-align:center;">
+          <p style="margin:0 0 4px;font-size:11px;color:#<%= @payroll_run.payslips.revised.any? ? 'D97706' : '2563EB' %>;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">Revised</p>
+          <p style="margin:0;font-size:24px;font-weight:700;color:#<%= @payroll_run.payslips.revised.any? ? '92400E' : '1E3A8A' %>;"><%= @payroll_run.payslips.revised.count %></p>
+        </div>
+      </td>
+    </tr>
+  </table>
+
+  <% if @payroll_run.payslips.revised.any? %>
+  <div style="background:#FFFBEB;border:1px solid #FDE68A;border-left:4px solid #D97706;border-radius:6px;padding:14px 18px;margin-bottom:28px;">
+    <p style="margin:0;font-size:14px;color:#92400E;line-height:1.5;">
+      <strong><%= @payroll_run.payslips.revised.count %> payslip(s)</strong> were manually adjusted by HR. Review them carefully before approving.
+    </p>
+  </div>
+  <% end %>
+
+  <div style="background:#EFF6FF;border:1px solid #BFDBFE;border-radius:10px;padding:16px 20px;margin-bottom:32px;">
+    <p style="margin:0;font-size:14px;color:#1E40AF;line-height:1.6;">
+      Log in to Kula HR to review payslips and take action.
+    </p>
+  </div>
+
+  <p style="margin:0;font-size:14px;color:#9CA3AF;">
+    — The Kula HR System
+  </p>
+</div>

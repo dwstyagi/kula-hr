@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title><%= @preview.preview_name.gsub('_', ' ').titleize %> · Kula HR</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+      background: #F0F4F8;
+      color: #1E293B;
+      min-height: 100vh;
+    }
+    .topbar {
+      background: #1E293B;
+      padding: 0 32px;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .topbar-logo { font-size: 16px; font-weight: 700; color: #fff; letter-spacing: -0.3px; }
+    .topbar-divider { width: 1px; height: 20px; background: #334155; }
+    .topbar-link { font-size: 13px; color: #94A3B8; text-decoration: none; }
+    .topbar-link:hover { color: #fff; }
+    .topbar-current { font-size: 13px; color: #CBD5E1; }
+    .container { max-width: 680px; margin: 0 auto; padding: 40px 24px; }
+    .page-header { margin-bottom: 28px; }
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      color: #64748B;
+      text-decoration: none;
+      margin-bottom: 16px;
+    }
+    .back-link:hover { color: #2563EB; }
+    .page-title { font-size: 24px; font-weight: 700; color: #0F172A; }
+    .page-subtitle { font-size: 14px; color: #64748B; margin-top: 4px; }
+    .card {
+      background: #fff;
+      border-radius: 14px;
+      border: 1px solid #E2E8F0;
+      overflow: hidden;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    }
+    .email-list { padding: 8px 0; }
+    .email-link {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 20px;
+      text-decoration: none;
+      color: #374151;
+      font-size: 14px;
+      border-bottom: 1px solid #F8FAFC;
+      transition: background 0.1s;
+    }
+    .email-link:last-child { border-bottom: none; }
+    .email-link:hover { background: #F8FAFC; color: #2563EB; }
+    .email-link:hover .email-icon { background: #EFF6FF; color: #2563EB; }
+    .email-icon {
+      width: 36px; height: 36px;
+      background: #F1F5F9;
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px;
+      flex-shrink: 0;
+      transition: background 0.1s, color 0.1s;
+    }
+    .email-name { flex: 1; font-weight: 500; }
+    .email-hint { font-size: 12px; color: #94A3B8; margin-top: 2px; }
+    .email-arrow { color: #CBD5E1; font-size: 14px; }
+  </style>
+</head>
+<body>
+
+<div class="topbar">
+  <span class="topbar-logo">Kula HR</span>
+  <div class="topbar-divider"></div>
+  <a class="topbar-link" href="<%= url_for(controller: 'rails/mailers', action: 'index') %>">Email Previews</a>
+  <span style="color:#475569">›</span>
+  <span class="topbar-current"><%= @preview.preview_name.gsub('_', ' ').titleize %></span>
+</div>
+
+<div class="container">
+  <div class="page-header">
+    <a class="back-link" href="<%= url_for(controller: 'rails/mailers', action: 'index') %>">← All Mailers</a>
+    <h1 class="page-title"><%= @preview.preview_name.gsub('_', ' ').titleize %></h1>
+    <p class="page-subtitle"><%= @preview.emails.count %> email template<%= @preview.emails.count == 1 ? '' : 's' %></p>
+  </div>
+
+  <div class="card">
+    <div class="email-list">
+      <% @preview.emails.each do |email| %>
+        <a class="email-link" href="<%= url_for(controller: 'rails/mailers', action: 'preview', path: "#{@preview.preview_name}/#{email}") %>">
+          <div class="email-icon">✉️</div>
+          <div style="flex:1">
+            <div class="email-name"><%= email.gsub('_', ' ').capitalize %></div>
+            <div class="email-hint"><%= @preview.preview_name %>#<%= email %></div>
+          </div>
+          <span class="email-arrow">→</span>
+        </a>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

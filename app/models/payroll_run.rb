@@ -58,6 +58,11 @@ class PayrollRun < ApplicationRecord
       transitions from: :under_review, to: :rejected
     end
 
+    # rejected → under_review (HR fixes payslips inline and resubmits — no wipe)
+    event :resubmit_for_review do
+      transitions from: :rejected, to: :under_review
+    end
+
     # rejected or processed → draft (HR reprocesses — wipes all payslips)
     event :reprocess do
       transitions from: [ :rejected, :processed ], to: :draft, after: :clear_payslips

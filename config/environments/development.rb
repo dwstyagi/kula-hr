@@ -32,12 +32,16 @@ Rails.application.configure do
   config.active_storage.service = :local
 
   # Open emails in browser instead of sending in development.
-  config.action_mailer.delivery_method = :letter_opener
+  # Uses letter_opener_web so deliver_later (via Sidekiq) also captures emails.
+  config.action_mailer.delivery_method = :letter_opener_web
   config.action_mailer.perform_deliveries = true
   config.action_mailer.raise_delivery_errors = false
 
   # Make template changes take effect immediately.
   config.action_mailer.perform_caching = false
+
+  # Mailer previews live in spec/mailers/previews/
+  config.action_mailer.preview_paths = [ Rails.root.join("spec/mailers/previews") ]
 
   # Set lvh.me to be used by links generated in mailer templates (supports subdomains).
   config.action_mailer.default_url_options = { host: "lvh.me", port: ENV.fetch("PORT", 3000).to_i }

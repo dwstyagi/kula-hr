@@ -1,19 +1,70 @@
-<h2>Payroll Processed Successfully</h2>
+<%# ── Banner ── %>
+<div style="background:linear-gradient(135deg,#059669 0%,#10B981 100%);padding:36px 40px 32px;">
+  <table role="presentation" cellpadding="0" cellspacing="0" width="100%">
+    <tr>
+      <td>
+        <p style="margin:0 0 6px;font-size:12px;font-weight:600;color:#A7F3D0;letter-spacing:1px;text-transform:uppercase;">Payroll Processing</p>
+        <h1 style="margin:0;font-size:26px;font-weight:700;color:#ffffff;line-height:1.2;">Payslips Generated ✓</h1>
+        <p style="margin:10px 0 0;font-size:15px;color:#D1FAE5;"><%= @payroll_run.period_label %> &middot; <%= @tenant.name %></p>
+      </td>
+      <td align="right" valign="top">
+        <div style="background:rgba(255,255,255,0.15);border-radius:50%;width:56px;height:56px;display:inline-flex;align-items:center;justify-content:center;font-size:28px;line-height:56px;text-align:center;">✅</div>
+      </td>
+    </tr>
+  </table>
+</div>
 
-<p>Hello,</p>
+<%# ── Body ── %>
+<div style="padding:36px 40px;">
+  <p style="margin:0 0 24px;font-size:15px;color:#374151;line-height:1.6;">
+    Hi <%= @payroll_run.initiated_by.full_name %>,<br><br>
+    Payroll for <strong><%= @payroll_run.period_label %></strong> has been processed successfully.
+    All payslips are ready for your review.
+  </p>
 
-<p>
-  Payroll for <strong><%= @payroll_run.period_label %></strong> has been processed
-  successfully for <strong><%= @tenant.company_name %></strong>.
-</p>
+  <%# Stats grid %>
+  <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="margin-bottom:28px;">
+    <tr>
+      <td width="50%" style="padding-right:8px;">
+        <div style="background:#F0FDF4;border:1px solid #BBF7D0;border-radius:10px;padding:16px 20px;text-align:center;">
+          <p style="margin:0 0 4px;font-size:12px;color:#16A34A;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">Employees</p>
+          <p style="margin:0;font-size:28px;font-weight:700;color:#14532D;"><%= @payroll_run.processed_employees %></p>
+        </div>
+      </td>
+      <td width="50%" style="padding-left:8px;">
+        <div style="background:#F0FDF4;border:1px solid #BBF7D0;border-radius:10px;padding:16px 20px;text-align:center;">
+          <p style="margin:0 0 4px;font-size:12px;color:#16A34A;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">Total Net Pay</p>
+          <p style="margin:0;font-size:24px;font-weight:700;color:#14532D;">₹<%= number_with_delimiter(@payroll_run.total_net_pay.round(0)) %></p>
+        </div>
+      </td>
+    </tr>
+  </table>
 
-<table>
-  <tr><td>Period</td><td><%= @payroll_run.period_label %></td></tr>
-  <tr><td>Employees Processed</td><td><%= @payroll_run.processed_employees %></td></tr>
-  <tr><td>Total Gross</td><td>₹<%= number_with_delimiter(@payroll_run.total_gross.round(0)) %></td></tr>
-  <tr><td>Total Net Pay</td><td>₹<%= number_with_delimiter(@payroll_run.total_net_pay.round(0)) %></td></tr>
-</table>
+  <%# Detail table %>
+  <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="border:1px solid #E5E7EB;border-radius:10px;overflow:hidden;margin-bottom:32px;">
+    <tr style="background:#F9FAFB;">
+      <td style="padding:10px 16px;font-size:12px;font-weight:600;color:#6B7280;text-transform:uppercase;letter-spacing:0.5px;border-bottom:1px solid #E5E7EB;">Summary</td>
+      <td style="padding:10px 16px;font-size:12px;font-weight:600;color:#6B7280;text-transform:uppercase;letter-spacing:0.5px;border-bottom:1px solid #E5E7EB;text-align:right;">Amount</td>
+    </tr>
+    <tr>
+      <td style="padding:12px 16px;font-size:14px;color:#374151;border-bottom:1px solid #F3F4F6;">Total Gross Pay</td>
+      <td style="padding:12px 16px;font-size:14px;color:#111827;font-weight:600;text-align:right;border-bottom:1px solid #F3F4F6;">₹<%= number_with_delimiter(@payroll_run.total_gross.round(0)) %></td>
+    </tr>
+    <tr>
+      <td style="padding:12px 16px;font-size:14px;color:#374151;border-bottom:1px solid #F3F4F6;">Total Deductions</td>
+      <td style="padding:12px 16px;font-size:14px;color:#DC2626;font-weight:600;text-align:right;border-bottom:1px solid #F3F4F6;">₹<%= number_with_delimiter(@payroll_run.total_deductions.round(0)) %></td>
+    </tr>
+    <tr style="background:#F0FDF4;">
+      <td style="padding:14px 16px;font-size:15px;color:#14532D;font-weight:700;">Net Pay</td>
+      <td style="padding:14px 16px;font-size:15px;color:#14532D;font-weight:700;text-align:right;">₹<%= number_with_delimiter(@payroll_run.total_net_pay.round(0)) %></td>
+    </tr>
+  </table>
 
-<p>
-  Please log in to review the payslips and submit for approval.
-</p>
+  <p style="margin:0 0 24px;font-size:14px;color:#6B7280;line-height:1.6;">
+    Review the payslips and submit for Super Admin approval when ready.
+  </p>
+
+  <p style="margin:0;font-size:14px;color:#9CA3AF;">
+    — The Kula HR System
+  </p>
+</div>

@@ -1,0 +1,63 @@
+<%# ── Banner ── %>
+<div style="background:linear-gradient(135deg,#DC2626 0%,#EF4444 100%);padding:36px 40px 32px;">
+  <table role="presentation" cellpadding="0" cellspacing="0" width="100%">
+    <tr>
+      <td>
+        <p style="margin:0 0 6px;font-size:12px;font-weight:600;color:#FECACA;letter-spacing:1px;text-transform:uppercase;">Payroll Review</p>
+        <h1 style="margin:0;font-size:26px;font-weight:700;color:#ffffff;line-height:1.2;">Payroll Rejected</h1>
+        <p style="margin:10px 0 0;font-size:15px;color:#FEE2E2;"><%= @payroll_run.period_label %> &middot; <%= @tenant.name %></p>
+      </td>
+      <td align="right" valign="top">
+        <div style="font-size:36px;line-height:1;">❌</div>
+      </td>
+    </tr>
+  </table>
+</div>
+
+<%# ── Body ── %>
+<div style="padding:36px 40px;">
+  <p style="margin:0 0 24px;font-size:15px;color:#374151;line-height:1.6;">
+    Hi <%= @payroll_run.initiated_by.full_name %>,<br><br>
+    The <strong><%= @payroll_run.period_label %></strong> payroll run has been
+    <strong style="color:#DC2626;">rejected</strong> and requires your attention.
+  </p>
+
+  <% if @payroll_run.rejection_reason.present? %>
+  <%# Rejection reason box %>
+  <div style="background:#FEF2F2;border:1px solid #FECACA;border-left:4px solid #DC2626;border-radius:6px;padding:18px 20px;margin-bottom:28px;">
+    <p style="margin:0 0 8px;font-size:12px;font-weight:700;color:#991B1B;text-transform:uppercase;letter-spacing:0.5px;">Rejection Reason</p>
+    <p style="margin:0;font-size:15px;color:#7F1D1D;line-height:1.6;"><%= @payroll_run.rejection_reason %></p>
+  </div>
+  <% end %>
+
+  <%# What to do next %>
+  <p style="margin:0 0 14px;font-size:13px;font-weight:600;color:#374151;text-transform:uppercase;letter-spacing:0.5px;">What to do next</p>
+  <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="margin-bottom:32px;">
+    <tr>
+      <td style="padding:0 0 12px;">
+        <div style="display:flex;background:#F9FAFB;border:1px solid #E5E7EB;border-radius:10px;padding:16px 20px;">
+          <div style="font-size:20px;line-height:1;margin-right:14px;">✏️</div>
+          <div>
+            <p style="margin:0 0 4px;font-size:14px;font-weight:600;color:#111827;">Edit payslips &amp; resubmit</p>
+            <p style="margin:0;font-size:13px;color:#6B7280;line-height:1.5;">Fix the specific issue on the affected payslip(s) using inline editing, then resubmit for review — no need to reprocess everything.</p>
+          </div>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <div style="background:#F9FAFB;border:1px solid #E5E7EB;border-radius:10px;padding:16px 20px;">
+          <div style="font-size:20px;line-height:1;margin-right:14px;display:inline-block;">🔄</div>
+          <div style="display:inline-block;vertical-align:top;width:calc(100% - 40px);">
+            <p style="margin:0 0 4px;font-size:14px;font-weight:600;color:#111827;">Reprocess from scratch</p>
+            <p style="margin:0;font-size:13px;color:#6B7280;line-height:1.5;">Clear all payslips and re-run the full payroll calculation. Use this if the issue is widespread.</p>
+          </div>
+        </div>
+      </td>
+    </tr>
+  </table>
+
+  <p style="margin:0;font-size:14px;color:#9CA3AF;">
+    — The Kula HR System
+  </p>
+</div>

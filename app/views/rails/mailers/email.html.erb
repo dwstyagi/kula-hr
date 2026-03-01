@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title><%= @email.subject %> · Kula HR</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+      background: #F0F4F8;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Top nav bar */
+    .topbar {
+      background: #1E293B;
+      padding: 0 24px;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-shrink: 0;
+    }
+    .topbar-logo { font-size: 15px; font-weight: 700; color: #fff; letter-spacing: -0.3px; }
+    .topbar-divider { width: 1px; height: 18px; background: #334155; }
+    .topbar-link { font-size: 12px; color: #94A3B8; text-decoration: none; }
+    .topbar-link:hover { color: #fff; }
+    .topbar-crumb { font-size: 12px; color: #64748B; }
+    .topbar-current { font-size: 12px; color: #CBD5E1; max-width: 300px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+    /* Email meta header */
+    .meta-bar {
+      background: #fff;
+      border-bottom: 1px solid #E2E8F0;
+      padding: 16px 24px;
+      flex-shrink: 0;
+    }
+    .subject-line {
+      font-size: 17px;
+      font-weight: 700;
+      color: #0F172A;
+      margin-bottom: 12px;
+      line-height: 1.3;
+    }
+    .meta-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 8px 24px;
+    }
+    .meta-field { display: flex; align-items: baseline; gap: 6px; }
+    .meta-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: #94A3B8;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .meta-value { font-size: 13px; color: #374151; }
+
+    /* Toolbar: format switcher + actions */
+    .toolbar {
+      background: #F8FAFC;
+      border-bottom: 1px solid #E2E8F0;
+      padding: 10px 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-shrink: 0;
+    }
+    .format-toggle {
+      display: flex;
+      background: #E2E8F0;
+      border-radius: 8px;
+      padding: 3px;
+      gap: 2px;
+    }
+    .format-btn {
+      padding: 5px 12px;
+      font-size: 12px;
+      font-weight: 500;
+      color: #64748B;
+      border-radius: 6px;
+      cursor: pointer;
+      border: none;
+      background: transparent;
+      transition: all 0.15s;
+    }
+    .format-btn.active {
+      background: #fff;
+      color: #1E293B;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    .toolbar-spacer { flex: 1; }
+    .download-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: #64748B;
+      text-decoration: none;
+      padding: 5px 12px;
+      border: 1px solid #E2E8F0;
+      border-radius: 8px;
+      background: #fff;
+      transition: all 0.15s;
+    }
+    .download-link:hover { border-color: #CBD5E1; color: #374151; }
+
+    /* Preview area */
+    .preview-wrap {
+      flex: 1;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      padding: 20px 24px;
+    }
+    .preview-card {
+      background: #fff;
+      border-radius: 14px;
+      border: 1px solid #E2E8F0;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
+      overflow: hidden;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+    iframe {
+      flex: 1;
+      border: none;
+      width: 100%;
+    }
+
+    select {
+      font-size: 12px;
+      color: #374151;
+      border: 1px solid #E2E8F0;
+      border-radius: 6px;
+      padding: 4px 8px;
+      background: #fff;
+    }
+  </style>
+</head>
+<body>
+
+<%# Top nav %>
+<div class="topbar">
+  <span class="topbar-logo">Kula HR</span>
+  <div class="topbar-divider"></div>
+  <a class="topbar-link" href="<%= url_for(controller: 'rails/mailers', action: 'index') %>">Previews</a>
+  <span class="topbar-crumb">›</span>
+  <a class="topbar-link" href="<%= url_for(controller: 'rails/mailers', action: 'preview', path: @preview.preview_name) %>">
+    <%= @preview.preview_name.gsub('_', ' ').titleize %>
+  </a>
+  <span class="topbar-crumb">›</span>
+  <span class="topbar-current"><%= @email_action.gsub('_', ' ').capitalize %></span>
+</div>
+
+<%# Email metadata %>
+<div class="meta-bar">
+  <div class="subject-line"><%= @email.subject %></div>
+  <div class="meta-grid">
+    <div class="meta-field">
+      <span class="meta-label">From</span>
+      <span class="meta-value"><%= @email.header['from'] %></span>
+    </div>
+    <div class="meta-field">
+      <span class="meta-label">To</span>
+      <span class="meta-value"><%= @email.header['to'] %></span>
+    </div>
+    <% if @email.cc %>
+      <div class="meta-field">
+        <span class="meta-label">CC</span>
+        <span class="meta-value"><%= @email.header['cc'] %></span>
+      </div>
+    <% end %>
+    <div class="meta-field">
+      <span class="meta-label">Date</span>
+      <span class="meta-value"><%= (@email.header['date'] || Time.current.rfc2822).to_s.truncate(40) %></span>
+    </div>
+  </div>
+</div>
+
+<%# Toolbar %>
+<div class="toolbar">
+  <% if @email.html_part && @email.text_part %>
+    <div class="format-toggle">
+      <button class="format-btn <%= request.format == Mime[:html] ? 'active' : '' %>"
+              onclick="switchPart('<%= part_query('text/html') %>', this)">HTML</button>
+      <button class="format-btn <%= request.format == Mime[:text] ? 'active' : '' %>"
+              onclick="switchPart('<%= part_query('text/plain') %>', this)">Plain text</button>
+    </div>
+  <% elsif @part %>
+    <span style="font-size:12px;color:#94A3B8;">
+      <%= @part.mime_type == 'text/html' ? 'HTML email' : 'Plain text email' %>
+    </span>
+  <% end %>
+
+  <% if I18n.available_locales.count > 1 %>
+    <select onchange="location.href='?' + '<%= part_query(@part&.mime_type || 'text/html') %>' + '&' + '<%= locale_query(I18n.locale) %>'.replace(/locale=[^&]+/, 'locale=' + this.value)">
+      <% I18n.available_locales.each do |locale| %>
+        <option <%= I18n.locale == locale ? 'selected' : '' %> value="<%= locale %>"><%= locale %></option>
+      <% end %>
+    </select>
+  <% end %>
+
+  <div class="toolbar-spacer"></div>
+
+  <a class="download-link" href="<%= url_for(action: :download, locale: params[:locale]) %>">
+    ↓ Download .eml
+  </a>
+</div>
+
+<%# Email preview iframe %>
+<div class="preview-wrap">
+  <div class="preview-card">
+    <% if @part && @part.mime_type %>
+      <iframe name="messageBody"
+              id="emailFrame"
+              src="?<%= part_query(@part.mime_type) %>">
+      </iframe>
+    <% else %>
+      <div style="padding:40px;text-align:center;color:#94A3B8;">
+        <p style="font-size:15px;margin-bottom:8px;">No content available</p>
+        <p style="font-size:13px;">The <code>mail</code> method has not been called in
+          <code><%= @preview.preview_name %>#<%= @email_action %></code>.</p>
+      </div>
+    <% end %>
+  </div>
+</div>
+
+<script>
+  function switchPart(partQuery, btn) {
+    // Update active button
+    btn.closest('.format-toggle').querySelectorAll('.format-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+
+    // Reload iframe
+    var iframe = document.getElementById('emailFrame');
+    if (iframe) iframe.contentWindow.location = '?' + partQuery;
+
+    // Update browser URL
+    var url = location.pathname.replace(/\.(txt|html)$/, '');
+    var format = /html/.test(partQuery) ? '.html' : '.txt';
+    if (history.replaceState) window.history.replaceState({}, '', url + format);
+  }
+</script>
+
+</body>
+</html>

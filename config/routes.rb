@@ -1,6 +1,10 @@
 require "sidekiq/web"
 
 Rails.application.routes.draw do
+  if Rails.env.development?
+    mount LetterOpenerWeb::Engine, at: "/letter_opener"
+  end
+
   # Health check
   get "up" => "rails/health#show", as: :rails_health_check
 
@@ -67,6 +71,7 @@ Rails.application.routes.draw do
           patch :submit_for_review
           patch :approve
           patch :reject
+          patch :resubmit_for_review
           patch :reprocess
           patch :mark_paid
           get  :progress

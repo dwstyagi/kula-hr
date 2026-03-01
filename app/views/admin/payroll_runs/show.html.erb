@@ -84,11 +84,19 @@
         <% end %>
       <% end %>
 
-      <% if @payroll_run.rejected? && policy(@payroll_run).reprocess? %>
-        <%= button_to "Reprocess",
-              reprocess_admin_payroll_run_path(@payroll_run),
+      <% if @payroll_run.rejected? && policy(@payroll_run).resubmit_for_review? %>
+        <%= button_to "Resubmit for Review",
+              resubmit_for_review_admin_payroll_run_path(@payroll_run),
               method: :patch,
               class: "px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 cursor-pointer",
+              form: { data: { turbo_confirm: "Resubmit this payroll for review? Make sure you've corrected the payslips first." } } %>
+      <% end %>
+
+      <% if @payroll_run.rejected? && policy(@payroll_run).reprocess? %>
+        <%= button_to "Reprocess from Scratch",
+              reprocess_admin_payroll_run_path(@payroll_run),
+              method: :patch,
+              class: "px-4 py-2 bg-white border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 cursor-pointer",
               form: { data: { turbo_confirm: "This will delete all payslips and re-run payroll. Are you sure?" } } %>
       <% end %>
 

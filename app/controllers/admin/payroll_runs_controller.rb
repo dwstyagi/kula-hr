@@ -1,7 +1,8 @@
 module Admin
   class PayrollRunsController < BaseController
     before_action :set_payroll_run, only: [ :show, :process_payroll, :submit_for_review,
-                                            :approve, :reject, :reprocess, :mark_paid, :progress ]
+                                            :approve, :reject, :resubmit_for_review,
+                                            :reprocess, :mark_paid, :progress ]
 
     # GET /admin/payroll_runs
     def index
@@ -55,8 +56,9 @@ module Admin
       authorize @payroll_run
 
       if @payroll_run.submit_for_review!
+        PayrollMailer.submitted_for_review(@payroll_run).deliver_later
         redirect_to admin_payroll_run_path(@payroll_run),
-                    notice: "Payroll submitted for review."
+                    notice: "Payroll submitted for review. Super admins have been notified."
       else
         redirect_to admin_payroll_run_path(@payroll_run),
                     alert: "Could not submit for review."
@@ -81,9 +83,21 @@ module Admin
 
       @payroll_run.update!(rejection_reason: params[:rejection_reason])
       @payroll_run.reject!
+      PayrollMailer.rejected(@payroll_run).deliver_later
 
       redirect_to admin_payroll_run_path(@payroll_run),
                   alert: "Payroll rejected. HR has been notified."
+    end
+
+    # PATCH /admin/payroll_runs/:id/resubmit_for_review
+    def resubmit_for_review
+      authorize @payroll_run
+
+      @payroll_run.resubmit_for_review!
+      PayrollMailer.submitted_for_review(@payroll_run).deliver_later
+
+      redirect_to admin_payroll_run_path(@payroll_run),
+                  notice: "Payroll resubmitted for review. Super admins have been notified."
     end
 
     # PATCH /admin/payroll_runs/:id/reprocess

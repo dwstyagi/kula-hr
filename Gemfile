@@ -101,8 +101,8 @@ end
 group :development do
   # Use console on exceptions pages [https://github.com/rails/web-console]
   gem "web-console"
-  # Preview emails in browser instead of sending
-  gem "letter_opener"
+  # Preview emails stored to disk — works with Sidekiq (deliver_later)
+  gem "letter_opener_web"
 end
 
 group :test do
