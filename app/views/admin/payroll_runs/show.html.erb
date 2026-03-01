@@ -129,5 +129,22 @@
         Download All (ZIP)
       <% end %>
     </div>
+
+    <%# Bank file — only once approved or paid %>
+    <% if @payroll_run.approved? || @payroll_run.paid? %>
+      <div class="bg-white rounded-xl border border-gray-200 p-4 flex items-center justify-between">
+        <div>
+          <p class="text-sm font-medium text-gray-700">Bank Transfer File</p>
+          <p class="text-xs text-gray-400 mt-0.5">Generate HDFC / ICICI / SBI / CSV file for salary disbursement</p>
+        </div>
+        <%= link_to bank_file_admin_payroll_run_path(@payroll_run),
+              class: "inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-700 text-xs font-medium rounded-lg hover:bg-blue-100 transition-colors" do %>
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
+          </svg>
+          Generate Bank File
+        <% end %>
+      </div>
+    <% end %>
   <% end %>
 </div>

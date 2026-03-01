@@ -3,7 +3,7 @@ module Admin
     before_action :set_payroll_run, only: [ :show, :process_payroll, :submit_for_review,
                                             :approve, :reject, :resubmit_for_review,
                                             :reprocess, :mark_paid, :progress,
-                                            :download_payslips ]
+                                            :download_payslips, :bank_file, :download_bank_file ]
 
     # GET /admin/payroll_runs
     def index
@@ -122,6 +122,28 @@ module Admin
                   notice: "Payroll marked as paid for #{@payroll_run.period_label}."
     end
 
+    # GET /admin/payroll_runs/:id/bank_file
+    def bank_file
+      authorize @payroll_run, :show?
+      generator = build_generator("generic_csv")  # default for warnings check
+      @missing   = generator.employees_missing_bank_details
+    end
+
+    # GET /admin/payroll_runs/:id/download_bank_file?bank=hdfc
+    def download_bank_file
+      authorize @payroll_run, :show?
+
+      bank   = params[:bank].presence || "generic_csv"
+      generator = build_generator(bank)
+      content   = generator.call
+
+      ext, mime = file_meta(bank)
+      filename  = "salary_#{@payroll_run.period_label.gsub(' ', '_')}_#{bank}.#{ext}"
+      send_data content, filename: filename, type: mime, disposition: "attachment"
+    rescue Payroll::BankFileGenerators::BankFileError => e
+      redirect_to bank_file_admin_payroll_run_path(@payroll_run), alert: e.message
+    end
+
     # GET /admin/payroll_runs/:id/download_payslips
     def download_payslips
       authorize @payroll_run, :show?
@@ -145,6 +167,22 @@ module Admin
 
     def payroll_run_params
       params.require(:payroll_run).permit(:month, :year, :notes)
+    end
+
+    BANK_GENERATORS = {
+      "hdfc"        => Payroll::BankFileGenerators::Hdfc,
+      "icici"       => Payroll::BankFileGenerators::Icici,
+      "sbi"         => Payroll::BankFileGenerators::Sbi,
+      "generic_csv" => Payroll::BankFileGenerators::GenericCsv
+    }.freeze
+
+    def build_generator(bank)
+      klass = BANK_GENERATORS[bank] || Payroll::BankFileGenerators::GenericCsv
+      klass.new(payroll_run: @payroll_run)
+    end
+
+    def file_meta(bank)
+      bank == "generic_csv" ? [ "csv", "text/csv" ] : [ "txt", "text/plain" ]
     end
   end
 end

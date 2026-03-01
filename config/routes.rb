@@ -76,6 +76,8 @@ Rails.application.routes.draw do
           patch :mark_paid
           get  :progress
           get  :download_payslips
+          get  :bank_file
+          get  :download_bank_file
         end
         resources :payslips, only: [ :index, :show, :edit, :update ], shallow: true do
           member do
