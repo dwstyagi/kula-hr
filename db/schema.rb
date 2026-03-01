@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_02_28_100004) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_01_100001) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "pg_catalog.plpgsql"
@@ -185,6 +185,30 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_28_100004) do
     t.datetime "updated_at", null: false
     t.index ["tenant_id", "code"], name: "index_leave_types_on_tenant_id_and_code", unique: true
     t.index ["tenant_id"], name: "index_leave_types_on_tenant_id"
+  end
+
+  create_table "payroll_runs", force: :cascade do |t|
+    t.datetime "approved_at"
+    t.bigint "approved_by_id"
+    t.datetime "created_at", null: false
+    t.bigint "initiated_by_id", null: false
+    t.integer "month", null: false
+    t.text "notes"
+    t.integer "processed_employees", default: 0
+    t.text "rejection_reason"
+    t.string "status", default: "draft", null: false
+    t.bigint "tenant_id", null: false
+    t.decimal "total_deductions", precision: 12, scale: 2, default: "0.0"
+    t.integer "total_employees", default: 0
+    t.decimal "total_employer_cost", precision: 12, scale: 2, default: "0.0"
+    t.decimal "total_gross", precision: 12, scale: 2, default: "0.0"
+    t.decimal "total_net_pay", precision: 12, scale: 2, default: "0.0"
+    t.datetime "updated_at", null: false
+    t.integer "year", null: false
+    t.index ["approved_by_id"], name: "index_payroll_runs_on_approved_by_id"
+    t.index ["initiated_by_id"], name: "index_payroll_runs_on_initiated_by_id"
+    t.index ["tenant_id", "month", "year"], name: "idx_payroll_run_tenant_month_year", unique: true
+    t.index ["tenant_id"], name: "index_payroll_runs_on_tenant_id"
   end
 
   create_table "payroll_settings", force: :cascade do |t|
@@ -395,6 +419,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_28_100004) do
   add_foreign_key "leave_requests", "tenants"
   add_foreign_key "leave_requests", "users", column: "approved_by_id"
   add_foreign_key "leave_types", "tenants"
+  add_foreign_key "payroll_runs", "tenants"
+  add_foreign_key "payroll_runs", "users", column: "approved_by_id"
+  add_foreign_key "payroll_runs", "users", column: "initiated_by_id"
   add_foreign_key "payroll_settings", "tenants"
   add_foreign_key "professional_tax_slabs", "tenants"
   add_foreign_key "salary_components", "tenants"
