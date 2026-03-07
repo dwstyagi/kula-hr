@@ -71,10 +71,11 @@ RSpec.describe "Admin::AttendanceSummaries", type: :request do
             params: { attendance_summary: { days_present: 18, half_days: 0 } },
             headers: { "Host" => subdomain_host }
 
-      expect(response).to have_http_status(:ok)
-      expect(summary.reload.days_present).to eq(18)
-      expect(summary.reload.unapproved_absences).to eq(2)
-      expect(summary.reload.lop_days).to eq(2)
+      expect(response).to redirect_to(admin_attendance_summaries_path(month: 2, year: 2026))
+      summary.reload
+      expect(summary.days_present).to eq(18)
+      expect(summary.unapproved_absences).to eq(2)
+      expect(summary.lop_days).to eq(2)
     end
 
     it "does not update a locked summary" do

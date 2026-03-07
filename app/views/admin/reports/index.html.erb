@@ -1,0 +1,84 @@
+<% content_for(:page_title, "Reports") %>
+<div class="space-y-6">
+  <div>
+    <h1 class="text-2xl font-bold text-gray-900">Reports</h1>
+    <p class="text-sm text-gray-500 mt-0.5">Generate and download payroll & statutory reports</p>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <%# Department Breakdown %>
+    <div class="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-md transition-shadow">
+      <div class="flex items-center gap-3 mb-3">
+        <div class="p-2 bg-blue-50 rounded-lg">
+          <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+          </svg>
+        </div>
+        <h3 class="text-lg font-semibold text-gray-900">Department Breakdown</h3>
+      </div>
+      <p class="text-sm text-gray-500 mb-4">Payroll costs aggregated by department with employer contributions.</p>
+      <%= link_to "View Report", department_breakdown_admin_reports_path,
+          class: "text-sm font-medium text-blue-600 hover:text-blue-800" %>
+    </div>
+
+    <%# PF ECR %>
+    <div class="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-md transition-shadow">
+      <div class="flex items-center gap-3 mb-3">
+        <div class="p-2 bg-green-50 rounded-lg">
+          <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+          </svg>
+        </div>
+        <h3 class="text-lg font-semibold text-gray-900">PF Monthly Report</h3>
+      </div>
+      <p class="text-sm text-gray-500 mb-4">EPFO ECR file with EPF/EPS split for monthly PF filing.</p>
+      <%= link_to "View Report", pf_report_admin_reports_path,
+          class: "text-sm font-medium text-blue-600 hover:text-blue-800" %>
+    </div>
+
+    <%# ESI %>
+    <div class="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-md transition-shadow">
+      <div class="flex items-center gap-3 mb-3">
+        <div class="p-2 bg-purple-50 rounded-lg">
+          <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+          </svg>
+        </div>
+        <h3 class="text-lg font-semibold text-gray-900">ESI Monthly Report</h3>
+      </div>
+      <p class="text-sm text-gray-500 mb-4">Employee and employer ESI contributions for monthly filing.</p>
+      <%= link_to "View Report", esi_report_admin_reports_path,
+          class: "text-sm font-medium text-blue-600 hover:text-blue-800" %>
+    </div>
+
+    <%# PT Challan %>
+    <div class="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-md transition-shadow">
+      <div class="flex items-center gap-3 mb-3">
+        <div class="p-2 bg-amber-50 rounded-lg">
+          <svg class="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z"/>
+          </svg>
+        </div>
+        <h3 class="text-lg font-semibold text-gray-900">PT Challan</h3>
+      </div>
+      <p class="text-sm text-gray-500 mb-4">Professional tax slab-wise breakdown for state PT challan filing.</p>
+      <%= link_to "View Report", pt_challan_admin_reports_path,
+          class: "text-sm font-medium text-blue-600 hover:text-blue-800" %>
+    </div>
+
+    <%# YTD Earnings %>
+    <div class="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-md transition-shadow">
+      <div class="flex items-center gap-3 mb-3">
+        <div class="p-2 bg-indigo-50 rounded-lg">
+          <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+          </svg>
+        </div>
+        <h3 class="text-lg font-semibold text-gray-900">YTD Earnings</h3>
+      </div>
+      <p class="text-sm text-gray-500 mb-4">Year-to-date earnings and deductions per employee for the financial year.</p>
+      <%= link_to "View Report", ytd_earnings_admin_reports_path,
+          class: "text-sm font-medium text-blue-600 hover:text-blue-800" %>
+    </div>
+  </div>
+</div>

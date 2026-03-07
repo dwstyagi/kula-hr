@@ -85,6 +85,20 @@ Rails.application.routes.draw do
           end
         end
       end
+      resources :reports, only: [ :index ] do
+        collection do
+          get :department_breakdown
+          get :pf_report
+          get :esi_report
+          get :pt_challan
+          get :ytd_earnings
+          get :download_department_csv
+          get :download_pf_ecr
+          get :download_esi_csv
+          get :download_pt_csv
+          get :download_ytd_csv
+        end
+      end
       get "salary_breakup", to: "salary_breakup#show"
       resources :imports, only: [ :new, :create ] do
         collection do

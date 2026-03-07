@@ -1,5 +1,4 @@
 <div class="max-w-7xl mx-auto">
-
   <%# Import error report download banner %>
   <% if session[:import_error_key].present? %>
     <div class="flex items-center justify-between bg-amber-50 border border-amber-200 rounded-lg px-4 py-3 mb-5">
@@ -19,7 +18,6 @@
       <% end %>
     </div>
   <% end %>
-
   <div class="flex items-center justify-between mb-6">
     <div>
       <h1 class="text-2xl font-bold text-gray-900">Employees</h1>
@@ -51,12 +49,10 @@
       <% end %>
     </div>
   </div>
-
   <%# Search & Filters %>
   <%= form_with url: admin_employees_path, method: :get,
       data: { turbo_frame: "employees_list" },
       class: "flex flex-wrap items-end gap-3 mb-4" do |f| %>
-
     <div class="flex-1 min-w-48">
       <%= f.label :q, "Search", class: "block text-xs font-medium text-gray-600 mb-1" %>
       <div class="relative">
@@ -67,14 +63,12 @@
             class: "w-full pl-9 pr-3 py-2 rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm" %>
       </div>
     </div>
-
     <div class="min-w-40">
       <%= f.label :department_id, "Department", class: "block text-xs font-medium text-gray-600 mb-1" %>
       <%= f.collection_select :department_id, @departments, :id, :name,
           { selected: params[:department_id], include_blank: "All Departments" },
           class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm py-2" %>
     </div>
-
     <div class="min-w-36">
       <%= f.label :status, "Status", class: "block text-xs font-medium text-gray-600 mb-1" %>
       <%= f.select :status,
@@ -82,7 +76,6 @@
           { selected: params[:status], include_blank: "All Statuses" },
           class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm py-2" %>
     </div>
-
     <div class="flex gap-2">
       <%= f.submit "Search", class: "px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 cursor-pointer" %>
       <% if params[:q].present? || params[:department_id].present? || params[:status].present? %>
@@ -92,7 +85,6 @@
       <% end %>
     </div>
   <% end %>
-
   <%# Results (Turbo Frame) %>
   <%= turbo_frame_tag "employees_list" do %>
     <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
@@ -159,7 +151,6 @@
                         <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
                       </svg>
                     <% end %>
-
                     <%= link_to edit_admin_employee_path(employee),
                         title: "Edit Profile",
                         class: "p-1 rounded-md text-gray-600 hover:bg-gray-200 transition-colors cursor-pointer",
@@ -174,7 +165,6 @@
             <% end %>
           </tbody>
         </table>
-
         <% if @pagy.pages > 1 %>
           <div class="px-6 py-3 border-t border-gray-200 flex justify-center">
             <%= render "shared/pagy_nav", pagy: @pagy %>

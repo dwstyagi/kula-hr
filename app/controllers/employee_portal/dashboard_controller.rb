@@ -22,6 +22,8 @@ module EmployeePortal
                             .order(created_at: :desc)
                             .limit(5)
 
+      @payroll_data = Dashboard::EmployeeDashboardService.new(employee: current_employee).call
+
       today  = Date.today
       @working_days_this_month = Attendance::WorkingDaysCalculator.new(
         month:  today.month,

@@ -1,6 +1,7 @@
 module Admin
   class AttendanceSummariesController < BaseController
     before_action :set_month_year
+    before_action :check_future_month, only: [ :index, :generate, :lock_month, :download_template, :upload_template ]
     before_action :set_summary, only: [ :show, :edit, :update ]
 
     def index
@@ -14,26 +15,42 @@ module Admin
       @any_generated = @summaries.any?
     end
 
-    # Returns read-only row partial (used by Cancel link in edit form)
     def show
       authorize @summary
-      render partial: "summary_row", locals: { summary: @summary }
+      redirect_to admin_attendance_summaries_path(month: @summary.month, year: @summary.year)
     end
 
-    # Returns editable row form partial
     def edit
       authorize @summary
-      render partial: "edit_row", locals: { summary: @summary }
+      @summaries = policy_scope(AttendanceSummary)
+        .for_month(@summary.month, @summary.year)
+        .includes(employee: [ :department, :designation ])
+        .order("employees.last_name, employees.first_name")
+      @month = @summary.month
+      @year = @summary.year
+      @all_locked = @summaries.any? && @summaries.all?(&:locked?)
+      @any_generated = @summaries.any?
+      @editing_summary = @summary
+      render :index
     end
 
     def update
       authorize @summary
 
       if @summary.update(summary_params)
-        render partial: "summary_row", locals: { summary: @summary }
+        redirect_to admin_attendance_summaries_path(month: @summary.month, year: @summary.year),
+          notice: "Attendance updated for #{@summary.employee.full_name}."
       else
-        render partial: "edit_row", locals: { summary: @summary },
-               status: :unprocessable_content
+        @summaries = policy_scope(AttendanceSummary)
+          .for_month(@summary.month, @summary.year)
+          .includes(employee: [ :department, :designation ])
+          .order("employees.last_name, employees.first_name")
+        @month = @summary.month
+        @year = @summary.year
+        @all_locked = @summaries.any? && @summaries.all?(&:locked?)
+        @any_generated = @summaries.any?
+        @editing_summary = @summary
+        render :index, status: :unprocessable_content
       end
     end
 
@@ -99,6 +116,20 @@ module Admin
       today   = Date.today
       @month  = (params[:month] || today.month).to_i
       @year   = (params[:year]  || today.year).to_i
+    end
+
+    def check_future_month
+      redirect_to_current_month if future_month?
+    end
+
+    def future_month?
+      Date.new(@year, @month, 1) > Date.current.beginning_of_month
+    end
+
+    def redirect_to_current_month
+      today = Date.current
+      redirect_to admin_attendance_summaries_path(month: today.month, year: today.year),
+        alert: "Cannot process attendance for #{Date::MONTHNAMES[@month]} #{@year}. You can only manage attendance up to the current month (#{Date::MONTHNAMES[today.month]} #{today.year})."
     end
 
     def set_summary

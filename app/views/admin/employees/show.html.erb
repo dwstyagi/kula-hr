@@ -1,5 +1,4 @@
 <div class="max-w-4xl mx-auto">
-
   <%# Profile Header %>
   <div class="bg-white rounded-lg border border-gray-200 p-6 mb-6">
     <div class="flex items-center justify-between">
@@ -57,7 +56,7 @@
         <% unless @employee.user&.invitation_accepted_at.present? %>
           <%= button_to @employee.user ? "Resend Invite" : "Send Invite", resend_invite_admin_employee_path(@employee),
               method: :post,
-              class: "px-4 py-2 bg-yellow-500 text-white text-sm font-medium rounded-lg hover:bg-yellow-600" %>
+              class: "px-4 py-2 bg-yellow-500 text-white text-sm font-medium rounded-lg hover:bg-yellow-600 cursor-pointer" %>
         <% end %>
         <%= link_to "Edit", edit_admin_employee_path(@employee),
             class: "px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700" %>
@@ -66,41 +65,38 @@
       </div>
     </div>
   </div>
-
   <%# Tabs %>
   <div data-controller="tabs" data-tabs-active-value="<%= params[:tab].presence || 'personal' %>">
-
     <%# Tab Navigation %>
     <div class="border-b border-gray-200 mb-6">
       <nav class="-mb-px flex space-x-8">
         <button data-tabs-target="tab" data-tab="personal"
             data-action="click->tabs#switch"
-            class="py-3 px-1 border-b-2 text-sm font-medium whitespace-nowrap border-transparent text-gray-500">
+          class="py-3 px-1 border-b-2 text-sm font-medium whitespace-nowrap border-transparent text-gray-500 cursor-pointer">
           Personal
         </button>
         <button data-tabs-target="tab" data-tab="employment"
             data-action="click->tabs#switch"
-            class="py-3 px-1 border-b-2 text-sm font-medium whitespace-nowrap border-transparent text-gray-500">
+          class="py-3 px-1 border-b-2 text-sm font-medium whitespace-nowrap border-transparent text-gray-500 cursor-pointer">
           Employment
         </button>
         <button data-tabs-target="tab" data-tab="bank"
             data-action="click->tabs#switch"
-            class="py-3 px-1 border-b-2 text-sm font-medium whitespace-nowrap border-transparent text-gray-500">
+          class="py-3 px-1 border-b-2 text-sm font-medium whitespace-nowrap border-transparent text-gray-500 cursor-pointer">
           Bank & Statutory
         </button>
         <button data-tabs-target="tab" data-tab="salary"
             data-action="click->tabs#switch"
-            class="py-3 px-1 border-b-2 text-sm font-medium whitespace-nowrap border-transparent text-gray-500">
+          class="py-3 px-1 border-b-2 text-sm font-medium whitespace-nowrap border-transparent text-gray-500 cursor-pointer">
           Salary
         </button>
         <button data-tabs-target="tab" data-tab="leave"
             data-action="click->tabs#switch"
-            class="py-3 px-1 border-b-2 text-sm font-medium whitespace-nowrap border-transparent text-gray-500">
+          class="py-3 px-1 border-b-2 text-sm font-medium whitespace-nowrap border-transparent text-gray-500 cursor-pointer">
           Leave
         </button>
       </nav>
     </div>
-
     <%# Personal Panel %>
     <div data-tabs-target="panel" data-panel="personal" class="space-y-6">
       <div class="bg-white rounded-lg border border-gray-200 p-6">
@@ -124,7 +120,6 @@
           </div>
         </dl>
       </div>
-
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div class="bg-white rounded-lg border border-gray-200 p-6">
           <h3 class="text-base font-semibold text-gray-900 mb-4">Address</h3>
@@ -137,7 +132,6 @@
             <p class="text-sm text-gray-400">No address provided.</p>
           <% end %>
         </div>
-
         <div class="bg-white rounded-lg border border-gray-200 p-6">
           <h3 class="text-base font-semibold text-gray-900 mb-4">Emergency Contact</h3>
           <% if @employee.emergency_contact_name.present? %>
@@ -150,7 +144,6 @@
         </div>
       </div>
     </div>
-
     <%# Employment Panel %>
     <div data-tabs-target="panel" data-panel="employment" class="hidden">
       <div class="bg-white rounded-lg border border-gray-200 p-6">
@@ -205,7 +198,6 @@
         </dl>
       </div>
     </div>
-
     <%# Bank & Statutory Panel %>
     <div data-tabs-target="panel" data-panel="bank" class="hidden space-y-6">
       <div class="bg-white rounded-lg border border-gray-200 p-6">
@@ -225,7 +217,6 @@
           </div>
         </dl>
       </div>
-
       <div class="bg-white rounded-lg border border-gray-200 p-6">
         <h3 class="text-base font-semibold text-gray-900 mb-4">Statutory Details</h3>
         <dl class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-5">
@@ -248,7 +239,6 @@
         </dl>
       </div>
     </div>
-
     <%# Salary Panel %>
     <div data-tabs-target="panel" data-panel="salary" class="hidden space-y-6">
       <% if @current_salary %>
@@ -281,7 +271,6 @@
             </div>
           </dl>
         </div>
-
         <%# Salary History %>
         <% if @salary_history.any? %>
           <div class="bg-white rounded-lg border border-gray-200 p-6">
@@ -308,7 +297,6 @@
             </table>
           </div>
         <% end %>
-
       <% else %>
         <%# No salary assigned %>
         <div class="bg-white rounded-lg border border-gray-200 p-12 text-center">
@@ -329,7 +317,6 @@
         </div>
       <% end %>
     </div>
-
     <%# Leave Panel %>
     <div data-tabs-target="panel" data-panel="leave" class="hidden space-y-6">
       <div class="bg-white rounded-lg border border-gray-200 p-6">
@@ -339,7 +326,6 @@
             <span class="text-xs font-normal text-gray-400 ml-1"><%= LeaveBalance.current_financial_year %></span>
           </h3>
         </div>
-
         <% if @leave_balances.any? %>
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <% @leave_balances.each do |balance| %>
@@ -350,13 +336,11 @@
                     <%= balance.leave_type.code %>
                   </span>
                 </div>
-
                 <% used_pct = balance.total_days > 0 ? (balance.used_days / balance.total_days * 100).round : 0 %>
                 <div class="w-full bg-gray-100 rounded-full h-1.5 mb-2">
                   <div class="h-1.5 rounded-full <%= used_pct > 80 ? 'bg-red-500' : 'bg-blue-500' %>"
                        style="width: <%= used_pct %>%"></div>
                 </div>
-
                 <div class="flex items-end justify-between">
                   <div>
                     <p class="text-2xl font-bold text-gray-900"><%= balance.remaining_days.to_i %></p>
@@ -382,6 +366,5 @@
         <% end %>
       </div>
     </div>
-
   </div>
 </div>

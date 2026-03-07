@@ -12,6 +12,16 @@ module EmployeePortal
       # YTD summary for current financial year
       fy_start = Date.today.month >= 4 ? Date.new(Date.today.year, 4, 1) : Date.new(Date.today.year - 1, 4, 1)
       @ytd_payslips = @payslips.select { |p| Date.new(p.year, p.month, 1) >= fy_start }
+      # Month-over-month changes
+      @mom_changes = {}
+      sorted = @payslips.to_a
+      sorted.each_with_index do |payslip, i|
+        prev = sorted[i + 1]
+        if prev && prev.net_pay > 0
+          @mom_changes[payslip.id] = ((payslip.net_pay - prev.net_pay) / prev.net_pay * 100).round(1)
+        end
+      end
+
       @ytd_gross      = @ytd_payslips.sum(&:gross_pay)
       @ytd_deductions = @ytd_payslips.sum(&:total_deductions)
       @ytd_net        = @ytd_payslips.sum(&:net_pay)

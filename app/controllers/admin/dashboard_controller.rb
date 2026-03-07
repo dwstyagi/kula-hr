@@ -76,6 +76,8 @@ module Admin
         )
       end
 
+      @payroll_data = Dashboard::AdminDashboardService.new(tenant: ActsAsTenant.current_tenant).call
+
       @upcoming_anniversaries = @upcoming_anniversaries.order(
         Arel.sql("EXTRACT(MONTH FROM joining_date), EXTRACT(DAY FROM joining_date)")
       ).limit(5)

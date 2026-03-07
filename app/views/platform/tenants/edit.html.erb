@@ -58,7 +58,10 @@
 
       <div class="flex items-center gap-4 pt-4">
         <%= f.submit "Update Tenant", class: "rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 cursor-pointer" %>
-        <%= link_to "Cancel", platform_admin_tenant_path(@tenant), class: "text-sm text-gray-600 hover:text-gray-900" %>
+        <%= link_to platform_admin_tenant_path(@tenant), class: "inline-flex items-center gap-1.5 text-sm text-gray-600 hover:text-gray-900" do %>
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+          Cancel
+        <% end %>
       </div>
     <% end %>
   </div>

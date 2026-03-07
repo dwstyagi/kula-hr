@@ -107,11 +107,23 @@
         </thead>
         <tbody class="divide-y divide-gray-200">
           <% @summaries.each do |summary| %>
-            <%= render "summary_row", summary: summary %>
+            <% if @editing_summary&.id == summary.id %>
+              <%= render "edit_row", summary: summary %>
+            <% else %>
+              <%= render "summary_row", summary: summary %>
+            <% end %>
           <% end %>
         </tbody>
       </table>
     </div>
+
+    <% if @editing_summary %>
+      <%= form_with url: admin_attendance_summary_path(@editing_summary),
+                    method: :patch,
+                    id: "edit_attendance_#{@editing_summary.id}",
+                    class: "hidden" do %>
+      <% end %>
+    <% end %>
   <% elsif @any_generated == false %>
     <div class="bg-white rounded-xl border border-gray-200 p-16 text-center">
       <svg class="mx-auto h-12 w-12 text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

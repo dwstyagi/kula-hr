@@ -1,62 +1,75 @@
-<div class="max-w-lg mx-auto space-y-6">
+<div class="space-y-6">
   <div>
     <h1 class="text-2xl font-bold text-gray-900">Run Payroll</h1>
     <p class="text-sm text-gray-500 mt-0.5">Select the month and year to process payroll for</p>
   </div>
 
-  <div class="bg-white rounded-xl border border-gray-200 p-6">
-    <%= form_with model: [:admin, @payroll_run], class: "space-y-5" do |f| %>
-      <% if @payroll_run.errors.any? %>
-        <div class="rounded-lg bg-red-50 border border-red-200 p-4 text-sm text-red-700">
-          <p class="font-semibold mb-1">Could not create payroll run:</p>
-          <ul class="list-disc list-inside space-y-1">
-            <% @payroll_run.errors.full_messages.each do |msg| %>
-              <li><%= msg %></li>
-            <% end %>
-          </ul>
-        </div>
-      <% end %>
+  <%= form_with model: [:admin, @payroll_run], class: "space-y-6" do |f| %>
+    <% if @payroll_run.errors.any? %>
+      <div class="rounded-lg bg-red-50 border border-red-200 p-4 text-sm text-red-700">
+        <p class="font-semibold mb-1">Could not create payroll run:</p>
+        <ul class="list-disc list-inside space-y-1">
+          <% @payroll_run.errors.full_messages.each do |msg| %>
+            <li><%= msg %></li>
+          <% end %>
+        </ul>
+      </div>
+    <% end %>
 
-      <div class="grid grid-cols-2 gap-4">
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Month</label>
-          <%= f.select :month,
-                (1..12).map { |m| [Date::MONTHNAMES[m], m] },
-                { selected: @payroll_run.month || Date.today.month },
-                class: "w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500" %>
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Year</label>
-          <%= f.number_field :year,
-                value: @payroll_run.year || Date.today.year,
-                min: 2020, max: 2099,
-                class: "w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500" %>
+    <%# Row 1: Period + Notes %>
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div class="bg-white rounded-xl border border-gray-200 p-6 space-y-4">
+        <h2 class="text-base font-semibold text-gray-900 border-b border-gray-100 pb-3">Payroll Period</h2>
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Month</label>
+            <%= f.select :month,
+                  (1..12).map { |m| [Date::MONTHNAMES[m], m] },
+                  { selected: @payroll_run.month || Date.today.month },
+                  class: "w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500" %>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Year</label>
+            <%= f.number_field :year,
+                  value: @payroll_run.year || Date.today.year,
+                  min: 2020, max: 2099,
+                  class: "w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500" %>
+          </div>
         </div>
       </div>
 
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Notes <span class="text-gray-400">(optional)</span></label>
-        <%= f.text_area :notes, rows: 2,
+      <div class="bg-white rounded-xl border border-gray-200 p-6 space-y-4">
+        <h2 class="text-base font-semibold text-gray-900 border-b border-gray-100 pb-3">Notes</h2>
+        <%= f.text_area :notes, rows: 3,
               placeholder: "Any notes for this payroll run…",
               class: "w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500" %>
       </div>
+    </div>
 
-      <%# Prerequisites reminder %>
-      <div class="rounded-lg bg-amber-50 border border-amber-200 p-4 text-sm text-amber-800">
-        <p class="font-medium mb-1">Before running payroll, ensure:</p>
-        <ul class="list-disc list-inside space-y-1 text-amber-700">
-          <li>Attendance is locked for all active employees</li>
-          <li>All employees have a salary structure assigned</li>
-          <li>Tax declarations are submitted (for TDS)</li>
-        </ul>
+    <%# Row 2: Prerequisites + Actions %>
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div class="bg-white rounded-xl border border-gray-200 p-6 space-y-4">
+        <h2 class="text-base font-semibold text-gray-900 border-b border-gray-100 pb-3">Prerequisites</h2>
+        <div class="rounded-lg bg-amber-50 border border-amber-200 p-4 text-sm text-amber-800">
+          <p class="font-medium mb-1">Before running payroll, ensure:</p>
+          <ul class="list-disc list-inside space-y-1 text-amber-700">
+            <li>Attendance is locked for all active employees</li>
+            <li>All employees have a salary structure assigned</li>
+            <li>Tax declarations are submitted (for TDS)</li>
+          </ul>
+        </div>
       </div>
 
-      <div class="flex items-center justify-end gap-3 pt-2">
-        <%= link_to "Cancel", admin_payroll_runs_path,
-              class: "px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900" %>
-        <%= f.submit "Create Payroll Run",
-              class: "px-5 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 cursor-pointer" %>
+      <div class="bg-white rounded-xl border border-gray-200 p-6 space-y-4">
+        <h2 class="text-base font-semibold text-gray-900 border-b border-gray-100 pb-3">Actions</h2>
+        <p class="text-sm text-gray-500">Review the details and click below to create the payroll run.</p>
+        <div class="flex items-center gap-3 pt-2">
+          <%= f.submit "Create Payroll Run",
+                class: "px-5 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 cursor-pointer" %>
+          <%= link_to "Cancel", admin_payroll_runs_path,
+                class: "px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900" %>
+        </div>
       </div>
-    <% end %>
-  </div>
+    </div>
+  <% end %>
 </div>

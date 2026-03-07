@@ -4,8 +4,10 @@
   <div class="bg-white rounded-lg border border-gray-200 p-6 mb-6">
     <div class="flex items-center justify-between mb-6">
       <h2 class="text-lg font-semibold text-gray-900">Company Details</h2>
-      <%= link_to "Edit", edit_platform_admin_tenant_path(@tenant),
-          class: "text-sm text-blue-600 hover:text-blue-900" %>
+      <%= link_to edit_platform_admin_tenant_path(@tenant), class: "relative group inline-block text-blue-600 hover:text-blue-800" do %>
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+        <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-800 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">Edit</span>
+      <% end %>
     </div>
 
     <dl class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
@@ -50,5 +52,8 @@
     </dl>
   </div>
 
-  <%= link_to "Back to Tenants", platform_admin_tenants_path, class: "text-sm text-gray-600 hover:text-gray-900" %>
+  <%= link_to platform_admin_tenants_path, class: "relative group inline-flex items-center gap-1.5 text-sm text-gray-600 hover:text-gray-900" do %>
+    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+    Back to Tenants
+  <% end %>
 </div>
