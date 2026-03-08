@@ -3,6 +3,7 @@ module Dashboard
     Result = Struct.new(
       :current_run, :current_run_status, :current_run_net, :current_run_ctc,
       :current_run_employees, :payroll_trend, :deduction_breakdown, :recent_activity,
+      :pending_leave_count, :pending_leave_requests,
       keyword_init: true
     )
 
@@ -20,7 +21,9 @@ module Dashboard
         current_run_employees: current&.processed_employees || 0,
         payroll_trend: payroll_trend,
         deduction_breakdown: deduction_breakdown(current),
-        recent_activity: recent_activity
+        recent_activity: recent_activity,
+        pending_leave_count: pending_leaves.count,
+        pending_leave_requests: pending_leaves.limit(5)
       )
     end
 
@@ -54,6 +57,12 @@ module Dashboard
                      .group(:component_name)
                      .sum(:amount)
                      .transform_values { |v| v.to_f.round(0) }
+    end
+
+    def pending_leaves
+      LeaveRequest.where(status: :pending)
+                  .includes(:employee, :leave_type)
+                  .order(created_at: :desc)
     end
 
     def recent_activity

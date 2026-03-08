@@ -37,8 +37,20 @@ class Employee < ApplicationRecord
   scope :probation, -> { where(employment_status: "probation") }
   scope :resigned, -> { where(employment_status: "resigned") }
 
+  # Virtual attributes for emergency contact
+  attr_writer :emergency_contact_first_name, :emergency_contact_last_name
+
+  def emergency_contact_first_name
+    @emergency_contact_first_name || emergency_contact_name&.split(" ", 2)&.first
+  end
+
+  def emergency_contact_last_name
+    @emergency_contact_last_name || emergency_contact_name&.split(" ", 2)&.last
+  end
+
   # Callbacks
   before_validation :generate_employee_code, on: :create
+  before_validation :combine_emergency_contact_name
 
   def full_name
     "#{first_name} #{last_name}"
@@ -53,6 +65,12 @@ class Employee < ApplicationRecord
   end
 
   private
+
+  def combine_emergency_contact_name
+    if @emergency_contact_first_name.present? || @emergency_contact_last_name.present?
+      self.emergency_contact_name = [emergency_contact_first_name, emergency_contact_last_name].compact_blank.join(" ")
+    end
+  end
 
   def generate_employee_code
     return if employee_code.present?

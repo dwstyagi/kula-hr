@@ -84,6 +84,26 @@ RSpec.describe Employee, type: :model do
     end
   end
 
+  describe "emergency contact name" do
+    it "combines first and last name into emergency_contact_name" do
+      employee = build(:employee, tenant: tenant, emergency_contact_first_name: "John", emergency_contact_last_name: "Smith")
+      employee.valid?
+      expect(employee.emergency_contact_name).to eq("John Smith")
+    end
+
+    it "handles missing first or last name gracefully" do
+      employee = build(:employee, tenant: tenant, emergency_contact_first_name: "John", emergency_contact_last_name: "")
+      employee.valid?
+      expect(employee.emergency_contact_name).to eq("John")
+    end
+
+    it "splits existing name into virtual attributes" do
+      employee = build(:employee, tenant: tenant, emergency_contact_name: "Jane Doe")
+      expect(employee.emergency_contact_first_name).to eq("Jane")
+      expect(employee.emergency_contact_last_name).to eq("Doe")
+    end
+  end
+
   describe "#full_name" do
     it "joins first and last name" do
       emp = build(:employee, first_name: "Jane", last_name: "Doe")

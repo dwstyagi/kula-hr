@@ -51,6 +51,41 @@ RSpec.describe Dashboard::AdminDashboardService do
         expect(result.recent_activity.size).to eq(2)
       end
 
+      context "with pending leave requests" do
+        let(:department) { create(:department, tenant: tenant) }
+        let(:designation) { create(:designation, tenant: tenant) }
+        let!(:employee) do
+          create(:employee, tenant: tenant, department: department, designation: designation)
+        end
+        let!(:leave_type) { create(:leave_type, tenant: tenant) }
+
+        it "returns pending leave count and requests" do
+          leave_request = LeaveRequest.new(
+            tenant: tenant,
+            employee: employee,
+            leave_type: leave_type,
+            from_date: Date.today + 10,
+            to_date: Date.today + 12,
+            number_of_days: 3,
+            reason: "Vacation",
+            status: :pending
+          )
+          leave_request.save(validate: false)
+
+          result = described_class.new(tenant: tenant).call
+
+          expect(result.pending_leave_count).to eq(1)
+          expect(result.pending_leave_requests.first).to eq(leave_request)
+        end
+
+        it "returns zero pending count when no pending leaves" do
+          result = described_class.new(tenant: tenant).call
+
+          expect(result.pending_leave_count).to eq(0)
+          expect(result.pending_leave_requests).to be_empty
+        end
+      end
+
       context "with deductions" do
         let!(:payslip) { create(:payslip, tenant: tenant, payroll_run: run2) }
         let!(:pf_item) do
