@@ -3,6 +3,10 @@ class EmployeePolicy < ApplicationPolicy
     admin_or_hr? || record.user_id == user&.id
   end
 
+  def update_profile?
+    record.user_id == user&.id
+  end
+
   def resend_invite?
     admin_or_hr?
   end

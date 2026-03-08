@@ -30,6 +30,9 @@ module EmployeePortal
         year:   today.year,
         tenant: ActsAsTenant.current_tenant
       ).call
+
+      @attendance = current_employee.attendance_summaries
+                      .find_by(month: today.month, year: today.year)
     end
   end
 end

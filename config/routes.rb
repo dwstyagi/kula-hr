@@ -124,6 +124,7 @@ Rails.application.routes.draw do
           get :download
         end
       end
+      resource :profile, only: [ :show, :edit, :update ]
     end
 
     root "admin/dashboard#index", as: :tenant_root
