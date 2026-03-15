@@ -33,7 +33,24 @@ class Tenant < ApplicationRecord
   scope :trial, -> { where(status: "trial") }
   scope :suspended, -> { where(status: "suspended") }
 
+  ACTIVATION_TOKEN_VALIDITY = 1.hour
+
   before_validation :normalize_subdomain
+
+  def generate_activation_token!
+    update!(
+      activation_token: SecureRandom.urlsafe_base64(32),
+      activation_token_expires_at: ACTIVATION_TOKEN_VALIDITY.from_now
+    )
+  end
+
+  def activation_token_valid?
+    activation_token.present? && activation_token_expires_at&.future?
+  end
+
+  def revoke_activation_token!
+    update!(activation_token: nil, activation_token_expires_at: nil)
+  end
 
   private
 

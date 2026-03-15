@@ -59,7 +59,7 @@ module Employees
       "Required",
       "Required — must be unique",
       "Optional",
-      "Optional — DD/MM/YYYY",
+      "Required — DD/MM/YYYY",
       "Optional — male / female / other",
       "Required — DD/MM/YYYY",
       "Required — active / probation / notice_period / resigned / terminated",

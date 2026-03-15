@@ -6,6 +6,7 @@ RSpec.describe Employees::RowValidator do
       "first_name"        => "Jane",
       "last_name"         => "Doe",
       "email"             => "jane.doe@example.com",
+      "date_of_birth"     => "15/08/1990",
       "joining_date"      => "15/08/2023",
       "employment_status" => "active"
     }.merge(overrides)
@@ -21,7 +22,7 @@ RSpec.describe Employees::RowValidator do
   end
 
   describe "required fields" do
-    %w[first_name last_name email joining_date employment_status].each do |field|
+    %w[first_name last_name email date_of_birth joining_date employment_status].each do |field|
       context "when #{field} is blank" do
         let(:row) { valid_row(field => "") }
 
@@ -63,7 +64,7 @@ RSpec.describe Employees::RowValidator do
 
         it "skips validation" do
           errors_for_field = result[:errors].select { |e| e.include?(field.humanize) }
-          expect(errors_for_field).to be_empty unless field == "joining_date"
+          expect(errors_for_field).to be_empty unless %w[joining_date date_of_birth].include?(field)
         end
       end
     end

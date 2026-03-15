@@ -18,11 +18,78 @@
       <% end %>
     </div>
   <% end %>
+  <%# Activation link banner %>
+  <% tenant = ActsAsTenant.current_tenant %>
+  <% if tenant.activation_token_valid? %>
+    <% activation_url = employee_activation_url(token: tenant.activation_token, subdomain: tenant.subdomain) %>
+    <div id="activation-banner" class="flex items-center justify-between bg-indigo-50 border border-indigo-200 rounded-lg px-4 py-3 mb-5">
+      <div class="flex items-center gap-2 text-sm text-indigo-800 min-w-0">
+        <svg class="w-4 h-4 shrink-0 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
+        </svg>
+        <span class="truncate font-mono text-xs"><%= activation_url %></span>
+        <span class="shrink-0 text-indigo-500 text-xs">· expires <%= time_ago_in_words(tenant.activation_token_expires_at) %> from now</span>
+      </div>
+      <div class="flex items-center gap-2 shrink-0 ml-4">
+        <button type="button"
+                data-activation-url="<%= activation_url %>"
+                onclick="
+                  const url = this.dataset.activationUrl;
+                  const btn = this;
+                  const original = btn.innerHTML;
+                  if (navigator.clipboard && window.isSecureContext) {
+                    navigator.clipboard.writeText(url);
+                  } else {
+                    const ta = document.createElement('textarea');
+                    ta.value = url; ta.style.position = 'fixed'; ta.style.opacity = '0';
+                    document.body.appendChild(ta); ta.select(); document.execCommand('copy');
+                    document.body.removeChild(ta);
+                  }
+                  btn.textContent = 'Copied!';
+                  setTimeout(() => btn.innerHTML = original, 2000);
+                "
+                class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 text-white text-xs font-medium rounded-lg hover:bg-indigo-700 cursor-pointer">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+          </svg>
+          Copy
+        </button>
+        <%= button_to generate_admin_activation_link_path, method: :post,
+            class: "inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-indigo-300 text-indigo-700 text-xs font-medium rounded-lg hover:bg-indigo-50 cursor-pointer",
+            form: { data: { turbo_confirm: "This will invalidate the current link. Continue?" } } do %>
+          Regenerate
+        <% end %>
+        <%= button_to revoke_admin_activation_link_path, method: :delete,
+            class: "inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-red-200 text-red-600 text-xs font-medium rounded-lg hover:bg-red-50 cursor-pointer",
+            form: { data: { turbo_confirm: "This will disable self-service activation. Continue?" } } do %>
+          Revoke
+        <% end %>
+        <button type="button"
+                onclick="document.getElementById('activation-banner').remove()"
+                class="ml-1 p-1.5 text-indigo-400 hover:text-indigo-600 hover:bg-indigo-100 rounded-lg cursor-pointer"
+                title="Dismiss">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  <% end %>
+
   <div class="flex items-center justify-between mb-6">
     <div>
       <h1 class="text-2xl font-bold text-gray-900">Employees</h1>
     </div>
     <div class="flex items-center gap-2">
+      <% unless tenant.activation_token_valid? %>
+        <%= button_to generate_admin_activation_link_path, method: :post,
+            class: "inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 cursor-pointer" do %>
+          <svg class="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
+          </svg>
+          Generate Activation Link
+        <% end %>
+      <% end %>
       <%= link_to export_admin_employees_path(q: params[:q], department_id: params[:department_id], status: params[:status]),
           class: "inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50",
           data: { turbo: false } do %>

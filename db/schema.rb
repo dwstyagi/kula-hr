@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_01_100003) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_15_100001) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "pg_catalog.plpgsql"
@@ -376,6 +376,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_01_100003) do
   end
 
   create_table "tenants", force: :cascade do |t|
+    t.string "activation_token"
+    t.datetime "activation_token_expires_at"
     t.string "address"
     t.string "city"
     t.datetime "created_at", null: false
@@ -390,6 +392,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_01_100003) do
     t.citext "subdomain", null: false
     t.string "tan"
     t.datetime "updated_at", null: false
+    t.index ["activation_token"], name: "index_tenants_on_activation_token", unique: true
     t.index ["status"], name: "index_tenants_on_status"
     t.index ["subdomain"], name: "index_tenants_on_subdomain", unique: true
   end

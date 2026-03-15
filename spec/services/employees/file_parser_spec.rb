@@ -46,8 +46,8 @@ RSpec.describe Employees::FileParser do
         expect(row["employment_status"]).to eq("active")
       end
 
-      it "assigns _row numbers starting from 2" do
-        expect(result.rows.first["_row"]).to eq(2)
+      it "assigns _row numbers starting from 1 (excluding header row)" do
+        expect(result.rows.first["_row"]).to eq(1)
       end
 
       it "skips completely blank rows" do

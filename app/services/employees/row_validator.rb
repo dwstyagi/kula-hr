@@ -1,6 +1,6 @@
 module Employees
   class RowValidator
-    REQUIRED_FIELDS = %w[first_name last_name email joining_date employment_status].freeze
+    REQUIRED_FIELDS = %w[first_name last_name email date_of_birth joining_date employment_status].freeze
     DATE_FIELDS     = %w[joining_date date_of_birth confirmation_date].freeze
     DATE_FORMAT     = "%d/%m/%Y"
 

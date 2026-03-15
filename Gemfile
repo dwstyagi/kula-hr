@@ -47,6 +47,7 @@ gem "acts_as_tenant"
 # Authentication
 gem "devise"
 gem "devise_invitable"
+gem "rack-attack"
 
 # Authorization & roles
 gem "rolify"

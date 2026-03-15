@@ -9,6 +9,7 @@ RSpec.describe Employees::BulkValidator do
       "first_name"        => "Jane",
       "last_name"         => "Doe",
       "email"             => "jane@example.com",
+      "date_of_birth"     => "15/08/1990",
       "joining_date"      => "15/08/2023",
       "employment_status" => "active"
     }.merge(overrides)

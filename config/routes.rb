@@ -13,6 +13,19 @@ Rails.application.routes.draw do
 
   # === Tenant subdomain routes ===
   constraints subdomain: /.+/ do
+    # Self-service employee activation (public)
+    get  "activate/:token", to: "employee_activations#new",    as: :employee_activation
+    post "activate/:token", to: "employee_activations#create", as: :employee_activation_submit
+    get  "activate/:token/sent", to: "employee_activations#sent", as: :employee_activation_sent
+
+    # Admin: generate/revoke activation link
+    namespace :admin do
+      resource :activation_link, only: [] do
+        post :generate
+        delete :revoke
+      end
+    end
+
     devise_for :users, controllers: { sessions: "users/sessions" }
 
     namespace :admin do

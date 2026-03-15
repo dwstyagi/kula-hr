@@ -193,7 +193,16 @@ module Admin
         end
       end
 
-      records.each_slice(500) { |batch| Employee.insert_all!(batch) } if records.any?
+      if records.any?
+        # Capture emails before insert to identify newly created employees
+        emails = records.map { |r| r["email"] }
+
+        records.each_slice(500) { |batch| Employee.insert_all!(batch) }
+
+        # Allocate leave balances in bulk — insert_all bypasses callbacks so we do it manually
+        employees = Employee.where(email: emails).to_a
+        Leave::LeaveBalanceAllocator.new(employees: employees).call
+      end
     end
 
     # Returns { "Engineering" => dept_id, ... } — upserts missing names in one pass
