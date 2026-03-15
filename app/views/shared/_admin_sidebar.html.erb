@@ -58,7 +58,12 @@
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
         </svg>
-        Leave Requests
+        <span class="flex-1">Leave Requests</span>
+        <% if @pending_leave_count&.positive? %>
+          <span class="inline-flex items-center justify-center px-2 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-600">
+            <%= @pending_leave_count %>
+          </span>
+        <% end %>
       <% end %>
 
       <%= link_to admin_attendance_summaries_path,

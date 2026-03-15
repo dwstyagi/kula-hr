@@ -53,6 +53,10 @@ module Admin
     def cancel
       authorize @leave_request
 
+      if @leave_request.to_date < Date.today
+        return redirect_to admin_leave_requests_path, alert: "Cannot cancel a leave whose dates have already passed."
+      end
+
       if @leave_request.approved?
         ActiveRecord::Base.transaction do
           Leave::LeaveBalanceAdjuster.new(leave_request: @leave_request).credit!
