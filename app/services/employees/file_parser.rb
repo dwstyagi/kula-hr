@@ -54,10 +54,11 @@ module Employees
         next if raw.all?(&:blank?)
 
         row_data = headers.each_with_index.with_object({}) do |(header, index), hash|
-          hash[header] = raw[index].to_s.strip.presence
+          value = raw[index]
+          hash[header] = value.is_a?(Date) ? value.strftime("%d/%m/%Y") : value.to_s.strip.presence
         end
 
-        row_data["_row"] = row_num
+        row_data["_row"] = row_num - 1
         rows << row_data
       end
 

@@ -142,7 +142,7 @@ Rails.application.routes.draw do
     delete "logout", to: "sessions#destroy"
 
     root "dashboard#index"
-    resources :tenants, only: [ :index, :show, :edit, :update ] do
+    resources :tenants, only: [ :index, :new, :create, :show, :edit, :update ] do
       member do
         patch :toggle_status
       end

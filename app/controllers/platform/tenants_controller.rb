@@ -6,6 +6,27 @@ module Platform
       @pagy, @tenants = pagy(:offset, Tenant.order(created_at: :desc), limit: 25)
     end
 
+    def new
+      @signup_form = SignupForm.new
+    end
+
+    def create
+      @signup_form = SignupForm.new(signup_form_params)
+
+      if @signup_form.valid?
+        result = Tenants::TenantOnboarder.call(@signup_form)
+
+        if result.success?
+          redirect_to platform_admin_tenant_path(result.tenant), notice: "Tenant '#{result.tenant.name}' created successfully."
+        else
+          flash.now[:alert] = result.error
+          render :new, status: :unprocessable_entity
+        end
+      else
+        render :new, status: :unprocessable_entity
+      end
+    end
+
     def show
     end
 
@@ -38,6 +59,14 @@ module Platform
 
     def set_tenant
       @tenant = Tenant.find(params[:id])
+    end
+
+    def signup_form_params
+      params.require(:signup_form).permit(
+        :company_name, :subdomain, :state,
+        :first_name, :last_name, :email,
+        :password, :password_confirmation
+      )
     end
 
     def tenant_params
