@@ -66,4 +66,8 @@ class ApplicationPolicy
   def employee?
     user&.has_role?(:employee)
   end
+
+  def current_tenant
+    ActsAsTenant.current_tenant
+  end
 end

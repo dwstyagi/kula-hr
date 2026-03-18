@@ -16,6 +16,9 @@ class Tenant < ApplicationRecord
   RESERVED_SUBDOMAINS = %w[www admin api app mail ftp smtp pop imap blog support help
                            status assets cdn static media platform dashboard].freeze
 
+  TRIAL_EMPLOYEE_LIMIT = 20
+  WRITE_ALLOWED_STATUSES = %w[trial active].freeze
+
   validates :name, presence: true
   validates :subdomain, presence: true,
                          uniqueness: { case_sensitive: false },
@@ -36,6 +39,13 @@ class Tenant < ApplicationRecord
   ACTIVATION_TOKEN_VALIDITY = 1.hour
 
   before_validation :normalize_subdomain
+
+  def trial?            = status == "trial"
+  def active?           = status == "active"
+  def write_allowed?    = WRITE_ALLOWED_STATUSES.include?(status)
+  def at_employee_limit?
+    trial? && employees.count >= TRIAL_EMPLOYEE_LIMIT
+  end
 
   def generate_activation_token!
     update!(

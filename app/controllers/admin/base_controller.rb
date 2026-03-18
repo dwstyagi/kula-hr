@@ -3,6 +3,7 @@ module Admin
     before_action :authenticate_user!
     before_action :verify_admin_or_hr!
     before_action :set_pending_leave_count
+    before_action :verify_tenant_write_access!, unless: -> { action_name.in?(%w[index show bank_file export template progress]) }
 
     layout "admin"
 
@@ -16,6 +17,12 @@ module Admin
 
     def set_pending_leave_count
       @pending_leave_count = LeaveRequest.where(status: "pending").count
+    end
+
+    def verify_tenant_write_access!
+      tenant = ActsAsTenant.current_tenant
+      return if tenant.nil? || tenant.write_allowed?
+      redirect_to admin_root_path, alert: "Your account is #{tenant.status}. Contact support to restore access."
     end
   end
 end

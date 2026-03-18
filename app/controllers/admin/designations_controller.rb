@@ -36,6 +36,32 @@ module Admin
       end
     end
 
+    def bulk_import
+      authorize Designation, :create?
+
+      unless params[:file].present?
+        return redirect_to admin_designations_path, alert: "Please select a CSV file."
+      end
+
+      names = parse_names(params[:file].read)
+
+      if names.empty?
+        return redirect_to admin_designations_path, alert: "No valid names found in the file."
+      end
+
+      tenant    = ActsAsTenant.current_tenant
+      existing  = Designation.where("lower(name) IN (?)", names.map(&:downcase)).pluck(:name).map(&:downcase).to_set
+      to_create = names.reject { |n| existing.include?(n.downcase) }
+
+      Designation.insert_all(to_create.map { |n| { name: n, tenant_id: tenant.id, created_at: Time.current, updated_at: Time.current } }) if to_create.any?
+
+      skipped = names.size - to_create.size
+      notice  = "#{to_create.size} #{'designation'.pluralize(to_create.size)} imported."
+      notice += " #{skipped} skipped (already exist)." if skipped > 0
+
+      redirect_to admin_designations_path, notice: notice
+    end
+
     def destroy
       authorize @designation
       @designation.destroy!
@@ -50,6 +76,15 @@ module Admin
 
     def designation_params
       params.require(:designation).permit(:name)
+    end
+
+    def parse_names(content)
+      content.force_encoding("UTF-8")
+             .lines
+             .map { |l| l.strip.split(",").first.to_s.strip }
+             .reject(&:blank?)
+             .reject { |n| n.downcase == "name" }
+             .uniq { |n| n.downcase }
     end
   end
 end

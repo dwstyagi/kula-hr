@@ -22,6 +22,14 @@
 
     <div class="ml-64">
       <%= render "shared/admin_topbar" %>
+      <% if ActsAsTenant.current_tenant&.trial? %>
+        <div class="bg-amber-50 border-b border-amber-200 px-6 py-2 text-sm text-amber-800 flex items-center justify-between">
+          <span>
+            <strong>You're on a Kula trial.</strong> Some features are limited on trial accounts.
+          </span>
+          <a href="mailto:support@kulahrms.com" class="font-medium underline">Upgrade →</a>
+        </div>
+      <% end %>
       <main class="p-6">
         <%= yield %>
       </main>

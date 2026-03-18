@@ -1,14 +1,22 @@
 <div class="max-w-4xl mx-auto">
   <div class="flex items-center justify-between mb-6">
     <h1 class="text-2xl font-bold text-gray-900">Departments</h1>
-    <%= link_to new_admin_department_path,
-        class: "inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700",
-        data: { turbo_frame: "department_form" } do %>
-      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-      </svg>
-      Add Department
-    <% end %>
+    <div class="flex items-center gap-2">
+      <%= form_with url: bulk_import_admin_departments_path, method: :post, multipart: true, data: { turbo: false }, class: "flex items-center gap-2" do |f| %>
+        <%= f.file_field :file, accept: ".csv,.txt",
+            class: "text-xs text-gray-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-md file:border file:border-gray-300 file:text-xs file:font-medium file:bg-white file:text-gray-700 hover:file:bg-gray-50 cursor-pointer" %>
+        <%= f.submit "Import CSV",
+            class: "px-3 py-1.5 bg-white border border-gray-300 text-gray-700 text-xs font-medium rounded-lg hover:bg-gray-50 cursor-pointer whitespace-nowrap" %>
+      <% end %>
+      <%= link_to new_admin_department_path,
+          class: "inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700",
+          data: { turbo_frame: "department_form" } do %>
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+        </svg>
+        Add Department
+      <% end %>
+    </div>
   </div>
 
   <%= turbo_frame_tag "department_form" %>

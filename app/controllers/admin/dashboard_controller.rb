@@ -81,6 +81,23 @@ module Admin
       @upcoming_anniversaries = @upcoming_anniversaries.order(
         Arel.sql("EXTRACT(MONTH FROM joining_date), EXTRACT(DAY FROM joining_date)")
       ).limit(5)
+
+      # Upcoming birthdays (next 30 days)
+      if today.month == end_date.month
+        @upcoming_birthdays = Employee.active.where(
+          "EXTRACT(MONTH FROM date_of_birth) = ? AND EXTRACT(DAY FROM date_of_birth) BETWEEN ? AND ?",
+          today.month, today.day, end_date.day
+        )
+      else
+        @upcoming_birthdays = Employee.active.where(
+          "(EXTRACT(MONTH FROM date_of_birth) = ? AND EXTRACT(DAY FROM date_of_birth) >= ?) OR (EXTRACT(MONTH FROM date_of_birth) = ? AND EXTRACT(DAY FROM date_of_birth) <= ?)",
+          today.month, today.day, end_date.month, end_date.day
+        )
+      end
+
+      @upcoming_birthdays = @upcoming_birthdays.order(
+        Arel.sql("EXTRACT(MONTH FROM date_of_birth), EXTRACT(DAY FROM date_of_birth)")
+      ).limit(5)
     end
   end
 end

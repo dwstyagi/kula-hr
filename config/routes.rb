@@ -30,8 +30,12 @@ Rails.application.routes.draw do
 
     namespace :admin do
       root "dashboard#index"
-      resources :departments
-      resources :designations
+      resources :departments do
+        collection { post :bulk_import }
+      end
+      resources :designations do
+        collection { post :bulk_import }
+      end
       resources :salary_components do
         member do
           patch :toggle_active

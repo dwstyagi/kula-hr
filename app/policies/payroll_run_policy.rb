@@ -10,6 +10,11 @@ class PayrollRunPolicy < ApplicationPolicy
   def mark_paid?       = admin_or_hr?
   def progress?        = admin_or_hr?
 
+  def download_bank_file?
+    return false if current_tenant&.trial?
+    admin_or_hr?
+  end
+
   # Only Super Admin can approve or reject
   def approve? = super_admin?
   def reject?  = super_admin?

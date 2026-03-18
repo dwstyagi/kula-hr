@@ -53,6 +53,11 @@ module Admin
     end
 
     def new
+      tenant = ActsAsTenant.current_tenant
+      if tenant.at_employee_limit?
+        return redirect_to admin_employees_path,
+                           alert: "Trial accounts are limited to #{Tenant::TRIAL_EMPLOYEE_LIMIT} employees. Upgrade to add more."
+      end
       @employee = Employee.new
       authorize @employee
       load_form_options
@@ -61,6 +66,13 @@ module Admin
     def create
       @employee = Employee.new(employee_params)
       authorize @employee
+
+      tenant = ActsAsTenant.current_tenant
+      if tenant.at_employee_limit?
+        load_form_options
+        flash.now[:alert] = "Trial accounts are limited to #{Tenant::TRIAL_EMPLOYEE_LIMIT} employees. Upgrade to add more."
+        return render :new, status: :unprocessable_entity
+      end
 
       ActiveRecord::Base.transaction do
         user = User.create!(

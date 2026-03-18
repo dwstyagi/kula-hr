@@ -21,6 +21,25 @@
     </div>
   </div>
 
+  <%# Trial limit warning %>
+  <% if @trial_remaining&.zero? %>
+    <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+      <p class="text-sm text-red-800">
+        <strong>You've reached the trial limit of <%= Tenant::TRIAL_EMPLOYEE_LIMIT %> employees.</strong>
+        No employees can be imported.
+        <a href="mailto:support@kulahrms.com" class="underline font-medium ml-1">Upgrade to continue →</a>
+      </p>
+    </div>
+  <% elsif @trial_will_skip&.positive? %>
+    <div class="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-6">
+      <p class="text-sm text-amber-800">
+        <strong>Trial limit:</strong> You have <%= @trial_remaining %> slot<%= @trial_remaining == 1 ? '' : 's' %> remaining.
+        Only the first <strong><%= @trial_remaining %></strong> valid rows will be imported — <strong><%= @trial_will_skip %></strong> will be skipped.
+        <a href="mailto:support@kulahrms.com" class="underline font-medium ml-1">Upgrade to import all →</a>
+      </p>
+    </div>
+  <% end %>
+
   <%# Error rows warning %>
   <% if @invalid_rows.any? %>
     <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
@@ -135,9 +154,10 @@
 
   <%# Actions %>
   <div class="flex items-center gap-3">
-    <% if @valid_rows.any? %>
+    <% importable = @trial_remaining ? [@valid_rows.size, @trial_remaining].min : @valid_rows.size %>
+    <% if importable.positive? %>
       <%= form_with url: confirm_admin_imports_path, method: :post, data: { turbo: false } do |f| %>
-        <%= f.submit "Import #{@valid_rows.size} Valid Employees#{@invalid_rows.any? ? ' & Download Error Report' : ''}",
+        <%= f.submit "Import #{importable} #{'Employee'.pluralize(importable)}#{@invalid_rows.any? ? ' & Download Error Report' : ''}",
               class: "px-6 py-2.5 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 cursor-pointer" %>
       <% end %>
     <% end %>
