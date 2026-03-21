@@ -29,8 +29,9 @@
               <div class="text-sm font-medium text-gray-900"><%= tenant.name %></div>
             </td>
             <td class="px-6 py-4 whitespace-nowrap">
-              <%= link_to root_url(subdomain: tenant.subdomain), target: "_blank", class: "text-sm text-blue-600 hover:underline font-mono" do %>
-                <%= root_url(subdomain: tenant.subdomain).sub(/\Ahttps?:\/\//, "") %>
+              <% tenant_url = root_url(subdomain: tenant.subdomain, host: ENV.fetch("APP_DOMAIN", "lvh.me")) %>
+              <%= link_to tenant_url, target: "_blank", class: "text-sm text-blue-600 hover:underline font-mono" do %>
+                <%= tenant_url.sub(/\Ahttps?:\/\//, "") %>
               <% end %>
             </td>
             <td class="px-6 py-4 whitespace-nowrap">

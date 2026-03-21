@@ -1,0 +1,1068 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kula HR — Beta Testing Guide</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Plus Jakarta Sans', 'sans-serif'],
+            serif: ['Instrument Serif', 'serif'],
+            mono: ['DM Mono', 'monospace'],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    :root {
+      --bg-base: #060b18;
+      --bg-card: #0d1626;
+      --border: rgba(99, 102, 241, 0.15);
+      --border-subtle: rgba(255,255,255,0.06);
+      --text-primary: #f1f5f9;
+      --text-secondary: #94a3b8;
+      --text-muted: #475569;
+      --accent-indigo: #6366f1;
+      --accent-violet: #8b5cf6;
+      --accent-cyan: #22d3ee;
+      --green: #10b981;
+      --amber: #f59e0b;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      background-color: var(--bg-base);
+      color: var(--text-primary);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.4;
+    }
+
+    .orb {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(120px);
+      pointer-events: none;
+      z-index: 0;
+    }
+    .orb-1 { width: 600px; height: 600px; background: radial-gradient(circle, rgba(99,102,241,0.12) 0%, transparent 70%); top: -200px; left: -200px; }
+    .orb-2 { width: 500px; height: 500px; background: radial-gradient(circle, rgba(139,92,246,0.08) 0%, transparent 70%); bottom: 20%; right: -150px; }
+    .orb-3 { width: 400px; height: 400px; background: radial-gradient(circle, rgba(34,211,238,0.05) 0%, transparent 70%); top: 50%; left: 40%; }
+
+    #sidebar {
+      position: fixed;
+      top: 0; left: 0;
+      height: 100vh;
+      width: 280px;
+      background: rgba(10, 16, 32, 0.92);
+      backdrop-filter: blur(20px);
+      border-right: 1px solid var(--border-subtle);
+      overflow-y: auto;
+      z-index: 50;
+      transition: transform 0.3s ease;
+    }
+    #sidebar::-webkit-scrollbar { width: 3px; }
+    #sidebar::-webkit-scrollbar-track { background: transparent; }
+    #sidebar::-webkit-scrollbar-thumb { background: rgba(99,102,241,0.3); border-radius: 10px; }
+
+    .sidebar-link {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 20px;
+      border-radius: 8px;
+      margin: 2px 12px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      text-decoration: none;
+      transition: all 0.15s ease;
+      cursor: pointer;
+    }
+    .sidebar-link:hover { background: rgba(99,102,241,0.12); color: var(--text-primary); }
+    .sidebar-link.active { background: rgba(99,102,241,0.18); color: #a5b4fc; }
+    .sidebar-link .num {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 22px; height: 22px;
+      background: rgba(99,102,241,0.15);
+      border-radius: 6px;
+      font-size: 11px; font-weight: 600; color: #818cf8;
+      flex-shrink: 0;
+    }
+    .sidebar-link.active .num { background: rgba(99,102,241,0.35); color: #c7d2fe; }
+
+    #main { margin-left: 280px; position: relative; z-index: 1; min-height: 100vh; }
+
+    .flow-section {
+      padding: 60px 64px;
+      border-bottom: 1px solid var(--border-subtle);
+      scroll-margin-top: 0;
+    }
+
+    .flow-number {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px; font-weight: 500;
+      letter-spacing: 0.15em; text-transform: uppercase;
+      color: var(--accent-indigo); opacity: 0.8;
+    }
+
+    .flow-title {
+      font-family: 'Instrument Serif', serif;
+      font-size: 32px; color: var(--text-primary);
+      margin: 8px 0 4px; line-height: 1.2;
+    }
+
+    .flow-meta { display: flex; align-items: center; gap: 16px; margin-bottom: 32px; }
+
+    .time-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 4px 12px;
+      background: rgba(99,102,241,0.1);
+      border: 1px solid rgba(99,102,241,0.2);
+      border-radius: 20px; font-size: 12px; font-weight: 500; color: #a5b4fc;
+    }
+
+    .portal-badge {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 500;
+    }
+    .portal-badge.platform { background: rgba(139,92,246,0.12); border: 1px solid rgba(139,92,246,0.25); color: #c4b5fd; }
+    .portal-badge.admin    { background: rgba(34,211,238,0.08);  border: 1px solid rgba(34,211,238,0.2);   color: #67e8f9; }
+    .portal-badge.employee { background: rgba(16,185,129,0.1);   border: 1px solid rgba(16,185,129,0.25);  color: #6ee7b7; }
+    .portal-badge.both     { background: rgba(245,158,11,0.08);  border: 1px solid rgba(245,158,11,0.2);   color: #fcd34d; }
+
+    .steps-list { list-style: none; padding: 0; margin: 0 0 28px; }
+    .step-item {
+      display: flex; align-items: flex-start; gap: 14px;
+      padding: 13px 16px; border-radius: 10px; margin-bottom: 4px;
+      transition: background 0.15s; cursor: pointer;
+    }
+    .step-item:hover { background: rgba(255,255,255,0.03); }
+    .step-item:hover .checkbox { border-color: rgba(99,102,241,0.6); }
+
+    .checkbox {
+      width: 20px; height: 20px;
+      border: 1.5px solid rgba(255,255,255,0.15);
+      border-radius: 6px; flex-shrink: 0; margin-top: 1px;
+      transition: all 0.15s; position: relative; cursor: pointer;
+    }
+    .step-item.checked .checkbox { background: var(--accent-indigo); border-color: var(--accent-indigo); }
+    .step-item.checked .checkbox::after {
+      content: '';
+      position: absolute; top: 3px; left: 6px;
+      width: 5px; height: 9px;
+      border: 2px solid white; border-top: none; border-left: none;
+      transform: rotate(45deg);
+    }
+    .step-item.checked .step-text {
+      color: var(--text-muted);
+      text-decoration: line-through;
+      text-decoration-color: rgba(255,255,255,0.15);
+    }
+
+    .step-text { font-size: 14.5px; color: var(--text-secondary); line-height: 1.5; transition: color 0.15s; }
+    .step-text strong { color: var(--text-primary); font-weight: 600; }
+    .step-text code {
+      font-family: 'DM Mono', monospace; font-size: 12.5px;
+      background: rgba(99,102,241,0.12); border: 1px solid rgba(99,102,241,0.2);
+      color: #a5b4fc; padding: 1px 7px; border-radius: 5px;
+    }
+
+    .callout { border-radius: 12px; padding: 16px 20px; margin: 20px 0; display: flex; gap: 14px; }
+    .callout-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+    .callout-content { flex: 1; }
+    .callout-title { font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 6px; }
+    .callout-body { font-size: 13.5px; line-height: 1.55; }
+    .callout-body ul { margin: 6px 0 0; padding-left: 16px; }
+    .callout-body li { margin-bottom: 3px; }
+
+    .callout.verify  { background: rgba(16,185,129,0.07);  border: 1px solid rgba(16,185,129,0.2);  }
+    .callout.verify  .callout-title { color: #34d399; }
+    .callout.verify  .callout-body  { color: #a7f3d0; }
+    .callout.warning { background: rgba(245,158,11,0.07);  border: 1px solid rgba(245,158,11,0.2);  }
+    .callout.warning .callout-title { color: #fbbf24; }
+    .callout.warning .callout-body  { color: #fde68a; }
+    .callout.info    { background: rgba(99,102,241,0.07);  border: 1px solid rgba(99,102,241,0.2);  }
+    .callout.info    .callout-title { color: #818cf8; }
+    .callout.info    .callout-body  { color: #c7d2fe; }
+
+    .url-chip {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 8px 16px;
+      background: rgba(10, 16, 32, 0.8);
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      font-family: 'DM Mono', monospace; font-size: 13px; color: var(--accent-cyan);
+      margin: 4px 0 20px;
+    }
+    .url-chip .label {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 11px; color: var(--text-muted); font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.08em; margin-right: 4px;
+    }
+
+    .site-header {
+      background: rgba(6, 11, 24, 0.9); backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border-subtle);
+      padding: 20px 64px;
+      position: sticky; top: 0; z-index: 40;
+    }
+
+    #progress-bar { position: fixed; top: 0; left: 280px; right: 0; height: 2px; background: var(--border-subtle); z-index: 100; }
+    #progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent-indigo), var(--accent-violet)); width: 0%; transition: width 0.3s ease; }
+
+    .progress-widget {
+      background: rgba(10, 16, 32, 0.6); border: 1px solid var(--border-subtle);
+      border-radius: 12px; padding: 16px; margin: 16px;
+    }
+    .progress-bar-track { height: 4px; background: rgba(255,255,255,0.06); border-radius: 10px; margin-top: 10px; overflow: hidden; }
+    .progress-bar-fill { height: 100%; background: linear-gradient(90deg, #6366f1, #8b5cf6); border-radius: 10px; transition: width 0.4s ease; }
+
+    .sidebar-logo { display: flex; align-items: center; gap: 10px; padding: 24px 20px 16px; }
+    .logo-mark {
+      width: 32px; height: 32px;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      border-radius: 9px;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 800; font-size: 14px; color: white; letter-spacing: -0.5px;
+    }
+    .logo-text { font-weight: 700; font-size: 15px; color: var(--text-primary); }
+    .logo-text span { color: #818cf8; }
+
+    .sidebar-section-label { padding: 16px 20px 6px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: var(--text-muted); }
+
+    .hero { padding: 80px 64px 60px; border-bottom: 1px solid var(--border-subtle); position: relative; overflow: hidden; }
+    .hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at 20% 50%, rgba(99,102,241,0.08) 0%, transparent 60%); pointer-events: none; }
+
+    .beta-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 5px 14px;
+      background: rgba(245,158,11,0.12); border: 1px solid rgba(245,158,11,0.3);
+      border-radius: 20px; font-size: 11px; font-weight: 700;
+      letter-spacing: 0.1em; text-transform: uppercase; color: #fbbf24;
+      margin-bottom: 20px;
+    }
+    .hero h1 { font-family: 'Instrument Serif', serif; font-size: clamp(36px, 5vw, 56px); line-height: 1.1; color: var(--text-primary); margin-bottom: 16px; }
+    .hero h1 em { font-style: italic; color: #a5b4fc; }
+    .hero p { font-size: 16px; color: var(--text-secondary); max-width: 600px; line-height: 1.7; margin-bottom: 32px; }
+
+    .overview-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; max-width: 640px; }
+    .overview-card { padding: 16px 20px; background: rgba(255,255,255,0.03); border: 1px solid var(--border-subtle); border-radius: 12px; }
+    .overview-card .label { font-size: 11px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; }
+    .overview-card .value { font-size: 22px; font-weight: 700; color: var(--text-primary); margin: 4px 0 0; }
+
+    .feedback-section { padding: 64px; background: rgba(10, 16, 32, 0.4); }
+    .bug-card { background: rgba(255,255,255,0.03); border: 1px solid var(--border-subtle); border-radius: 16px; padding: 28px; flex: 1; }
+
+    .state-machine {
+      display: flex; align-items: center; flex-wrap: wrap; gap: 6px;
+      padding: 16px 20px; background: rgba(6,11,24,0.6); border: 1px solid var(--border-subtle);
+      border-radius: 10px; margin: 12px 0;
+      font-family: 'DM Mono', monospace; font-size: 12px;
+    }
+    .state-pill { padding: 4px 12px; border-radius: 6px; font-weight: 500; }
+    .state-arrow { color: var(--text-muted); }
+    .state-draft      { background: rgba(148,163,184,0.12); color: #94a3b8; }
+    .state-processing { background: rgba(34,211,238,0.1);   color: #67e8f9; }
+    .state-review     { background: rgba(245,158,11,0.1);   color: #fbbf24; }
+    .state-approved   { background: rgba(99,102,241,0.12);  color: #818cf8; }
+    .state-paid       { background: rgba(16,185,129,0.1);   color: #34d399; }
+
+    .steps-group-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); padding: 16px 16px 6px; }
+
+    .mobile-header {
+      display: none; padding: 14px 20px;
+      background: rgba(6, 11, 24, 0.95); backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border-subtle);
+      align-items: center; justify-content: space-between;
+      position: sticky; top: 0; z-index: 40;
+    }
+
+    @media (max-width: 1024px) {
+      #sidebar { transform: translateX(-100%); }
+      #sidebar.open { transform: translateX(0); }
+      #sidebar-toggle { display: flex !important; }
+      #main { margin-left: 0; }
+      #progress-bar { left: 0; }
+      .flow-section { padding: 40px 24px; }
+      .site-header { display: none !important; }
+      .mobile-header { display: flex; }
+      .hero { padding: 48px 24px 40px; }
+      .overview-grid { grid-template-columns: repeat(2, 1fr); }
+      .feedback-section { padding: 40px 24px; }
+    }
+
+    html::-webkit-scrollbar { width: 6px; }
+    html::-webkit-scrollbar-track { background: var(--bg-base); }
+    html::-webkit-scrollbar-thumb { background: rgba(99,102,241,0.25); border-radius: 10px; }
+  </style>
+</head>
+<body>
+
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+<div class="orb orb-3"></div>
+
+<div id="progress-bar"><div id="progress-fill"></div></div>
+
+<!-- Sidebar -->
+<nav id="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-mark">K</div>
+    <div class="logo-text">Kula<span>HR</span></div>
+  </div>
+
+  <div class="progress-widget">
+    <div style="display:flex;justify-content:space-between;align-items:center;">
+      <span style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted);">Testing Progress</span>
+      <span id="progress-text" style="font-family:'DM Mono',monospace;font-size:12px;color:#818cf8;font-weight:600;">0 / 12</span>
+    </div>
+    <div class="progress-bar-track">
+      <div class="progress-bar-fill" id="sidebar-progress" style="width:0%"></div>
+    </div>
+  </div>
+
+  <div class="sidebar-section-label">Testing Flows</div>
+  <a class="sidebar-link active" href="#flow-1"><span class="num">1</span>Platform Admin</a>
+  <a class="sidebar-link" href="#flow-2"><span class="num">2</span>Company Signup</a>
+  <a class="sidebar-link" href="#flow-3"><span class="num">3</span>Employee Management</a>
+  <a class="sidebar-link" href="#flow-4"><span class="num">4</span>Salary Structure</a>
+  <a class="sidebar-link" href="#flow-5"><span class="num">5</span>Leave Management</a>
+  <a class="sidebar-link" href="#flow-6"><span class="num">6</span>Attendance</a>
+  <a class="sidebar-link" href="#flow-7"><span class="num">7</span>Statutory Settings</a>
+  <a class="sidebar-link" href="#flow-8"><span class="num">8</span>Tax Declaration</a>
+  <a class="sidebar-link" href="#flow-9"><span class="num">9</span>Payroll Processing</a>
+  <a class="sidebar-link" href="#flow-10"><span class="num">10</span>Payslip View</a>
+  <a class="sidebar-link" href="#flow-11"><span class="num">11</span>Reports</a>
+  <a class="sidebar-link" href="#flow-12"><span class="num">12</span>Trial Gating</a>
+  <div style="height:8px;"></div>
+  <div class="sidebar-section-label">Resources</div>
+  <a class="sidebar-link" href="#feedback"><span style="font-size:14px;">🐛</span>Report a Bug</a>
+  <a class="sidebar-link" href="#feedback"><span style="font-size:14px;">💬</span>Give Feedback</a>
+</nav>
+
+<!-- Mobile header -->
+<div class="mobile-header">
+  <div style="display:flex;align-items:center;gap:10px;">
+    <div class="logo-mark">K</div>
+    <span style="font-weight:700;font-size:15px;">Kula<span style="color:#818cf8">HR</span> Beta Guide</span>
+  </div>
+  <button onclick="document.getElementById('sidebar').classList.toggle('open')" style="background:rgba(99,102,241,0.15);border:none;color:#a5b4fc;padding:8px 12px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;">
+    ☰ Menu
+  </button>
+</div>
+
+<!-- Main -->
+<div id="main">
+
+  <!-- Desktop header -->
+  <div class="site-header" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+    <div>
+      <div style="font-size:13px;color:var(--text-muted);font-weight:500;">Kula HR — Beta Testing Guide</div>
+      <div style="font-size:12px;color:var(--text-muted);margin-top:2px;">Follow each flow in order · Check off steps as you go</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:12px;">
+      <div class="beta-badge" style="margin:0;">
+        <span style="width:6px;height:6px;background:#f59e0b;border-radius:50%;display:inline-block;"></span>
+        Beta v1.0
+      </div>
+      <div style="font-family:'DM Mono',monospace;font-size:12px;color:var(--text-muted);">12 flows · ~2.5 hrs</div>
+    </div>
+  </div>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="beta-badge">
+      <span style="width:6px;height:6px;background:#f59e0b;border-radius:50%;display:inline-block;"></span>
+      Private Beta · v1.0
+    </div>
+    <h1>Test Kula HR<br/><em>end to end.</em></h1>
+    <p>You're one of our first testers. This guide walks you through every major feature of Kula HR — India's modern HRMS + Payroll platform. Follow the flows in order, check off each step, and report anything that feels off.</p>
+    <div class="overview-grid">
+      <div class="overview-card"><div class="label">Flows</div><div class="value">12</div></div>
+      <div class="overview-card"><div class="label">Est. Time</div><div class="value">~2.5h</div></div>
+      <div class="overview-card"><div class="label">Portals</div><div class="value">3</div></div>
+    </div>
+
+    <div style="margin-top:32px;padding:20px 24px;background:rgba(99,102,241,0.07);border:1px solid rgba(99,102,241,0.2);border-radius:14px;max-width:640px;">
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#818cf8;margin-bottom:12px;">Three Portals You'll Use</div>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+          <span class="portal-badge platform">Platform Admin</span>
+          <code style="font-family:'DM Mono',monospace;font-size:12px;color:var(--text-muted);"><%= @platform_url %>/platform_admin</code>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+          <span class="portal-badge admin">HR Admin</span>
+          <code style="font-family:'DM Mono',monospace;font-size:12px;color:var(--text-muted);"><%= @tenant_url %>/admin</code>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+          <span class="portal-badge employee">Employee Portal</span>
+          <code style="font-family:'DM Mono',monospace;font-size:12px;color:var(--text-muted);"><%= @tenant_url %>/portal</code>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── FLOW 1: Platform Admin ─── -->
+  <section class="flow-section" id="flow-1">
+    <div class="flow-number">Flow 01</div>
+    <h2 class="flow-title">Platform Admin</h2>
+    <div class="flow-meta">
+      <span class="time-badge">⏱ ~10 min</span>
+      <span class="portal-badge platform">Platform Portal</span>
+    </div>
+    <div class="url-chip"><span class="label">URL</span><%= @platform_url %>/platform_admin/login</div>
+
+    <ul class="steps-list">
+      <li class="step-item" onclick="toggleStep(this)"><div class="checkbox"></div><div class="step-text">Navigate to <code><%= @platform_url %>/platform_admin/login</code> and log in with your platform admin credentials</div></li>
+      <li class="step-item" onclick="toggleStep(this)"><div class="checkbox"></div><div class="step-text">View the <strong>Platform Dashboard</strong> — confirm you can see total tenant count, total employee count, and signups this month</div></li>
+      <li class="step-item" onclick="toggleStep(this)"><div class="checkbox"></div><div class="step-text">Click <strong>Tenants</strong> in the sidebar — verify the tenant list loads with name, subdomain, status, and employee count</div></li>
+      <li class="step-item" onclick="toggleStep(this)"><div class="checkbox"></div><div class="step-text">Click into a tenant's detail page — verify company info is shown correctly</div></li>
+      <li class="step-item" onclick="toggleStep(this)"><div class="checkbox"></div><div class="step-text">Try <strong>disabling</strong> a tenant — confirm the status changes to suspended</div></li>
+      <li class="step-item" onclick="toggleStep(this)"><div class="checkbox"></div><div class="step-text"><strong>Re-enable</strong> the tenant — confirm status returns to active</div></li>
+    </ul>
+
+    <div class="callout verify">
+      <div class="callout-icon">✓</div>
+      <div class="callout-content">
+        <div class="callout-title">What to Verify</div>
+        <div class="callout-body"><ul>
+          <li>Dashboard stats are accurate and not placeholder zeros</li>
+          <li>Tenant list is paginated if there are many tenants</li>
+          <li>Enable/disable action updates status immediately via Turbo</li>
+          <li>Platform admin session is independent from tenant Devise sessions</li>
+        </ul></div>
+      </div>
+    </div>
+    <div class="callout warning">
+      <div class="callout-icon">⚠</div>
+      <div class="callout-content">
+        <div class="callout-title">Common Issues</div>
+        <div class="callout-body"><ul>
+          <li>If login redirects to wrong portal, ensure you're on the root domain — not a subdomain</li>
+          <li>Platform admin uses its own auth (has_secure_password) — Devise credentials won't work here</li>
+        </ul></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── FLOW 2: Company Signup ─── -->
+  <section class="flow-section" id="flow-2">
+    <div class="flow-number">Flow 02</div>
+    <h2 class="flow-title">Company Signup</h2>
+    <div class="flow-meta">
+      <span class="time-badge">⏱ ~10 min</span>
+      <span class="portal-badge admin">HR Admin Portal</span>
+    </div>
+    <div class="url-chip"><span class="label">URL</span><%= @platform_url %>/signup</div>
+
+    <ul class="steps-list">
+      <li class="step-item" onclick="toggleStep(this)"><div class="checkbox"></div><div class="step-text">Go to <code><%= @platform_url %>/signup</code> — confirm the signup form loads correctly</div></li>
+      <li class="step-item" onclick="toggleStep(this)"><div class="checkbox"></div><div class="step-text">Fill in: <strong>Company Name</strong> (e.g. "Acme Corp"), <strong>Subdomain</strong> (e.g. "acme"), <strong>State</strong> (Maharashtra or Karnataka), admin <strong>Email</strong> and <strong>Password</strong></div></li>
+      <li class="step-item" onclick="toggleStep(this)"><div class="checkbox"></div><div class="step-text">Submit — verify you're redirected to <code>acme.<%= @app_domain %>/admin/dashboard</code></div></li>
+      <li class="step-item" onclick="toggleStep(this)"><div class="checkbox"></div><div class="step-text">Go to <strong>Salary Components</strong> — verify default Indian components were seeded (Basic, HRA, Special Allowance, PF, ESI, PT)</div></li>
+      <li class="step-item" onclick="toggleStep(this)"><div class="checkbox"></div><div class="step-text">Go to <strong>Leave Types</strong> — verify defaults: Casual (12 days), Sick (6 days), Earned (15 days)</div></li>
+      <li class="step-item" onclick="toggleStep(this)"><div class="checkbox"></div><div class="step-text">Go to <strong>Payroll Settings</strong> — verify PF rate (12%), ESI threshold (₹21,000), and PT state matches your selection</div></li>
+    </ul>
+
+    <div class="callout verify">
+      <div class="callout-icon">✓</div>
+      <div class="callout-content">
+        <div class="callout-title">What to Verify</div>
+        <div class="callout-body"><ul>
+          <li>Reserved subdomains (admin, www, api) should be rejected with a clear error</li>
+          <li>Subdomain must be lowercase alphanumeric — test spaces and uppercase and check error messages</li>
+          <li>The new tenant should appear in the Platform Admin tenant list immediately after signup</li>
+          <li>PT slabs should be seeded for the state you selected</li>
+        </ul></div>
+      </div>
+    </div>
+    <div class="callout warning">
+      <div class="callout-icon">⚠</div>
+      <div class="callout-content">
+        <div class="callout-title">Common Issues</div>
+        <div class="callout-body"><ul>
+          <li>After signup, you must use your subdomain URL — not the root domain</li>
+          <% if Rails.env.development? %>
+          <li>In development, subdomains use <code>lvh.me</code> — it always resolves to 127.0.0.1 by design</li>
+          <% end %>
+        </ul></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── FLOW 3: Employee Management ─── -->
+  <section class="flow-section" id="flow-3">
+    <div class="flow-number">Flow 03</div>
+    <h2 class="flow-title">Employee Management</h2>
+    <div class="flow-meta">
+      <span class="time-badge">⏱ ~20 min</span>
+      <span class="portal-badge admin">HR Admin Portal</span>
+    </div>
+    <div class="url-chip"><span class="label">URL</span><%= @tenant_url %>/admin/employees</div>
+
+    <div class="steps-group-label">Departments & Designations</div>
+    <ul class="steps-list">
+      <li class="step-item" onclick="toggleStep(this)"><div class="checkbox"></div><div class="step-text">Go to <strong>Departments</strong> → create at least 3: <em>Engineering, Sales, HR</em></div></li>
+      <li class="step-item" onclick="toggleStep(this)"><div class="checkbox"></div><div class="step-text">Go to <strong>Designations</strong> → create: <em>Software Engineer, Sales Manager, HR Executive</em></div></li>
+    </ul>
+
+    <div class="steps-group-label">Manual Employee Creation</div>
+    <ul class="steps-list">
+      <li class="step-item" onclick="toggleStep(this)"><div class="checkbox"></div><div class="step-text">Click <strong>Add Employee</strong> — fill all required fields: name, email, department, designation, date of joining, employment type</div></li>
+      <li class="step-item" onclick="toggleStep(this)"><div class="checkbox"></div><div class="step-text">Fill bank details: <strong>Account Number</strong>, <strong>IFSC Code</strong>, <strong>Bank Name</strong></div></li>
+      <li class="step-item" onclick="toggleStep(this)"><div class="checkbox"></div><div class="step-text">Fill statutory fields: <strong>PAN Number</strong> (format: ABCDE1234F), <strong>UAN Number</strong></div></li>
+      <li class="step-item" onclick="toggleStep(this)"><div class="checkbox"></div><div class="step-text">Save — verify the employee appears in the list with status "Active"</div></li>
+    </ul>
+
+    <div class="steps-group-label">Bulk Upload via CSV</div>
+    <ul class="steps-list">
+      <li class="step-item" onclick="toggleStep(this)"><div class="checkbox"></div><div class="step-text">Click <strong>Bulk Import</strong> → <strong>Download Template</strong> — open the CSV and inspect the column headers</div></li>
+      <li class="step-item" onclick="toggleStep(this)"><div class="checkbox"></div><div class="step-text">Fill in <strong>5 employee rows</strong> using departments and designations you created. PAN format: ABCDE1234F</div></li>
+      <li class="step-item" onclick="toggleStep(this)"><div class="checkbox"></div><div class="step-text">Upload the CSV — verify the preview shows 5 valid rows with no errors</div></li>
+      <li class="step-item" onclick="toggleStep(this)"><div class="checkbox"></div><div class="step-text">Test <strong>validation errors</strong>: add a row with a duplicate email or invalid PAN — confirm the error row is flagged while valid rows remain importable</div></li>
+      <li class="step-item" onclick="toggleStep(this)"><div class="checkbox"></div><div class="step-text">Confirm the import — all 5 valid employees should appear in the list</div></li>
+    </ul>
+
+    <div class="steps-group-label">Search, Filter & Export</div>
+    <ul class="steps-list">
+      <li class="step-item" onclick="toggleStep(this)"><div class="checkbox"></div><div class="step-text">Use the <strong>search bar</strong> — search by first name, verify results filter in real-time</div></li>
+      <li class="step-item" onclick="toggleStep(this)"><div class="checkbox"></div><div class="step-text"><strong>Filter by Department</strong> — select Engineering, verify only Engineering employees show</div></li>
+      <li class="step-item" onclick="toggleStep(this)"><div class="checkbox"></div><div class="step-text">Click <strong>Export CSV</strong> — download and open the file, verify all employees are included</div></li>
+    </ul>
+
+    <div class="callout verify">
+      <div class="callout-icon">✓</div>
+      <div class="callout-content">
+        <div class="callout-title">What to Verify</div>
+        <div class="callout-body"><ul>
+          <li>PAN must match format AAAAA9999A — invalid formats should be caught on upload and manual creation</li>
+          <li>Duplicate email within the same CSV should be flagged (not just duplicate vs. DB)</li>
+          <li>Non-existent department/designation in CSV should error — should NOT auto-create them</li>
+          <li>Employee profile tabs (Personal, Salary, Attendance, Documents) should all load without errors</li>
+        </ul></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── FLOW 4: Salary Structure ─── -->
+  <section class="flow-section" id="flow-4">
+    <div class="flow-number">Flow 04</div>
+    <h2 class="flow-title">Salary Structure & CTC</h2>
+    <div class="flow-meta">
+      <span class="time-badge">⏱ ~15 min</span>
+      <span class="portal-badge admin">HR Admin Portal</span>
+    </div>
+    <div class="url-chip"><span class="label">URL</span><%= @tenant_url %>/admin/salary_structures</div>
+
+    <ul class="steps-list">
+      <li class="step-item" onclick="toggleStep(this)"><div class="checkbox"></div><div class="step-text">Go to <strong>Salary Components</strong> — verify defaults: Basic (earning, 40%), HRA (earning, 50% of Basic), Special Allowance (earning, balancing), Employee PF (deduction, 12%), ESI (deduction, 0.75%), PT (deduction)</div></li>
+      <li class="step-item" onclick="toggleStep(this)"><div class="checkbox"></div><div class="step-text">Go to <strong>Salary Structures</strong> → <strong>New Structure</strong> — name it "Standard Package"</div></li>
+      <li class="step-item" onclick="toggleStep(this)"><div class="checkbox"></div><div class="step-text">Add components: <strong>Basic</strong> (40% of CTC), <strong>HRA</strong> (50% of Basic), <strong>Special Allowance</strong> (balancing figure)</div></li>
+      <li class="step-item" onclick="toggleStep(this)"><div class="checkbox"></div><div class="step-text">Save the structure — verify it appears in the list</div></li>
+      <li class="step-item" onclick="toggleStep(this)"><div class="checkbox"></div><div class="step-text">Open an employee's profile → <strong>Salary tab</strong> → <strong>Assign Salary Structure</strong></div></li>
+      <li class="step-item" onclick="toggleStep(this)"><div class="checkbox"></div><div class="step-text">Select "Standard Package", enter Annual CTC = <strong>₹8,00,000</strong> — watch the live calculator update as you type</div></li>
+      <li class="step-item" onclick="toggleStep(this)"><div class="checkbox"></div><div class="step-text">Verify the auto-calculated breakdown: <strong>Basic ≈ ₹26,667/mo</strong>, <strong>HRA ≈ ₹13,333/mo</strong>, Special Allowance as the balancing figure</div></li>
+      <li class="step-item" onclick="toggleStep(this)"><div class="checkbox"></div><div class="step-text">Save — verify the effective date is set and the salary appears in the employee's salary history</div></li>
+    </ul>
+
+    <div class="callout verify">
+      <div class="callout-icon">✓</div>
+      <div class="callout-content">
+        <div class="callout-title">What to Verify — CTC Math</div>
+        <div class="callout-body"><ul>
+          <li>CTC calculator must update <em>in real-time</em> as you type — no page refresh</li>
+          <li>Gross = CTC − Employer PF − Employer ESI (if applicable)</li>
+          <li>Basic = 40% of CTC = ₹3,20,000/yr = ₹26,667/mo</li>
+          <li>HRA = 50% of Basic = ₹1,60,000/yr = ₹13,333/mo</li>
+          <li>Special Allowance = Gross − Basic − HRA (must not be negative)</li>
+        </ul></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── FLOW 5: Leave Management ─── -->
+  <section class="flow-section" id="flow-5">
+    <div class="flow-number">Flow 05</div>
+    <h2 class="flow-title">Leave Management</h2>
+    <div class="flow-meta">
+      <span class="time-badge">⏱ ~15 min</span>
+      <span class="portal-badge both">HR + Employee Portal</span>
+    </div>
+
+    <div class="steps-group-label">Configure (as HR Admin)</div>
+    <ul class="steps-list">
+      <li class="step-item" onclick="toggleStep(this)"><div class="checkbox"></div><div class="step-text">Go to <strong>Leave Types</strong> — verify defaults: Casual (12), Sick (6), Earned (15) days, all marked as paid</div></li>
+      <li class="step-item" onclick="toggleStep(this)"><div class="checkbox"></div><div class="step-text">Check that leave balances are allocated for employees — open an employee profile → Leave Balances tab</div></li>
+    </ul>
+
+    <div class="steps-group-label">Apply for Leave (as Employee)</div>
+    <ul class="steps-list">
+      <li class="step-item" onclick="toggleStep(this)"><div class="checkbox"></div><div class="step-text">Log in to the employee portal at <code><%= @tenant_url %>/portal</code></div></li>
+      <li class="step-item" onclick="toggleStep(this)"><div class="checkbox"></div><div class="step-text">Go to <strong>Leave Requests</strong> → <strong>Apply Leave</strong></div></li>
+      <li class="step-item" onclick="toggleStep(this)"><div class="checkbox"></div><div class="step-text">Select <strong>Casual Leave</strong>, pick 2 working days next week, add a reason — submit</div></li>
+      <li class="step-item" onclick="toggleStep(this)"><div class="checkbox"></div><div class="step-text">Verify the leave request shows status <strong>"Pending"</strong> in the employee's leave history</div></li>
+    </ul>
+
+    <div class="steps-group-label">Approve Leave (as HR Admin)</div>
+    <ul class="steps-list">
+      <li class="step-item" onclick="toggleStep(this)"><div class="checkbox"></div><div class="step-text">Switch to the HR Admin portal — go to <strong>Leave Requests</strong> and find the pending request</div></li>
+      <li class="step-item" onclick="toggleStep(this)"><div class="checkbox"></div><div class="step-text">Click <strong>Approve</strong> — status updates to "Approved" immediately via Turbo Stream</div></li>
+      <li class="step-item" onclick="toggleStep(this)"><div class="checkbox"></div><div class="step-text">Switch back to the employee portal — verify the request now shows <strong>"Approved"</strong></div></li>
+      <li class="step-item" onclick="toggleStep(this)"><div class="checkbox"></div><div class="step-text">Check the employee's <strong>Casual Leave balance</strong> — it should have decreased by 2 days</div></li>
+    </ul>
+
+    <div class="callout verify">
+      <div class="callout-icon">✓</div>
+      <div class="callout-content">
+        <div class="callout-title">What to Verify</div>
+        <div class="callout-body"><ul>
+          <li>Balance is deducted <em>on approval</em>, not on application</li>
+          <li>Applying for more days than available balance should be prevented or flagged</li>
+          <li>Rejecting a leave request should NOT deduct the balance</li>
+          <li>HR sidebar should show a pending count badge when there are pending requests</li>
+        </ul></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── FLOW 6: Attendance ─── -->
+  <section class="flow-section" id="flow-6">
+    <div class="flow-number">Flow 06</div>
+    <h2 class="flow-title">Attendance</h2>
+    <div class="flow-meta">
+      <span class="time-badge">⏱ ~15 min</span>
+      <span class="portal-badge admin">HR Admin Portal</span>
+    </div>
+    <div class="url-chip"><span class="label">URL</span><%= @tenant_url %>/admin/attendance_summaries</div>
+
+    <ul class="steps-list">
+      <li class="step-item" onclick="toggleStep(this)"><div class="checkbox"></div><div class="step-text">Go to <strong>Attendance</strong> → select the current month — verify the listing shows all active employees</div></li>
+      <li class="step-item" onclick="toggleStep(this)"><div class="checkbox"></div><div class="step-text">Click <strong>Prepare Attendance</strong> — auto-fills from approved leaves. Confirm the employee with 2 approved leave days shows <strong>approved_leaves: 2</strong></div></li>
+      <li class="step-item" onclick="toggleStep(this)"><div class="checkbox"></div><div class="step-text">Use <strong>on-screen editing</strong> — mark 1 additional unapproved absence (LOP) for an employee</div></li>
+      <li class="step-item" onclick="toggleStep(this)"><div class="checkbox"></div><div class="step-text">Verify <strong>paid_days</strong> = total_working_days − lop_days is recalculated correctly</div></li>
+      <li class="step-item" onclick="toggleStep(this)"><div class="checkbox"></div><div class="step-text">Click <strong>Download Template</strong> — open the CSV, verify it's pre-filled with employee names and leave data</div></li>
+      <li class="step-item" onclick="toggleStep(this)"><div class="checkbox"></div><div class="step-text">Edit the template (change one employee's unapproved absences) and re-upload — verify records update</div></li>
+      <li class="step-item" onclick="toggleStep(this)"><div class="checkbox"></div><div class="step-text">Click <strong>Lock Attendance</strong> — confirm the month is locked and status shows "Locked"</div></li>
+      <li class="step-item" onclick="toggleStep(this)"><div class="checkbox"></div><div class="step-text">Try editing attendance after locking — verify it's <strong>blocked</strong></div></li>
+    </ul>
+
+    <div class="callout verify">
+      <div class="callout-icon">✓</div>
+      <div class="callout-content">
+        <div class="callout-title">What to Verify</div>
+        <div class="callout-body"><ul>
+          <li>Attendance can only be locked when all employees have summaries (no missing employees)</li>
+          <li>Payroll initiation should fail if attendance is not locked for that month</li>
+          <li>Paid days should never exceed total working days</li>
+          <li>LOP days feed into proration during payroll — 1 LOP day reduces salary proportionally</li>
+        </ul></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── FLOW 7: Statutory Settings ─── -->
+  <section class="flow-section" id="flow-7">
+    <div class="flow-number">Flow 07</div>
+    <h2 class="flow-title">Statutory Settings</h2>
+    <div class="flow-meta">
+      <span class="time-badge">⏱ ~10 min</span>
+      <span class="portal-badge admin">HR Admin Portal</span>
+    </div>
+    <div class="url-chip"><span class="label">URL</span><%= @tenant_url %>/admin/payroll_settings</div>
+
+    <ul class="steps-list">
+      <li class="step-item" onclick="toggleStep(this)"><div class="checkbox"></div><div class="step-text">Go to <strong>Payroll Settings</strong> — verify <strong>PF Employee Rate: 12%</strong> and <strong>PF Employer Rate: 12%</strong></div></li>
+      <li class="step-item" onclick="toggleStep(this)"><div class="checkbox"></div><div class="step-text">Verify <strong>PF wage ceiling: ₹15,000/month</strong> — PF is calculated on min(Basic+DA, ₹15,000)</div></li>
+      <li class="step-item" onclick="toggleStep(this)"><div class="checkbox"></div><div class="step-text">Verify <strong>ESI gross threshold: ₹21,000/month</strong> — ESI applies only if gross ≤ ₹21,000</div></li>
+      <li class="step-item" onclick="toggleStep(this)"><div class="checkbox"></div><div class="step-text">Check <strong>Professional Tax Slabs</strong> — confirm slabs match your state (Maharashtra: 0 / ₹175 / ₹200; Karnataka: 0 / ₹200 / ₹200)</div></li>
+      <li class="step-item" onclick="toggleStep(this)"><div class="checkbox"></div><div class="step-text">View <strong>TDS settings</strong> — confirm both Old and New Regime slabs are configured and Standard Deduction = ₹75,000</div></li>
+      <li class="step-item" onclick="toggleStep(this)"><div class="checkbox"></div><div class="step-text">Update the PF rate — save and verify the change persists on page reload</div></li>
+    </ul>
+
+    <div class="callout info">
+      <div class="callout-icon">ℹ</div>
+      <div class="callout-content">
+        <div class="callout-title">Indian Statutory Rates (FY 2025–26)</div>
+        <div class="callout-body">PF: 12% of Basic+DA (capped at ₹15,000 base) · ESI: 0.75% employee + 3.25% employer (gross ≤ ₹21,000) · PT: Maharashtra max ₹2,500/yr · TDS: Standard deduction ₹75,000 (both regimes) · Cess: 4%</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── FLOW 8: Tax Declaration ─── -->
+  <section class="flow-section" id="flow-8">
+    <div class="flow-number">Flow 08</div>
+    <h2 class="flow-title">Tax Declaration</h2>
+    <div class="flow-meta">
+      <span class="time-badge">⏱ ~10 min</span>
+      <span class="portal-badge employee">Employee Portal</span>
+    </div>
+    <div class="url-chip"><span class="label">URL</span><%= @tenant_url %>/portal/tax_declarations</div>
+
+    <ul class="steps-list">
+      <li class="step-item" onclick="toggleStep(this)"><div class="checkbox"></div><div class="step-text">Log in to the employee portal — navigate to <strong>Tax Declarations</strong></div></li>
+      <li class="step-item" onclick="toggleStep(this)"><div class="checkbox"></div><div class="step-text">Verify a draft declaration for <strong>FY 2025–26</strong> was auto-created on first visit</div></li>
+      <li class="step-item" onclick="toggleStep(this)"><div class="checkbox"></div><div class="step-text">Select <strong>Tax Regime: Old Regime</strong> — verify deduction sections appear (80C, 80D, HRA, 24b, NPS)</div></li>
+      <li class="step-item" onclick="toggleStep(this)"><div class="checkbox"></div><div class="step-text">Enter 80C investment: <strong>₹1,50,000</strong> (PPF/ELSS — this is the maximum limit)</div></li>
+      <li class="step-item" onclick="toggleStep(this)"><div class="checkbox"></div><div class="step-text">Enter 80D (medical insurance): <strong>₹25,000</strong></div></li>
+      <li class="step-item" onclick="toggleStep(this)"><div class="checkbox"></div><div class="step-text">Submit the declaration — verify status changes from <strong>"Draft"</strong> to <strong>"Submitted"</strong></div></li>
+      <li class="step-item" onclick="toggleStep(this)"><div class="checkbox"></div><div class="step-text">Switch to <strong>New Regime</strong> — verify that 80C/80D fields disappear (New Regime doesn't allow most deductions)</div></li>
+    </ul>
+
+    <div class="callout verify">
+      <div class="callout-icon">✓</div>
+      <div class="callout-content">
+        <div class="callout-title">What to Verify</div>
+        <div class="callout-body"><ul>
+          <li>80C is capped at ₹1,50,000 — entering more should be auto-capped or shown as a warning</li>
+          <li>Switching regimes should dynamically show/hide investment sections without a page reload</li>
+          <li>The submitted declaration's regime and amounts should reflect in TDS calculation during payroll</li>
+        </ul></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── FLOW 9: Payroll Processing ─── -->
+  <section class="flow-section" id="flow-9">
+    <div class="flow-number">Flow 09</div>
+    <h2 class="flow-title">Payroll Processing</h2>
+    <div class="flow-meta">
+      <span class="time-badge">⏱ ~25 min</span>
+      <span class="portal-badge admin">HR Admin Portal</span>
+    </div>
+    <div class="url-chip"><span class="label">URL</span><%= @tenant_url %>/admin/payroll_runs</div>
+
+    <div style="margin-bottom:20px;">
+      <div style="font-size:12px;color:var(--text-muted);margin-bottom:8px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;">Payroll State Machine</div>
+      <div class="state-machine">
+        <span class="state-pill state-draft">draft</span><span class="state-arrow">→</span>
+        <span class="state-pill state-processing">processing</span><span class="state-arrow">→</span>
+        <span class="state-pill state-review">under_review</span><span class="state-arrow">→</span>
+        <span class="state-pill state-approved">approved</span><span class="state-arrow">→</span>
+        <span class="state-pill state-paid">paid</span>
+      </div>
+    </div>
+
+    <div class="steps-group-label">Prerequisites</div>
+    <ul class="steps-list">
+      <li class="step-item" onclick="toggleStep(this)"><div class="checkbox"></div><div class="step-text">Confirm attendance is <strong>locked</strong> for the current month (Flow 6 complete)</div></li>
+      <li class="step-item" onclick="toggleStep(this)"><div class="checkbox"></div><div class="step-text">Confirm all active employees have a <strong>salary assignment</strong> (Flow 4 complete)</div></li>
+    </ul>
+
+    <div class="steps-group-label">Initiate & Process</div>
+    <ul class="steps-list">
+      <li class="step-item" onclick="toggleStep(this)"><div class="checkbox"></div><div class="step-text">Go to <strong>Payroll Runs</strong> → <strong>New Payroll Run</strong></div></li>
+      <li class="step-item" onclick="toggleStep(this)"><div class="checkbox"></div><div class="step-text">Select the current month and year — click <strong>Start Processing</strong></div></li>
+      <li class="step-item" onclick="toggleStep(this)"><div class="checkbox"></div><div class="step-text">Watch the <strong>progress bar</strong> update in real-time as Sidekiq processes each employee (Turbo Stream)</div></li>
+      <li class="step-item" onclick="toggleStep(this)"><div class="checkbox"></div><div class="step-text">Once complete, status becomes <strong>"Under Review"</strong></div></li>
+    </ul>
+
+    <div class="steps-group-label">Review Payslips</div>
+    <ul class="steps-list">
+      <li class="step-item" onclick="toggleStep(this)"><div class="checkbox"></div><div class="step-text">Click <strong>View Payslips</strong> — verify all employees have payslips with correct amounts</div></li>
+      <li class="step-item" onclick="toggleStep(this)"><div class="checkbox"></div><div class="step-text">For employee with CTC ₹8,00,000 (Maharashtra, full month): verify <strong>Employee PF = ₹1,800</strong> (12% × ₹15,000), <strong>PT = ₹200</strong>, ESI = ₹0 (gross > ₹21,000)</div></li>
+      <li class="step-item" onclick="toggleStep(this)"><div class="checkbox"></div><div class="step-text">Verify the employee with <strong>1 LOP day</strong> has a prorated gross (gross × paid_days / working_days)</div></li>
+      <li class="step-item" onclick="toggleStep(this)"><div class="checkbox"></div><div class="step-text">Try <strong>editing a payslip line item</strong> — change one component amount and save</div></li>
+    </ul>
+
+    <div class="steps-group-label">Approve & Pay</div>
+    <ul class="steps-list">
+      <li class="step-item" onclick="toggleStep(this)"><div class="checkbox"></div><div class="step-text">Click <strong>Submit for Approval</strong></div></li>
+      <li class="step-item" onclick="toggleStep(this)"><div class="checkbox"></div><div class="step-text">As <strong>Super Admin</strong>, click <strong>Approve</strong> — status changes to "Approved"</div></li>
+      <li class="step-item" onclick="toggleStep(this)"><div class="checkbox"></div><div class="step-text">Go to <strong>Bank File</strong> — select format (Generic CSV, HDFC, ICICI, or SBI) and click <strong>Generate & Download</strong></div></li>
+      <li class="step-item" onclick="toggleStep(this)"><div class="checkbox"></div><div class="step-text">Open the downloaded file — verify employee names, account numbers, IFSC codes, and net pay amounts are correct</div></li>
+      <li class="step-item" onclick="toggleStep(this)"><div class="checkbox"></div><div class="step-text">Click <strong>Mark as Paid</strong> — status moves to "Paid"</div></li>
+    </ul>
+
+    <div class="callout verify">
+      <div class="callout-icon">✓</div>
+      <div class="callout-content">
+        <div class="callout-title">What to Verify — Payslip Math (CTC ₹8L, Maharashtra)</div>
+        <div class="callout-body"><ul>
+          <li>Basic = ₹26,667/mo · HRA = ₹13,333/mo · Special Allowance = remainder</li>
+          <li>Employee PF = ₹1,800 (12% × min(Basic, ₹15,000))</li>
+          <li>ESI = ₹0 (gross > ₹21,000, not applicable)</li>
+          <li>PT = ₹200 (Maharashtra, gross > ₹10,000)</li>
+          <li>Net Pay = Gross − PF − ESI − PT − TDS</li>
+        </ul></div>
+      </div>
+    </div>
+    <div class="callout warning">
+      <div class="callout-icon">⚠</div>
+      <div class="callout-content">
+        <div class="callout-title">Common Issues</div>
+        <div class="callout-body"><ul>
+          <li>If processing hangs, check that Sidekiq and Redis are running</li>
+          <li>HR Admins cannot approve payroll — only Super Admin can. Test that the approve button is hidden for HR Admin</li>
+          <li>Bank file download is blocked on trial accounts (see Flow 12)</li>
+        </ul></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── FLOW 10: Payslip View ─── -->
+  <section class="flow-section" id="flow-10">
+    <div class="flow-number">Flow 10</div>
+    <h2 class="flow-title">Payslip View (Employee)</h2>
+    <div class="flow-meta">
+      <span class="time-badge">⏱ ~10 min</span>
+      <span class="portal-badge employee">Employee Portal</span>
+    </div>
+    <div class="url-chip"><span class="label">URL</span><%= @tenant_url %>/portal/payslips</div>
+
+    <ul class="steps-list">
+      <li class="step-item" onclick="toggleStep(this)"><div class="checkbox"></div><div class="step-text">Log in to the employee portal — check the <strong>Dashboard</strong> shows a Latest Payslip card with gross, deductions, and net pay</div></li>
+      <li class="step-item" onclick="toggleStep(this)"><div class="checkbox"></div><div class="step-text">Click <strong>View Details</strong> — open the full payslip with earnings and deductions breakdown</div></li>
+      <li class="step-item" onclick="toggleStep(this)"><div class="checkbox"></div><div class="step-text">Click <strong>Download PDF</strong> — the payslip PDF should download with company name, employee details, and all components</div></li>
+      <li class="step-item" onclick="toggleStep(this)"><div class="checkbox"></div><div class="step-text">Go to <strong>Payslip History</strong> — verify all paid months are listed in descending order</div></li>
+      <li class="step-item" onclick="toggleStep(this)"><div class="checkbox"></div><div class="step-text">Check the <strong>YTD Summary</strong> (April–March) — verify total gross, PF, TDS, and net are summed correctly</div></li>
+      <li class="step-item" onclick="toggleStep(this)"><div class="checkbox"></div><div class="step-text">Test authorization: manually change the payslip ID in the URL to another employee's ID — verify access is <strong>denied</strong></div></li>
+    </ul>
+
+    <div class="callout verify">
+      <div class="callout-icon">✓</div>
+      <div class="callout-content">
+        <div class="callout-title">What to Verify</div>
+        <div class="callout-body"><ul>
+          <li>PDF must include: company name, employee name, PAN, UAN, bank (last 4 digits), all earnings, all deductions, working days, paid days, LOP days, net pay</li>
+          <li>Employee should only see payslips in "approved" or "paid" status — not draft or processing</li>
+          <li>Month-over-month change % in payslip history should be accurate</li>
+        </ul></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── FLOW 11: Reports ─── -->
+  <section class="flow-section" id="flow-11">
+    <div class="flow-number">Flow 11</div>
+    <h2 class="flow-title">Statutory Reports</h2>
+    <div class="flow-meta">
+      <span class="time-badge">⏱ ~20 min</span>
+      <span class="portal-badge admin">HR Admin Portal</span>
+    </div>
+    <div class="url-chip"><span class="label">URL</span><%= @tenant_url %>/admin/reports</div>
+
+    <div class="steps-group-label">PF / ECR Report</div>
+    <ul class="steps-list">
+      <li class="step-item" onclick="toggleStep(this)"><div class="checkbox"></div><div class="step-text">Go to <strong>Reports → PF Report</strong> → select the current month — verify employee count, total EPF, EPS</div></li>
+      <li class="step-item" onclick="toggleStep(this)"><div class="checkbox"></div><div class="step-text">Click <strong>Download ECR File (.txt)</strong> — open it and verify the pipe-delimited format: <code>UAN|NAME|GROSS|EPF_WAGES|EPS_WAGES|...</code></div></li>
+    </ul>
+
+    <div class="steps-group-label">ESI Report</div>
+    <ul class="steps-list">
+      <li class="step-item" onclick="toggleStep(this)"><div class="checkbox"></div><div class="step-text">Go to <strong>ESI Report</strong> → select the current month — verify only employees with <strong>gross ≤ ₹21,000</strong> are included</div></li>
+      <li class="step-item" onclick="toggleStep(this)"><div class="checkbox"></div><div class="step-text">Download the ESI CSV — verify employee share (0.75%), employer share (3.25%), and total contribution</div></li>
+    </ul>
+
+    <div class="steps-group-label">Professional Tax Challan</div>
+    <ul class="steps-list">
+      <li class="step-item" onclick="toggleStep(this)"><div class="checkbox"></div><div class="step-text">Go to <strong>PT Challan</strong> — verify slab-wise breakdown matches your state's PT rules</div></li>
+      <li class="step-item" onclick="toggleStep(this)"><div class="checkbox"></div><div class="step-text">If testing in <strong>February</strong> — verify Maharashtra uses ₹300 for the > ₹10,000 slab instead of ₹200</div></li>
+      <li class="step-item" onclick="toggleStep(this)"><div class="checkbox"></div><div class="step-text">Download the PT challan PDF/CSV</div></li>
+    </ul>
+
+    <div class="steps-group-label">YTD Earnings Report</div>
+    <ul class="steps-list">
+      <li class="step-item" onclick="toggleStep(this)"><div class="checkbox"></div><div class="step-text">Go to <strong>YTD Report</strong> → select FY 2025–26 — verify every active/exited employee is shown with YTD gross, PF, TDS, net</div></li>
+      <li class="step-item" onclick="toggleStep(this)"><div class="checkbox"></div><div class="step-text">Verify <strong>Months Paid</strong> is correct for mid-year joiners</div></li>
+      <li class="step-item" onclick="toggleStep(this)"><div class="checkbox"></div><div class="step-text">Click <strong>Export CSV</strong> — verify the totals row at the bottom matches the sum of all employee rows</div></li>
+    </ul>
+
+    <div class="steps-group-label">Department Breakdown</div>
+    <ul class="steps-list">
+      <li class="step-item" onclick="toggleStep(this)"><div class="checkbox"></div><div class="step-text">Go to <strong>Department Breakdown</strong> — verify each department shows employee count, gross, deductions, net, and average net</div></li>
+      <li class="step-item" onclick="toggleStep(this)"><div class="checkbox"></div><div class="step-text">Verify the <strong>Totals row</strong> matches the overall payroll run totals</div></li>
+      <li class="step-item" onclick="toggleStep(this)"><div class="checkbox"></div><div class="step-text">Export the department breakdown to CSV</div></li>
+    </ul>
+
+    <div class="callout verify">
+      <div class="callout-icon">✓</div>
+      <div class="callout-content">
+        <div class="callout-title">What to Verify — Report Accuracy</div>
+        <div class="callout-body"><ul>
+          <li>PF ECR total_epf_ee must equal the sum of all Employee PF line items in that payroll run</li>
+          <li>ESI report must exclude employees with gross > ₹21,000</li>
+          <li>YTD sums should match individual payslip amounts — cross-check one employee manually</li>
+          <li>Department totals should add up to the payroll run's total_gross and total_net</li>
+        </ul></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── FLOW 12: Trial Gating ─── -->
+  <section class="flow-section" id="flow-12">
+    <div class="flow-number">Flow 12</div>
+    <h2 class="flow-title">Trial & Access Control</h2>
+    <div class="flow-meta">
+      <span class="time-badge">⏱ ~10 min</span>
+      <span class="portal-badge both">All Portals</span>
+    </div>
+
+    <div class="callout info">
+      <div class="callout-icon">ℹ</div>
+      <div class="callout-content">
+        <div class="callout-title">About this Flow</div>
+        <div class="callout-body">New tenants start on "trial" status with restricted access. Use a fresh tenant or ask the platform admin to set a tenant to trial status for this test.</div>
+      </div>
+    </div>
+
+    <div class="steps-group-label">Trial Account Limits</div>
+    <ul class="steps-list">
+      <li class="step-item" onclick="toggleStep(this)"><div class="checkbox"></div><div class="step-text">Sign up a new tenant — confirm it starts on <strong>trial</strong> status</div></li>
+      <li class="step-item" onclick="toggleStep(this)"><div class="checkbox"></div><div class="step-text">Verify the <strong>trial banner</strong> appears at the top of the admin layout (e.g. "3 / 10 employees used")</div></li>
+      <li class="step-item" onclick="toggleStep(this)"><div class="checkbox"></div><div class="step-text">Add employees until you hit <strong>10</strong> — the 11th attempt should show: <em>"Trial accounts are limited to 10 employees. Upgrade to add more."</em></div></li>
+      <li class="step-item" onclick="toggleStep(this)"><div class="checkbox"></div><div class="step-text">Go to <strong>Bulk Import</strong> — verify it shows a message that bulk import is not available on trial</div></li>
+      <li class="step-item" onclick="toggleStep(this)"><div class="checkbox"></div><div class="step-text">Process a payroll run — go to the bank file page — verify <strong>download buttons are hidden</strong> with an upgrade prompt</div></li>
+    </ul>
+
+    <div class="steps-group-label">Suspended Account</div>
+    <ul class="steps-list">
+      <li class="step-item" onclick="toggleStep(this)"><div class="checkbox"></div><div class="step-text">From Platform Admin, <strong>suspend</strong> the test tenant</div></li>
+      <li class="step-item" onclick="toggleStep(this)"><div class="checkbox"></div><div class="step-text">As HR Admin for that tenant, try to create an employee — verify redirect with: <em>"Your account is suspended. Contact support to restore access."</em></div></li>
+      <li class="step-item" onclick="toggleStep(this)"><div class="checkbox"></div><div class="step-text">Try to approve a leave request — verify this write action is also blocked</div></li>
+      <li class="step-item" onclick="toggleStep(this)"><div class="checkbox"></div><div class="step-text">Verify read-only actions still work: viewing employee list, viewing payslips, running reports</div></li>
+      <li class="step-item" onclick="toggleStep(this)"><div class="checkbox"></div><div class="step-text">Re-enable the tenant from Platform Admin — verify write access is fully restored</div></li>
+    </ul>
+
+    <div class="callout verify">
+      <div class="callout-icon">✓</div>
+      <div class="callout-content">
+        <div class="callout-title">What to Verify</div>
+        <div class="callout-body"><ul>
+          <li>Trial banner counter must update as employees are added</li>
+          <li>Suspension must block: create, update, destroy, approve, reject — across ALL admin controllers</li>
+          <li>Suspension must NOT block: index, show, export, report actions</li>
+          <li>Trial/suspended state must not affect the employee portal (employees can still view their own data)</li>
+        </ul></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── Feedback ─── -->
+  <section class="feedback-section" id="feedback">
+    <div style="max-width:800px;">
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:var(--text-muted);margin-bottom:12px;">Found Something?</div>
+      <h2 style="font-family:'Instrument Serif',serif;font-size:clamp(28px,4vw,40px);color:var(--text-primary);margin-bottom:12px;line-height:1.2;">Help us <em style="color:#a5b4fc;">build better.</em></h2>
+      <p style="color:var(--text-secondary);font-size:15px;line-height:1.7;margin-bottom:36px;max-width:560px;">Every bug you find, every flow that feels off, every suggestion — all of it makes Kula HR better for every company that'll use it. Be specific: what you did, what you expected, what happened.</p>
+
+      <div style="display:flex;flex-wrap:wrap;gap:16px;margin-bottom:40px;">
+        <div class="bug-card">
+          <div style="font-size:24px;margin-bottom:12px;">🐛</div>
+          <div style="font-weight:700;color:var(--text-primary);margin-bottom:6px;font-size:15px;">Report a Bug</div>
+          <div style="font-size:13px;color:var(--text-secondary);line-height:1.6;margin-bottom:16px;">Include: which flow, which step, your browser, and a screenshot if possible.</div>
+          <div style="font-family:'DM Mono',monospace;font-size:12px;padding:10px 14px;background:rgba(255,255,255,0.04);border:1px solid var(--border-subtle);border-radius:8px;color:var(--accent-cyan);">beta@kulahrms.com</div>
+        </div>
+        <div class="bug-card">
+          <div style="font-size:24px;margin-bottom:12px;">💬</div>
+          <div style="font-weight:700;color:var(--text-primary);margin-bottom:6px;font-size:15px;">Share Feedback</div>
+          <div style="font-size:13px;color:var(--text-secondary);line-height:1.6;margin-bottom:16px;">What felt confusing? What was missing? UX, payroll math, feature gaps — all feedback welcome.</div>
+          <div style="font-family:'DM Mono',monospace;font-size:12px;padding:10px 14px;background:rgba(255,255,255,0.04);border:1px solid var(--border-subtle);border-radius:8px;color:var(--accent-cyan);">beta@kulahrms.com</div>
+        </div>
+        <div class="bug-card">
+          <div style="font-size:24px;margin-bottom:12px;">📋</div>
+          <div style="font-weight:700;color:var(--text-primary);margin-bottom:6px;font-size:15px;">Bug Report Template</div>
+          <div style="font-size:13px;color:var(--text-secondary);line-height:1.6;margin-bottom:16px;">Copy and use this when reporting:</div>
+          <div style="font-family:'DM Mono',monospace;font-size:11.5px;padding:12px 14px;background:rgba(6,11,24,0.8);border:1px solid var(--border-subtle);border-radius:8px;color:var(--text-secondary);line-height:1.8;white-space:pre-wrap;">Flow: [e.g. Flow 09 — Payroll]
+Step: [e.g. Step 3 — Progress bar]
+Expected: [what should happen]
+Actual: [what did happen]
+Browser: [Chrome/Safari/Firefox]
+Screenshot: [attach if possible]</div>
+        </div>
+      </div>
+
+      <div style="padding:20px 24px;background:rgba(99,102,241,0.06);border:1px solid rgba(99,102,241,0.15);border-radius:12px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+        <div style="font-size:28px;">🙏</div>
+        <div>
+          <div style="font-weight:600;color:var(--text-primary);margin-bottom:3px;">Thank you for being a beta tester.</div>
+          <div style="font-size:13px;color:var(--text-secondary);">You're helping shape a product that will be used by real HR teams across India. Your time here genuinely matters.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <div style="padding:24px 64px;border-top:1px solid var(--border-subtle);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <div class="logo-mark">K</div>
+      <span style="font-size:14px;color:var(--text-muted);">Kula HR — Beta Testing Guide v1.0</span>
+    </div>
+    <div style="font-family:'DM Mono',monospace;font-size:12px;color:var(--text-muted);">
+      12 flows · Rails 8.1.2 · <%= Rails.env %>
+    </div>
+  </div>
+
+</div><!-- /main -->
+
+<!-- Mobile sidebar toggle -->
+<button id="sidebar-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')" style="display:none;position:fixed;bottom:24px;right:24px;z-index:200;background:var(--accent-indigo);color:white;border:none;border-radius:50%;width:52px;height:52px;font-size:20px;cursor:pointer;box-shadow:0 8px 32px rgba(99,102,241,0.4);align-items:center;justify-content:center;">☰</button>
+
+<script>
+  function toggleStep(el) {
+    el.classList.toggle('checked');
+    updateProgress();
+  }
+
+  function updateProgress() {
+    const allSteps = document.querySelectorAll('.step-item');
+    const checked  = document.querySelectorAll('.step-item.checked');
+    const pct = allSteps.length > 0 ? (checked.length / allSteps.length) * 100 : 0;
+
+    document.getElementById('progress-fill').style.width = pct + '%';
+    document.getElementById('sidebar-progress').style.width = pct + '%';
+
+    let completedFlows = 0;
+    for (let i = 1; i <= 12; i++) {
+      const sec = document.getElementById('flow-' + i);
+      if (!sec) continue;
+      const steps = sec.querySelectorAll('.step-item');
+      const done  = sec.querySelectorAll('.step-item.checked');
+      if (steps.length > 0 && steps.length === done.length) completedFlows++;
+    }
+    document.getElementById('progress-text').textContent = completedFlows + ' / 12';
+  }
+
+  // Highlight active sidebar link on scroll
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        document.querySelectorAll('.sidebar-link[href^="#flow"]').forEach(link => {
+          link.classList.toggle('active', link.getAttribute('href') === '#' + entry.target.id);
+        });
+      }
+    });
+  }, { rootMargin: '-20% 0px -70% 0px' });
+
+  document.querySelectorAll('.flow-section').forEach(s => observer.observe(s));
+
+  // Close sidebar on main content click (mobile)
+  document.getElementById('main').addEventListener('click', () => {
+    if (window.innerWidth < 1024) document.getElementById('sidebar').classList.remove('open');
+  });
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') document.getElementById('sidebar').classList.remove('open');
+  });
+</script>
+</body>
+</html>

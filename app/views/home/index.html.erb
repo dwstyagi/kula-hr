@@ -1,103 +1,176 @@
-<!-- Navigation -->
+<%# Navigation %>
 <header class="absolute inset-x-0 top-0 z-50">
   <nav class="flex items-center justify-between p-6 lg:px-8" aria-label="Global">
     <div class="flex lg:flex-1">
-      <a href="#" class="-m-1.5 p-1.5 flex items-center gap-2">
+      <a href="/" class="-m-1.5 p-1.5 flex items-center gap-2">
         <span class="sr-only"><%= t('app_name') %></span>
-        <div class="h-8 w-8 rounded bg-blue-600 flex items-center justify-center text-white font-bold text-xl">K</div>
+        <div class="h-8 w-8 rounded-lg bg-indigo-600 flex items-center justify-center text-white font-bold text-lg">K</div>
         <span class="font-bold text-xl tracking-tight text-gray-900"><%= t('app_name') %></span>
       </a>
     </div>
     <div class="flex lg:hidden">
-      <button type="button" class="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5 text-gray-700">
+      <button type="button" id="mobile-menu-btn" class="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5 text-gray-700">
         <span class="sr-only">Open main menu</span>
-        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
         </svg>
       </button>
     </div>
-    <div class="hidden lg:flex lg:gap-x-12">
-      <a href="#features" class="text-sm font-semibold leading-6 text-gray-900 hover:text-blue-600 transition">Features</a>
-      <a href="#solutions" class="text-sm font-semibold leading-6 text-gray-900 hover:text-blue-600 transition">Solutions</a>
-      <a href="#pricing" class="text-sm font-semibold leading-6 text-gray-900 hover:text-blue-600 transition">Pricing</a>
-      <a href="#company" class="text-sm font-semibold leading-6 text-gray-900 hover:text-blue-600 transition">Company</a>
+    <div class="hidden lg:flex lg:gap-x-10">
+      <a href="#features"  class="text-sm font-semibold leading-6 text-gray-700 hover:text-indigo-600 transition">Features</a>
+      <a href="#how-it-works" class="text-sm font-semibold leading-6 text-gray-700 hover:text-indigo-600 transition">How it works</a>
+      <a href="#pricing"   class="text-sm font-semibold leading-6 text-gray-700 hover:text-indigo-600 transition">Pricing</a>
     </div>
-    <div class="hidden lg:flex lg:flex-1 lg:justify-end gap-x-4">
-      <a href="#" class="text-sm font-semibold leading-6 text-gray-900 py-2">Log in</a>
-      <a href="#" class="rounded-md bg-blue-600 px-3.5 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-blue-600 transition">Sign up</a>
+    <div class="hidden lg:flex lg:flex-1 lg:justify-end gap-x-4 items-center">
+      <a href="#login-prompt" class="text-sm font-semibold leading-6 text-gray-700 hover:text-indigo-600 transition py-2">Log in</a>
+      <a href="<%= signup_path %>" class="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 transition">
+        Start free trial
+      </a>
     </div>
   </nav>
 </header>
+
 <main>
-  <!-- Hero Section -->
-  <div class="relative isolate pt-14">
+  <%# ── Hero ── %>
+  <div class="relative isolate pt-14 overflow-hidden">
+    <%# Background gradient %>
     <div class="absolute inset-x-0 -top-40 -z-10 transform-gpu overflow-hidden blur-3xl sm:-top-80" aria-hidden="true">
-      <div class="relative left-[calc(50%-11rem)] aspect-1155/678 w-144.5 -translate-x-1/2 rotate-30 bg-linear-to-tr from-[#ff80b5] to-[#9089fc] opacity-30 sm:left-[calc(50%-30rem)] sm:w-288.75" style="clip-path: polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)"></div>
+      <div class="relative left-[calc(50%-11rem)] aspect-[1155/678] w-[36.125rem] -translate-x-1/2 rotate-[30deg] bg-gradient-to-tr from-[#818cf8] to-[#6366f1] opacity-20 sm:left-[calc(50%-30rem)] sm:w-[72.1875rem]"
+        style="clip-path: polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)">
+      </div>
     </div>
+
     <div class="py-24 sm:py-32 lg:pb-40">
       <div class="mx-auto max-w-7xl px-6 lg:px-8">
-        <div class="mx-auto max-w-2xl text-center">
-          <h1 class="text-4xl font-bold tracking-tight text-gray-900 sm:text-6xl">
-            HR Management designed for <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">modern teams</span>
-          </h1>
-          <p class="mt-6 text-lg leading-8 text-gray-600">
-            Simplify your HR processes with our all-in-one platform. From recruitment to offboarding, handle everything seamlessly and focus on what matters most—your people.
-          </p>
-          <div class="mt-10 flex items-center justify-center gap-x-6">
-            <a href="#" class="rounded-md bg-blue-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-blue-600 transition hover:shadow-lg">Get started for free</a>
-            <a href="#" class="text-sm font-semibold leading-6 text-gray-900 flex items-center gap-1 hover:gap-2 transition-all">Book a demo <span aria-hidden="true">→</span></a>
+        <div class="mx-auto max-w-3xl text-center">
+          <%# India badge %>
+          <div class="mb-6 flex justify-center">
+            <span class="inline-flex items-center gap-2 rounded-full bg-indigo-50 px-4 py-1.5 text-sm font-medium text-indigo-700 ring-1 ring-inset ring-indigo-700/20">
+              🇮🇳 Built for Indian companies
+            </span>
           </div>
+
+          <h1 class="text-4xl font-bold tracking-tight text-gray-900 sm:text-6xl">
+            Payroll & HR for<br/>
+            <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-violet-600">growing Indian teams</span>
+          </h1>
+          <p class="mt-6 text-lg leading-8 text-gray-600 max-w-2xl mx-auto">
+            Run compliant payroll in minutes. Automate PF, ESI, Professional Tax, and TDS. Generate payslips, bank files, and statutory reports — all from one platform.
+          </p>
+          <div class="mt-10 flex items-center justify-center gap-x-6 flex-wrap gap-y-4">
+            <a href="<%= signup_path %>" class="rounded-lg bg-indigo-600 px-6 py-3 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 transition hover:shadow-lg">
+              Start free trial — no credit card
+            </a>
+            <a href="#how-it-works" class="text-sm font-semibold leading-6 text-gray-900 flex items-center gap-1 hover:text-indigo-600 transition">
+              See how it works <span aria-hidden="true">→</span>
+            </a>
+          </div>
+          <p class="mt-4 text-xs text-gray-400">Free for up to 10 employees · No setup fees · Cancel anytime</p>
         </div>
-        <!-- Dashboard Mockup -->
+
+        <%# Dashboard mockup %>
         <div class="mt-16 flow-root sm:mt-24">
           <div class="-m-2 rounded-xl bg-gray-900/5 p-2 ring-1 ring-inset ring-gray-900/10 lg:-m-4 lg:rounded-2xl lg:p-4">
             <div class="rounded-xl bg-white shadow-2xl ring-1 ring-gray-900/10 overflow-hidden">
-              <!-- Fake browser header -->
-              <div class="border-b border-gray-200 bg-gray-50 flex items-center px-4 py-2 space-x-2">
+              <%# Fake browser bar %>
+              <div class="border-b border-gray-200 bg-gray-50 flex items-center px-4 py-2.5 gap-2">
                 <div class="w-3 h-3 rounded-full bg-red-400"></div>
                 <div class="w-3 h-3 rounded-full bg-yellow-400"></div>
                 <div class="w-3 h-3 rounded-full bg-green-400"></div>
-                <div class="flex-1 bg-white mx-4 rounded-md h-6 border border-gray-200"></div>
-              </div>
-              <!-- Dashboard Content -->
-              <div class="p-8 grid grid-cols-1 md:grid-cols-3 gap-6 bg-slate-50 min-h-[400px]">
-                <!-- Sidebar placeholder -->
-                <div class="hidden md:block col-span-1 bg-white rounded-lg shadow-sm border border-gray-100 p-4 space-y-4">
-                  <div class="h-8 w-3/4 bg-gray-100 rounded animate-pulse"></div>
-                  <div class="space-y-2">
-                    <div class="h-4 w-full bg-blue-50 rounded text-blue-600 font-medium px-2 py-1">Dashboard</div>
-                    <div class="h-4 w-full hover:bg-gray-50 rounded px-2 py-1">Employees</div>
-                    <div class="h-4 w-full hover:bg-gray-50 rounded px-2 py-1">Payroll</div>
-                    <div class="h-4 w-full hover:bg-gray-50 rounded px-2 py-1">Time Off</div>
-                  </div>
+                <div class="flex-1 bg-white mx-4 rounded-md h-6 border border-gray-200 flex items-center px-3">
+                  <span class="text-xs text-gray-400">acme.<%= @app_domain %>/admin/dashboard</span>
                 </div>
-                <!-- Main Content -->
-                <div class="col-span-1 md:col-span-2 space-y-6">
-                  <!-- Stats Row -->
-                  <div class="grid grid-cols-3 gap-4">
-                    <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
-                      <p class="text-xs text-gray-500 uppercase font-bold">Total Headcount</p>
-                      <p class="text-2xl font-bold text-gray-900 mt-1">1,248</p>
-                      <p class="text-xs text-green-600 mt-1 flex items-center">
-                        <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path></svg>
-                        +12% vs last month
-                      </p>
+              </div>
+              <%# Dashboard content %>
+              <div class="flex bg-slate-50 min-h-[420px]">
+                <%# Sidebar %>
+                <div class="hidden md:flex flex-col w-52 bg-white border-r border-gray-100 p-4 gap-1 flex-shrink-0">
+                  <div class="flex items-center gap-2 mb-4 px-2">
+                    <div class="w-6 h-6 rounded bg-indigo-600 flex items-center justify-center text-white text-xs font-bold">K</div>
+                    <span class="font-semibold text-sm text-gray-900">Acme Corp</span>
+                  </div>
+                  <div class="text-xs font-semibold text-indigo-600 bg-indigo-50 rounded-md px-3 py-2">Dashboard</div>
+                  <div class="text-xs text-gray-500 px-3 py-2 hover:bg-gray-50 rounded-md cursor-default">Employees</div>
+                  <div class="text-xs text-gray-500 px-3 py-2 hover:bg-gray-50 rounded-md cursor-default">Payroll Runs</div>
+                  <div class="text-xs text-gray-500 px-3 py-2 hover:bg-gray-50 rounded-md cursor-default">Leave Requests</div>
+                  <div class="text-xs text-gray-500 px-3 py-2 hover:bg-gray-50 rounded-md cursor-default">Attendance</div>
+                  <div class="text-xs text-gray-500 px-3 py-2 hover:bg-gray-50 rounded-md cursor-default">Reports</div>
+                  <div class="text-xs text-gray-500 px-3 py-2 hover:bg-gray-50 rounded-md cursor-default">Settings</div>
+                </div>
+                <%# Main content %>
+                <div class="flex-1 p-6 space-y-4 overflow-hidden">
+                  <div class="flex items-center justify-between">
+                    <div>
+                      <h3 class="text-sm font-semibold text-gray-900">Dashboard</h3>
+                      <p class="text-xs text-gray-400">March 2026</p>
                     </div>
-                    <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
-                      <p class="text-xs text-gray-500 uppercase font-bold">Active Leave</p>
-                      <p class="text-2xl font-bold text-gray-900 mt-1">42</p>
-                      <p class="text-xs text-gray-400 mt-1">3 pending approval</p>
+                    <span class="inline-flex items-center gap-1.5 text-xs font-medium text-green-700 bg-green-50 px-2.5 py-1 rounded-full ring-1 ring-green-600/20">
+                      <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>Payroll Paid
+                    </span>
+                  </div>
+                  <%# Stat cards %>
+                  <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                    <div class="bg-white p-3.5 rounded-xl border border-gray-100 shadow-sm">
+                      <p class="text-xs text-gray-400 font-medium">Employees</p>
+                      <p class="text-xl font-bold text-gray-900 mt-0.5">52</p>
+                      <p class="text-xs text-green-600 mt-0.5">+3 this month</p>
                     </div>
-                    <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
-                      <p class="text-xs text-gray-500 uppercase font-bold">Open Roles</p>
-                      <p class="text-2xl font-bold text-gray-900 mt-1">8</p>
-                      <p class="text-xs text-blue-600 mt-1">View candidates</p>
+                    <div class="bg-white p-3.5 rounded-xl border border-gray-100 shadow-sm">
+                      <p class="text-xs text-gray-400 font-medium">Net Pay</p>
+                      <p class="text-xl font-bold text-gray-900 mt-0.5">₹26.4L</p>
+                      <p class="text-xs text-green-600 mt-0.5">▲ 2.1% vs last</p>
+                    </div>
+                    <div class="bg-white p-3.5 rounded-xl border border-gray-100 shadow-sm">
+                      <p class="text-xs text-gray-400 font-medium">PF Liability</p>
+                      <p class="text-xl font-bold text-gray-900 mt-0.5">₹3.75L</p>
+                      <p class="text-xs text-gray-400 mt-0.5">Due 15 Apr</p>
+                    </div>
+                    <div class="bg-white p-3.5 rounded-xl border border-gray-100 shadow-sm">
+                      <p class="text-xs text-gray-400 font-medium">Leave Pending</p>
+                      <p class="text-xl font-bold text-gray-900 mt-0.5">5</p>
+                      <p class="text-xs text-amber-600 mt-0.5">Needs approval</p>
                     </div>
                   </div>
-                  <!-- Chart/List Placeholder -->
-                  <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-100 h-64 flex flex-col justify-center items-center text-gray-400">
-                    <svg class="w-16 h-16 mb-4 opacity-20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
-                    <span class="text-sm">Performance Analytics Visualization</span>
+                  <%# Payroll row %>
+                  <div class="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+                    <div class="px-4 py-3 border-b border-gray-50 flex items-center justify-between">
+                      <span class="text-xs font-semibold text-gray-700">Recent Payslips — March 2026</span>
+                      <span class="text-xs text-indigo-600 font-medium">View all →</span>
+                    </div>
+                    <table class="w-full text-xs">
+                      <thead class="bg-gray-50">
+                        <tr>
+                          <th class="text-left px-4 py-2 text-gray-400 font-medium">Employee</th>
+                          <th class="text-right px-4 py-2 text-gray-400 font-medium">Gross</th>
+                          <th class="text-right px-4 py-2 text-gray-400 font-medium">PF</th>
+                          <th class="text-right px-4 py-2 text-gray-400 font-medium">TDS</th>
+                          <th class="text-right px-4 py-2 text-gray-400 font-medium">Net Pay</th>
+                        </tr>
+                      </thead>
+                      <tbody class="divide-y divide-gray-50">
+                        <tr>
+                          <td class="px-4 py-2.5 font-medium text-gray-800">Amit Sharma</td>
+                          <td class="px-4 py-2.5 text-right text-gray-600">₹77,826</td>
+                          <td class="px-4 py-2.5 text-right text-gray-600">₹1,800</td>
+                          <td class="px-4 py-2.5 text-right text-gray-600">₹2,962</td>
+                          <td class="px-4 py-2.5 text-right font-semibold text-gray-900">₹72,864</td>
+                        </tr>
+                        <tr>
+                          <td class="px-4 py-2.5 font-medium text-gray-800">Sneha Patel</td>
+                          <td class="px-4 py-2.5 text-right text-gray-600">₹55,200</td>
+                          <td class="px-4 py-2.5 text-right text-gray-600">₹1,800</td>
+                          <td class="px-4 py-2.5 text-right text-gray-600">₹1,140</td>
+                          <td class="px-4 py-2.5 text-right font-semibold text-gray-900">₹51,860</td>
+                        </tr>
+                        <tr>
+                          <td class="px-4 py-2.5 font-medium text-gray-800">Ravi Kumar</td>
+                          <td class="px-4 py-2.5 text-right text-gray-600">₹42,000</td>
+                          <td class="px-4 py-2.5 text-right text-gray-600">₹1,800</td>
+                          <td class="px-4 py-2.5 text-right text-gray-600">₹350</td>
+                          <td class="px-4 py-2.5 text-right font-semibold text-gray-900">₹39,650</td>
+                        </tr>
+                      </tbody>
+                    </table>
                   </div>
                 </div>
               </div>
@@ -105,229 +178,493 @@
           </div>
         </div>
       </div>
-      <!-- Gradient Background Bottom -->
-      <div class="absolute inset-x-0 top-[calc(100%-13rem)] -z-10 transform-gpu overflow-hidden blur-3xl sm:top-[calc(100%-30rem)]" aria-hidden="true">
-        <div class="relative left-[calc(50%+3rem)] aspect-1155/678 w-144.5 -translate-x-1/2 bg-gradient-to-tr from-[#ff80b5] to-[#9089fc] opacity-30 sm:left-[calc(50%+36rem)] sm:w-[72.1875rem]" style="clip-path: polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)"></div>
+    </div>
+
+    <div class="absolute inset-x-0 top-[calc(100%-13rem)] -z-10 transform-gpu overflow-hidden blur-3xl sm:top-[calc(100%-30rem)]" aria-hidden="true">
+      <div class="relative left-[calc(50%+3rem)] aspect-[1155/678] w-[36.125rem] -translate-x-1/2 bg-gradient-to-tr from-[#818cf8] to-[#6366f1] opacity-20 sm:left-[calc(50%+36rem)] sm:w-[72.1875rem]"
+        style="clip-path: polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)">
       </div>
     </div>
   </div>
-  <!-- Logo Cloud -->
-  <div class="bg-white py-12 sm:py-20">
+
+  <%# ── Statutory compliance strip ── %>
+  <div class="bg-indigo-600 py-8">
     <div class="mx-auto max-w-7xl px-6 lg:px-8">
-      <h2 class="text-center text-lg font-semibold leading-8 text-gray-900">Trusted by innovative teams worldwide</h2>
-      <div class="mx-auto mt-10 grid max-w-lg grid-cols-4 items-center gap-x-8 gap-y-10 sm:max-w-xl sm:grid-cols-6 sm:gap-x-10 lg:mx-0 lg:max-w-none lg:grid-cols-5 opacity-60 grayscale hover:grayscale-0 transition-all duration-500">
-        <!-- Placeholder Logos with text -->
-        <div class="col-span-2 max-h-12 w-full object-contain lg:col-span-1 text-2xl font-bold text-gray-400 flex justify-center items-center">ACME Corp</div>
-        <div class="col-span-2 max-h-12 w-full object-contain lg:col-span-1 text-2xl font-bold text-gray-400 flex justify-center items-center">Tuple</div>
-        <div class="col-span-2 max-h-12 w-full object-contain lg:col-span-1 text-2xl font-bold text-gray-400 flex justify-center items-center">SavvyCal</div>
-        <div class="col-span-2 max-h-12 w-full object-contain lg:col-span-1 text-2xl font-bold text-gray-400 flex justify-center items-center">WorkCation</div>
-        <div class="col-span-2 max-h-12 w-full object-contain lg:col-span-1 text-2xl font-bold text-gray-400 flex justify-center items-center">Reform</div>
+      <p class="text-center text-sm font-semibold text-indigo-100 mb-6 uppercase tracking-widest">Fully compliant with Indian statutory requirements</p>
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-6 text-center">
+        <div>
+          <p class="text-2xl font-bold text-white">PF / EPF</p>
+          <p class="text-xs text-indigo-200 mt-1">12% auto-calculated<br/>ECR file generated</p>
+        </div>
+        <div>
+          <p class="text-2xl font-bold text-white">ESI</p>
+          <p class="text-xs text-indigo-200 mt-1">Eligibility auto-checked<br/>Contribution statement</p>
+        </div>
+        <div>
+          <p class="text-2xl font-bold text-white">Prof. Tax</p>
+          <p class="text-xs text-indigo-200 mt-1">State slab-based<br/>7 states supported</p>
+        </div>
+        <div>
+          <p class="text-2xl font-bold text-white">TDS</p>
+          <p class="text-xs text-indigo-200 mt-1">Old & New Regime<br/>Monthly projection</p>
+        </div>
       </div>
     </div>
   </div>
-  <!-- Features Section -->
-  <div id="features" class="bg-gray-50 py-24 sm:py-32">
+
+  <%# ── Features ── %>
+  <div id="features" class="bg-white py-24 sm:py-32">
     <div class="mx-auto max-w-7xl px-6 lg:px-8">
-      <div class="mx-auto max-w-2xl lg:text-center">
-        <h2 class="text-base font-semibold leading-7 text-blue-600">Deploy faster</h2>
-        <p class="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">Everything you need to manage your team</p>
+      <div class="mx-auto max-w-2xl text-center">
+        <p class="text-base font-semibold leading-7 text-indigo-600">Everything in one platform</p>
+        <h2 class="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
+          From onboarding to payslip — done.
+        </h2>
         <p class="mt-6 text-lg leading-8 text-gray-600">
-          Our platform integrates seamlessly with your existing workflow, providing tools that scale with your company.
+          Kula HR replaces spreadsheets, tally adjustments, and manual bank transfers with a single, compliant workflow built for Indian companies.
         </p>
       </div>
+
       <div class="mx-auto mt-16 max-w-2xl sm:mt-20 lg:mt-24 lg:max-w-none">
-        <dl class="grid max-w-xl grid-cols-1 gap-x-8 gap-y-16 lg:max-w-none lg:grid-cols-3">
-          <div class="flex flex-col bg-white p-8 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+        <dl class="grid max-w-xl grid-cols-1 gap-x-8 gap-y-10 lg:max-w-none lg:grid-cols-3">
+
+          <div class="flex flex-col bg-white p-8 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md hover:border-indigo-100 transition-all">
             <dt class="flex items-center gap-x-3 text-base font-semibold leading-7 text-gray-900">
-              <div class="h-10 w-10 flex items-center justify-center rounded-lg bg-blue-600 text-white">
-                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
+              <div class="h-10 w-10 flex items-center justify-center rounded-lg bg-indigo-600 text-white flex-shrink-0">
+                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 9h3.75M15 12h3.75M15 15h3.75M4.5 19.5h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5zm6-10.125a1.875 1.875 0 11-3.75 0 1.875 1.875 0 013.75 0zm1.294 6.336a6.721 6.721 0 01-3.17.789 6.721 6.721 0 01-3.168-.789 3.376 3.376 0 016.338 0z" />
                 </svg>
               </div>
-              Employee Profiles
+              Employee Management
             </dt>
             <dd class="mt-4 flex flex-auto flex-col text-base leading-7 text-gray-600">
-              <p class="flex-auto">Centralize all employee data. From contracts to emergency contacts, access everything securely in one place.</p>
-              <p class="mt-6">
-                <a href="#" class="text-sm font-semibold leading-6 text-blue-600 hover:text-blue-500">Learn more <span aria-hidden="true">→</span></a>
-              </p>
+              <p class="flex-auto">Full employee lifecycle — CRUD, bulk CSV/Excel import, department and designation management, invite flow, and export. All scoped to your company.</p>
             </dd>
           </div>
-          <div class="flex flex-col bg-white p-8 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+
+          <div class="flex flex-col bg-white p-8 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md hover:border-indigo-100 transition-all">
             <dt class="flex items-center gap-x-3 text-base font-semibold leading-7 text-gray-900">
-              <div class="h-10 w-10 flex items-center justify-center rounded-lg bg-blue-600 text-white">
-                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+              <div class="h-10 w-10 flex items-center justify-center rounded-lg bg-indigo-600 text-white flex-shrink-0">
+                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z" />
                 </svg>
               </div>
-              Time & Attendance
+              Salary Structures & CTC
             </dt>
             <dd class="mt-4 flex flex-auto flex-col text-base leading-7 text-gray-600">
-              <p class="flex-auto">Track work hours, manage shift schedules, and process leave requests with automated approval workflows.</p>
-              <p class="mt-6">
-                <a href="#" class="text-sm font-semibold leading-6 text-blue-600 hover:text-blue-500">Learn more <span aria-hidden="true">→</span></a>
-              </p>
+              <p class="flex-auto">Configure CTC-based salary structures with Indian components — Basic (40%), HRA (50% of Basic), Special Allowance (balancing). Auto-calculate breakup from CTC in real time.</p>
             </dd>
           </div>
-          <div class="flex flex-col bg-white p-8 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+
+          <div class="flex flex-col bg-white p-8 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md hover:border-indigo-100 transition-all">
             <dt class="flex items-center gap-x-3 text-base font-semibold leading-7 text-gray-900">
-              <div class="h-10 w-10 flex items-center justify-center rounded-lg bg-blue-600 text-white">
-                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+              <div class="h-10 w-10 flex items-center justify-center rounded-lg bg-indigo-600 text-white flex-shrink-0">
+                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+                </svg>
+              </div>
+              Leave & Attendance
+            </dt>
+            <dd class="mt-4 flex flex-auto flex-col text-base leading-7 text-gray-600">
+              <p class="flex-auto">Configurable leave types (CL, SL, EL), approval workflows, auto leave-balance deduction, attendance summaries, LOP calculation, and template upload — all feeding directly into payroll.</p>
+            </dd>
+          </div>
+
+          <div class="flex flex-col bg-white p-8 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md hover:border-indigo-100 transition-all">
+            <dt class="flex items-center gap-x-3 text-base font-semibold leading-7 text-gray-900">
+              <div class="h-10 w-10 flex items-center justify-center rounded-lg bg-violet-600 text-white flex-shrink-0">
+                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25zM6.75 12h.008v.008H6.75V12zm0 3h.008v.008H6.75V15zm0 3h.008v.008H6.75V18z" />
+                </svg>
+              </div>
+              One-click Payroll Processing
+            </dt>
+            <dd class="mt-4 flex flex-auto flex-col text-base leading-7 text-gray-600">
+              <p class="flex-auto">Initiate payroll for the month. System calculates gross, PF, ESI, PT, and TDS for every employee, handles LOP proration, and generates payslips — all in the background via Sidekiq.</p>
+            </dd>
+          </div>
+
+          <div class="flex flex-col bg-white p-8 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md hover:border-indigo-100 transition-all">
+            <dt class="flex items-center gap-x-3 text-base font-semibold leading-7 text-gray-900">
+              <div class="h-10 w-10 flex items-center justify-center rounded-lg bg-violet-600 text-white flex-shrink-0">
+                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z" />
+                </svg>
+              </div>
+              Bank File Generation
+            </dt>
+            <dd class="mt-4 flex flex-auto flex-col text-base leading-7 text-gray-600">
+              <p class="flex-auto">Download a salary transfer file formatted for your bank — HDFC, ICICI, SBI, or a generic CSV. Upload directly to your corporate net banking and salaries are on their way.</p>
+            </dd>
+          </div>
+
+          <div class="flex flex-col bg-white p-8 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md hover:border-indigo-100 transition-all">
+            <dt class="flex items-center gap-x-3 text-base font-semibold leading-7 text-gray-900">
+              <div class="h-10 w-10 flex items-center justify-center rounded-lg bg-violet-600 text-white flex-shrink-0">
+                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
                 </svg>
               </div>
-              Performance Analytics
+              Statutory Reports
             </dt>
             <dd class="mt-4 flex flex-auto flex-col text-base leading-7 text-gray-600">
-              <p class="flex-auto">Visualize team performance with insightful dashboards. Identify top performers and areas for improvement.</p>
-              <p class="mt-6">
-                <a href="#" class="text-sm font-semibold leading-6 text-blue-600 hover:text-blue-500">Learn more <span aria-hidden="true">→</span></a>
-              </p>
+              <p class="flex-auto">Generate PF ECR files, ESI contribution statements, PT challans, and YTD earnings reports in the exact format required for filing. No more manual Excel work.</p>
             </dd>
           </div>
+
         </dl>
       </div>
     </div>
   </div>
-  <!-- Pricing Section -->
-  <div id="pricing" class="bg-white py-24 sm:py-32">
+
+  <%# ── How it works ── %>
+  <div id="how-it-works" class="bg-gray-50 py-24 sm:py-32">
     <div class="mx-auto max-w-7xl px-6 lg:px-8">
-      <div class="mx-auto max-w-2xl sm:text-center">
-        <h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">Simple, transparent pricing</h2>
-        <p class="mt-6 text-lg leading-8 text-gray-600">Choose the plan that fits your company size. No hidden fees.</p>
+      <div class="mx-auto max-w-2xl text-center mb-16">
+        <p class="text-base font-semibold leading-7 text-indigo-600">Simple workflow</p>
+        <h2 class="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">Payroll done in 5 steps</h2>
       </div>
-      <div class="mx-auto mt-16 max-w-2xl rounded-3xl ring-1 ring-gray-200 sm:mt-20 lg:mx-0 lg:flex lg:max-w-none">
-        <div class="p-8 sm:p-10 lg:flex-auto">
-          <h3 class="text-2xl font-bold tracking-tight text-gray-900">Lifetime membership</h3>
-          <p class="mt-6 text-base leading-7 text-gray-600">Get access to all current and future features. Perfect for growing startups looking for a long-term solution.</p>
-          <div class="mt-10 flex items-center gap-x-4">
-            <h4 class="flex-none text-sm font-semibold leading-6 text-blue-600">What’s included</h4>
-            <div class="h-px flex-auto bg-gray-100"></div>
-          </div>
-          <ul role="list" class="mt-8 grid grid-cols-1 gap-4 text-sm leading-6 text-gray-600 sm:grid-cols-2 sm:gap-6">
-            <li class="flex gap-x-3">
-              <svg class="h-6 w-5 flex-none text-blue-600" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                <path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd" />
-              </svg>
-              Unlimited employees
-            </li>
-            <li class="flex gap-x-3">
-              <svg class="h-6 w-5 flex-none text-blue-600" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                <path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd" />
-              </svg>
-              Advanced analytics
-            </li>
-            <li class="flex gap-x-3">
-              <svg class="h-6 w-5 flex-none text-blue-600" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                <path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd" />
-              </svg>
-              24-hour support response time
-            </li>
-            <li class="flex gap-x-3">
-              <svg class="h-6 w-5 flex-none text-blue-600" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                <path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd" />
-              </svg>
-              Custom roles & permissions
-            </li>
+      <div class="relative">
+        <%# Connector line %>
+        <div class="hidden lg:block absolute top-8 left-[10%] right-[10%] h-0.5 bg-indigo-100"></div>
+        <div class="grid grid-cols-1 gap-10 lg:grid-cols-5">
+          <% [
+            { step: "1", icon: "🏢", title: "Sign up",        desc: "Create your company account. Subdomain, state, admin user — done in 2 minutes." },
+            { step: "2", icon: "👥", title: "Add employees",  desc: "Import your team via CSV or add one by one. Salary structures auto-calculate CTC breakup." },
+            { step: "3", icon: "📅", title: "Mark attendance", desc: "Approve leaves, upload attendance template, or edit on-screen. Lock the month." },
+            { step: "4", icon: "⚙️",  title: "Run payroll",   desc: "One click. System calculates PF, ESI, PT, TDS, handles LOP, and generates payslips." },
+            { step: "5", icon: "🏦", title: "Pay & file",     desc: "Download the bank file. Transfer salaries. Download statutory reports for compliance." },
+          ].each do |s| %>
+            <div class="flex flex-col items-center text-center">
+              <div class="relative z-10 w-16 h-16 rounded-2xl bg-white border-2 border-indigo-100 shadow-sm flex items-center justify-center text-2xl mb-4">
+                <%= s[:icon] %>
+              </div>
+              <p class="text-xs font-bold text-indigo-600 uppercase tracking-widest mb-1">Step <%= s[:step] %></p>
+              <h3 class="text-sm font-semibold text-gray-900 mb-2"><%= s[:title] %></h3>
+              <p class="text-sm text-gray-500 leading-relaxed"><%= s[:desc] %></p>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <%# ── Employee portal callout ── %>
+  <div class="bg-white py-24 sm:py-32">
+    <div class="mx-auto max-w-7xl px-6 lg:px-8">
+      <div class="mx-auto max-w-2xl lg:max-w-none lg:flex lg:items-center lg:gap-x-16">
+        <div class="lg:flex-1">
+          <p class="text-base font-semibold leading-7 text-indigo-600">Employee self-service</p>
+          <h2 class="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
+            Your team gets their own portal
+          </h2>
+          <p class="mt-6 text-lg leading-8 text-gray-600">
+            Every employee gets access to <code class="text-sm bg-gray-100 px-1.5 py-0.5 rounded text-gray-700">yourcompany.<%= @app_domain %>/portal</code> — a dedicated self-service portal where they can:
+          </p>
+          <ul class="mt-6 space-y-3">
+            <% [
+              "View and download their payslip as a PDF",
+              "Check 12-month payslip history and YTD summary",
+              "Apply for leave and track approval status",
+              "Submit tax declarations (Old or New Regime) with investment details",
+              "View their leave balance at any time",
+            ].each do |item| %>
+              <li class="flex items-start gap-3 text-sm text-gray-600">
+                <svg class="h-5 w-5 flex-none text-indigo-600 mt-0.5" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd" />
+                </svg>
+                <%= item %>
+              </li>
+            <% end %>
           </ul>
         </div>
-        <div class="-mt-2 p-2 lg:mt-0 lg:w-full lg:max-w-md lg:flex-shrink-0">
-          <div class="rounded-2xl bg-gray-50 py-10 text-center ring-1 ring-inset ring-gray-900/5 lg:flex lg:flex-col lg:justify-center lg:py-16">
-            <div class="mx-auto max-w-xs px-8">
-              <p class="text-base font-semibold text-gray-600">Pay once, own it forever</p>
-              <p class="mt-6 flex items-baseline justify-center gap-x-2">
-                <span class="text-5xl font-bold tracking-tight text-gray-900">$349</span>
-                <span class="text-sm font-semibold leading-6 tracking-wide text-gray-600">USD</span>
-              </p>
-              <a href="#" class="mt-10 block w-full rounded-md bg-blue-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 transition hover:shadow-lg">Get access</a>
-              <p class="mt-6 text-xs leading-5 text-gray-600">Invoices and receipts available for easy company reimbursement</p>
+        <div class="mt-10 lg:mt-0 lg:flex-1">
+          <%# Employee portal mockup %>
+          <div class="rounded-2xl bg-gray-900/5 p-2 ring-1 ring-inset ring-gray-900/10">
+            <div class="rounded-xl bg-white shadow-lg overflow-hidden">
+              <div class="border-b border-gray-100 bg-gray-50 px-4 py-2.5 flex items-center gap-2">
+                <div class="w-2.5 h-2.5 rounded-full bg-red-400"></div>
+                <div class="w-2.5 h-2.5 rounded-full bg-yellow-400"></div>
+                <div class="w-2.5 h-2.5 rounded-full bg-green-400"></div>
+                <span class="text-xs text-gray-400 ml-2">acme.<%= @app_domain %>/portal</span>
+              </div>
+              <div class="p-5 space-y-4">
+                <div class="flex items-center gap-3">
+                  <div class="w-9 h-9 rounded-full bg-indigo-100 flex items-center justify-center text-sm font-bold text-indigo-700">AS</div>
+                  <div>
+                    <p class="text-sm font-semibold text-gray-900">Welcome, Amit</p>
+                    <p class="text-xs text-gray-400">Software Engineer · Engineering</p>
+                  </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                  <div class="bg-indigo-50 rounded-xl p-3.5">
+                    <p class="text-xs text-indigo-600 font-medium">March Payslip</p>
+                    <p class="text-lg font-bold text-gray-900 mt-1">₹72,864</p>
+                    <p class="text-xs text-gray-500 mt-0.5">Net pay · Paid ✓</p>
+                  </div>
+                  <div class="bg-green-50 rounded-xl p-3.5">
+                    <p class="text-xs text-green-700 font-medium">Leave Balance</p>
+                    <p class="text-lg font-bold text-gray-900 mt-1">8 days</p>
+                    <p class="text-xs text-gray-500 mt-0.5">Casual leave remaining</p>
+                  </div>
+                </div>
+                <div class="bg-gray-50 rounded-xl p-3.5 flex items-center justify-between">
+                  <div>
+                    <p class="text-xs font-medium text-gray-700">Tax Declaration</p>
+                    <p class="text-xs text-amber-600 mt-0.5">⚠ Draft — submit by Mar 31</p>
+                  </div>
+                  <span class="text-xs font-semibold text-indigo-600">Complete →</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </div>
     </div>
   </div>
-  <!-- CTA Section -->
-  <div class="bg-blue-600">
+
+  <%# ── Pricing ── %>
+  <div id="pricing" class="bg-gray-50 py-24 sm:py-32">
+    <div class="mx-auto max-w-7xl px-6 lg:px-8">
+      <div class="mx-auto max-w-2xl text-center">
+        <p class="text-base font-semibold leading-7 text-indigo-600">Transparent pricing</p>
+        <h2 class="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">Pay per employee, not per feature</h2>
+        <p class="mt-4 text-lg text-gray-600">Start free. Upgrade when you're ready. No hidden fees, no setup cost.</p>
+      </div>
+
+      <div class="mx-auto mt-16 grid max-w-5xl grid-cols-1 gap-8 lg:grid-cols-3">
+        <%# Trial %>
+        <div class="flex flex-col rounded-3xl bg-white p-8 ring-1 ring-gray-200">
+          <h3 class="text-lg font-semibold leading-8 text-gray-900">Trial</h3>
+          <p class="mt-4 text-sm leading-6 text-gray-600">Try the full product with a small team. No credit card needed.</p>
+          <div class="mt-6 flex items-baseline gap-x-1">
+            <span class="text-4xl font-bold tracking-tight text-gray-900">Free</span>
+          </div>
+          <a href="<%= signup_path %>" class="mt-8 block rounded-lg bg-indigo-50 px-4 py-2.5 text-center text-sm font-semibold text-indigo-600 hover:bg-indigo-100 transition">
+            Get started free
+          </a>
+          <ul class="mt-8 space-y-3 text-sm leading-6 text-gray-600">
+            <% ["Up to 10 employees", "Full payroll processing", "Leave & attendance", "Statutory compliance (PF/ESI/PT/TDS)", "Payslip PDF generation", "Employee self-service portal"].each do |f| %>
+              <li class="flex gap-x-3">
+                <svg class="h-6 w-5 flex-none text-indigo-600" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd" /></svg>
+                <%= f %>
+              </li>
+            <% end %>
+            <li class="flex gap-x-3 text-gray-400">
+              <svg class="h-6 w-5 flex-none text-gray-300" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 10a.75.75 0 01.75-.75h10.5a.75.75 0 010 1.5H4.75A.75.75 0 014 10z" clip-rule="evenodd" /></svg>
+              Bulk CSV import
+            </li>
+            <li class="flex gap-x-3 text-gray-400">
+              <svg class="h-6 w-5 flex-none text-gray-300" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 10a.75.75 0 01.75-.75h10.5a.75.75 0 010 1.5H4.75A.75.75 0 014 10z" clip-rule="evenodd" /></svg>
+              Bank file download
+            </li>
+          </ul>
+        </div>
+
+        <%# Starter — highlighted %>
+        <div class="flex flex-col rounded-3xl bg-indigo-600 p-8 ring-1 ring-indigo-600 relative">
+          <div class="absolute -top-3 left-1/2 -translate-x-1/2">
+            <span class="inline-flex rounded-full bg-amber-400 px-3 py-1 text-xs font-semibold text-amber-900">Most popular</span>
+          </div>
+          <h3 class="text-lg font-semibold leading-8 text-white">Starter</h3>
+          <p class="mt-4 text-sm leading-6 text-indigo-200">For growing companies ready to run payroll properly.</p>
+          <div class="mt-6 flex items-baseline gap-x-1">
+            <span class="text-4xl font-bold tracking-tight text-white">₹149</span>
+            <span class="text-sm font-semibold leading-6 text-indigo-200">/ employee / month</span>
+          </div>
+          <a href="<%= signup_path %>" class="mt-8 block rounded-lg bg-white px-4 py-2.5 text-center text-sm font-semibold text-indigo-600 hover:bg-indigo-50 transition shadow-sm">
+            Start free trial
+          </a>
+          <ul class="mt-8 space-y-3 text-sm leading-6 text-indigo-200">
+            <% ["Unlimited employees", "Everything in Trial", "Bulk CSV/Excel import", "Bank file generation (HDFC / ICICI / SBI)", "PF ECR + ESI + PT reports", "YTD earnings export", "Priority email support"].each do |f| %>
+              <li class="flex gap-x-3">
+                <svg class="h-6 w-5 flex-none text-white" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd" /></svg>
+                <%= f %>
+              </li>
+            <% end %>
+          </ul>
+        </div>
+
+        <%# Growth %>
+        <div class="flex flex-col rounded-3xl bg-white p-8 ring-1 ring-gray-200">
+          <h3 class="text-lg font-semibold leading-8 text-gray-900">Growth</h3>
+          <p class="mt-4 text-sm leading-6 text-gray-600">For companies with 100+ employees and custom needs.</p>
+          <div class="mt-6 flex items-baseline gap-x-1">
+            <span class="text-4xl font-bold tracking-tight text-gray-900">₹99</span>
+            <span class="text-sm font-semibold leading-6 text-gray-500">/ employee / month</span>
+          </div>
+          <a href="mailto:hello@kulahr.com" class="mt-8 block rounded-lg bg-gray-900 px-4 py-2.5 text-center text-sm font-semibold text-white hover:bg-gray-700 transition">
+            Contact us
+          </a>
+          <ul class="mt-8 space-y-3 text-sm leading-6 text-gray-600">
+            <% ["Everything in Starter", "Volume pricing (100+ employees)", "Dedicated onboarding support", "Custom salary components", "Multi-state PT configuration", "SLA-backed support"].each do |f| %>
+              <li class="flex gap-x-3">
+                <svg class="h-6 w-5 flex-none text-indigo-600" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 010 1.5H4.75A.75.75 0 014 10z" clip-rule="evenodd" /></svg>
+                <%= f %>
+              </li>
+            <% end %>
+          </ul>
+        </div>
+      </div>
+
+      <p class="text-center text-sm text-gray-400 mt-10">All plans include a 14-day free trial. Billed monthly or annually (save 20% annually).</p>
+    </div>
+  </div>
+
+  <%# ── Login prompt ── %>
+  <div id="login-prompt" class="bg-white py-16 border-t border-gray-100">
+    <div class="mx-auto max-w-xl px-6 text-center">
+      <h2 class="text-xl font-bold text-gray-900 mb-2">Already have an account?</h2>
+      <p class="text-sm text-gray-500 mb-6">Log in using your company's subdomain — e.g. <code class="bg-gray-100 px-1.5 py-0.5 rounded text-gray-700">acme.<%= @app_domain %>/admin</code></p>
+      <div class="flex gap-3 max-w-sm mx-auto">
+        <div class="flex flex-1 items-center rounded-lg ring-1 ring-gray-300 overflow-hidden bg-white focus-within:ring-2 focus-within:ring-indigo-600" id="subdomain-wrapper">
+          <input id="subdomain-input" type="text" placeholder="yourcompany" class="flex-1 px-4 py-2.5 text-sm outline-none text-gray-900 min-w-0" />
+          <span class="text-sm text-gray-400 pr-3 whitespace-nowrap">.<%= @app_domain %></span>
+        </div>
+        <button onclick="goToLogin()" id="login-btn" class="rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-500 transition whitespace-nowrap">
+          Log in
+        </button>
+      </div>
+      <p id="login-error" class="mt-3 text-sm text-red-600 hidden"></p>
+    </div>
+  </div>
+
+  <%# ── CTA ── %>
+  <div class="bg-indigo-600">
     <div class="px-6 py-24 sm:px-6 sm:py-32 lg:px-8">
       <div class="mx-auto max-w-2xl text-center">
-        <h2 class="text-3xl font-bold tracking-tight text-white sm:text-4xl">Boost your productivity.<br>
-          Start using <%= t('app_name') %> today.</h2>
-        <p class="mx-auto mt-6 max-w-xl text-lg leading-8 text-blue-100">Join over 4,000+ companies already managing their workforce smarter, faster, and better.</p>
-        <div class="mt-10 flex items-center justify-center gap-x-6">
-          <a href="#" class="rounded-md bg-white px-3.5 py-2.5 text-sm font-semibold text-blue-600 shadow-sm hover:bg-blue-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white transition">Get started</a>
-          <a href="#" class="text-sm font-semibold leading-6 text-white hover:text-blue-100 transition">Learn more <span aria-hidden="true">→</span></a>
+        <h2 class="text-3xl font-bold tracking-tight text-white sm:text-4xl">
+          Run your first payroll<br/>in under 30 minutes.
+        </h2>
+        <p class="mx-auto mt-6 max-w-xl text-lg leading-8 text-indigo-200">
+          Sign up, add your team, configure salary structures — and you're ready to process payroll with full PF, ESI, PT, and TDS compliance.
+        </p>
+        <div class="mt-10 flex items-center justify-center gap-x-6 flex-wrap gap-y-4">
+          <a href="<%= signup_path %>" class="rounded-lg bg-white px-6 py-3 text-sm font-semibold text-indigo-600 shadow-sm hover:bg-indigo-50 transition">
+            Start free — no credit card
+          </a>
+          <a href="<%= beta_guide_path %>" class="text-sm font-semibold leading-6 text-indigo-100 hover:text-white transition">
+            Beta tester? View testing guide →
+          </a>
         </div>
       </div>
     </div>
   </div>
 </main>
-<!-- Footer -->
+
+<%# ── Footer ── %>
 <footer class="bg-gray-900" aria-labelledby="footer-heading">
   <h2 id="footer-heading" class="sr-only">Footer</h2>
   <div class="mx-auto max-w-7xl px-6 pb-8 pt-16 sm:pt-24 lg:px-8 lg:pt-32">
     <div class="xl:grid xl:grid-cols-3 xl:gap-8">
-      <div class="space-y-8">
+      <div class="space-y-6">
         <div class="flex items-center gap-2">
-          <div class="h-8 w-8 rounded bg-white/10 flex items-center justify-center text-white font-bold text-xl">K</div>
+          <div class="h-8 w-8 rounded-lg bg-indigo-600 flex items-center justify-center text-white font-bold">K</div>
           <span class="font-bold text-xl tracking-tight text-white"><%= t('app_name') %></span>
         </div>
-        <p class="text-sm leading-6 text-gray-300">Making the world a better place through constructing elegant hierarchies.</p>
-        <div class="flex space-x-6">
-          <a href="#" class="text-gray-400 hover:text-gray-300">
-            <span class="sr-only">Facebook</span>
-            <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z" clip-rule="evenodd" /></svg>
-          </a>
-          <a href="#" class="text-gray-400 hover:text-gray-300">
-            <span class="sr-only">Twitter</span>
-            <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84" /></svg>
-          </a>
-        </div>
+        <p class="text-sm leading-6 text-gray-400">
+          HRMS and payroll software built specifically for Indian companies. Handle PF, ESI, PT, TDS, and payslips — without the spreadsheets.
+        </p>
+        <p class="text-xs text-gray-500">🇮🇳 Made in India</p>
       </div>
+
       <div class="mt-16 grid grid-cols-2 gap-8 xl:col-span-2 xl:mt-0">
         <div class="md:grid md:grid-cols-2 md:gap-8">
           <div>
-            <h3 class="text-sm font-semibold leading-6 text-white">Solutions</h3>
-            <ul role="list" class="mt-6 space-y-4">
-              <li><a href="#" class="text-sm leading-6 text-gray-300 hover:text-white">Marketing</a></li>
-              <li><a href="#" class="text-sm leading-6 text-gray-300 hover:text-white">Analytics</a></li>
-              <li><a href="#" class="text-sm leading-6 text-gray-300 hover:text-white">Commerce</a></li>
-              <li><a href="#" class="text-sm leading-6 text-gray-300 hover:text-white">Insights</a></li>
+            <h3 class="text-sm font-semibold leading-6 text-white">Product</h3>
+            <ul class="mt-6 space-y-4">
+              <li><a href="#features"      class="text-sm text-gray-400 hover:text-white transition">Features</a></li>
+              <li><a href="#how-it-works"  class="text-sm text-gray-400 hover:text-white transition">How it works</a></li>
+              <li><a href="#pricing"       class="text-sm text-gray-400 hover:text-white transition">Pricing</a></li>
+              <li><a href="<%= beta_guide_path %>" class="text-sm text-gray-400 hover:text-white transition">Beta Guide</a></li>
             </ul>
           </div>
           <div class="mt-10 md:mt-0">
-            <h3 class="text-sm font-semibold leading-6 text-white">Support</h3>
-            <ul role="list" class="mt-6 space-y-4">
-              <li><a href="#" class="text-sm leading-6 text-gray-300 hover:text-white">Pricing</a></li>
-              <li><a href="#" class="text-sm leading-6 text-gray-300 hover:text-white">Documentation</a></li>
-              <li><a href="#" class="text-sm leading-6 text-gray-300 hover:text-white">Guides</a></li>
-              <li><a href="#" class="text-sm leading-6 text-gray-300 hover:text-white">API Status</a></li>
+            <h3 class="text-sm font-semibold leading-6 text-white">Compliance</h3>
+            <ul class="mt-6 space-y-4">
+              <li><a href="#features" class="text-sm text-gray-400 hover:text-white transition">PF / EPF</a></li>
+              <li><a href="#features" class="text-sm text-gray-400 hover:text-white transition">ESI</a></li>
+              <li><a href="#features" class="text-sm text-gray-400 hover:text-white transition">Professional Tax</a></li>
+              <li><a href="#features" class="text-sm text-gray-400 hover:text-white transition">TDS / Income Tax</a></li>
             </ul>
           </div>
         </div>
         <div class="md:grid md:grid-cols-2 md:gap-8">
           <div>
             <h3 class="text-sm font-semibold leading-6 text-white">Company</h3>
-            <ul role="list" class="mt-6 space-y-4">
-              <li><a href="#" class="text-sm leading-6 text-gray-300 hover:text-white">About</a></li>
-              <li><a href="#" class="text-sm leading-6 text-gray-300 hover:text-white">Blog</a></li>
-              <li><a href="#" class="text-sm leading-6 text-gray-300 hover:text-white">Jobs</a></li>
-              <li><a href="#" class="text-sm leading-6 text-gray-300 hover:text-white">Press</a></li>
+            <ul class="mt-6 space-y-4">
+              <li><a href="#" class="text-sm text-gray-400 hover:text-white transition">About</a></li>
+              <li><a href="mailto:hello@kulahr.com" class="text-sm text-gray-400 hover:text-white transition">Contact</a></li>
+              <li><a href="<%= signup_path %>" class="text-sm text-gray-400 hover:text-white transition">Sign up</a></li>
             </ul>
           </div>
           <div class="mt-10 md:mt-0">
             <h3 class="text-sm font-semibold leading-6 text-white">Legal</h3>
-            <ul role="list" class="mt-6 space-y-4">
-              <li><a href="#" class="text-sm leading-6 text-gray-300 hover:text-white">Claim</a></li>
-              <li><a href="#" class="text-sm leading-6 text-gray-300 hover:text-white">Privacy</a></li>
-              <li><a href="#" class="text-sm leading-6 text-gray-300 hover:text-white">Terms</a></li>
+            <ul class="mt-6 space-y-4">
+              <li><a href="#" class="text-sm text-gray-400 hover:text-white transition">Privacy Policy</a></li>
+              <li><a href="#" class="text-sm text-gray-400 hover:text-white transition">Terms of Service</a></li>
             </ul>
           </div>
         </div>
       </div>
     </div>
-    <div class="mt-16 border-t border-white/10 pt-8 sm:mt-20 lg:mt-24">
-      <p class="text-xs leading-5 text-gray-400">&copy; 2026 <%= t('app_name') %>, Inc. All rights reserved.</p>
+
+    <div class="mt-16 border-t border-white/10 pt-8 sm:mt-20 lg:mt-24 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <p class="text-xs text-gray-400">&copy; 2026 <%= t('app_name') %>. All rights reserved.</p>
+      <p class="text-xs text-gray-500">GST-compliant · EPFO-ready · Multi-state PT support</p>
     </div>
   </div>
 </footer>
+
+<script>
+  async function goToLogin() {
+    const sub = document.getElementById('subdomain-input').value.trim().toLowerCase();
+    const errorEl = document.getElementById('login-error');
+    const wrapperEl = document.getElementById('subdomain-wrapper');
+    const btn = document.getElementById('login-btn');
+
+    errorEl.classList.add('hidden');
+    errorEl.textContent = '';
+    wrapperEl.classList.remove('ring-red-400');
+
+    if (!sub) {
+      wrapperEl.classList.add('ring-2', 'ring-red-400');
+      errorEl.textContent = 'Please enter your company subdomain.';
+      errorEl.classList.remove('hidden');
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = 'Checking…';
+
+    try {
+      const res = await fetch('/check_tenant?subdomain=' + encodeURIComponent(sub));
+      const data = await res.json();
+
+      if (!data.exists) {
+        wrapperEl.classList.add('ring-2', 'ring-red-400');
+        errorEl.textContent = "We couldn't find a company with that subdomain. Please check and try again.";
+        errorEl.classList.remove('hidden');
+        btn.disabled = false;
+        btn.textContent = 'Log in';
+        return;
+      }
+
+      const protocol = window.location.protocol;
+      const host = window.location.host;
+      window.location.href = protocol + '//' + sub + '.' + host + '/users/sign_in';
+    } catch (e) {
+      btn.disabled = false;
+      btn.textContent = 'Log in';
+    }
+  }
+
+  document.getElementById('subdomain-input').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') goToLogin();
+  });
+
+  document.getElementById('subdomain-input').addEventListener('input', function() {
+    document.getElementById('login-error').classList.add('hidden');
+    document.getElementById('subdomain-wrapper').classList.remove('ring-2', 'ring-red-400');
+  });
+</script>

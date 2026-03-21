@@ -223,8 +223,9 @@
                 <div>
                   <p class="text-sm font-medium text-gray-900"><%= tenant[:name] %></p>
                   <p class="text-xs text-gray-400">
-                    <%= link_to root_url(subdomain: tenant[:subdomain]), target: "_blank", class: "text-blue-500 hover:underline font-mono" do %>
-                      <%= root_url(subdomain: tenant[:subdomain]).sub(/\Ahttps?:\/\//, "").chomp("/") %>
+                    <% tenant_url = root_url(subdomain: tenant[:subdomain], host: ENV.fetch("APP_DOMAIN", "lvh.me")) %>
+                    <%= link_to tenant_url, target: "_blank", class: "text-blue-500 hover:underline font-mono" do %>
+                      <%= tenant_url.sub(/\Ahttps?:\/\//, "").chomp("/") %>
                     <% end %>
                     &middot; <%= tenant[:employee_count] %> employees
                   </p>
@@ -332,7 +333,8 @@
             <% @stats.churn_risk_tenants.each do |tenant| %>
               <p class="text-xs text-amber-700">
                 <%= tenant[:name] %>
-                <%= link_to root_url(subdomain: tenant[:subdomain]).sub(/\Ahttps?:\/\//, "").chomp("/"), root_url(subdomain: tenant[:subdomain]), target: "_blank", class: "text-amber-500 hover:underline font-mono" %>
+                <% churn_tenant_url = root_url(subdomain: tenant[:subdomain], host: ENV.fetch("APP_DOMAIN", "lvh.me")) %>
+                <%= link_to churn_tenant_url.sub(/\Ahttps?:\/\//, "").chomp("/"), churn_tenant_url, target: "_blank", class: "text-amber-500 hover:underline font-mono" %>
                 &middot; Last payroll: <%= tenant[:last_payroll] %>
               </p>
             <% end %>
@@ -348,7 +350,8 @@
             <% @stats.inactive_tenants.each do |tenant| %>
               <p class="text-xs text-gray-600">
                 <%= tenant[:name] %>
-                <%= link_to root_url(subdomain: tenant[:subdomain]).sub(/\Ahttps?:\/\//, "").chomp("/"), root_url(subdomain: tenant[:subdomain]), target: "_blank", class: "text-gray-400 hover:underline font-mono" %>
+                <% inactive_tenant_url = root_url(subdomain: tenant[:subdomain], host: ENV.fetch("APP_DOMAIN", "lvh.me")) %>
+                <%= link_to inactive_tenant_url.sub(/\Ahttps?:\/\//, "").chomp("/"), inactive_tenant_url, target: "_blank", class: "text-gray-400 hover:underline font-mono" %>
               </p>
             <% end %>
           </div>

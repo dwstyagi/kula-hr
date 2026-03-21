@@ -151,6 +151,8 @@ Rails.application.routes.draw do
   root "home#index"
   get "signup", to: "signups#new"
   post "signup", to: "signups#create"
+  get "beta-guide", to: "beta_guide#show", as: :beta_guide
+  get "check_tenant", to: "home#check_tenant"
 
   # Platform admin
   scope :platform_admin, module: "platform", as: "platform_admin" do
