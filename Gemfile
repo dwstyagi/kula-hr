@@ -63,6 +63,7 @@ gem "paper_trail"
 gem "pagy"
 
 # PDF generation
+gem "matrix"  # required by prawn (removed from Ruby stdlib in 3.1+)
 gem "prawn"
 gem "prawn-table"
 gem "rubyzip"
