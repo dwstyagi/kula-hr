@@ -533,6 +533,7 @@ DEPENDENCIES
   jbuilder
   kamal
   letter_opener_web
+  matrix
   pagy
   paper_trail
   pg (~> 1.1)

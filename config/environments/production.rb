@@ -89,6 +89,9 @@ Rails.application.configure do
   config.hosts << app_domain
   config.hosts << /\A.+\.#{Regexp.escape(app_domain)}\z/
 
+  # Allow direct IP access (useful for testing before domain is set up)
+  config.hosts << ENV["SERVER_IP"] if ENV["SERVER_IP"].present?
+
   # Skip DNS rebinding protection for the health check endpoint.
   config.host_authorization = { exclude: ->(request) { request.path == "/up" } }
 end

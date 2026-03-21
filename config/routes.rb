@@ -172,7 +172,7 @@ Rails.application.routes.draw do
   PLATFORM_ADMIN_CONSTRAINT = lambda do |request|
     request.session[:platform_admin_id].present? &&
       PlatformAdmin.exists?(request.session[:platform_admin_id])
-  end
+  end unless defined?(PLATFORM_ADMIN_CONSTRAINT)
 
   constraints(PLATFORM_ADMIN_CONSTRAINT) do
     mount Sidekiq::Web => "/platform_admin/sidekiq"
