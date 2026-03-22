@@ -1,0 +1,29 @@
+[Unit]
+Description=Puma HTTP Server — Kulahr
+After=network.target postgresql.service redis.service
+Requires=postgresql.service redis.service
+
+[Service]
+Type=simple
+User=ubuntu
+Group=ubuntu
+WorkingDirectory=/var/www/kulahr
+
+# Load all app environment variables (DATABASE_URL, REDIS_URL, RAILS_MASTER_KEY, etc.)
+EnvironmentFile=/etc/kulahr.env
+
+ExecStart=/home/ubuntu/.rbenv/shims/bundle exec puma -C config/puma.rb -e production
+# SIGUSR1 = graceful restart (workers finish current requests before stopping)
+ExecReload=/bin/kill -USR1 $MAINPID
+
+Restart=on-failure
+RestartSec=5
+KillMode=mixed
+TimeoutStopSec=30
+
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=kulahr-puma
+
+[Install]
+WantedBy=multi-user.target

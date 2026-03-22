@@ -1,0 +1,99 @@
+name: CI / CD
+
+on:
+  workflow_dispatch:
+
+jobs:
+  # ── 1. Run tests ─────────────────────────────────────────────────────────────
+  test:
+    name: RSpec
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: hrms_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      redis:
+        image: redis:7
+        ports: ["6379:6379"]
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      RAILS_ENV: test
+      DATABASE_URL: postgres://postgres:postgres@localhost/hrms_test
+      REDIS_URL: redis://localhost:6379/0
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: .ruby-version
+          bundler-cache: true
+
+      - name: Set up database
+        run: bundle exec rails db:prepare
+
+      - name: Build Tailwind CSS
+        run: bundle exec rails tailwindcss:build
+
+      - name: Run RSpec
+        run: bundle exec rspec --format progress
+
+  # ── 2. Deploy to EC2 (only on push to main, after tests pass) ───────────────
+  deploy:
+    name: Deploy to AWS EC2
+    needs: test
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            set -e
+            export PATH="$HOME/.rbenv/bin:$HOME/.rbenv/shims:$PATH"
+            eval "$(rbenv init -)"
+            cd /var/www/kulahr
+
+            echo "→ Pulling latest code..."
+            git fetch origin main
+            git reset --hard origin/main
+
+            echo "→ Installing gems..."
+            bundle config set --local without 'development test'
+            bundle install --jobs 4 --retry 3
+
+            echo "→ Precompiling assets..."
+            SECRET_KEY_BASE_DUMMY=1 RAILS_ENV=production bundle exec rails assets:precompile
+
+            echo "→ Running migrations..."
+            set -a; source /etc/kulahr.env; set +a
+            RAILS_ENV=production bundle exec rails db:migrate
+
+            echo "→ Reloading Puma (zero-downtime)..."
+            sudo systemctl reload puma || sudo systemctl restart puma
+
+            echo "→ Restarting Sidekiq..."
+            sudo systemctl restart sidekiq
+
+            echo "✓ Deployed $(git rev-parse --short HEAD)"

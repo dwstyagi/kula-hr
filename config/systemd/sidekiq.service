@@ -1,0 +1,27 @@
+[Unit]
+Description=Sidekiq Background Job Processor — Kulahr
+After=network.target postgresql.service redis.service
+Requires=postgresql.service redis.service
+
+[Service]
+Type=simple
+User=ubuntu
+Group=ubuntu
+WorkingDirectory=/var/www/kulahr
+
+EnvironmentFile=/etc/kulahr.env
+
+ExecStart=/home/ubuntu/.rbenv/shims/bundle exec sidekiq -c 2 -e production
+ExecReload=/bin/kill -TSTP $MAINPID
+
+Restart=on-failure
+RestartSec=10
+KillMode=mixed
+TimeoutStopSec=60
+
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=kulahr-sidekiq
+
+[Install]
+WantedBy=multi-user.target
