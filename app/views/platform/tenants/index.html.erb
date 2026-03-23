@@ -35,13 +35,13 @@
               <% end %>
             </td>
             <td class="px-6 py-4 whitespace-nowrap">
-              <% color = case tenant.status
-                         when "active" then "green"
-                         when "trial" then "yellow"
-                         when "suspended" then "red"
-                         else "gray"
-                         end %>
-              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-<%= color %>-100 text-<%= color %>-800">
+              <% badge_class = case tenant.status
+                               when "active"    then "bg-green-100 text-green-800"
+                               when "trial"     then "bg-yellow-100 text-yellow-800"
+                               when "suspended" then "bg-red-100 text-red-800"
+                               else                  "bg-gray-100 text-gray-800"
+                               end %>
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium <%= badge_class %>">
                 <%= tenant.status.capitalize %>
               </span>
             </td>

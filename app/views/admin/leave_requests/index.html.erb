@@ -17,6 +17,7 @@
 
   <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
     <% if @leave_requests.any? %>
+      <div class="overflow-x-auto">
       <table class="min-w-full divide-y divide-gray-200">
         <thead class="bg-gray-50">
           <tr>
@@ -146,6 +147,7 @@
           <% end %>
         </tbody>
       </table>
+      </div>
 
       <%# Pagination %>
       <% if @pagy.pages > 1 %>

@@ -37,7 +37,8 @@
   <%# Payslips table %>
   <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
     <% if @payslips.any? %>
-      <table class="w-full text-sm table-fixed">
+      <div class="overflow-x-auto">
+      <table class="min-w-full text-sm">
         <colgroup>
           <col class="w-36">
           <col class="w-36">
@@ -98,6 +99,7 @@
           <% end %>
         </tbody>
       </table>
+      </div>
     <% else %>
       <div class="text-center py-16 text-gray-400">
         <svg class="mx-auto w-10 h-10 mb-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">

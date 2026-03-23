@@ -159,6 +159,7 @@
         <div class="px-6 py-3 border-b border-gray-100 text-xs text-gray-500">
           <%= @pagy.count %> employee<%= @pagy.count == 1 ? "" : "s" %> found
         </div>
+        <div class="overflow-x-auto">
         <table class="min-w-full divide-y divide-gray-200">
           <thead class="bg-gray-50">
             <tr>
@@ -232,6 +233,7 @@
             <% end %>
           </tbody>
         </table>
+        </div>
         <% if @pagy.pages > 1 %>
           <div class="px-6 py-3 border-t border-gray-200 flex justify-center">
             <%= render "shared/pagy_nav", pagy: @pagy %>

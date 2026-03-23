@@ -41,6 +41,7 @@
     </div>
 
     <% if @leave_requests.any? %>
+      <div class="overflow-x-auto">
       <table class="min-w-full divide-y divide-gray-200">
         <thead class="bg-gray-50">
           <tr>
@@ -115,6 +116,7 @@
           <% end %>
         </tbody>
       </table>
+      </div>
     <% else %>
       <div class="p-10 text-center">
         <p class="text-sm text-gray-400">No leave requests yet.</p>
