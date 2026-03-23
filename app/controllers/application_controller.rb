@@ -20,10 +20,13 @@ class ApplicationController < ActionController::Base
     return unless request.subdomain.present? && request.subdomain != "www"
 
     tenant = Tenant.find_by(subdomain: request.subdomain)
-    if tenant
-      set_current_tenant(tenant)
-    else
+    if tenant.nil?
       redirect_to root_url(subdomain: nil), alert: "Company not found.", allow_other_host: true
+    elsif tenant.suspended? && request.path != "/suspended"
+      sign_out(current_user) if user_signed_in?
+      redirect_to suspended_url
+    else
+      set_current_tenant(tenant)
     end
   end
 

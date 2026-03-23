@@ -68,7 +68,7 @@ class Employee < ApplicationRecord
 
   def combine_emergency_contact_name
     if @emergency_contact_first_name.present? || @emergency_contact_last_name.present?
-      self.emergency_contact_name = [emergency_contact_first_name, emergency_contact_last_name].compact_blank.join(" ")
+      self.emergency_contact_name = [ emergency_contact_first_name, emergency_contact_last_name ].compact_blank.join(" ")
     end
   end
 

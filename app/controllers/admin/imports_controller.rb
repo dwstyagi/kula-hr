@@ -6,7 +6,7 @@ module Admin
       authorize :import, :new?
       tenant = ActsAsTenant.current_tenant
       if tenant.at_employee_limit?
-        return redirect_to admin_employees_path,
+        redirect_to admin_employees_path,
                            alert: "Trial accounts are limited to #{Tenant::TRIAL_EMPLOYEE_LIMIT} employees. Upgrade to add more."
       end
     end

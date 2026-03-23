@@ -128,9 +128,9 @@ RSpec.describe Dashboard::EmployeeDashboardService do
       it "returns tax declaration values" do
         fy = if Date.current.month >= 4
                "#{Date.current.year}-#{(Date.current.year + 1).to_s.last(2)}"
-             else
+        else
                "#{Date.current.year - 1}-#{Date.current.year.to_s.last(2)}"
-             end
+        end
         create(:tax_declaration, tenant: tenant, employee: employee, financial_year: fy,
                estimated_monthly_tds: 5_000, total_declared_investments: 150_000)
 

@@ -42,6 +42,7 @@ class Tenant < ApplicationRecord
 
   def trial?            = status == "trial"
   def active?           = status == "active"
+  def suspended?        = status == "suspended"
   def write_allowed?    = WRITE_ALLOWED_STATUSES.include?(status)
   def at_employee_limit?
     trial? && employees.count >= TRIAL_EMPLOYEE_LIMIT

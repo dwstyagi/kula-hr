@@ -13,6 +13,9 @@ Rails.application.routes.draw do
 
   # === Tenant subdomain routes ===
   constraints subdomain: /.+/ do
+    # Account suspended (public — no auth, skips suspension check)
+    get "suspended", to: "suspended#show", as: :suspended
+
     # Self-service employee activation (public)
     get  "activate/:token", to: "employee_activations#new",    as: :employee_activation
     post "activate/:token", to: "employee_activations#create", as: :employee_activation_submit

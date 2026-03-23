@@ -42,7 +42,7 @@
             <% app_domain = ENV.fetch("APP_DOMAIN", "lvh.me") %>
             <div class="mt-1 flex rounded-lg border border-gray-300 shadow-sm focus-within:border-indigo-500 focus-within:ring-1 focus-within:ring-indigo-500 overflow-hidden">
               <%= f.text_field :subdomain, class: "block w-full px-3 py-2 focus:outline-none sm:text-sm", placeholder: "acme" %>
-              <span class="inline-flex items-center px-3 bg-gray-50 text-gray-500 text-sm border-l border-gray-300">.<%= app_domain %></span>
+              <span class="inline-flex items-center px-3 bg-gray-50 text-gray-500 text-sm border-l border-gray-300 whitespace-nowrap shrink-0">.<%= app_domain %></span>
             </div>
           </div>
 
