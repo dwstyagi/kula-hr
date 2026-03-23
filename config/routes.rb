@@ -150,6 +150,9 @@ Rails.application.routes.draw do
     root "admin/dashboard#index", as: :tenant_root
   end
 
+  # === Error pages ===
+  match "/404", to: "errors#not_found", via: :all
+
   # === Root domain routes (no subdomain) ===
   root "home#index"
   get "signup", to: "signups#new"
