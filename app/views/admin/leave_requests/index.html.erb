@@ -27,6 +27,7 @@
             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Days</th>
             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Reason</th>
             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Approver</th>
             <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
           </tr>
         </thead>
@@ -67,6 +68,15 @@
                   <p class="text-xs text-red-400 mt-0.5 truncate max-w-[140px]" title="<%= lr.rejection_reason %>">
                     <%= lr.rejection_reason %>
                   </p>
+                <% end %>
+              </td>
+              <td class="px-6 py-4 text-xs text-gray-500">
+                <% mgr = lr.employee.reporting_manager %>
+                <% if mgr&.user.present? %>
+                  <p class="font-medium text-gray-700"><%= mgr.full_name %></p>
+                  <p class="text-gray-400">Manager</p>
+                <% else %>
+                  <span class="text-gray-400">HR Admin</span>
                 <% end %>
               </td>
               <td class="px-6 py-4 text-right">

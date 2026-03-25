@@ -55,6 +55,35 @@ RSpec.describe LeaveRequestPolicy, type: :policy do
     it { is_expected.not_to be_approve }
   end
 
+  describe "for a reporting manager (direct report's request)" do
+    let(:manager_user) { create(:user, :employee) }
+    let(:manager_emp)  { create(:employee, tenant: tenant, user: manager_user) }
+    let(:report_emp)   { create(:employee, tenant: tenant, user: emp_user, reporting_manager: manager_emp) }
+    let(:report_req) do
+      lr = build(:leave_request, :pending, tenant: tenant, employee: report_emp, leave_type: leave_type)
+      lr.save(validate: false)
+      lr
+    end
+
+    before { set_tenant(tenant) }
+
+    subject { described_class.new(manager_user, report_req) }
+
+    it { is_expected.to be_approve }
+    it { is_expected.to be_reject }
+    it { is_expected.not_to be_cancel }
+  end
+
+  describe "for a reporting manager (non-direct-report's request)" do
+    let(:manager_user) { create(:user, :employee) }
+    let(:manager_emp)  { create(:employee, tenant: tenant, user: manager_user) }
+
+    subject { described_class.new(manager_user, other_req) }
+
+    it { is_expected.not_to be_approve }
+    it { is_expected.not_to be_reject }
+  end
+
   describe "for an unauthenticated user" do
     subject { described_class.new(nil, pending_req) }
 

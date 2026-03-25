@@ -25,9 +25,10 @@ module Leave
       end
     end
 
-    # Called when HR approves or rejects.
-    # Notifies: the employee themselves.
-    def broadcast_status_update!
+    # Called when HR or a reporting manager approves or rejects.
+    # Always notifies: the employee.
+    # When notify_hr: true (manager acted): also notifies HR/admins so they stay informed.
+    def broadcast_status_update!(notify_hr: false)
       return unless @employee.user
 
       status  = @leave_request.status
@@ -42,6 +43,20 @@ module Leave
         kind:    status == "approved" ? "success" : "error",
         url:     "/portal/leave_requests"
       })
+
+      if notify_hr
+        manager_name = @leave_request.approved_by&.full_name || "A manager"
+        hr_message = "#{manager_name} #{status} #{@employee.full_name}'s " \
+                     "#{@leave_type.name} request (#{@leave_request.number_of_days.to_i} day(s))."
+        hr_and_admin_users.each do |hr_user|
+          broadcast_to(hr_user, {
+            title:   "Leave #{status.titleize} by Manager",
+            message: hr_message,
+            kind:    @leave_request.approved? ? "info" : "warning",
+            url:     "/admin/leave_requests"
+          })
+        end
+      end
     end
 
     private

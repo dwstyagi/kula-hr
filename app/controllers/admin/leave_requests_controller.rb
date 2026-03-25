@@ -4,7 +4,7 @@ module Admin
 
     def index
       requests = policy_scope(LeaveRequest)
-        .includes(:employee, :leave_type, :approved_by)
+        .includes(:leave_type, :approved_by, employee: { reporting_manager: :user })
         .order(created_at: :desc)
 
       requests = requests.where(status: params[:status]) if params[:status].present?

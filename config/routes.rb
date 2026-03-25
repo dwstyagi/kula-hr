@@ -136,6 +136,12 @@ Rails.application.routes.draw do
           patch :cancel
         end
       end
+      resources :team_leave_requests, only: [ :index ] do
+        member do
+          patch :approve
+          patch :reject
+        end
+      end
       resource :tax_declaration, only: [ :show, :edit, :update ] do
         patch :submit, on: :member
       end

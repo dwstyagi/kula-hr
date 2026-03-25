@@ -13,13 +13,13 @@ class LeaveRequestPolicy < ApplicationPolicy
     admin_or_hr? || (employee? && own_record? && record.pending?)
   end
 
-  # Only HR/admin can approve or reject
+  # HR/admin can approve or reject any request; reporting manager can approve/reject their direct report's request
   def approve?
-    admin_or_hr?
+    admin_or_hr? || is_reporting_manager?
   end
 
   def reject?
-    admin_or_hr?
+    admin_or_hr? || is_reporting_manager?
   end
 
   class Scope < ApplicationPolicy::Scope
@@ -39,5 +39,12 @@ class LeaveRequestPolicy < ApplicationPolicy
   def own_record?
     employee = Employee.find_by(user: user)
     employee && record.employee_id == employee.id
+  end
+
+  def is_reporting_manager?
+    return false unless user
+    manager_employee = Employee.find_by(user: user)
+    return false unless manager_employee
+    record.employee.reporting_manager_id == manager_employee.id
   end
 end
