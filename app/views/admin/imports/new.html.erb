@@ -5,13 +5,6 @@
     <p class="text-sm text-gray-500 mt-1">Upload an Excel file to bulk import employees into your organisation.</p>
   </div>
 
-  <% if ActsAsTenant.current_tenant&.trial? %>
-    <div class="mb-6 rounded-lg bg-amber-50 border border-amber-200 p-4 text-sm text-amber-800">
-      <strong>You're on a Kula trial.</strong> Some features are limited on trial accounts.
-      <a href="mailto:support@kulahrms.com" class="underline font-medium ml-1">Contact us to upgrade →</a>
-    </div>
-  <% end %>
-
   <%# Flash alert %>
   <% if flash[:alert] %>
     <div class="mb-6 rounded-lg bg-red-50 border border-red-200 p-4 text-sm text-red-700">

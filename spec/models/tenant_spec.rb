@@ -9,6 +9,7 @@ RSpec.describe Tenant, type: :model do
     it { is_expected.to have_many(:salary_components).dependent(:destroy) }
     it { is_expected.to have_many(:leave_types).dependent(:destroy) }
     it { is_expected.to have_many(:professional_tax_slabs).dependent(:destroy) }
+    it { is_expected.to have_many(:payroll_runs).dependent(:destroy) }
     it { is_expected.to have_one(:payroll_setting).dependent(:destroy) }
   end
 
@@ -106,6 +107,78 @@ RSpec.describe Tenant, type: :model do
     it "normalizes subdomain to lowercase" do
       tenant = create(:tenant, subdomain: "ACME123")
       expect(tenant.subdomain).to eq("acme123")
+    end
+  end
+
+  describe "#write_allowed?" do
+    it "returns true for active tenants" do
+      expect(build(:tenant, :active).write_allowed?).to be true
+    end
+
+    it "returns true for trial tenants with fewer than #{Tenant::TRIAL_PAYROLL_RUN_LIMIT} approved runs" do
+      tenant = create(:tenant, status: "trial")
+      expect(tenant.write_allowed?).to be true
+    end
+
+    it "returns false for suspended tenants" do
+      expect(build(:tenant, :suspended).write_allowed?).to be false
+    end
+
+    it "returns false for trial tenants once payroll run limit is reached" do
+      tenant = create(:tenant, status: "trial")
+      hr_user = create(:user, :hr_admin)
+      Tenant::TRIAL_PAYROLL_RUN_LIMIT.times do |i|
+        ActsAsTenant.with_tenant(tenant) do
+          create(:payroll_run, :approved, tenant: tenant, initiated_by: hr_user, month: i + 1, year: 2026)
+        end
+      end
+      expect(tenant.write_allowed?).to be false
+    end
+  end
+
+  describe "#trial_payroll_runs_used" do
+    let(:tenant) { create(:tenant, status: "trial") }
+    let(:hr_user) { create(:user, :hr_admin) }
+
+    it "counts approved and paid payroll runs" do
+      ActsAsTenant.with_tenant(tenant) do
+        create(:payroll_run, :approved, tenant: tenant, initiated_by: hr_user, month: 1, year: 2026)
+        create(:payroll_run, :paid, tenant: tenant, initiated_by: hr_user, month: 2, year: 2026)
+        create(:payroll_run, tenant: tenant, initiated_by: hr_user, month: 3, year: 2026) # draft
+      end
+      expect(tenant.trial_payroll_runs_used).to eq(2)
+    end
+
+    it "returns 0 when no approved runs exist" do
+      expect(tenant.trial_payroll_runs_used).to eq(0)
+    end
+  end
+
+  describe "#trial_payroll_runs_exhausted?" do
+    let(:tenant) { create(:tenant, status: "trial") }
+    let(:hr_user) { create(:user, :hr_admin) }
+
+    it "returns false when under the limit" do
+      expect(tenant.trial_payroll_runs_exhausted?).to be false
+    end
+
+    it "returns true when approved runs reach the limit" do
+      Tenant::TRIAL_PAYROLL_RUN_LIMIT.times do |i|
+        ActsAsTenant.with_tenant(tenant) do
+          create(:payroll_run, :approved, tenant: tenant, initiated_by: hr_user, month: i + 1, year: 2026)
+        end
+      end
+      expect(tenant.trial_payroll_runs_exhausted?).to be true
+    end
+
+    it "returns false for active tenants regardless of run count" do
+      tenant_active = create(:tenant, :active)
+      Tenant::TRIAL_PAYROLL_RUN_LIMIT.times do |i|
+        ActsAsTenant.with_tenant(tenant_active) do
+          create(:payroll_run, :approved, tenant: tenant_active, initiated_by: hr_user, month: i + 1, year: 2026)
+        end
+      end
+      expect(tenant_active.trial_payroll_runs_exhausted?).to be false
     end
   end
 end

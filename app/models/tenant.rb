@@ -12,11 +12,13 @@ class Tenant < ApplicationRecord
   has_many :professional_tax_slabs, dependent: :destroy
   has_many :employees, dependent: :destroy
   has_one :payroll_setting, dependent: :destroy
+  has_many :payroll_runs, dependent: :destroy
 
   RESERVED_SUBDOMAINS = %w[www admin api app mail ftp smtp pop imap blog support help
                            status assets cdn static media platform dashboard].freeze
 
-  TRIAL_EMPLOYEE_LIMIT = 20
+  TRIAL_EMPLOYEE_LIMIT = 50
+  TRIAL_PAYROLL_RUN_LIMIT = 3
   WRITE_ALLOWED_STATUSES = %w[trial active].freeze
 
   validates :name, presence: true
@@ -43,9 +45,23 @@ class Tenant < ApplicationRecord
   def trial?            = status == "trial"
   def active?           = status == "active"
   def suspended?        = status == "suspended"
-  def write_allowed?    = WRITE_ALLOWED_STATUSES.include?(status)
+
+  def write_allowed?
+    return false unless WRITE_ALLOWED_STATUSES.include?(status)
+    return false if trial_payroll_runs_exhausted?
+    true
+  end
+
   def at_employee_limit?
     trial? && employees.count >= TRIAL_EMPLOYEE_LIMIT
+  end
+
+  def trial_payroll_runs_used
+    payroll_runs.where(status: %w[approved paid]).count
+  end
+
+  def trial_payroll_runs_exhausted?
+    trial? && trial_payroll_runs_used >= TRIAL_PAYROLL_RUN_LIMIT
   end
 
   def generate_activation_token!

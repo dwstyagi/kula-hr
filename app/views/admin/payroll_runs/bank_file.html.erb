@@ -82,20 +82,13 @@
     </div>
 
     <div class="px-5 py-4 bg-gray-50 border-t border-gray-100">
-      <% if ActsAsTenant.current_tenant&.trial? %>
-        <div class="rounded-lg bg-amber-50 border border-amber-200 p-4 text-sm text-amber-800">
-          <strong>You're on a Kula trial.</strong> Some features are limited on trial accounts.
-          <a href="mailto:support@kulahrms.com" class="underline font-medium ml-1">Contact us to upgrade →</a>
-        </div>
-      <% else %>
-        <%= link_to download_bank_file_admin_payroll_run_path(@payroll_run, bank: "generic_csv"),
-              id: "download-link",
-              class: "inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors" do %>
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3M3 17V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
-          </svg>
-          Generate & Download
-        <% end %>
+      <%= link_to download_bank_file_admin_payroll_run_path(@payroll_run, bank: "generic_csv"),
+            id: "download-link",
+            class: "inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors" do %>
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3M3 17V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
+        </svg>
+        Generate & Download
       <% end %>
     </div>
   </div>

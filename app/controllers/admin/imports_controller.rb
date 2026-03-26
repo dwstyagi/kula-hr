@@ -4,11 +4,6 @@ module Admin
 
     def new
       authorize :import, :new?
-      tenant = ActsAsTenant.current_tenant
-      if tenant.at_employee_limit?
-        redirect_to admin_employees_path,
-                           alert: "Trial accounts are limited to #{Tenant::TRIAL_EMPLOYEE_LIMIT} employees. Upgrade to add more."
-      end
     end
 
     def create
@@ -60,12 +55,6 @@ module Admin
       @invalid_rows = all_rows.reject { |r| r["_valid"] }
       @total_count  = all_rows.size
 
-      tenant = ActsAsTenant.current_tenant
-      if tenant.trial?
-        @trial_remaining = Tenant::TRIAL_EMPLOYEE_LIMIT - tenant.employees.count
-        @trial_will_skip = [ @valid_rows.size - @trial_remaining, 0 ].max
-      end
-
       # Manual pagination
       @current_page = [ (params[:page] || 1).to_i, 1 ].max
       @total_pages  = [ (@total_count.to_f / PER_PAGE).ceil, 1 ].max
@@ -93,22 +82,6 @@ module Admin
 
       valid_rows   = validated_rows.select { |r| r["_valid"] }
       invalid_rows = validated_rows.reject { |r| r["_valid"] }
-
-      tenant = ActsAsTenant.current_tenant
-      if tenant.trial?
-        remaining = Tenant::TRIAL_EMPLOYEE_LIMIT - tenant.employees.count
-        if remaining <= 0
-          Rails.cache.delete(cache_key)
-          session.delete(:import_cache_key)
-          return redirect_to admin_employees_path,
-                             alert: "Trial accounts are limited to #{Tenant::TRIAL_EMPLOYEE_LIMIT} employees. Upgrade to add more."
-        end
-        if valid_rows.size > remaining
-          skipped_count = valid_rows.size - remaining
-          valid_rows    = valid_rows.first(remaining)
-          flash[:alert] = "Trial limit reached: #{skipped_count} #{'row'.pluralize(skipped_count)} skipped. Upgrade to import all employees."
-        end
-      end
 
       import_employees(valid_rows)
 

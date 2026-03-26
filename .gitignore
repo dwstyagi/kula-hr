@@ -36,6 +36,8 @@
 # Ignore key files for decrypting credentials and more.
 /config/*.key
 
+CLAUDE.md
+
 docs/
 /coverage/
 /app/assets/builds/*

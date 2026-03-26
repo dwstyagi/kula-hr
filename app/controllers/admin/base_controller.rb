@@ -22,7 +22,12 @@ module Admin
     def verify_tenant_write_access!
       tenant = ActsAsTenant.current_tenant
       return if tenant.nil? || tenant.write_allowed?
-      redirect_to admin_root_path, alert: "Your account is #{tenant.status}. Contact support to restore access."
+      msg = if tenant.trial?
+        "Your trial has ended — #{Tenant::TRIAL_PAYROLL_RUN_LIMIT} payroll runs completed. Upgrade to continue."
+      else
+        "Your account is #{tenant.status}. Contact support to restore access."
+      end
+      redirect_to admin_root_path, alert: msg
     end
   end
 end

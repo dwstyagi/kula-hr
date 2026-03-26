@@ -25,6 +25,7 @@ RSpec.describe PayrollRunPolicy, type: :policy do
     it { is_expected.to be_reprocess }
     it { is_expected.to be_mark_paid }
     it { is_expected.to be_progress }
+    it { is_expected.to be_download_bank_file }
     it { is_expected.to be_approve }
     it { is_expected.to be_reject }
   end
@@ -44,6 +45,7 @@ RSpec.describe PayrollRunPolicy, type: :policy do
     it { is_expected.to be_reprocess }
     it { is_expected.to be_mark_paid }
     it { is_expected.to be_progress }
+    it { is_expected.to be_download_bank_file }
 
     it { is_expected.not_to be_approve }
     it { is_expected.not_to be_reject }

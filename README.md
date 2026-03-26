@@ -1,219 +1,297 @@
-# Kula HR — Multi-Tenant HRMS & Payroll for Indian Companies
+# Kula HR
 
-A SaaS application that lets Indian companies manage employee payroll end-to-end — from salary structures and attendance to statutory compliance (PF, ESI, PT, TDS) and payslip generation.
+Kula HR is a multi-tenant HRMS and payroll application built for Indian payroll workflows. It covers tenant onboarding, employee management, leave and attendance, salary structures, payroll processing, payslips, statutory deductions, reports, and bank file generation.
 
-**Live:** https://kula-hr.com
+Production: https://kula-hr.com
 
----
+## Overview
 
-## What It Does
+Kula HR is organized around three user-facing surfaces:
 
-```
-Company signs up → Add employees → Configure salary structures
-→ Track attendance & leaves → Run payroll every month
-→ System calculates PF, ESI, PT, TDS automatically
-→ Generate payslips → Download bank file → Pay via bank
-```
+| Surface | URL pattern | Purpose |
+| --- | --- | --- |
+| Marketing site | `kula-hr.com` | Product pages and tenant signup |
+| Platform admin | `kula-hr.com/platform_admin` | SaaS operator tools |
+| Tenant app | `tenant.kula-hr.com` | HR admin and employee self-service |
 
----
+Tenant data is isolated with subdomain-based multitenancy and row-level scoping through `acts_as_tenant`.
 
-## Three Portals
+## Core Capabilities
 
-| Portal | URL | Who Uses It |
-|--------|-----|-------------|
-| Platform Admin | `kula-hr.com/platform_admin` | SaaS owner — monitors all tenants |
-| HR Admin | `company.kula-hr.com/admin` | HR team — manages employees, payroll, leaves |
-| Employee | `company.kula-hr.com/portal` | Staff — views payslips, applies leave, submits tax |
-
----
+- Tenant onboarding with seeded payroll defaults
+- Role-based access for platform admins, tenant super admins, HR admins, and employees
+- Employee directory, invitations, activation links, salary assignment, and bulk import/export
+- Leave types, leave requests, leave balances, attendance summary generation, and attendance template upload
+- Payroll runs with draft, review, approval, rejection, reprocessing, and payment states
+- Payslip generation, inline revision, PDF download, ZIP export, and bank file generation
+- Statutory calculations for PF, ESI, Professional Tax, and TDS
+- Dashboards, compliance reports, and YTD earnings reporting
+- Real-time payroll progress and leave notifications using Turbo and Action Cable
 
 ## Tech Stack
 
-| Layer | Technology |
-|-------|-----------|
+| Layer | Choice |
+| --- | --- |
 | Language | Ruby 4.0.1 |
 | Framework | Rails 8.1.2 |
-| Database | PostgreSQL 16 |
-| Cache + Queue | Redis 7 |
-| Background Jobs | Sidekiq |
-| Web Server | Puma 7 + Nginx |
-| Frontend | Tailwind CSS v4, Hotwire (Turbo + Stimulus) |
-| Multi-tenancy | acts_as_tenant (subdomain-based) |
-| Auth | Devise + devise_invitable |
+| Database | PostgreSQL |
+| Background jobs | Sidekiq + Redis |
+| Frontend | ERB, Tailwind CSS, Hotwire (Turbo + Stimulus), Importmap |
+| Auth | Devise, Devise Invitable |
 | Authorization | Pundit + Rolify |
-| State Machine | AASM (payroll lifecycle) |
-| PDF | Prawn + Prawn Table |
-| Audit Trail | PaperTrail |
-| Charts | Chartkick + Groupdate |
-| Testing | RSpec + FactoryBot + Shoulda Matchers |
-| CI/CD | GitHub Actions |
-| Hosting | AWS EC2 t3.micro + Cloudflare |
+| Multitenancy | `acts_as_tenant` |
+| Workflow state | AASM |
+| Auditing | PaperTrail |
+| Testing | RSpec, FactoryBot |
 
----
+## Architecture
 
-## Indian Statutory Compliance
+### Multitenancy
 
-| Compliance | Rate | Notes |
-|-----------|------|-------|
-| PF (EPF) | 12% employee + 12% employer | Capped at ₹15,000 basic |
-| ESI | 0.75% employee + 3.25% employer | Applicable if gross ≤ ₹21,000 |
-| Professional Tax | State-specific slabs | 7 states supported |
-| TDS | Old regime (0/5/20/30%) or New regime (0/5/10/15/20/30%) | Standard deduction ₹75,000 |
+- Each company gets its own subdomain, for example `acme.kula-hr.com`.
+- Tenant context is resolved from the request subdomain in `ApplicationController`.
+- Tenant-scoped models use `acts_as_tenant :tenant`.
+- Background jobs and services that run outside request scope wrap work in `ActsAsTenant.with_tenant`.
 
----
+### Portals
 
-## Trial vs Active Feature Gating
+- `Platform::` controllers handle operator workflows outside tenant scope.
+- `Admin::` controllers handle tenant HR and payroll operations.
+- `EmployeePortal::` controllers handle employee self-service.
 
-| Feature | Trial | Active |
-|---------|-------|--------|
-| Employees (manual) | Up to 10 | Unlimited |
-| Bulk Import | ❌ | ✅ |
-| Leave & Attendance | ✅ | ✅ |
-| Payroll Processing | ✅ | ✅ |
-| Bank File Download | ❌ | ✅ |
-| Payslip PDF (bulk) | ❌ | ✅ |
-| Reports | ✅ | ✅ |
+### Business Logic
 
-Suspended/Cancelled tenants get read-only access across the board.
+Most business rules live in service objects under `app/services`, with major areas split into:
 
----
+- `attendance`
+- `employees`
+- `leave`
+- `payroll`
+- `reports`
+- `salary`
+- `statutory`
+- `tenants`
 
-## Local Development
+## Key Business Rules
 
-### Prerequisites
-- Ruby 4.0.1 (via rbenv)
-- PostgreSQL 16
-- Redis 7
-- Bundler 4
+- Payroll is processed per tenant, per month, with one `PayrollRun` allowed for a given month and year.
+- Attendance must be locked before payroll can be created for a month.
+- Payroll approval and rejection are restricted to tenant super admins.
+- Payslips can be revised after processing; payroll totals are recalculated after edits.
+- TDS calculations use the Indian financial year (`April` through `March`) and account for employee tax declarations.
+- Leave and attendance feed payroll through a locked monthly `AttendanceSummary`, not through raw leave data.
+
+## Getting Started
+
+### Requirements
+
+Make sure the following are installed and running locally:
+
+- Ruby `4.0.1`
+- Bundler
+- PostgreSQL
+- Redis
+
+Node.js is not required for the standard local workflow because the app uses Importmap and `tailwindcss-rails`.
+PostgreSQL and Redis are not started by `bin/dev`, so start them separately before booting the app.
 
 ### Setup
 
+1. Install gems:
+
 ```bash
-git clone https://github.com/dwstyagi/kula-hr.git
-cd kula-hr
 bundle install
-cp .env.example .env          # fill in values
-rails db:create db:migrate db:seed
-bin/dev                       # starts Rails + Tailwind watcher
 ```
 
-### Subdomains (local)
-
-The app uses `lvh.me` for local subdomain routing:
-
-```
-lvh.me:3000/platform_admin      → Platform Admin
-acme.lvh.me:3000/admin          → HR Admin (tenant: acme)
-acme.lvh.me:3000/portal         → Employee Portal (tenant: acme)
-```
-
-### Create a Platform Admin (local)
+2. Prepare the database:
 
 ```bash
-rails console
-PlatformAdmin.create!(email: "admin@example.com", password: "password123")
+bin/rails db:prepare
 ```
 
----
-
-## Payroll Lifecycle (AASM)
-
-```
-draft → processing → processed → under_review → approved → paid
-                                              ↘ rejected
-```
-
----
-
-## Background Jobs (Sidekiq)
-
-| Job | Trigger |
-|-----|---------|
-| Payroll processing | Manual (HR triggers) |
-| Bulk payslip PDF | After payroll approved |
-| Employee invitation emails | On invite |
-
-Start Sidekiq locally:
-```bash
-bundle exec sidekiq
-```
-
----
-
-## Testing
+3. Optionally load demo data:
 
 ```bash
-bundle exec rspec                      # all tests
-bundle exec rspec spec/models          # models only
-bundle exec rspec spec/requests        # request specs
-bundle exec rspec --format documentation
+bin/rails db:seed
 ```
 
-Test coverage report generated at `coverage/index.html`.
+4. Start the app:
 
----
+```bash
+bin/dev
+```
+
+`bin/dev` starts:
+
+- Rails server
+- Tailwind watcher
+- Sidekiq worker
+
+If you want a one-command bootstrap, use:
+
+```bash
+bin/setup
+```
+
+For setup without starting the app:
+
+```bash
+bin/setup --skip-server
+```
+
+## Local Development URLs
+
+In development, subdomains are served via `lvh.me`, which resolves to `127.0.0.1`.
+
+| Area | URL |
+| --- | --- |
+| Marketing site | `http://lvh.me:3000` |
+| Platform admin login | `http://lvh.me:3000/platform_admin/login` |
+| Tenant admin | `http://acme.lvh.me:3000/admin` |
+| Employee portal | `http://acme.lvh.me:3000/portal` |
+| Letter Opener | `http://lvh.me:3000/letter_opener` |
+
+## Seed Data
+
+If you run `bin/rails db:seed`, the app creates a sample platform admin and a sample tenant.
+
+### Demo Credentials
+
+| Role | Email | Password |
+| --- | --- | --- |
+| Platform admin | `admin@kulahr.com` | `password123` |
+| Tenant super admin | `admin@acme.com` | `password123` |
+
+The sample tenant uses the `acme` subdomain and includes departments, designations, employees, and sample bank details.
+
+## Typical Payroll Flow
+
+1. Configure payroll settings, salary components, and salary structures.
+2. Create or import employees and assign salaries.
+3. Approve leave and generate monthly attendance summaries.
+4. Lock attendance for the payroll month.
+5. Create a payroll run.
+6. Process payroll in the background through Sidekiq.
+7. Review payslips and resubmit if corrections are needed.
+8. Approve payroll, lock payslips, and generate bank files.
+9. Mark the payroll run as paid.
+
+## Testing and Quality Checks
+
+Run the core test suite:
+
+```bash
+bundle exec rspec
+```
+
+Run linting:
+
+```bash
+bin/rubocop
+```
+
+Run security checks:
+
+```bash
+bin/brakeman --quiet --no-pager --exit-on-warn --exit-on-error
+bin/bundler-audit
+bin/importmap audit
+```
+
+Build Tailwind assets manually if needed:
+
+```bash
+bundle exec rails tailwindcss:build
+```
+
+CI/CD is defined in `.github/workflows/deploy.yml`. The workflow runs RSpec and can deploy to EC2 when manually dispatched from `main`.
+
+## Repository Structure
+
+```text
+app/
+  controllers/
+    admin/
+    employee_portal/
+    platform/
+  models/
+  policies/
+  services/
+    attendance/
+    employees/
+    leave/
+    payroll/
+    reports/
+    salary/
+    statutory/
+    tenants/
+  jobs/
+  mailers/
+  views/
+spec/
+config/
+db/
+```
+
+## Background Jobs and Realtime
+
+- Sidekiq queues are configured in `config/sidekiq.yml`.
+- Payroll processing runs on the dedicated `payroll` queue.
+- Mail delivery runs through Sidekiq in development and production.
+- Payroll progress uses Turbo Streams.
+- Leave notifications use Action Cable.
+- Development uses the async cable adapter; production uses Redis.
 
 ## Deployment
 
-**Infrastructure:** AWS EC2 t3.micro + Cloudflare (free tier)
+The primary deployment path is:
 
-```
-Browser → Cloudflare (SSL) → Nginx (port 80) → Puma (port 3000)
-                                              → Sidekiq
-PostgreSQL + Redis run on the same EC2 instance
-```
+- GitHub Actions
+- SSH to AWS EC2
+- Puma + Sidekiq behind Nginx
+- PostgreSQL + Redis on the host
 
-See [`config/DEPLOYMENT.md`](config/DEPLOYMENT.md) for full debugging and ops guide.
+Useful references:
 
-### CI/CD (GitHub Actions)
+- Runbook: `config/DEPLOYMENT.md`
+- Deployment workflow: `.github/workflows/deploy.yml`
+- Production image build: `Dockerfile`
 
-Push to `main` → runs RSpec → deploys to EC2 via SSH if tests pass.
+### Important Production Environment Variables
 
-Pipeline: `.github/workflows/deploy.yml`
+- `RAILS_MASTER_KEY`
+- `DATABASE_URL`
+- `REDIS_URL`
+- `SECRET_KEY_BASE`
+- `APP_DOMAIN`
+- `SERVER_IP`
 
-Required GitHub secrets:
-
-| Secret | Value |
-|--------|-------|
-| `EC2_HOST` | EC2 public IP |
-| `EC2_SSH_KEY` | Private key (contents of `.pem` file) |
-
-### Manual Deploy
+## Useful Commands
 
 ```bash
-ssh kulahr
-cd /var/www/kulahr
-git pull origin main
-bundle config set --local without 'development test'
-bundle install --jobs 4
-SECRET_KEY_BASE_DUMMY=1 RAILS_ENV=production bundle exec rails assets:precompile
-set -a; source /etc/kulahr.env; set +a
-RAILS_ENV=production bundle exec rails db:migrate
-sudo systemctl reload puma
-sudo systemctl restart sidekiq
+# Start app, Tailwind watcher, and Sidekiq
+bin/dev
+
+# Prepare database
+bin/rails db:prepare
+
+# Seed demo data
+bin/rails db:seed
+
+# Run specs
+bundle exec rspec
+
+# Open Rails console
+bin/rails console
+
+# Start Sidekiq manually
+bundle exec sidekiq -C config/sidekiq.yml
 ```
 
----
+## Notes for Contributors
 
-## Project Structure
-
-```
-app/
-├── controllers/
-│   ├── admin/            # HR Admin portal
-│   ├── employee_portal/  # Employee portal
-│   ├── platform/         # Platform Admin
-│   └── home_controller.rb
-├── models/
-├── policies/             # Pundit authorization
-├── services/
-│   ├── statutory/        # PF, ESI, PT, TDS calculators
-│   └── payroll/          # Salary calculator, processor, PDF, bank files
-└── views/
-config/
-├── DEPLOYMENT.md         # Ops & debugging guide
-├── nginx/kulahr.conf     # Nginx config
-└── systemd/              # Puma + Sidekiq service files
-```
-
----
+- The app is server-rendered by default; prefer following existing Rails and Hotwire patterns.
+- Business rules are generally implemented in service objects, not controllers.
+- When changing payroll logic, review both payroll processing and salary preview paths.
+- When changing tenant-scoped behavior, verify `acts_as_tenant` and policy coverage.
+- Request specs and service specs provide the best starting point for regression coverage.
