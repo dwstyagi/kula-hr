@@ -51,6 +51,7 @@ Rails.application.routes.draw do
           delete :remove_component
         end
       end
+      resources :admin_users, only: [ :index, :new, :create, :destroy ]
       resources :employees do
         collection do
           get :template
