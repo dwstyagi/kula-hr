@@ -16,6 +16,14 @@ class User < ApplicationRecord
     "#{first_name} #{last_name}"
   end
 
+  def active_for_authentication?
+    super && account_active?
+  end
+
+  def inactive_message
+    account_active? ? super : :account_inactive
+  end
+
   def assign_role(role_name)
     roles.clear
     add_role(role_name)

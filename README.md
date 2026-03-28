@@ -4,6 +4,8 @@ Kula HR is a multi-tenant HRMS and payroll application built for Indian payroll 
 
 Production: https://kula-hr.com
 
+Detailed system design: `docs/ARCHITECTURE.md`
+
 ## Overview
 
 Kula HR is organized around three user-facing surfaces:

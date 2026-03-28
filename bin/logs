@@ -1,0 +1,256 @@
+#!/bin/bash
+# Production Logs Viewer for Kula HR
+# Usage: ./bin/logs [service] [options]
+
+set -e
+
+# Colors
+RED=$'\033[0;31m'
+GREEN=$'\033[0;32m'
+YELLOW=$'\033[1;33m'
+BLUE=$'\033[0;34m'
+NC=$'\033[0m'
+
+# Production server
+SERVER="kulahr"
+SERVER_IP="ubuntu@13.200.249.229"
+
+# Check if SSH alias exists, fallback to IP
+if ! ssh -G "$SERVER" &>/dev/null 2>&1; then
+    SERVER="$SERVER_IP"
+fi
+
+APP_PATH="/var/www/kulahr"
+
+# Function to display usage
+usage() {
+    cat << EOF
+${GREEN}Production Logs Viewer — Kula HR${NC}
+
+${YELLOW}Usage:${NC}
+  ./bin/logs [service] [options]
+
+${YELLOW}Services:${NC}
+  rails             View Rails application log (production.log)
+  puma              View Puma (web server) logs via journalctl
+  sidekiq           View Sidekiq (background jobs) logs via journalctl
+  nginx             View Nginx access/error logs
+  all               View Rails + Sidekiq logs interleaved
+
+${YELLOW}Options:${NC}
+  -f, --follow      Follow logs in real-time (default for most services)
+  -n NUMBER         Show last N lines (default: 50); disables follow
+  -e, --errors      Show only error lines
+  --since TIME      Show logs since time (e.g., "1 hour ago", "10 min ago")
+  -h, --help        Show this help message
+
+${YELLOW}Examples:${NC}
+  ./bin/logs rails                  # Follow Rails production.log
+  ./bin/logs rails -n 100           # Last 100 lines of Rails log
+  ./bin/logs puma                   # Follow Puma (journalctl)
+  ./bin/logs sidekiq --follow       # Follow Sidekiq logs
+  ./bin/logs sidekiq --since "10 min ago"
+  ./bin/logs rails --errors         # Show only ERROR lines in Rails log
+  ./bin/logs nginx                  # Follow Nginx access log
+  ./bin/logs all -f                 # Follow Rails + Sidekiq interleaved
+
+${YELLOW}Server:${NC} $SERVER
+EOF
+}
+
+# Function to show interactive menu
+show_menu() {
+    echo -e "${GREEN}==================================${NC}"
+    echo -e "${GREEN}   Kula HR — Production Logs${NC}"
+    echo -e "${GREEN}==================================${NC}"
+    echo ""
+    echo "Select service to view:"
+    echo ""
+    echo "  1) Rails app log (production.log)"
+    echo "  2) Puma (web server)"
+    echo "  3) Sidekiq (background jobs)"
+    echo "  4) Nginx (reverse proxy)"
+    echo "  5) All logs (Rails + Sidekiq interleaved)"
+    echo "  6) Rails errors only"
+    echo "  7) Sidekiq errors only"
+    echo ""
+    echo "  0) Exit"
+    echo ""
+    read -p "Enter choice [0-7]: " choice
+
+    case $choice in
+        1) view_logs "rails" "yes" "50" "" "";;
+        2) view_logs "puma" "yes" "50" "" "";;
+        3) view_logs "sidekiq" "yes" "50" "" "";;
+        4) view_logs "nginx" "yes" "50" "" "";;
+        5) view_logs "all" "yes" "50" "" "";;
+        6) view_logs "rails" "yes" "50" "errors" "";;
+        7) view_logs "sidekiq" "yes" "50" "errors" "";;
+        0) exit 0;;
+        *) echo -e "${RED}Invalid choice${NC}" && exit 1;;
+    esac
+}
+
+# Function to view logs
+view_logs() {
+    local service=$1
+    local follow=$2
+    local lines=$3
+    local errors_only=$4
+    local since=$5
+
+    echo -e "${BLUE}Connecting to production server ($SERVER)...${NC}"
+    echo ""
+
+    case $service in
+        rails)
+            local log_file="$APP_PATH/log/production.log"
+            if [ "$errors_only" = "errors" ]; then
+                echo -e "${YELLOW}Showing Rails ERROR lines...${NC}"
+                if [ -n "$follow" ]; then
+                    ssh "$SERVER" "sudo tail -f $log_file | grep -i 'error\|exception\|fatal'"
+                else
+                    ssh "$SERVER" "sudo tail -n $lines $log_file | grep -i 'error\|exception\|fatal'"
+                fi
+            elif [ -n "$since" ]; then
+                echo -e "${YELLOW}Showing Rails log (last 200 lines, time filter not available for file logs)...${NC}"
+                ssh "$SERVER" "sudo tail -n 200 $log_file"
+            elif [ -n "$follow" ]; then
+                echo -e "${YELLOW}Following Rails production.log (Ctrl+C to exit)...${NC}"
+                ssh "$SERVER" "sudo tail -f $log_file"
+            else
+                echo -e "${YELLOW}Showing last $lines lines of Rails production.log...${NC}"
+                ssh "$SERVER" "sudo tail -n $lines $log_file"
+            fi
+            ;;
+
+        puma)
+            if [ -n "$since" ]; then
+                echo -e "${YELLOW}Showing Puma logs since $since...${NC}"
+                ssh "$SERVER" "sudo journalctl -u puma --since \"$since\" --no-pager"
+            elif [ -n "$follow" ]; then
+                echo -e "${YELLOW}Following Puma logs (Ctrl+C to exit)...${NC}"
+                ssh "$SERVER" "sudo journalctl -u puma -f"
+            else
+                echo -e "${YELLOW}Showing last $lines lines of Puma logs...${NC}"
+                ssh "$SERVER" "sudo journalctl -u puma -n $lines --no-pager"
+            fi
+            ;;
+
+        sidekiq)
+            if [ "$errors_only" = "errors" ]; then
+                echo -e "${YELLOW}Showing Sidekiq error logs...${NC}"
+                if [ -n "$follow" ]; then
+                    ssh "$SERVER" "sudo journalctl -u sidekiq -f | grep -i 'error\|exception\|fatal\|WARN'"
+                else
+                    ssh "$SERVER" "sudo journalctl -u sidekiq -n $lines --no-pager | grep -i 'error\|exception\|fatal\|WARN'"
+                fi
+            elif [ -n "$since" ]; then
+                echo -e "${YELLOW}Showing Sidekiq logs since $since...${NC}"
+                ssh "$SERVER" "sudo journalctl -u sidekiq --since \"$since\" --no-pager"
+            elif [ -n "$follow" ]; then
+                echo -e "${YELLOW}Following Sidekiq logs (Ctrl+C to exit)...${NC}"
+                ssh "$SERVER" "sudo journalctl -u sidekiq -f"
+            else
+                echo -e "${YELLOW}Showing last $lines lines of Sidekiq logs...${NC}"
+                ssh "$SERVER" "sudo journalctl -u sidekiq -n $lines --no-pager"
+            fi
+            ;;
+
+        nginx)
+            if [ -n "$since" ]; then
+                echo -e "${YELLOW}Showing Nginx logs since $since...${NC}"
+                ssh "$SERVER" "sudo journalctl -u nginx --since \"$since\" --no-pager"
+            elif [ -n "$follow" ]; then
+                echo -e "${YELLOW}Following Nginx logs (Ctrl+C to exit)...${NC}"
+                ssh "$SERVER" "sudo journalctl -u nginx -f"
+            else
+                echo -e "${YELLOW}Showing last $lines lines of Nginx logs...${NC}"
+                ssh "$SERVER" "sudo journalctl -u nginx -n $lines --no-pager"
+            fi
+            ;;
+
+        all)
+            local log_file="$APP_PATH/log/production.log"
+            if [ -n "$since" ]; then
+                echo -e "${YELLOW}Showing all logs since $since...${NC}"
+                ssh "$SERVER" "sudo journalctl -u sidekiq --since \"$since\" --no-pager & sudo tail -n 100 $log_file; wait"
+            elif [ -n "$follow" ]; then
+                echo -e "${YELLOW}Following Rails + Sidekiq logs (Ctrl+C to exit)...${NC}"
+                ssh "$SERVER" "sudo tail -f $log_file /dev/null & sudo journalctl -u sidekiq -f; wait"
+            else
+                echo -e "${YELLOW}Showing last $lines lines of Rails + Sidekiq logs...${NC}"
+                ssh "$SERVER" "echo '=== Rails production.log ===' && sudo tail -n $lines $log_file && echo '' && echo '=== Sidekiq ===' && sudo journalctl -u sidekiq -n $lines --no-pager"
+            fi
+            ;;
+
+        *)
+            echo -e "${RED}Error: Unknown service '$service'${NC}"
+            echo ""
+            usage
+            exit 1
+            ;;
+    esac
+}
+
+# Parse arguments
+SERVICE=""
+FOLLOW="yes"
+LINES="50"
+ERRORS_ONLY=""
+SINCE=""
+
+# If no arguments, show interactive menu
+if [ $# -eq 0 ]; then
+    show_menu
+    exit 0
+fi
+
+# Parse command line arguments
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        -h|--help)
+            usage
+            exit 0
+            ;;
+        -f|--follow)
+            FOLLOW="yes"
+            shift
+            ;;
+        -n|--lines)
+            LINES="$2"
+            FOLLOW=""
+            shift 2
+            ;;
+        -e|--errors)
+            ERRORS_ONLY="errors"
+            shift
+            ;;
+        --since)
+            SINCE="$2"
+            FOLLOW=""
+            shift 2
+            ;;
+        rails|puma|sidekiq|nginx|all)
+            SERVICE="$1"
+            shift
+            ;;
+        *)
+            echo -e "${RED}Error: Unknown option '$1'${NC}"
+            echo ""
+            usage
+            exit 1
+            ;;
+    esac
+done
+
+# Validate service is provided
+if [ -z "$SERVICE" ]; then
+    echo -e "${RED}Error: No service specified${NC}"
+    echo ""
+    usage
+    exit 1
+fi
+
+# View the logs
+view_logs "$SERVICE" "$FOLLOW" "$LINES" "$ERRORS_ONLY" "$SINCE"

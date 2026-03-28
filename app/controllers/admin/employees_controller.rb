@@ -1,6 +1,6 @@
 module Admin
   class EmployeesController < BaseController
-    before_action :set_employee, only: [ :show, :edit, :update, :destroy, :resend_invite, :assign_salary, :create_salary, :revise_salary, :create_revision ]
+    before_action :set_employee, only: [ :show, :edit, :update, :destroy, :resend_invite, :toggle_account_status, :assign_salary, :create_salary, :revise_salary, :create_revision ]
 
     def template
       authorize Employee, :template?
@@ -116,6 +116,19 @@ module Admin
           user.invite!(current_user)
         end
         redirect_to admin_employee_path(@employee), notice: "Invitation sent to #{@employee.email}."
+      end
+    end
+
+    def toggle_account_status
+      authorize @employee
+      return redirect_to admin_employee_path(@employee), alert: "Employee has no portal account." unless @employee.user
+
+      if @employee.user.account_active?
+        @employee.user.update!(account_active: false)
+        redirect_to admin_employee_path(@employee), notice: "Portal access deactivated for #{@employee.full_name}."
+      else
+        @employee.user.update!(account_active: true)
+        redirect_to admin_employee_path(@employee), notice: "Portal access reactivated for #{@employee.full_name}."
       end
     end
 

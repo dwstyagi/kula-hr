@@ -58,6 +58,7 @@ Rails.application.routes.draw do
         end
         member do
           post :resend_invite
+          patch :toggle_account_status
           get :assign_salary
           post :assign_salary, action: :create_salary
           get :revise_salary

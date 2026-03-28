@@ -35,6 +35,10 @@ class EmployeePolicy < ApplicationPolicy
     admin_or_hr?
   end
 
+  def toggle_account_status?
+    admin_or_hr?
+  end
+
   def destroy?
     super_admin?
   end
