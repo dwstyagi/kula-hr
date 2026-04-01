@@ -178,7 +178,7 @@ RSpec.describe Payroll::PayrollProcessor do
 
       it "excludes resigned employees whose last_working_date is not in the run month" do
         emp = create(:employee, tenant: tenant, employment_status: "resigned",
-                     last_working_date: 3.months.ago.to_date, pan_number: "ZYXKL1234J")
+                     last_working_date: Date.new(2025, 10, 31), pan_number: "ZYXKL1234J")
         create(:employee_salary, tenant: tenant, employee: emp,
                salary_structure: structure, annual_ctc: 600_000)
         create(:attendance_summary, :locked, tenant: tenant, employee: emp,

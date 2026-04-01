@@ -19,15 +19,17 @@ RSpec.describe Dashboard::EmployeeDashboardService do
     end
 
     context "with payslips" do
-      let!(:run1) { create(:payroll_run, :approved, tenant: tenant, month: 1, year: 2026) }
-      let!(:run2) { create(:payroll_run, :approved, tenant: tenant, month: 2, year: 2026) }
+      # Use April and May of the current FY so YTD filter always matches
+      let(:fy_start_year) { Date.current.month >= 4 ? Date.current.year : Date.current.year - 1 }
+      let!(:run1) { create(:payroll_run, :approved, tenant: tenant, month: 4, year: fy_start_year) }
+      let!(:run2) { create(:payroll_run, :approved, tenant: tenant, month: 5, year: fy_start_year) }
       let!(:payslip1) do
         create(:payslip, tenant: tenant, employee: employee, payroll_run: run1,
-               month: 1, year: 2026, gross_pay: 50_000, net_pay: 40_000, total_deductions: 10_000)
+               month: 4, year: fy_start_year, gross_pay: 50_000, net_pay: 40_000, total_deductions: 10_000)
       end
       let!(:payslip2) do
         create(:payslip, tenant: tenant, employee: employee, payroll_run: run2,
-               month: 2, year: 2026, gross_pay: 55_000, net_pay: 44_000, total_deductions: 11_000)
+               month: 5, year: fy_start_year, gross_pay: 55_000, net_pay: 44_000, total_deductions: 11_000)
       end
 
       it "returns latest and previous payslips" do
@@ -52,9 +54,9 @@ RSpec.describe Dashboard::EmployeeDashboardService do
       end
 
       it "returns last 3 recent payslips" do
-        run3 = create(:payroll_run, :approved, tenant: tenant, month: 3, year: 2026)
+        run3 = create(:payroll_run, :approved, tenant: tenant, month: 6, year: fy_start_year)
         payslip3 = create(:payslip, tenant: tenant, employee: employee, payroll_run: run3,
-                          month: 3, year: 2026, gross_pay: 55_000, net_pay: 44_000, total_deductions: 11_000)
+                          month: 6, year: fy_start_year, gross_pay: 55_000, net_pay: 44_000, total_deductions: 11_000)
 
         result = described_class.new(employee: employee).call
 
