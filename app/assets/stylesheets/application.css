@@ -8,3 +8,111 @@
  *
  * Consider organizing styles into separate files for maintainability.
  */
+
+/* ─── Button press feedback ───────────────────────────────────────────────────
+ * Scales every enabled button down 3% on press. Uses :where() (zero specificity)
+ * so Tailwind utility classes always win — no conflicts with hover/color transitions.
+ * This is the single highest-impact change: makes the whole app feel responsive.
+ * ─────────────────────────────────────────────────────────────────────────── */
+:where(button, [type="submit"], [type="button"]):not([disabled]) {
+  transition: transform 150ms ease-out;
+}
+
+:where(button, [type="submit"], [type="button"]):not([disabled]):active {
+  transform: scale(0.97);
+}
+
+/* ─── Modal entry animation ───────────────────────────────────────────────────
+ * Backdrop fades in; inner panel scales from 0.97 → 1.
+ * @starting-style triggers when display:none is removed (Tailwind's `hidden` class).
+ * Works for both Stimulus controller opens AND raw onclick removes.
+ * ~85% browser support as of 2026 — graceful no-op in unsupported browsers.
+ * ─────────────────────────────────────────────────────────────────────────── */
+@starting-style {
+  [data-modal-target="dialog"]:not(.hidden) {
+    opacity: 0;
+  }
+
+  [data-modal-target="dialog"]:not(.hidden) > div:first-child {
+    transform: scale(0.97);
+  }
+}
+
+[data-modal-target="dialog"]:not(.hidden) {
+  opacity: 1;
+  transition: opacity 200ms ease-out;
+}
+
+[data-modal-target="dialog"]:not(.hidden) > div:first-child {
+  transform: scale(1);
+  transition: transform 200ms ease-out;
+}
+
+/* ─── Flash entry animation ───────────────────────────────────────────────────
+ * Flash messages slide in from the right on page load.
+ * Exit (fade-out) is handled by flash_controller.js — this only affects entry.
+ * ─────────────────────────────────────────────────────────────────────────── */
+@starting-style {
+  [data-controller="flash"] {
+    opacity: 0;
+    transform: translateX(0.5rem);
+  }
+}
+
+[data-controller="flash"] {
+  transition: opacity 300ms ease-out, transform 300ms ease-out;
+}
+
+/* ─── Sidebar overlay fade ────────────────────────────────────────────────────
+ * The overlay previously toggled display:none instantly (visible blink).
+ * Starts at opacity:0; sidebar_controller.js sets opacity:1 via inline style
+ * after removing `hidden`, giving the transition a before/after state to animate.
+ * ─────────────────────────────────────────────────────────────────────────── */
+[data-sidebar-target="overlay"] {
+  opacity: 0;
+  transition: opacity 200ms ease-out;
+}
+
+/* ─── Respect prefers-reduced-motion ─────────────────────────────────────────
+ * Reduced motion ≠ no motion. Keep opacity transitions — they aid comprehension
+ * and don't cause vestibular symptoms. Remove transforms and position changes.
+ * ─────────────────────────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  /* Button: no scale animation */
+  :where(button, [type="submit"], [type="button"]):not([disabled]) {
+    transition: none;
+  }
+
+  :where(button, [type="submit"], [type="button"]):not([disabled]):active {
+    transform: none;
+  }
+
+  /* Modal: backdrop still fades, panel does not scale */
+  [data-modal-target="dialog"]:not(.hidden) > div:first-child {
+    transition: none;
+    transform: none;
+  }
+
+  @starting-style {
+    [data-modal-target="dialog"]:not(.hidden) > div:first-child {
+      transform: none;
+    }
+  }
+
+  /* Flash: keep fade, remove slide */
+  [data-controller="flash"] {
+    transition: opacity 300ms ease-out;
+  }
+
+  @starting-style {
+    [data-controller="flash"] {
+      opacity: 0;
+      transform: none;
+    }
+  }
+
+  /* Sidebar: snap in/out instead of sliding */
+  [data-sidebar-target="sidebar"] {
+    transition: none;
+  }
+}

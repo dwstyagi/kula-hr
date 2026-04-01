@@ -48,6 +48,13 @@ export default class extends Controller {
     toast.dataset.dismiss = ""
 
     document.body.appendChild(toast)
-    setTimeout(() => toast.remove(), 6000)
+
+    // Fade out before removing — asymmetric: instant-ish entry, graceful exit
+    setTimeout(() => {
+      toast.style.opacity = "0"
+      toast.style.transform = "translateX(0.5rem)"
+      toast.style.transition = "opacity 200ms ease-out, transform 200ms ease-out"
+      setTimeout(() => toast.remove(), 200)
+    }, 5800)
   }
 }

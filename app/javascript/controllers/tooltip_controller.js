@@ -34,12 +34,20 @@ export default class extends Controller {
     this.tooltip.className = [
       "fixed z-[9999] px-2 py-1 rounded-md shadow-md",
       "text-xs font-medium text-white bg-gray-800",
-      "pointer-events-none whitespace-nowrap",
-      "transition-opacity duration-150"
+      "pointer-events-none whitespace-nowrap"
     ].join(" ")
+
+    // Start invisible before appending — then fade in via rAF.
+    // Without this, the element is already at opacity:1 when the transition
+    // class is applied, so the browser sees no change and never animates.
+    this.tooltip.style.cssText = "opacity:0; transition: opacity 150ms ease-out;"
 
     document.body.appendChild(this.tooltip)
     this.position(target)
+
+    requestAnimationFrame(() => {
+      if (this.tooltip) this.tooltip.style.opacity = "1"
+    })
   }
 
   hide(event) {
@@ -52,9 +60,13 @@ export default class extends Controller {
       delete target.dataset.tooltipText
     }
 
-    this.tooltip.remove()
+    // Capture reference before nulling — fade out then remove
+    const tip = this.tooltip
     this.tooltip = null
     this.currentTarget = null
+
+    tip.style.opacity = "0"
+    setTimeout(() => tip.remove(), 150)
   }
 
   position(target) {
