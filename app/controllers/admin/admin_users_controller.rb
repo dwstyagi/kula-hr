@@ -1,6 +1,7 @@
 module Admin
   class AdminUsersController < BaseController
     before_action :set_admin_user, only: [ :destroy ]
+    skip_after_action :verify_policy_scoped, only: [ :index ]
 
     def index
       authorize :admin_user, :index?, policy_class: AdminUserPolicy

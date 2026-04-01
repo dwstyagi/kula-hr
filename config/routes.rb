@@ -87,6 +87,7 @@ Rails.application.routes.draw do
         end
       end
       resource :payroll_setting, only: [ :show, :edit, :update ]
+      resource :company_profile, only: [ :show, :edit, :update ]
       resources :payroll_runs, only: [ :index, :new, :create, :show ] do
         member do
           post :process_payroll
