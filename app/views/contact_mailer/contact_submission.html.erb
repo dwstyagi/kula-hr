@@ -1,0 +1,22 @@
+<p>Hi Diwanshu,</p>
+
+<p>You have a new message from the Kula HR contact form.</p>
+
+<table style="width:100%; border-collapse:collapse; margin:24px 0;">
+  <tr>
+    <td style="padding:10px 16px; background:#f8fafc; border:1px solid #e2e8f0; font-weight:600; width:120px;">Name</td>
+    <td style="padding:10px 16px; border:1px solid #e2e8f0;"><%= @name %></td>
+  </tr>
+  <tr>
+    <td style="padding:10px 16px; background:#f8fafc; border:1px solid #e2e8f0; font-weight:600;">Email</td>
+    <td style="padding:10px 16px; border:1px solid #e2e8f0;"><a href="mailto:<%= @email %>"><%= @email %></a></td>
+  </tr>
+  <tr>
+    <td style="padding:10px 16px; background:#f8fafc; border:1px solid #e2e8f0; font-weight:600; vertical-align:top;">Message</td>
+    <td style="padding:10px 16px; border:1px solid #e2e8f0; white-space:pre-wrap;"><%= @message %></td>
+  </tr>
+</table>
+
+<p style="color:#6b7280; font-size:13px;">
+  You can reply directly to this email to respond to <%= @name %>.
+</p>
