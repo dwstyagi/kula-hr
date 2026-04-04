@@ -7,6 +7,7 @@ class PayrollProcessingJob < ApplicationJob
 
   def perform(payroll_run_id)
     payroll_run = PayrollRun.find(payroll_run_id)
+    return unless payroll_run.processing?
 
     # Scope all queries to the correct tenant for this run
     ActsAsTenant.with_tenant(payroll_run.tenant) do

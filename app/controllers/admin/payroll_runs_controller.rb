@@ -41,12 +41,14 @@ module Admin
     def process_payroll
       authorize @payroll_run
 
-      unless @payroll_run.may_start_processing?
-        return redirect_to admin_payroll_run_path(@payroll_run),
-                           alert: "Payroll run cannot be processed in its current state."
+      @payroll_run.with_lock do
+        unless @payroll_run.may_start_processing?
+          return redirect_to admin_payroll_run_path(@payroll_run),
+                             alert: "Payroll run cannot be processed in its current state."
+        end
+        @payroll_run.start_processing!
+        PayrollProcessingJob.perform_later(@payroll_run.id)
       end
-
-      PayrollProcessingJob.perform_later(@payroll_run.id)
 
       redirect_to admin_payroll_run_path(@payroll_run),
                   notice: "Processing started. This page will update automatically."
@@ -70,9 +72,11 @@ module Admin
     def approve
       authorize @payroll_run
 
-      @payroll_run.approve!
-      @payroll_run.record_approval(current_user)
-      @payroll_run.payslips.update_all(status: "locked")
+      @payroll_run.with_lock do
+        @payroll_run.approve!
+        @payroll_run.record_approval(current_user)
+        @payroll_run.payslips.update_all(status: "locked")
+      end
 
       redirect_to admin_payroll_run_path(@payroll_run),
                   notice: "Payroll approved for #{@payroll_run.period_label}. Payslips are now locked."
@@ -82,9 +86,11 @@ module Admin
     def reject
       authorize @payroll_run
 
-      @payroll_run.update!(rejection_reason: params[:rejection_reason])
-      @payroll_run.reject!
-      PayrollMailer.rejected(@payroll_run).deliver_later
+      @payroll_run.with_lock do
+        @payroll_run.update!(rejection_reason: params[:rejection_reason])
+        @payroll_run.reject!
+        PayrollMailer.rejected(@payroll_run).deliver_later
+      end
 
       redirect_to admin_payroll_run_path(@payroll_run),
                   alert: "Payroll rejected. HR has been notified."

@@ -1,3 +1,5 @@
+require "zlib"
+
 class Employee < ApplicationRecord
   acts_as_tenant :tenant
   belongs_to :tenant
@@ -74,6 +76,13 @@ class Employee < ApplicationRecord
 
   def generate_employee_code
     return if employee_code.present?
+
+    lock_id = Zlib.crc32("emp_code:#{tenant_id}") & 0x7FFFFFFF
+    self.class.connection.exec_query(
+      "SELECT pg_advisory_xact_lock($1)",
+      "AdvisoryLock",
+      [ lock_id ]
+    )
 
     last_code = self.class.where(tenant_id: tenant_id)
                     .order(employee_code: :desc)

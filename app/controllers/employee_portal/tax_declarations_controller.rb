@@ -42,6 +42,11 @@ module EmployeePortal
         employee: current_employee,
         financial_year: current_financial_year
       )
+    rescue ActiveRecord::RecordNotUnique
+      @declaration = TaxDeclaration.find_by!(
+        employee: current_employee,
+        financial_year: current_financial_year
+      )
     end
 
     def current_financial_year

@@ -51,6 +51,7 @@ module Attendance
             next
           end
 
+          summary = AttendanceSummary.lock.find(summary.id)
           if summary.locked?
             errors << "Row #{row_num}: #{emp_code} is locked and cannot be updated"
             next

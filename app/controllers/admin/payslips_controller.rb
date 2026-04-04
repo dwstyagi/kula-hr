@@ -101,13 +101,15 @@ module Admin
 
     # Recalculate the PayrollRun aggregate totals after a payslip edit
     def update_payroll_run_totals
-      @payroll_run.update!(
-        total_gross:       @payroll_run.payslips.sum(:gross_pay),
-        total_deductions:  @payroll_run.payslips.sum(:total_deductions),
-        total_net_pay:     @payroll_run.payslips.sum(:net_pay),
-        total_employer_cost: @payroll_run.payslips.sum(:employer_pf) +
-                             @payroll_run.payslips.sum(:employer_esi)
-      )
+      @payroll_run.with_lock do
+        @payroll_run.update!(
+          total_gross:       @payroll_run.payslips.sum(:gross_pay),
+          total_deductions:  @payroll_run.payslips.sum(:total_deductions),
+          total_net_pay:     @payroll_run.payslips.sum(:net_pay),
+          total_employer_cost: @payroll_run.payslips.sum(:employer_pf) +
+                               @payroll_run.payslips.sum(:employer_esi)
+        )
+      end
     end
   end
 end

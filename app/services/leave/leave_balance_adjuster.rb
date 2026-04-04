@@ -20,16 +20,18 @@ module Leave
         raise InsufficientBalance, "No balance record found for #{@leave_request.leave_type.name}"
       end
 
-      if @balance.remaining_days < @leave_request.number_of_days
-        raise InsufficientBalance,
-          "Insufficient #{@leave_request.leave_type.name} balance. " \
-          "#{@balance.remaining_days} days remaining, #{@leave_request.number_of_days} requested."
-      end
+      @balance.with_lock do
+        if @balance.remaining_days < @leave_request.number_of_days
+          raise InsufficientBalance,
+            "Insufficient #{@leave_request.leave_type.name} balance. " \
+            "#{@balance.remaining_days} days remaining, #{@leave_request.number_of_days} requested."
+        end
 
-      @balance.update!(
-        used_days:      @balance.used_days + @leave_request.number_of_days,
-        remaining_days: @balance.remaining_days - @leave_request.number_of_days
-      )
+        @balance.update!(
+          used_days:      @balance.used_days + @leave_request.number_of_days,
+          remaining_days: @balance.remaining_days - @leave_request.number_of_days
+        )
+      end
     end
 
     # Called on cancellation of an approved request — credits days back
@@ -37,10 +39,12 @@ module Leave
       return if @leave_request.leave_type.lop?
       return unless @balance
 
-      @balance.update!(
-        used_days:      [ @balance.used_days - @leave_request.number_of_days, 0 ].max,
-        remaining_days: @balance.remaining_days + @leave_request.number_of_days
-      )
+      @balance.with_lock do
+        @balance.update!(
+          used_days:      [ @balance.used_days - @leave_request.number_of_days, 0 ].max,
+          remaining_days: @balance.remaining_days + @leave_request.number_of_days
+        )
+      end
     end
   end
 end

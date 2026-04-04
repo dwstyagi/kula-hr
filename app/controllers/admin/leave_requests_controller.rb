@@ -15,20 +15,19 @@ module Admin
     def approve
       authorize @leave_request
 
-      if @leave_request.pending?
-        ActiveRecord::Base.transaction do
-          Leave::LeaveBalanceAdjuster.new(leave_request: @leave_request).debit!
-          @leave_request.update!(
-            status:      :approved,
-            approved_by: current_user,
-            approved_at: Time.current
-          )
-          Leave::NotificationBroadcaster.new(leave_request: @leave_request).broadcast_status_update!
+      @leave_request.with_lock do
+        unless @leave_request.pending?
+          return redirect_to admin_leave_requests_path, alert: "Only pending requests can be approved."
         end
-        redirect_to admin_leave_requests_path, notice: "Leave approved for #{@leave_request.employee.full_name}."
-      else
-        redirect_to admin_leave_requests_path, alert: "Only pending requests can be approved."
+        Leave::LeaveBalanceAdjuster.new(leave_request: @leave_request).debit!
+        @leave_request.update!(
+          status:      :approved,
+          approved_by: current_user,
+          approved_at: Time.current
+        )
+        Leave::NotificationBroadcaster.new(leave_request: @leave_request).broadcast_status_update!
       end
+      redirect_to admin_leave_requests_path, notice: "Leave approved for #{@leave_request.employee.full_name}."
     rescue Leave::LeaveBalanceAdjuster::InsufficientBalance => e
       redirect_to admin_leave_requests_path, alert: e.message
     end
@@ -36,7 +35,10 @@ module Admin
     def reject
       authorize @leave_request
 
-      if @leave_request.pending?
+      @leave_request.with_lock do
+        unless @leave_request.pending?
+          return redirect_to admin_leave_requests_path, alert: "Only pending requests can be rejected."
+        end
         @leave_request.update!(
           status:           :rejected,
           rejection_reason: params[:rejection_reason].to_s.strip,
@@ -44,10 +46,8 @@ module Admin
           approved_at:      Time.current
         )
         Leave::NotificationBroadcaster.new(leave_request: @leave_request).broadcast_status_update!
-        redirect_to admin_leave_requests_path, notice: "Leave rejected for #{@leave_request.employee.full_name}."
-      else
-        redirect_to admin_leave_requests_path, alert: "Only pending requests can be rejected."
       end
+      redirect_to admin_leave_requests_path, notice: "Leave rejected for #{@leave_request.employee.full_name}."
     end
 
     def cancel
@@ -57,17 +57,17 @@ module Admin
         return redirect_to admin_leave_requests_path, alert: "Cannot cancel a leave whose dates have already passed."
       end
 
-      if @leave_request.approved?
-        ActiveRecord::Base.transaction do
+      @leave_request.with_lock do
+        if @leave_request.approved?
           Leave::LeaveBalanceAdjuster.new(leave_request: @leave_request).credit!
           @leave_request.update!(status: :cancelled)
+          return redirect_to admin_leave_requests_path, notice: "Approved leave cancelled and balance restored."
+        elsif @leave_request.pending?
+          @leave_request.update!(status: :cancelled)
+          return redirect_to admin_leave_requests_path, notice: "Leave request cancelled."
+        else
+          return redirect_to admin_leave_requests_path, alert: "This request cannot be cancelled."
         end
-        redirect_to admin_leave_requests_path, notice: "Approved leave cancelled and balance restored."
-      elsif @leave_request.pending?
-        @leave_request.update!(status: :cancelled)
-        redirect_to admin_leave_requests_path, notice: "Leave request cancelled."
-      else
-        redirect_to admin_leave_requests_path, alert: "This request cannot be cancelled."
       end
     end
 

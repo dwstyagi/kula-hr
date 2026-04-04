@@ -17,6 +17,7 @@ module Payroll
     def call
       # Guard: if the job is retried and the run is already processing, continue
       @run.start_processing! if @run.may_start_processing?
+      return unless @run.processing?
 
       employees = eligible_employees
       @run.update!(total_employees: employees.count)
