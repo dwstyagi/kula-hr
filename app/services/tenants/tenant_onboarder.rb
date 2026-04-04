@@ -104,9 +104,10 @@ module Tenants
         { name: "Employer ESI", component_type: "employer_contribution", calculation_type: "percentage", taxable: false, sort_order: 12 }
       ]
 
-      components.each do |attrs|
-        SalaryComponent.create!(attrs.merge(tenant: tenant))
-      end
+      now = Time.current
+      SalaryComponent.insert_all!(
+        components.map { |attrs| attrs.merge(tenant_id: tenant.id, created_at: now, updated_at: now) }
+      )
     end
 
     def seed_leave_types(tenant)
@@ -117,9 +118,10 @@ module Tenants
         { name: "Loss of Pay",   code: "LOP", annual_quota: 0,  carry_forward: false, max_carry_forward: 0,  is_paid: false, is_active: true }
       ]
 
-      leave_types.each do |attrs|
-        LeaveType.create!(attrs.merge(tenant: tenant))
-      end
+      now = Time.current
+      LeaveType.insert_all!(
+        leave_types.map { |attrs| attrs.merge(tenant_id: tenant.id, created_at: now, updated_at: now) }
+      )
     end
 
     MAHARASHTRA_SLABS = [
@@ -184,9 +186,10 @@ module Tenants
       pt_state = @form.state.to_s.downcase.gsub(" ", "_")
       slabs    = PT_SLABS_BY_STATE.fetch(pt_state, [])
 
-      slabs.each do |attrs|
-        ProfessionalTaxSlab.create!(attrs.merge(tenant: tenant, state: pt_state))
-      end
+      now = Time.current
+      ProfessionalTaxSlab.insert_all!(
+        slabs.map { |attrs| attrs.merge(tenant_id: tenant.id, state: pt_state, created_at: now, updated_at: now) }
+      )
     end
   end
 end

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_28_100001) do
+ActiveRecord::Schema[8.1].define(version: 2026_04_04_100001) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "pg_catalog.plpgsql"
@@ -35,6 +35,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_28_100001) do
     t.index ["employee_id", "month", "year"], name: "idx_att_sum_emp_month_year", unique: true
     t.index ["employee_id"], name: "index_attendance_summaries_on_employee_id"
     t.index ["tenant_id", "month", "year"], name: "idx_att_sum_tenant_month_year"
+    t.index ["tenant_id", "status"], name: "idx_att_sum_tenant_status"
     t.index ["tenant_id"], name: "index_attendance_summaries_on_tenant_id"
   end
 
@@ -208,6 +209,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_28_100001) do
     t.index ["approved_by_id"], name: "index_payroll_runs_on_approved_by_id"
     t.index ["initiated_by_id"], name: "index_payroll_runs_on_initiated_by_id"
     t.index ["tenant_id", "month", "year"], name: "idx_payroll_run_tenant_month_year", unique: true
+    t.index ["tenant_id", "status"], name: "idx_payroll_runs_tenant_status"
     t.index ["tenant_id"], name: "index_payroll_runs_on_tenant_id"
   end
 
@@ -270,6 +272,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_28_100001) do
     t.index ["employee_id", "month", "year"], name: "index_payslips_on_employee_id_and_month_and_year"
     t.index ["employee_id"], name: "index_payslips_on_employee_id"
     t.index ["payroll_run_id", "employee_id"], name: "index_payslips_on_payroll_run_id_and_employee_id", unique: true
+    t.index ["payroll_run_id", "status"], name: "idx_payslips_run_status"
     t.index ["payroll_run_id"], name: "index_payslips_on_payroll_run_id"
     t.index ["tenant_id"], name: "index_payslips_on_tenant_id"
   end
@@ -293,6 +296,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_28_100001) do
     t.decimal "tax_amount", precision: 10, scale: 2, null: false
     t.bigint "tenant_id", null: false
     t.datetime "updated_at", null: false
+    t.index ["tenant_id", "state", "month"], name: "idx_pt_slabs_tenant_state_month"
     t.index ["tenant_id"], name: "index_professional_tax_slabs_on_tenant_id"
   end
 
@@ -361,6 +365,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_28_100001) do
     t.decimal "total_exempt_allowances", precision: 12, scale: 2, default: "0.0"
     t.datetime "updated_at", null: false
     t.index ["employee_id", "financial_year"], name: "idx_tax_decl_emp_fy", unique: true
+    t.index ["employee_id", "status"], name: "idx_tax_decl_emp_status"
     t.index ["employee_id"], name: "index_tax_declarations_on_employee_id"
     t.index ["tenant_id"], name: "index_tax_declarations_on_tenant_id"
   end

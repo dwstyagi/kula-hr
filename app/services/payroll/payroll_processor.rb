@@ -99,30 +99,40 @@ module Payroll
     end
 
     def create_line_items(payslip, result)
+      now  = Time.current
       sort = 0
 
       # Earnings — store both prorated and full amount
-      result.earnings.each do |name, amount|
-        payslip.line_items.create!(
+      line_items = result.earnings.map do |name, amount|
+        {
+          payslip_id:     payslip.id,
           component_name: name,
           component_type: "earning",
           amount:         amount,
           full_amount:    result.full_earnings[name],
           sort_order:     (sort += 1),
-          category:       "fixed"
-        )
+          category:       "fixed",
+          created_at:     now,
+          updated_at:     now
+        }
       end
 
       # Deductions — no full_amount (deductions are on prorated base)
-      result.deductions.each do |name, amount|
-        payslip.line_items.create!(
+      line_items += result.deductions.map do |name, amount|
+        {
+          payslip_id:     payslip.id,
           component_name: name,
           component_type: "deduction",
           amount:         amount,
+          full_amount:    nil,
           sort_order:     (sort += 1),
-          category:       "statutory"
-        )
+          category:       "statutory",
+          created_at:     now,
+          updated_at:     now
+        }
       end
+
+      PayslipLineItem.insert_all!(line_items) if line_items.any?
     end
 
     # ── Progress + finalise ────────────────────────────────────────────────────
