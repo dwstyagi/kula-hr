@@ -153,9 +153,13 @@ module Admin
     # GET /admin/payroll_runs/:id/download_payslips
     def download_payslips
       authorize @payroll_run, :show?
-      zip_path = Payroll::BulkPayslipPdfGenerator.new(payroll_run: @payroll_run).call
-      filename = "payslips_#{@payroll_run.period_label.gsub(' ', '_')}.zip"
-      send_file zip_path, filename: filename, type: "application/zip", disposition: "attachment"
+      zip_path = Rails.root.join("tmp", "payslips_#{@payroll_run.id}_#{@payroll_run.month}_#{@payroll_run.year}.zip")
+      if File.exist?(zip_path)
+        filename = "payslips_#{@payroll_run.period_label.gsub(' ', '_')}.zip"
+        send_file zip_path, filename: filename, type: "application/zip", disposition: "attachment"
+      else
+        redirect_to admin_payroll_run_path(@payroll_run), alert: "Payslip ZIP is not ready yet. Please try again shortly."
+      end
     end
 
     # GET /admin/payroll_runs/:id/progress
