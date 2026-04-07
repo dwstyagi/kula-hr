@@ -1,0 +1,216 @@
+<div class="min-h-screen bg-gray-50 py-8 px-4 md:px-6">
+<div class="max-w-7xl mx-auto">
+  <%# Branding header %>
+  <div class="flex flex-wrap items-center justify-between gap-3 mb-8">
+    <div class="flex items-center gap-3">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" class="h-9 w-9 shrink-0">
+        <rect width="100" height="100" rx="20" fill="#2563eb"/>
+        <path d="M30 30v40M30 50l30-20M30 50l30 20" fill="none" stroke="white" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <div>
+        <p class="text-xs font-medium text-gray-400 uppercase tracking-wide leading-none mb-0.5">Powered by</p>
+        <span class="font-bold text-lg text-gray-900 leading-none">Kula HR</span>
+      </div>
+    </div>
+    <div class="text-right min-w-0">
+      <p class="text-xs text-gray-400 uppercase tracking-wide leading-none mb-0.5">Joining</p>
+      <p class="font-semibold text-gray-900 leading-none truncate max-w-48"><%= @tenant.name %></p>
+    </div>
+  </div>
+
+  <%= render "shared/flash" %>
+  <div class="mb-6">
+    <h1 class="text-2xl font-bold text-gray-900">Employee Registration</h1>
+    <p class="text-sm text-gray-500 mt-1">Fill in your details below. You'll receive an email invitation to set your password once submitted.</p>
+  </div>
+
+  <%= form_with url: employee_registration_submit_path(params[:token]), method: :post, class: "space-y-8" do |f| %>
+    <%= f.fields_for :employee, @employee do |ef| %>
+      <% if @employee.errors.any? %>
+        <div class="rounded-lg bg-red-50 p-4">
+          <div class="flex">
+            <svg class="h-5 w-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+            </svg>
+            <div class="ml-3">
+              <h3 class="text-sm font-medium text-red-800">Please fix the following errors:</h3>
+              <ul class="mt-2 text-sm text-red-700 list-disc list-inside">
+                <% @employee.errors.full_messages.each do |msg| %>
+                  <li><%= msg %></li>
+                <% end %>
+              </ul>
+            </div>
+          </div>
+        </div>
+      <% end %>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <%# Personal Information %>
+        <div class="bg-white rounded-lg border border-gray-200 p-4 sm:p-6">
+          <h3 class="text-lg font-semibold text-gray-900 mb-4">Personal Information</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <%= ef.label :first_name, class: "block text-sm font-medium text-gray-700 mb-1" %>
+              <%= ef.text_field :first_name, required: true, class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm" %>
+            </div>
+            <div>
+              <%= ef.label :last_name, class: "block text-sm font-medium text-gray-700 mb-1" %>
+              <%= ef.text_field :last_name, required: true, class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm" %>
+            </div>
+            <div>
+              <%= ef.label :email, class: "block text-sm font-medium text-gray-700 mb-1" %>
+              <%= ef.email_field :email, required: true, autocomplete: "email", placeholder: "you@company.com", class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm" %>
+            </div>
+            <div>
+              <%= ef.label :phone, class: "block text-sm font-medium text-gray-700 mb-1" %>
+              <%= ef.telephone_field :phone, class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm" %>
+            </div>
+            <div>
+              <%= ef.label :date_of_birth, class: "block text-sm font-medium text-gray-700 mb-1" %>
+              <%= ef.date_field :date_of_birth, class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm" %>
+            </div>
+            <div>
+              <%= ef.label :gender, class: "block text-sm font-medium text-gray-700 mb-1" %>
+              <%= ef.select :gender, Employee::GENDERS.map { |g| [g.titleize, g] }, { include_blank: "Select gender" }, class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm" %>
+            </div>
+          </div>
+        </div>
+
+        <%# Employment Details %>
+        <div class="bg-white rounded-lg border border-gray-200 p-4 sm:p-6">
+          <h3 class="text-lg font-semibold text-gray-900 mb-4">Employment Details</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <%= ef.label :joining_date, class: "block text-sm font-medium text-gray-700 mb-1" %>
+              <%= ef.date_field :joining_date, required: true, class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm" %>
+            </div>
+            <div>
+              <%= ef.label :confirmation_date, class: "block text-sm font-medium text-gray-700 mb-1" %>
+              <%= ef.date_field :confirmation_date, class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm" %>
+            </div>
+            <div>
+              <%= ef.label :employment_status, class: "block text-sm font-medium text-gray-700 mb-1" %>
+              <%= ef.select :employment_status, Employee::EMPLOYMENT_STATUSES.map { |s| [s.titleize, s] }, {}, class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm" %>
+            </div>
+            <div>
+              <%= ef.label :department_id, "Department", class: "block text-sm font-medium text-gray-700 mb-1" %>
+              <%= ef.collection_select :department_id, @departments, :id, :name, { include_blank: "Select department" }, class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm" %>
+            </div>
+            <div>
+              <%= ef.label :designation_id, "Designation", class: "block text-sm font-medium text-gray-700 mb-1" %>
+              <%= ef.collection_select :designation_id, @designations, :id, :name, { include_blank: "Select designation" }, class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm" %>
+            </div>
+          </div>
+        </div>
+
+        <%# Bank Details %>
+        <div class="bg-white rounded-lg border border-gray-200 p-4 sm:p-6">
+          <h3 class="text-lg font-semibold text-gray-900 mb-4">Bank Details</h3>
+          <div class="space-y-6">
+            <div>
+              <%= ef.label :bank_name, class: "block text-sm font-medium text-gray-700 mb-1" %>
+              <%= ef.text_field :bank_name, class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm" %>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <%= ef.label :bank_account_number, class: "block text-sm font-medium text-gray-700 mb-1" %>
+                <%= ef.text_field :bank_account_number, class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm" %>
+              </div>
+              <div>
+                <%= ef.label :ifsc_code, "IFSC Code", class: "block text-sm font-medium text-gray-700 mb-1" %>
+                <%= ef.text_field :ifsc_code, class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm" %>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <%# Statutory Details %>
+        <div class="bg-white rounded-lg border border-gray-200 p-4 sm:p-6">
+          <h3 class="text-lg font-semibold text-gray-900 mb-4">Statutory Details</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <%= ef.label :pan_number, "PAN Number", class: "block text-sm font-medium text-gray-700 mb-1" %>
+              <%= ef.text_field :pan_number, placeholder: "ABCDE1234F", class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm uppercase" %>
+            </div>
+            <div>
+              <%= ef.label :aadhaar_number, "Aadhaar Number", class: "block text-sm font-medium text-gray-700 mb-1" %>
+              <%= ef.text_field :aadhaar_number, placeholder: "123456789012", class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm" %>
+            </div>
+            <div>
+              <%= ef.label :uan_number, "UAN (PF)", class: "block text-sm font-medium text-gray-700 mb-1" %>
+              <%= ef.text_field :uan_number, class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm" %>
+            </div>
+            <div>
+              <%= ef.label :esi_number, "ESI Number", class: "block text-sm font-medium text-gray-700 mb-1" %>
+              <%= ef.text_field :esi_number, class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm" %>
+            </div>
+          </div>
+        </div>
+
+        <%# Address %>
+        <div class="bg-white rounded-lg border border-gray-200 p-4 sm:p-6">
+          <h3 class="text-lg font-semibold text-gray-900 mb-4">Address</h3>
+          <div class="grid grid-cols-1 gap-6">
+            <div>
+              <%= ef.label :current_address, class: "block text-sm font-medium text-gray-700 mb-1" %>
+              <%= ef.text_area :current_address, rows: 2, class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm" %>
+            </div>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
+            <div>
+              <%= ef.label :city, class: "block text-sm font-medium text-gray-700 mb-1" %>
+              <%= ef.text_field :city, class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm" %>
+            </div>
+            <div>
+              <%= ef.label :state, class: "block text-sm font-medium text-gray-700 mb-1" %>
+              <%= ef.text_field :state, class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm" %>
+            </div>
+            <div>
+              <%= ef.label :pincode, class: "block text-sm font-medium text-gray-700 mb-1" %>
+              <%= ef.text_field :pincode, placeholder: "400001", class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm" %>
+            </div>
+          </div>
+        </div>
+
+        <%# Emergency Contact %>
+        <div class="bg-white rounded-lg border border-gray-200 p-4 sm:p-6">
+          <h3 class="text-lg font-semibold text-gray-900 mb-4">Emergency Contact</h3>
+          <div class="space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <%= ef.label :emergency_contact_first_name, "First Name", class: "block text-sm font-medium text-gray-700 mb-1" %>
+                <%= ef.text_field :emergency_contact_first_name, class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm" %>
+              </div>
+              <div>
+                <%= ef.label :emergency_contact_last_name, "Last Name", class: "block text-sm font-medium text-gray-700 mb-1" %>
+                <%= ef.text_field :emergency_contact_last_name, class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm" %>
+              </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <%= ef.label :emergency_contact_phone, "Phone", class: "block text-sm font-medium text-gray-700 mb-1" %>
+                <%= ef.telephone_field :emergency_contact_phone, class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm" %>
+              </div>
+              <div>
+                <%= ef.label :emergency_contact_relation, "Relation", class: "block text-sm font-medium text-gray-700 mb-1" %>
+                <%= ef.text_field :emergency_contact_relation, placeholder: "e.g. Spouse, Parent", class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm" %>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    <% end %>
+
+    <%# Honeypot — bots fill this, humans don't %>
+    <div class="hidden" aria-hidden="true">
+      <%= text_field_tag :website, nil, tabindex: -1, autocomplete: "off" %>
+    </div>
+
+    <%# Submit %>
+    <div class="flex items-center gap-3">
+      <%= f.submit "Submit & Get Invite",
+          class: "w-full sm:w-auto px-6 py-2.5 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 cursor-pointer" %>
+    </div>
+  <% end %>
+</div>
+</div>

@@ -18,6 +18,64 @@
       <% end %>
     </div>
   <% end %>
+  <%# Invite people link banner %>
+  <% tenant = ActsAsTenant.current_tenant %>
+  <% if tenant.invite_token_valid? %>
+    <% invite_url = employee_registration_url(token: tenant.invite_token, subdomain: tenant.subdomain) %>
+    <div id="invite-banner" class="flex items-center justify-between bg-emerald-50 border border-emerald-200 rounded-lg px-4 py-3 mb-5">
+      <div class="flex items-center gap-2 text-sm text-emerald-800 min-w-0">
+        <svg class="w-4 h-4 shrink-0 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
+        </svg>
+        <span class="truncate font-mono text-xs"><%= invite_url %></span>
+        <span class="shrink-0 text-emerald-500 text-xs">· expires <%= time_ago_in_words(tenant.invite_token_expires_at) %> from now</span>
+      </div>
+      <div class="flex items-center gap-2 shrink-0 ml-4">
+        <button type="button"
+                data-invite-url="<%= invite_url %>"
+                onclick="
+                  const url = this.dataset.inviteUrl;
+                  const btn = this;
+                  const original = btn.innerHTML;
+                  if (navigator.clipboard && window.isSecureContext) {
+                    navigator.clipboard.writeText(url);
+                  } else {
+                    const ta = document.createElement('textarea');
+                    ta.value = url; ta.style.position = 'fixed'; ta.style.opacity = '0';
+                    document.body.appendChild(ta); ta.select(); document.execCommand('copy');
+                    document.body.removeChild(ta);
+                  }
+                  btn.textContent = 'Copied!';
+                  setTimeout(() => btn.innerHTML = original, 2000);
+                "
+                class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 text-white text-xs font-medium rounded-lg hover:bg-emerald-700 cursor-pointer">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+          </svg>
+          Copy
+        </button>
+        <%= button_to generate_admin_invite_link_path, method: :post,
+            class: "inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-emerald-300 text-emerald-700 text-xs font-medium rounded-lg hover:bg-emerald-50 cursor-pointer",
+            form: { data: { turbo_confirm: "This will invalidate the current invite link. Continue?" } } do %>
+          Regenerate
+        <% end %>
+        <%= button_to revoke_admin_invite_link_path, method: :delete,
+            class: "inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-red-200 text-red-600 text-xs font-medium rounded-lg hover:bg-red-50 cursor-pointer",
+            form: { data: { turbo_confirm: "This will disable self-registration. Continue?" } } do %>
+          Revoke
+        <% end %>
+        <button type="button"
+                onclick="document.getElementById('invite-banner').remove()"
+                class="ml-1 p-1.5 text-emerald-400 hover:text-emerald-600 hover:bg-emerald-100 rounded-lg cursor-pointer"
+                title="Dismiss">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  <% end %>
+
   <%# Activation link banner %>
   <% tenant = ActsAsTenant.current_tenant %>
   <% if tenant.activation_token_valid? %>
@@ -81,6 +139,15 @@
       <h1 class="text-2xl font-bold text-gray-900">Employees</h1>
     </div>
     <div class="flex items-center gap-2">
+      <% unless tenant.invite_token_valid? %>
+        <%= button_to generate_admin_invite_link_path, method: :post,
+            class: "inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 cursor-pointer" do %>
+          <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
+          </svg>
+          Generate Invite Link
+        <% end %>
+      <% end %>
       <% unless tenant.activation_token_valid? %>
         <%= button_to generate_admin_activation_link_path, method: :post,
             class: "inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 cursor-pointer" do %>

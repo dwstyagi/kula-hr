@@ -21,10 +21,23 @@ Rails.application.routes.draw do
     post "activate/:token", to: "employee_activations#create", as: :employee_activation_submit
     get  "activate/:token/sent", to: "employee_activations#sent", as: :employee_activation_sent
 
+    # Self-registration invite link (public)
+    get  "join/:token",      to: "employee_registrations#new",    as: :employee_registration
+    post "join/:token",      to: "employee_registrations#create", as: :employee_registration_submit
+    get  "join/:token/sent", to: "employee_registrations#sent",   as: :employee_registration_sent
+
     # Admin: generate/revoke activation link
     namespace :admin do
       resource :activation_link, only: [] do
         post :generate
+        delete :revoke
+      end
+    end
+
+    # Admin: generate/revoke invite link
+    namespace :admin do
+      resource :invite_link, only: [] do
+        post   :generate
         delete :revoke
       end
     end

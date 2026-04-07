@@ -39,6 +39,7 @@ class Tenant < ApplicationRecord
   scope :suspended, -> { where(status: "suspended") }
 
   ACTIVATION_TOKEN_VALIDITY = 1.hour
+  INVITE_TOKEN_VALIDITY = 24.hours
 
   before_validation :normalize_subdomain
 
@@ -77,6 +78,21 @@ class Tenant < ApplicationRecord
 
   def revoke_activation_token!
     update!(activation_token: nil, activation_token_expires_at: nil)
+  end
+
+  def generate_invite_token!
+    update!(
+      invite_token: SecureRandom.urlsafe_base64(32),
+      invite_token_expires_at: INVITE_TOKEN_VALIDITY.from_now
+    )
+  end
+
+  def invite_token_valid?
+    invite_token.present? && invite_token_expires_at&.future?
+  end
+
+  def revoke_invite_token!
+    update!(invite_token: nil, invite_token_expires_at: nil)
   end
 
   private

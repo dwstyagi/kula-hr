@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_04_04_100001) do
+ActiveRecord::Schema[8.1].define(version: 2026_04_07_144234) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "pg_catalog.plpgsql"
@@ -388,6 +388,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_04_100001) do
     t.datetime "created_at", null: false
     t.string "esi_code"
     t.string "gstin"
+    t.string "invite_token"
+    t.datetime "invite_token_expires_at"
     t.string "name", null: false
     t.string "pan"
     t.string "pf_establishment_code"
@@ -398,6 +400,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_04_100001) do
     t.string "tan"
     t.datetime "updated_at", null: false
     t.index ["activation_token"], name: "index_tenants_on_activation_token", unique: true
+    t.index ["invite_token"], name: "index_tenants_on_invite_token", unique: true
     t.index ["status"], name: "index_tenants_on_status"
     t.index ["subdomain"], name: "index_tenants_on_subdomain", unique: true
   end
