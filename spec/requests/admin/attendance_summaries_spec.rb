@@ -28,7 +28,7 @@ RSpec.describe "Admin::AttendanceSummaries", type: :request do
       end
       get admin_attendance_summaries_path(month: 2, year: 2026),
           headers: { "Host" => subdomain_host }
-      expect(response.body).to include(employee.full_name)
+      expect(response.body).to include(CGI.escapeHTML(employee.full_name))
     end
   end
 
