@@ -28,6 +28,12 @@ class EmployeeRegistrationsController < ApplicationController
     ActsAsTenant.with_tenant(tenant) do
       @employee = Employee.new(employee_params)
 
+      if User.exists?(email: @employee.email.to_s.strip.downcase)
+        @employee.errors.add(:email, "is already registered. Please contact your HR admin.")
+        load_form_data
+        return render :new, status: :unprocessable_content
+      end
+
       ActiveRecord::Base.transaction do
         @employee.save!
 
