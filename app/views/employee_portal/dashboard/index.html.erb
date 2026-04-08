@@ -1,9 +1,9 @@
 <div class="space-y-6">
 
   <%# Section 1: Welcome + Notifications %>
-  <div class="flex items-center justify-between">
+  <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
     <div>
-      <h1 class="text-2xl font-bold text-gray-900">
+      <h1 class="text-xl sm:text-2xl font-bold text-gray-900">
         Good <%= greeting %>, <%= current_employee&.first_name || current_user.first_name %>
       </h1>
       <p class="text-sm text-gray-500 mt-0.5">
@@ -12,7 +12,7 @@
       </p>
     </div>
     <%= link_to new_employee_portal_leave_request_path,
-        class: "inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700" do %>
+        class: "inline-flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 sm:w-auto" do %>
       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
       </svg>
@@ -139,9 +139,9 @@
           <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wider">Salary Summary</h2>
           <span class="text-xs text-gray-400"><%= @payroll_data.latest_payslip.period_label %></span>
         </div>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 divide-y md:divide-y-0 md:divide-x divide-gray-100">
           <%# Net Pay - Prominent %>
-          <div class="md:col-span-1">
+          <div class="md:col-span-1 pt-4 md:pt-0 first:pt-0 md:px-6 first:md:pl-0 last:md:pr-0">
             <p class="text-xs text-gray-500 mb-1">Net Pay</p>
             <p class="text-3xl font-bold text-green-700">₹<%= number_with_delimiter(@payroll_data.latest_payslip.net_pay.round(0)) %></p>
             <% if @payroll_data.mom_change %>
@@ -162,7 +162,7 @@
           </div>
 
           <%# Gross/Deductions Breakdown %>
-          <div class="md:col-span-1">
+          <div class="md:col-span-1 pt-4 md:pt-0 md:px-6">
             <div class="space-y-2">
               <div class="flex justify-between text-sm">
                 <span class="text-gray-500">Gross Pay</span>
@@ -180,7 +180,7 @@
           </div>
 
           <%# Paid Days / LOP %>
-          <div class="md:col-span-1">
+          <div class="md:col-span-1 pt-4 md:pt-0 md:px-6">
             <div class="space-y-2">
               <% if @payroll_data.latest_payslip.respond_to?(:paid_days) && @payroll_data.latest_payslip.paid_days.present? %>
                 <div class="flex justify-between text-sm">

@@ -5,7 +5,7 @@
   <%# Row 1: Key Stats — 2 rows of 4 cards %>
   <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
     <%# Total Tenants %>
-    <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-100 transition hover:shadow-md duration-300">
+    <div class="bg-white p-4 md:p-6 rounded-lg shadow-sm border border-gray-100 transition hover:shadow-md duration-300">
       <div class="flex items-center justify-between">
         <div>
           <p class="text-sm font-medium text-gray-500">Total Tenants</p>
@@ -20,7 +20,7 @@
     </div>
 
     <%# Active Tenants %>
-    <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-100 transition hover:shadow-md duration-300">
+    <div class="bg-white p-4 md:p-6 rounded-lg shadow-sm border border-gray-100 transition hover:shadow-md duration-300">
       <div class="flex items-center justify-between">
         <div>
           <p class="text-sm font-medium text-gray-500">Active Tenants</p>
@@ -35,7 +35,7 @@
     </div>
 
     <%# Trial Tenants %>
-    <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-100 transition hover:shadow-md duration-300">
+    <div class="bg-white p-4 md:p-6 rounded-lg shadow-sm border border-gray-100 transition hover:shadow-md duration-300">
       <div class="flex items-center justify-between">
         <div>
           <p class="text-sm font-medium text-gray-500">Trial Tenants</p>
@@ -50,7 +50,7 @@
     </div>
 
     <%# Suspended %>
-    <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-100 transition hover:shadow-md duration-300">
+    <div class="bg-white p-4 md:p-6 rounded-lg shadow-sm border border-gray-100 transition hover:shadow-md duration-300">
       <div class="flex items-center justify-between">
         <div>
           <p class="text-sm font-medium text-gray-500">Suspended</p>
@@ -65,7 +65,7 @@
     </div>
 
     <%# Signups This Month %>
-    <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-100 transition hover:shadow-md duration-300">
+    <div class="bg-white p-4 md:p-6 rounded-lg shadow-sm border border-gray-100 transition hover:shadow-md duration-300">
       <div class="flex items-center justify-between">
         <div>
           <p class="text-sm font-medium text-gray-500">Signups This Month</p>
@@ -80,7 +80,7 @@
     </div>
 
     <%# Total Users %>
-    <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-100 transition hover:shadow-md duration-300">
+    <div class="bg-white p-4 md:p-6 rounded-lg shadow-sm border border-gray-100 transition hover:shadow-md duration-300">
       <div class="flex items-center justify-between">
         <div>
           <p class="text-sm font-medium text-gray-500">Total Users</p>
@@ -95,7 +95,7 @@
     </div>
 
     <%# Total Employees %>
-    <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-100 transition hover:shadow-md duration-300">
+    <div class="bg-white p-4 md:p-6 rounded-lg shadow-sm border border-gray-100 transition hover:shadow-md duration-300">
       <div class="flex items-center justify-between">
         <div>
           <p class="text-sm font-medium text-gray-500">Total Employees</p>
@@ -110,7 +110,7 @@
     </div>
 
     <%# Avg Company Size %>
-    <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-100 transition hover:shadow-md duration-300">
+    <div class="bg-white p-4 md:p-6 rounded-lg shadow-sm border border-gray-100 transition hover:shadow-md duration-300">
       <div class="flex items-center justify-between">
         <div>
           <p class="text-sm font-medium text-gray-500">Avg Company Size</p>
@@ -215,28 +215,26 @@
       <% if @stats.recent_tenants.any? %>
         <div class="divide-y divide-gray-100">
           <% @stats.recent_tenants.each do |tenant| %>
-            <div class="px-6 py-3 flex items-center justify-between">
-              <div class="flex items-center gap-3">
-                <div class="h-9 w-9 rounded-full bg-linear-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold text-sm">
-                  <%= tenant[:name][0..1].upcase %>
-                </div>
-                <div>
-                  <p class="text-sm font-medium text-gray-900"><%= tenant[:name] %></p>
-                  <p class="text-xs text-gray-400">
-                    <% tenant_url = root_url(subdomain: tenant[:subdomain], host: ENV.fetch("APP_DOMAIN", "lvh.me")) %>
-                    <%= link_to tenant_url, target: "_blank", class: "text-blue-500 hover:underline font-mono" do %>
-                      <%= tenant_url.sub(/\Ahttps?:\/\//, "").chomp("/") %>
-                    <% end %>
-                    &middot; <%= tenant[:employee_count] %> employees
-                  </p>
-                </div>
+            <div class="px-4 md:px-6 py-3 flex items-center gap-3">
+              <div class="h-9 w-9 rounded-full bg-linear-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold text-sm shrink-0">
+                <%= tenant[:name][0..1].upcase %>
               </div>
-              <div class="flex items-center gap-3">
+              <div class="min-w-0 flex-1">
+                <p class="text-sm font-medium text-gray-900 truncate"><%= tenant[:name] %></p>
+                <p class="text-xs text-gray-400 truncate">
+                  <% tenant_url = root_url(subdomain: tenant[:subdomain], host: ENV.fetch("APP_DOMAIN", "lvh.me")) %>
+                  <%= link_to tenant_url, target: "_blank", class: "text-blue-500 hover:underline font-mono" do %>
+                    <%= tenant[:subdomain] %>.<%= ENV.fetch("APP_DOMAIN", "lvh.me") %>
+                  <% end %>
+                  &middot; <%= tenant[:employee_count] %> emp
+                </p>
+              </div>
+              <div class="flex items-center gap-2 shrink-0">
                 <% color = { "active" => "green", "trial" => "yellow", "suspended" => "red" }[tenant[:status]] || "gray" %>
                 <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-<%= color %>-100 text-<%= color %>-700">
                   <%= tenant[:status].capitalize %>
                 </span>
-                <span class="text-xs text-gray-400"><%= time_ago_in_words(tenant[:created_at]) %> ago</span>
+                <span class="text-xs text-gray-400 hidden sm:inline"><%= time_ago_in_words(tenant[:created_at]) %> ago</span>
               </div>
             </div>
           <% end %>
@@ -255,12 +253,12 @@
         <% status_colors = { "draft" => "bg-gray-100 text-gray-700", "processing" => "bg-blue-100 text-blue-700", "processed" => "bg-yellow-100 text-yellow-700", "under_review" => "bg-purple-100 text-purple-700", "approved" => "bg-green-100 text-green-700", "rejected" => "bg-red-100 text-red-700", "paid" => "bg-emerald-100 text-emerald-700" } %>
         <div class="divide-y divide-gray-100">
           <% @stats.recent_payroll_activity.each do |activity| %>
-            <div class="px-6 py-3 flex items-center justify-between">
-              <div>
-                <p class="text-sm font-medium text-gray-900"><%= activity[:tenant_name] %></p>
-                <p class="text-xs text-gray-500"><%= activity[:period] %> &middot; by <%= activity[:initiator] %> &middot; <%= time_ago_in_words(activity[:updated_at]) %> ago</p>
+            <div class="px-4 md:px-6 py-3 flex items-center gap-3">
+              <div class="min-w-0 flex-1">
+                <p class="text-sm font-medium text-gray-900 truncate"><%= activity[:tenant_name] %></p>
+                <p class="text-xs text-gray-500 truncate"><%= activity[:period] %> &middot; <%= activity[:initiator] %></p>
               </div>
-              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium <%= status_colors[activity[:status]] || 'bg-gray-100 text-gray-700' %>">
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium shrink-0 <%= status_colors[activity[:status]] || 'bg-gray-100 text-gray-700' %>">
                 <%= activity[:status].titleize %>
               </span>
             </div>

@@ -1,7 +1,7 @@
 <% content_for(:page_title, "Admin Dashboard") %>
 <div class="space-y-6">
   <!-- Stats Overview -->
-  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
     <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-100 transition hover:shadow-md duration-300">
       <div class="flex items-center justify-between">
         <div>
@@ -60,7 +60,7 @@
   </div>
   <!-- Payroll Summary -->
   <% if @payroll_data.current_run %>
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
       <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-100 transition hover:shadow-md duration-300">
         <div class="flex items-center justify-between">
           <div>
@@ -280,12 +280,12 @@
             <div class="shrink-0 h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 font-bold">
               <%= employee.first_name[0] %><%= employee.last_name[0] %>
             </div>
-            <div class="ml-4">
-              <div class="text-sm font-medium text-gray-900"><%= employee.full_name %></div>
-              <div class="text-sm text-gray-500"><%= employee.designation&.name || 'No Designation' %> • <%= employee.department&.name || 'No Dept' %></div>
+            <div class="ml-4 min-w-0 flex-1">
+              <div class="text-sm font-medium text-gray-900 truncate"><%= employee.full_name %></div>
+              <div class="text-sm text-gray-500 truncate"><%= employee.designation&.name || 'No Designation' %> • <%= employee.department&.name || 'No Dept' %></div>
             </div>
-            <div class="ml-auto text-sm text-gray-500">
-              Joined <%= time_ago_in_words(employee.joining_date) %> ago
+            <div class="ml-3 shrink-0 text-xs text-gray-400 hidden sm:block">
+              <%= time_ago_in_words(employee.joining_date) %> ago
             </div>
           </div>
         <% end %>
@@ -310,26 +310,24 @@
           <% years = (Date.current.year - employee.joining_date.year) %>
           <% anniversary_date = Date.new(Date.current.year, employee.joining_date.month, employee.joining_date.day) %>
           <% anniversary_date = anniversary_date + 1.year if anniversary_date < Date.current %>
-          <div class="flex items-center justify-between p-4 bg-white border border-gray-100 rounded-xl hover:shadow-md transition-all duration-200 group">
-            <div class="flex items-center gap-4">
-              <div class="relative">
-                <div class="h-12 w-12 rounded-full bg-linear-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-lg shadow-sm">
+          <div class="flex items-center justify-between p-3 bg-white border border-gray-100 rounded-xl hover:shadow-md transition-all duration-200 group">
+            <div class="flex items-center gap-3 min-w-0">
+              <div class="relative shrink-0">
+                <div class="h-10 w-10 rounded-full bg-linear-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm shadow-sm">
                   <%= employee.first_name[0] %><%= employee.last_name[0] %>
                 </div>
-                <div class="absolute -bottom-1 -right-1 bg-yellow-400 text-yellow-900 text-[10px] font-bold px-1.5 py-0.5 rounded-full border border-white shadow-sm">
+                <div class="absolute -bottom-1 -right-1 bg-yellow-400 text-yellow-900 text-[10px] font-bold px-1 py-0.5 rounded-full border border-white shadow-sm">
                   <%= years %>y
                 </div>
               </div>
-              <div>
-                <h4 class="text-sm font-bold text-gray-900 group-hover:text-purple-700 transition-colors">
+              <div class="min-w-0">
+                <h4 class="text-sm font-bold text-gray-900 group-hover:text-purple-700 transition-colors truncate">
                   <%= employee.full_name %>
                 </h4>
-                <div class="flex items-center gap-2 text-xs text-gray-500 mt-0.5">
-                  <span class="bg-purple-100 px-1.5 py-0.5 rounded text-purple-700 font-medium">Work Anniversary</span>
-                  <span>•</span>
-                  <span><%= employee.department&.name || 'Team' %></span>
-                  <span>•</span>
-                  <span><%= years.ordinalize %> year</span>
+                <div class="flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-xs text-gray-500 mt-0.5">
+                  <span class="bg-purple-100 px-1.5 py-0.5 rounded text-purple-700 font-medium shrink-0">Anniversary</span>
+                  <span class="hidden sm:inline truncate"><%= employee.department&.name || 'Team' %></span>
+                  <span class="shrink-0"><%= years.ordinalize %> yr</span>
                 </div>
               </div>
             </div>
@@ -351,24 +349,23 @@
         <% @upcoming_birthdays.each do |employee| %>
           <% birthday_date = Date.new(Date.current.year, employee.date_of_birth.month, employee.date_of_birth.day) %>
           <% birthday_date = birthday_date + 1.year if birthday_date < Date.current %>
-          <div class="flex items-center justify-between p-4 bg-white border border-gray-100 rounded-xl hover:shadow-md transition-all duration-200 group">
-            <div class="flex items-center gap-4">
-              <div class="relative">
-                <div class="h-12 w-12 rounded-full bg-linear-to-br from-pink-400 to-rose-500 flex items-center justify-center text-white font-bold text-lg shadow-sm">
+          <div class="flex items-center justify-between p-3 bg-white border border-gray-100 rounded-xl hover:shadow-md transition-all duration-200 group">
+            <div class="flex items-center gap-3 min-w-0">
+              <div class="relative shrink-0">
+                <div class="h-10 w-10 rounded-full bg-linear-to-br from-pink-400 to-rose-500 flex items-center justify-center text-white font-bold text-sm shadow-sm">
                   <%= employee.first_name[0] %><%= employee.last_name[0] %>
                 </div>
-                <div class="absolute -bottom-1 -right-1 text-base leading-none border border-white rounded-full bg-white shadow-sm">
+                <div class="absolute -bottom-1 -right-1 text-sm leading-none border border-white rounded-full bg-white shadow-sm">
                   🎂
                 </div>
               </div>
-              <div>
-                <h4 class="text-sm font-bold text-gray-900 group-hover:text-rose-600 transition-colors">
+              <div class="min-w-0">
+                <h4 class="text-sm font-bold text-gray-900 group-hover:text-rose-600 transition-colors truncate">
                   <%= employee.full_name %>
                 </h4>
-                <div class="flex items-center gap-2 text-xs text-gray-500 mt-0.5">
-                  <span class="bg-rose-100 px-1.5 py-0.5 rounded text-rose-700 font-medium">Birthday</span>
-                  <span>•</span>
-                  <span><%= employee.department&.name || 'Team' %></span>
+                <div class="flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-xs text-gray-500 mt-0.5">
+                  <span class="bg-rose-100 px-1.5 py-0.5 rounded text-rose-700 font-medium shrink-0">Birthday</span>
+                  <span class="hidden sm:inline truncate"><%= employee.department&.name || 'Team' %></span>
                 </div>
               </div>
             </div>
