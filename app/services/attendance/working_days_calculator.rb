@@ -21,13 +21,11 @@ module Attendance
       start_date = Date.new(@year, @month, 1)
       end_date   = start_date.end_of_month
 
-      (start_date..end_date).count { |date| working_day?(date) }
+      (start_date..end_date).count { |date| self.class.working_day?(date, @pattern) }
     end
 
-    private
-
-    def working_day?(date)
-      case @pattern
+    def self.working_day?(date, pattern)
+      case pattern
       when "all_saturdays_sundays"
         !date.saturday? && !date.sunday?
 

@@ -14,7 +14,8 @@ class LeaveRequest < ApplicationRecord
   validates :reason, length: { maximum: 500 }
 
   validate :to_date_on_or_after_from_date
-  validate :from_date_not_in_past, on: :create
+  validate :from_date_not_in_past,    on: :create
+  validate :working_days_present,     on: :create
   validate :no_overlapping_requests,  on: :create
   validate :sufficient_balance,       on: :create
   validate :employee_is_active,       on: :create
@@ -32,7 +33,17 @@ class LeaveRequest < ApplicationRecord
   def calculate_number_of_days
     return unless from_date.present? && to_date.present? && to_date >= from_date
 
-    self.number_of_days = (from_date..to_date).count { |d| !d.saturday? && !d.sunday? }
+    pattern = employee&.tenant&.payroll_setting&.week_off_pattern || "all_saturdays_sundays"
+    self.number_of_days = (from_date..to_date).count { |d| Attendance::WorkingDaysCalculator.working_day?(d, pattern) }
+  end
+
+  def working_days_present
+    return unless from_date.present? && to_date.present? && to_date >= from_date
+    return if number_of_days.nil?
+
+    if number_of_days == 0
+      errors.add(:base, "The selected date(s) fall entirely on non-working days. Please choose working days.")
+    end
   end
 
   def to_date_on_or_after_from_date

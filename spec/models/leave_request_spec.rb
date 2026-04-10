@@ -19,7 +19,7 @@ RSpec.describe LeaveRequest, type: :model do
   end
 
   describe "#calculate_number_of_days (before_validation)" do
-    it "counts only business days in the range" do
+    it "counts only business days in the range (5-day week default)" do
       # Monday to Friday = 5 business days
       mon = Date.today.next_occurring(:monday) + 14
       fri = mon + 4
@@ -46,6 +46,26 @@ RSpec.describe LeaveRequest, type: :model do
       lr.validate
       expect(lr.number_of_days).to eq(6)
     end
+
+    context "6-day week company (only_sundays)" do
+      before { create(:payroll_setting, tenant: tenant, week_off_pattern: "only_sundays") }
+
+      it "counts Saturday as a working day" do
+        saturday = Date.today.next_occurring(:saturday)
+        lr = build(:leave_request, tenant: tenant, employee: employee,
+                   leave_type: leave_type, from_date: saturday, to_date: saturday)
+        lr.validate
+        expect(lr.number_of_days).to eq(1)
+      end
+
+      it "still excludes Sunday" do
+        sunday = Date.today.next_occurring(:sunday)
+        lr = build(:leave_request, tenant: tenant, employee: employee,
+                   leave_type: leave_type, from_date: sunday, to_date: sunday)
+        lr.validate
+        expect(lr.number_of_days).to eq(0)
+      end
+    end
   end
 
   describe "validations" do
@@ -64,6 +84,56 @@ RSpec.describe LeaveRequest, type: :model do
                    from_date: Date.today - 1, to_date: Date.today)
         expect(lr).not_to be_valid
         expect(lr.errors[:from_date]).to include("cannot be in the past")
+      end
+    end
+
+    describe "working_days_present (on: :create)" do
+      context "5-day week company (all_saturdays_sundays)" do
+        before { create(:payroll_setting, tenant: tenant, week_off_pattern: "all_saturdays_sundays") }
+
+        it "is invalid when applying on a Saturday" do
+          saturday = Date.today.next_occurring(:saturday)
+          lr = build(:leave_request, tenant: tenant, employee: employee, leave_type: leave_type,
+                     from_date: saturday, to_date: saturday)
+          expect(lr).not_to be_valid
+          expect(lr.errors[:base]).to include(match(/non-working days/))
+        end
+
+        it "is invalid when applying on a Sunday" do
+          sunday = Date.today.next_occurring(:sunday)
+          lr = build(:leave_request, tenant: tenant, employee: employee, leave_type: leave_type,
+                     from_date: sunday, to_date: sunday)
+          expect(lr).not_to be_valid
+          expect(lr.errors[:base]).to include(match(/non-working days/))
+        end
+
+        it "is valid when applying on a weekday" do
+          monday = Date.today.next_occurring(:monday) + 14
+          lr = build(:leave_request, tenant: tenant, employee: employee, leave_type: leave_type,
+                     from_date: monday, to_date: monday)
+          lr.valid?
+          expect(lr.errors[:base]).not_to include(match(/non-working days/))
+        end
+      end
+
+      context "6-day week company (only_sundays)" do
+        before { create(:payroll_setting, tenant: tenant, week_off_pattern: "only_sundays") }
+
+        it "is valid when applying on a Saturday" do
+          saturday = Date.today.next_occurring(:saturday)
+          lr = build(:leave_request, tenant: tenant, employee: employee, leave_type: leave_type,
+                     from_date: saturday, to_date: saturday)
+          lr.valid?
+          expect(lr.errors[:base]).not_to include(match(/non-working days/))
+        end
+
+        it "is invalid when applying on a Sunday" do
+          sunday = Date.today.next_occurring(:sunday)
+          lr = build(:leave_request, tenant: tenant, employee: employee, leave_type: leave_type,
+                     from_date: sunday, to_date: sunday)
+          expect(lr).not_to be_valid
+          expect(lr.errors[:base]).to include(match(/non-working days/))
+        end
       end
     end
 
@@ -89,6 +159,31 @@ RSpec.describe LeaveRequest, type: :model do
                             from_date: Date.today + 14, to_date: Date.today + 14)
         non_overlap.valid?
         expect(non_overlap.errors[:base]).not_to include(match(/overlaps/))
+      end
+
+      it "allows a request when the overlapping one is rejected" do
+        existing.update!(status: :rejected)
+
+        new_request = build(:leave_request, tenant: tenant, employee: employee, leave_type: leave_type,
+                            from_date: Date.today + 7, to_date: Date.today + 9)
+        new_request.valid?
+        expect(new_request.errors[:base]).not_to include(match(/overlaps/))
+      end
+
+      it "allows a request when the overlapping one is cancelled" do
+        existing.update!(status: :cancelled)
+
+        new_request = build(:leave_request, tenant: tenant, employee: employee, leave_type: leave_type,
+                            from_date: Date.today + 7, to_date: Date.today + 9)
+        new_request.valid?
+        expect(new_request.errors[:base]).not_to include(match(/overlaps/))
+      end
+
+      it "allows a request that starts the day after an existing one ends" do
+        adjacent = build(:leave_request, tenant: tenant, employee: employee, leave_type: leave_type,
+                         from_date: Date.today + 10, to_date: Date.today + 11)
+        adjacent.valid?
+        expect(adjacent.errors[:base]).not_to include(match(/overlaps/))
       end
     end
 

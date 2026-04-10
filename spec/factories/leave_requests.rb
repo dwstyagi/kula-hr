@@ -12,7 +12,8 @@ FactoryBot.define do
     # skips before_validation callbacks that normally compute this field)
     after(:build) do |lr|
       if lr.number_of_days.nil? && lr.from_date && lr.to_date && lr.to_date >= lr.from_date
-        lr.number_of_days = (lr.from_date..lr.to_date).count { |d| !d.saturday? && !d.sunday? }
+        pattern = lr.employee&.tenant&.payroll_setting&.week_off_pattern || "all_saturdays_sundays"
+        lr.number_of_days = (lr.from_date..lr.to_date).count { |d| Attendance::WorkingDaysCalculator.working_day?(d, pattern) }
       end
     end
 
