@@ -92,9 +92,11 @@
                       </svg>
                     <% end %>
 
-                    <%# Reject — opens modal %>
+                    <%# Reject — opens modal rendered outside the table %>
                     <button type="button"
                         title="Reject"
+                        data-action="click->modal#open"
+                        data-modal-id="reject-modal-<%= lr.id %>"
                         onclick="document.getElementById('reject-modal-<%= lr.id %>').querySelector('[data-modal-target=dialog]').classList.remove('hidden')"
                         class="p-1.5 rounded-md bg-red-50 text-red-600 hover:bg-red-100 transition-colors cursor-pointer">
                       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
@@ -118,42 +120,6 @@
                 </div>
               </td>
             </tr>
-
-            <%# Reject Modal for this row %>
-            <% if lr.pending? %>
-              <div id="reject-modal-<%= lr.id %>" data-controller="modal">
-                <div data-modal-target="dialog"
-                     class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50"
-                     data-action="click->modal#closeOnBackdrop">
-                  <div class="bg-white rounded-xl shadow-xl w-full max-w-md p-6">
-                    <h3 class="text-base font-semibold text-gray-900 mb-1">Reject Leave Request</h3>
-                    <p class="text-sm text-gray-500 mb-4">
-                      <%= lr.employee.full_name %> &middot;
-                      <%= lr.leave_type.name %> &middot;
-                      <%= lr.from_date.strftime("%d %b") %>–<%= lr.to_date.strftime("%d %b %Y") %>
-                      (<%= lr.number_of_days.to_i %> days)
-                    </p>
-                    <%= form_with url: reject_admin_leave_request_path(lr), method: :patch do |f| %>
-                      <div class="mb-4">
-                        <%= f.label :rejection_reason, "Reason for rejection", class: "block text-sm font-medium text-gray-700 mb-1" %>
-                        <%= f.text_area :rejection_reason,
-                            rows: 3,
-                            class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-red-400 focus:ring-red-400 text-sm",
-                            placeholder: "Enter reason (optional)" %>
-                      </div>
-                      <div class="flex justify-end gap-3">
-                        <button type="button" data-action="modal#close"
-                            class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200">
-                          Cancel
-                        </button>
-                        <%= f.submit "Confirm Rejection",
-                            class: "px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 cursor-pointer" %>
-                      </div>
-                    <% end %>
-                  </div>
-                </div>
-              </div>
-            <% end %>
           <% end %>
         </tbody>
       </table>
@@ -177,4 +143,40 @@
       </div>
     <% end %>
   </div>
+
+  <%# Reject modals — rendered outside the table to produce valid HTML %>
+  <% @leave_requests.select(&:pending?).each do |lr| %>
+    <div id="reject-modal-<%= lr.id %>" data-controller="modal">
+      <div data-modal-target="dialog"
+           class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+           data-action="click->modal#closeOnBackdrop">
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-md p-6" onclick="event.stopPropagation()">
+          <h3 class="text-base font-semibold text-gray-900 mb-1">Reject Leave Request</h3>
+          <p class="text-sm text-gray-500 mb-4">
+            <%= lr.employee.full_name %> &middot;
+            <%= lr.leave_type.name %> &middot;
+            <%= lr.from_date.strftime("%d %b") %>–<%= lr.to_date.strftime("%d %b %Y") %>
+            (<%= lr.number_of_days.to_i %> days)
+          </p>
+          <%= form_with url: reject_admin_leave_request_path(lr), method: :patch do |f| %>
+            <div class="mb-4">
+              <%= f.label :rejection_reason, "Reason for rejection", class: "block text-sm font-medium text-gray-700 mb-1" %>
+              <%= f.text_area :rejection_reason,
+                  rows: 3,
+                  class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-red-400 focus:ring-red-400 text-sm",
+                  placeholder: "Enter reason (optional)" %>
+            </div>
+            <div class="flex justify-end gap-3">
+              <button type="button" data-action="modal#close"
+                  class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200">
+                Cancel
+              </button>
+              <%= f.submit "Confirm Rejection",
+                  class: "px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 cursor-pointer" %>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  <% end %>
 </div>
