@@ -1,0 +1,99 @@
+<div class="max-w-4xl mx-auto">
+  <div class="flex items-center justify-between mb-6">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-900">Public Holidays</h1>
+      <p class="text-sm text-gray-500 mt-1">Define company holidays. These are excluded from leave day calculations.</p>
+    </div>
+    <%= link_to new_admin_holiday_path,
+        class: "inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700",
+        data: { turbo_frame: "holiday_form" } do %>
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+      </svg>
+      Add Holiday
+    <% end %>
+  </div>
+
+  <%= turbo_frame_tag "holiday_form" %>
+
+  <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
+    <% if @holidays.any? %>
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
+            <tr>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Day</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+              <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-200">
+            <% @holidays.each do |holiday| %>
+              <%= turbo_frame_tag holiday do %>
+                <tr class="hover:bg-gray-50 <%= 'opacity-50' unless holiday.is_active? %>">
+                  <td class="px-6 py-4 text-sm font-medium text-gray-900"><%= holiday.name %></td>
+                  <td class="px-6 py-4 text-sm text-gray-700"><%= holiday.date.strftime("%d %b %Y") %></td>
+                  <td class="px-6 py-4 text-sm text-gray-500"><%= holiday.date.strftime("%A") %></td>
+                  <td class="px-6 py-4">
+                    <% if holiday.is_active? %>
+                      <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-700">Active</span>
+                    <% else %>
+                      <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-500">Inactive</span>
+                    <% end %>
+                  </td>
+                  <td class="px-6 py-4 text-right">
+                    <div class="flex items-center justify-end gap-2">
+                      <%= button_to toggle_active_admin_holiday_path(holiday),
+                          method: :patch,
+                          title: holiday.is_active? ? "Deactivate" : "Activate",
+                          class: "p-1.5 rounded-md transition-colors cursor-pointer #{holiday.is_active? ? 'text-amber-600 hover:bg-amber-100' : 'text-emerald-600 hover:bg-emerald-100'}" do %>
+                        <% if holiday.is_active? %>
+                          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                          </svg>
+                        <% else %>
+                          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                          </svg>
+                        <% end %>
+                      <% end %>
+
+                      <%= link_to edit_admin_holiday_path(holiday),
+                          title: "Edit",
+                          class: "p-1.5 rounded-md text-blue-600 hover:bg-blue-100 transition-colors cursor-pointer",
+                          data: { turbo_frame: dom_id(holiday) } do %>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                        </svg>
+                      <% end %>
+
+                      <%= button_to admin_holiday_path(holiday),
+                          method: :delete,
+                          title: "Delete",
+                          class: "p-1.5 rounded-md text-red-600 hover:bg-red-100 transition-colors cursor-pointer",
+                          form: { data: { turbo_confirm: "Delete '#{holiday.name}'? This cannot be undone." } } do %>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                        </svg>
+                      <% end %>
+                    </div>
+                  </td>
+                </tr>
+              <% end %>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    <% else %>
+      <div class="p-12 text-center">
+        <svg class="mx-auto h-10 w-10 text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5"/>
+        </svg>
+        <p class="text-sm text-gray-500">No holidays configured yet. Add holidays to exclude them from leave calculations.</p>
+      </div>
+    <% end %>
+  </div>
+</div>

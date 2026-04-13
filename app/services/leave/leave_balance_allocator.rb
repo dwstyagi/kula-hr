@@ -1,8 +1,8 @@
 module Leave
-  # Allocates leave balances on joining.
+  # Allocates leave balances on joining (first month's quota only).
   # Creates one LeaveBalance per active, paid leave type for the current FY.
   # Skips LOP (unpaid) — it's unlimited and doesn't need a balance record.
-  # Pro-rates allocation based on joining month if payroll_setting.pro_rate_leaves is true.
+  # MonthlyLeaveAccrualService credits subsequent monthly quotas on the 1st of each month.
   class LeaveBalanceAllocator
     def initialize(employee: nil, employees: nil)
       @employees = Array(employee || employees)
@@ -41,16 +41,10 @@ module Leave
 
     private
 
-    def calculate_allocation(leave_type, employee)
-      return leave_type.annual_quota unless @setting&.pro_rate_leaves?
-
-      months = months_remaining_in_fy(employee.joining_date)
-      (leave_type.annual_quota * months / 12.0).ceil
-    end
-
-    def months_remaining_in_fy(date)
-      fy_end = date.month >= 4 ? Date.new(date.year + 1, 3, 31) : Date.new(date.year, 3, 31)
-      (fy_end.year * 12 + fy_end.month) - (date.year * 12 + date.month) + 1
+    # On joining, employees receive the first month's allocation.
+    # Subsequent months are credited automatically by MonthlyLeaveAccrualService.
+    def calculate_allocation(leave_type, _employee)
+      (leave_type.annual_quota / 12.0).round(2)
     end
   end
 end

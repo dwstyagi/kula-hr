@@ -14,7 +14,9 @@
 
   <div class="bg-white rounded-lg border border-gray-200 p-6"
        data-controller="leave-calculator"
-       data-leave-calculator-balances-value="<%= balances_data.to_json %>">
+       data-leave-calculator-balances-value="<%= balances_data.to_json %>"
+       data-leave-calculator-week-off-pattern-value="<%= @week_off_pattern %>"
+       data-leave-calculator-holiday-dates-value="<%= @holiday_dates.to_json %>">
 
     <%= form_with model: @leave_request, url: employee_portal_leave_requests_path,
                   class: "space-y-5" do |f| %>

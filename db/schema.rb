@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_04_07_144234) do
+ActiveRecord::Schema[8.1].define(version: 2026_04_10_100001) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "pg_catalog.plpgsql"
@@ -118,6 +118,17 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_07_144234) do
     t.index ["tenant_id", "employee_code"], name: "index_employees_on_tenant_id_and_employee_code", unique: true
     t.index ["tenant_id"], name: "index_employees_on_tenant_id"
     t.index ["user_id"], name: "index_employees_on_user_id"
+  end
+
+  create_table "holidays", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.date "date", null: false
+    t.boolean "is_active", default: true, null: false
+    t.string "name", null: false
+    t.bigint "tenant_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["tenant_id", "date"], name: "index_holidays_on_tenant_id_and_date", unique: true
+    t.index ["tenant_id"], name: "index_holidays_on_tenant_id"
   end
 
   create_table "investment_declarations", force: :cascade do |t|
@@ -461,6 +472,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_07_144234) do
   add_foreign_key "employees", "employees", column: "reporting_manager_id"
   add_foreign_key "employees", "tenants"
   add_foreign_key "employees", "users"
+  add_foreign_key "holidays", "tenants"
   add_foreign_key "investment_declarations", "tax_declarations"
   add_foreign_key "investment_declarations", "tenants"
   add_foreign_key "leave_balances", "employees"

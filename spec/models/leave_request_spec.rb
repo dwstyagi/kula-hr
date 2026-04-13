@@ -66,6 +66,51 @@ RSpec.describe LeaveRequest, type: :model do
         expect(lr.number_of_days).to eq(0)
       end
     end
+
+    context "when holidays fall within the leave range" do
+      # Thursday to Wednesday (next week) = 7 calendar days, 5 business days
+      let(:thursday) { Date.today.next_occurring(:monday) + 14 + 3 }  # Monday+17 = Thursday
+      let(:wednesday_next) { thursday + 6 }
+
+      it "excludes an active holiday — Thursday to Wednesday with Monday holiday counts 4 days" do
+        monday = thursday + 4
+        create(:holiday, tenant: tenant, date: monday, is_active: true)
+        lr = build(:leave_request, tenant: tenant, employee: employee,
+                   leave_type: leave_type, from_date: thursday, to_date: wednesday_next)
+        lr.validate
+        expect(lr.number_of_days).to eq(4)
+      end
+
+      it "does not exclude an inactive holiday" do
+        monday = thursday + 4
+        create(:holiday, tenant: tenant, date: monday, is_active: false)
+        lr = build(:leave_request, tenant: tenant, employee: employee,
+                   leave_type: leave_type, from_date: thursday, to_date: wednesday_next)
+        lr.validate
+        expect(lr.number_of_days).to eq(5)
+      end
+
+      it "is invalid when the only requested day is a holiday" do
+        monday = Date.today.next_occurring(:monday) + 14
+        create(:holiday, tenant: tenant, date: monday, is_active: true)
+        lr = build(:leave_request, tenant: tenant, employee: employee,
+                   leave_type: leave_type, from_date: monday, to_date: monday)
+        expect(lr).not_to be_valid
+        expect(lr.errors[:base]).to include(match(/non-working days/))
+      end
+
+      it "does not exclude a holiday from another tenant" do
+        other_tenant = create(:tenant)
+        monday = thursday + 4
+        ActsAsTenant.with_tenant(other_tenant) do
+          create(:holiday, tenant: other_tenant, date: monday, is_active: true)
+        end
+        lr = build(:leave_request, tenant: tenant, employee: employee,
+                   leave_type: leave_type, from_date: thursday, to_date: wednesday_next)
+        lr.validate
+        expect(lr.number_of_days).to eq(5)
+      end
+    end
   end
 
   describe "validations" do

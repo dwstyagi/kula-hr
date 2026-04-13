@@ -33,8 +33,12 @@ class LeaveRequest < ApplicationRecord
   def calculate_number_of_days
     return unless from_date.present? && to_date.present? && to_date >= from_date
 
-    pattern = employee&.tenant&.payroll_setting&.week_off_pattern || "all_saturdays_sundays"
-    self.number_of_days = (from_date..to_date).count { |d| Attendance::WorkingDaysCalculator.working_day?(d, pattern) }
+    pattern       = employee&.tenant&.payroll_setting&.week_off_pattern || "all_saturdays_sundays"
+    holiday_dates = Holiday.active.where(date: from_date..to_date).pluck(:date).to_set
+
+    self.number_of_days = (from_date..to_date).count do |d|
+      Attendance::WorkingDaysCalculator.working_day?(d, pattern) && !holiday_dates.include?(d)
+    end
   end
 
   def working_days_present

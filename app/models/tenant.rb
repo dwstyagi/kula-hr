@@ -9,6 +9,7 @@ class Tenant < ApplicationRecord
   has_many :salary_structures, dependent: :destroy
   has_many :employee_salaries, dependent: :destroy
   has_many :leave_types, dependent: :destroy
+  has_many :holidays, dependent: :destroy
   has_many :professional_tax_slabs, dependent: :destroy
   has_many :employees, dependent: :destroy
   has_one :payroll_setting, dependent: :destroy

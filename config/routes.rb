@@ -84,6 +84,11 @@ Rails.application.routes.draw do
           patch :toggle_active
         end
       end
+      resources :holidays do
+        member do
+          patch :toggle_active
+        end
+      end
       resources :leave_requests, only: [ :index ] do
         member do
           patch :approve

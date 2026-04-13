@@ -60,8 +60,13 @@ module EmployeePortal
     end
 
     def load_form_data
-      @leave_types  = LeaveType.active.order(:name)
-      @leave_balances = current_employee.leave_balances.current.includes(:leave_type)
+      @leave_types      = LeaveType.active.order(:name)
+      @leave_balances   = current_employee.leave_balances.current.includes(:leave_type)
+      @week_off_pattern = current_employee.tenant.payroll_setting&.week_off_pattern || "all_saturdays_sundays"
+      @holiday_dates    = Holiday.active
+                                 .where("date >= ?", Date.today)
+                                 .pluck(:date)
+                                 .map { |d| d.strftime("%Y-%m-%d") }
     end
 
     def leave_request_params
