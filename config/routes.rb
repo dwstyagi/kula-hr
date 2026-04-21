@@ -184,7 +184,8 @@ Rails.application.routes.draw do
   root "home#index"
   get "signup", to: "signups#new"
   post "signup", to: "signups#create"
-  get "beta-guide", to: "beta_guide#show", as: :beta_guide
+  get  "beta-guide",     to: "beta_guide#show",      as: :beta_guide
+  post "beta-feedback",  to: "beta_feedbacks#create", as: :beta_feedback
   get "check_tenant", to: "home#check_tenant"
   get  "/contact", to: "contacts#new",    as: :contact
   post "/contact", to: "contacts#create"

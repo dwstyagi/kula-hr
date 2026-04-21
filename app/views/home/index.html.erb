@@ -178,7 +178,17 @@
   </nav>
 </header>
 
-<main>
+<%# Beta banner %>
+<div class="fixed inset-x-0 top-[73px] z-40 bg-amber-50 border-b border-amber-200">
+  <div class="mx-auto max-w-7xl px-6 py-2 flex items-center justify-center gap-2 text-sm text-amber-800">
+    <svg class="h-4 w-4 shrink-0 text-amber-500" viewBox="0 0 20 20" fill="currentColor">
+      <path fill-rule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495zM10 5a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 5zm0 9a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" />
+    </svg>
+    <span><strong>Beta</strong> — Kula HR is currently in beta testing. Features may change and some rough edges may exist. <a href="<%= beta_guide_path %>" class="underline font-medium hover:text-amber-900">View the beta guide →</a></span>
+  </div>
+</div>
+
+<main class="mt-9">
   <%# ── Hero ── %>
   <div class="relative isolate pt-14 overflow-hidden">
     <%# Background gradient blobs %>

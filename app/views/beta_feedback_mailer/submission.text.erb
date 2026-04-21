@@ -1,0 +1,23 @@
+Hi Diwanshu,
+
+New <%= @type == "bug" ? "Bug Report" : "Feedback" %> from the Kula HR beta guide.
+
+Type:  <%= @type == "bug" ? "Bug Report" : "General Feedback" %>
+Name:  <%= @name %>
+Email: <%= @email %>
+<% if @type == "bug" %>
+<% if @flow.present? %>Flow:  <%= @flow %>
+<% end %><% if @step.present? %>Step:  <%= @step %>
+<% end %><% if @expected.present? %>
+Expected:
+<%= @expected %>
+<% end %><% if @actual.present? %>
+Actual:
+<%= @actual %>
+<% end %><% if @browser.present? %>Browser: <%= @browser %>
+<% end %><% end %>
+<%= @type == "bug" ? "Notes" : "Message" %>:
+<%= @message %>
+
+--
+Reply to this email to respond to <%= @name %>.

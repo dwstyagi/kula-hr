@@ -1,0 +1,58 @@
+<p>Hi Diwanshu,</p>
+
+<p>You have a new <strong><%= @type == "bug" ? "Bug Report" : "Feedback" %></strong> from the Kula HR beta guide.</p>
+
+<table style="width:100%; border-collapse:collapse; margin:24px 0;">
+  <tr>
+    <td style="padding:10px 16px; background:#f8fafc; border:1px solid #e2e8f0; font-weight:600; width:120px;">Type</td>
+    <td style="padding:10px 16px; border:1px solid #e2e8f0;"><%= @type == "bug" ? "🐛 Bug Report" : "💬 General Feedback" %></td>
+  </tr>
+  <tr>
+    <td style="padding:10px 16px; background:#f8fafc; border:1px solid #e2e8f0; font-weight:600;">Name</td>
+    <td style="padding:10px 16px; border:1px solid #e2e8f0;"><%= @name %></td>
+  </tr>
+  <tr>
+    <td style="padding:10px 16px; background:#f8fafc; border:1px solid #e2e8f0; font-weight:600;">Email</td>
+    <td style="padding:10px 16px; border:1px solid #e2e8f0;"><a href="mailto:<%= @email %>"><%= @email %></a></td>
+  </tr>
+  <% if @type == "bug" %>
+    <% if @flow.present? %>
+      <tr>
+        <td style="padding:10px 16px; background:#f8fafc; border:1px solid #e2e8f0; font-weight:600;">Flow</td>
+        <td style="padding:10px 16px; border:1px solid #e2e8f0;"><%= @flow %></td>
+      </tr>
+    <% end %>
+    <% if @step.present? %>
+      <tr>
+        <td style="padding:10px 16px; background:#f8fafc; border:1px solid #e2e8f0; font-weight:600;">Step</td>
+        <td style="padding:10px 16px; border:1px solid #e2e8f0;"><%= @step %></td>
+      </tr>
+    <% end %>
+    <% if @expected.present? %>
+      <tr>
+        <td style="padding:10px 16px; background:#f8fafc; border:1px solid #e2e8f0; font-weight:600; vertical-align:top;">Expected</td>
+        <td style="padding:10px 16px; border:1px solid #e2e8f0; white-space:pre-wrap;"><%= @expected %></td>
+      </tr>
+    <% end %>
+    <% if @actual.present? %>
+      <tr>
+        <td style="padding:10px 16px; background:#f8fafc; border:1px solid #e2e8f0; font-weight:600; vertical-align:top;">Actual</td>
+        <td style="padding:10px 16px; border:1px solid #e2e8f0; white-space:pre-wrap;"><%= @actual %></td>
+      </tr>
+    <% end %>
+    <% if @browser.present? %>
+      <tr>
+        <td style="padding:10px 16px; background:#f8fafc; border:1px solid #e2e8f0; font-weight:600;">Browser</td>
+        <td style="padding:10px 16px; border:1px solid #e2e8f0;"><%= @browser %></td>
+      </tr>
+    <% end %>
+  <% end %>
+  <tr>
+    <td style="padding:10px 16px; background:#f8fafc; border:1px solid #e2e8f0; font-weight:600; vertical-align:top;"><%= @type == "bug" ? "Notes" : "Message" %></td>
+    <td style="padding:10px 16px; border:1px solid #e2e8f0; white-space:pre-wrap;"><%= @message %></td>
+  </tr>
+</table>
+
+<p style="color:#6b7280; font-size:13px;">
+  You can reply directly to this email to respond to <%= @name %>.
+</p>
