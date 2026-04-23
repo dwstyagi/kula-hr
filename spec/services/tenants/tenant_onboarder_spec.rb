@@ -47,8 +47,8 @@ RSpec.describe Tenants::TenantOnboarder do
         expect { described_class.call(form) }.to change(SalaryComponent, :count).by(12)
       end
 
-      it "creates 4 leave types" do
-        expect { described_class.call(form) }.to change(LeaveType, :count).by(4)
+      it "creates 5 leave types" do
+        expect { described_class.call(form) }.to change(LeaveType, :count).by(5)
       end
 
       it "creates professional tax slabs for Maharashtra" do
