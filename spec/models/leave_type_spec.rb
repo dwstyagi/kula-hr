@@ -13,6 +13,35 @@ RSpec.describe LeaveType, type: :model do
     it { is_expected.to validate_numericality_of(:annual_quota).is_greater_than_or_equal_to(0) }
     it { is_expected.to validate_numericality_of(:max_carry_forward).is_greater_than_or_equal_to(0) }
 
+    describe "max_carry_forward when carry_forward is enabled" do
+      it "is invalid when max_carry_forward is 0" do
+        lt = build(:leave_type, tenant: tenant, carry_forward: true, max_carry_forward: 0, annual_quota: 15)
+        expect(lt).not_to be_valid
+        expect(lt.errors[:max_carry_forward]).to include("must be at least 1 day when carry forward is enabled")
+      end
+
+      it "is invalid when max_carry_forward equals annual_quota" do
+        lt = build(:leave_type, tenant: tenant, carry_forward: true, max_carry_forward: 15, annual_quota: 15)
+        expect(lt).not_to be_valid
+        expect(lt.errors[:max_carry_forward]).to include("must be less than the annual quota (15 days)")
+      end
+
+      it "is invalid when max_carry_forward exceeds annual_quota" do
+        lt = build(:leave_type, tenant: tenant, carry_forward: true, max_carry_forward: 20, annual_quota: 15)
+        expect(lt).not_to be_valid
+      end
+
+      it "is valid when max_carry_forward is between 1 and annual_quota" do
+        lt = build(:leave_type, tenant: tenant, carry_forward: true, max_carry_forward: 10, annual_quota: 15)
+        expect(lt).to be_valid
+      end
+
+      it "does not apply when carry_forward is false" do
+        lt = build(:leave_type, tenant: tenant, carry_forward: false, max_carry_forward: 0, annual_quota: 12)
+        expect(lt).to be_valid
+      end
+    end
+
     describe "name uniqueness per tenant" do
       before { create(:leave_type, :casual, tenant: tenant) }
 

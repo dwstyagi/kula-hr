@@ -7,6 +7,12 @@ Sidekiq.configure_server do |config|
       cron:  "0 0 1 * *",
       class: "Leave::MonthlyLeaveAccrualJob"
     )
+
+    Sidekiq::Cron::Job.create(
+      name:  "Year-End Leave Processing — April 1st",
+      cron:  "0 1 1 4 *",
+      class: "Leave::YearEndProcessingJob"
+    )
   end
 end
 

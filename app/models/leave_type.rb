@@ -11,6 +11,7 @@ class LeaveType < ApplicationRecord
   validates :code, presence: true, uniqueness: { scope: :tenant_id }
   validates :annual_quota, numericality: { greater_than_or_equal_to: 0 }
   validates :max_carry_forward, numericality: { greater_than_or_equal_to: 0 }
+  validate :max_carry_forward_within_quota, if: :carry_forward?
 
   scope :active, -> { where(is_active: true) }
   scope :paid, -> { where(is_paid: true) }
@@ -18,5 +19,17 @@ class LeaveType < ApplicationRecord
 
   def lop?
     !is_paid?
+  end
+
+  private
+
+  def max_carry_forward_within_quota
+    return unless max_carry_forward.present? && annual_quota.present?
+
+    if max_carry_forward < 1
+      errors.add(:max_carry_forward, "must be at least 1 day when carry forward is enabled")
+    elsif max_carry_forward >= annual_quota
+      errors.add(:max_carry_forward, "must be less than the annual quota (#{annual_quota.to_i} days)")
+    end
   end
 end
