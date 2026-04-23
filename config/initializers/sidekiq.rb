@@ -19,6 +19,12 @@ Sidekiq.configure_server do |config|
       cron:  "0 9 1 3 *",
       class: "Leave::EncashmentReminderJob"
     )
+
+    Sidekiq::Cron::Job.create(
+      name:  "Comp-Off Expiry — daily at midnight",
+      cron:  "0 0 * * *",
+      class: "Leave::CompOffExpiryJob"
+    )
   end
 end
 

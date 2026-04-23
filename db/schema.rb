@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_04_23_100001) do
+ActiveRecord::Schema[8.1].define(version: 2026_04_23_100003) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "pg_catalog.plpgsql"
@@ -37,6 +37,25 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_23_100001) do
     t.index ["tenant_id", "month", "year"], name: "idx_att_sum_tenant_month_year"
     t.index ["tenant_id", "status"], name: "idx_att_sum_tenant_status"
     t.index ["tenant_id"], name: "index_attendance_summaries_on_tenant_id"
+  end
+
+  create_table "comp_off_requests", force: :cascade do |t|
+    t.datetime "approved_at"
+    t.bigint "approved_by_id"
+    t.boolean "balance_expired", default: false, null: false
+    t.datetime "created_at", null: false
+    t.bigint "employee_id", null: false
+    t.date "expiry_date"
+    t.string "reason"
+    t.string "rejection_reason"
+    t.integer "status", default: 0, null: false
+    t.bigint "tenant_id", null: false
+    t.datetime "updated_at", null: false
+    t.date "worked_date", null: false
+    t.index ["approved_by_id"], name: "index_comp_off_requests_on_approved_by_id"
+    t.index ["employee_id", "worked_date"], name: "idx_comp_off_emp_worked_date"
+    t.index ["employee_id"], name: "index_comp_off_requests_on_employee_id"
+    t.index ["tenant_id"], name: "index_comp_off_requests_on_tenant_id"
   end
 
   create_table "departments", force: :cascade do |t|
@@ -482,6 +501,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_23_100001) do
 
   add_foreign_key "attendance_summaries", "employees"
   add_foreign_key "attendance_summaries", "tenants"
+  add_foreign_key "comp_off_requests", "employees"
+  add_foreign_key "comp_off_requests", "tenants"
+  add_foreign_key "comp_off_requests", "users", column: "approved_by_id"
   add_foreign_key "departments", "tenants"
   add_foreign_key "designations", "tenants"
   add_foreign_key "employee_salaries", "employees"

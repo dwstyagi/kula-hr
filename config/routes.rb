@@ -102,6 +102,12 @@ Rails.application.routes.draw do
           patch :reject
         end
       end
+      resources :comp_off_requests, only: [ :index ] do
+        member do
+          patch :approve
+          patch :reject
+        end
+      end
       resources :attendance_summaries, only: [ :index, :show, :edit, :update ] do
         collection do
           post :generate
@@ -164,6 +170,13 @@ Rails.application.routes.draw do
         end
       end
       resources :leave_encashment_requests, only: [ :index, :create ]
+      resources :comp_off_requests, only: [ :index, :new, :create ]
+      resources :team_comp_off_requests, only: [ :index ] do
+        member do
+          patch :approve
+          patch :reject
+        end
+      end
       resources :team_leave_requests, only: [ :index ] do
         member do
           patch :approve
