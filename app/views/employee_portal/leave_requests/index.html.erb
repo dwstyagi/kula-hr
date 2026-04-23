@@ -34,6 +34,57 @@
     <% end %>
   </div>
 
+  <%# March Encashment Banner %>
+  <% if Date.today.month == 3 %>
+    <% fy = LeaveBalance.current_financial_year %>
+    <% encashable_balances = @leave_balances.select { |b|
+         b.leave_type.carry_forward? && !b.leave_type.lop? &&
+         [b.leave_type.max_carry_forward, b.remaining_days].min > 0
+       } %>
+    <% if encashable_balances.any? %>
+      <% encashable_balances.each do |balance| %>
+        <% eligible_days = [balance.leave_type.max_carry_forward, balance.remaining_days].min.to_i %>
+        <% existing_request = LeaveEncashmentRequest.find_by(
+             employee: current_employee,
+             leave_type: balance.leave_type,
+             financial_year: fy
+           ) %>
+        <% unless existing_request %>
+          <div class="bg-amber-50 border border-amber-200 rounded-lg px-5 py-4 flex items-start justify-between gap-4">
+            <div>
+              <p class="text-sm font-semibold text-amber-800">Year-End Option: <%= balance.leave_type.name %></p>
+              <p class="text-sm text-amber-700 mt-0.5">
+                You have <strong><%= eligible_days %> day(s)</strong> eligible for carry-forward.
+                By default they will carry over on April 1st — or you can encash them instead.
+              </p>
+            </div>
+            <%= button_to employee_portal_leave_encashment_requests_path,
+                method: :post,
+                params: { leave_type_id: balance.leave_type_id },
+                class: "shrink-0 px-4 py-2 bg-amber-600 text-white text-sm font-medium rounded-lg hover:bg-amber-700 cursor-pointer",
+                form: { data: { turbo_confirm: "Request encashment of #{eligible_days} #{balance.leave_type.name} day(s)? They will NOT carry forward if approved." } } do %>
+              Request Encashment
+            <% end %>
+          </div>
+        <% else %>
+          <div class="bg-gray-50 border border-gray-200 rounded-lg px-5 py-4">
+            <p class="text-sm font-semibold text-gray-700"><%= balance.leave_type.name %> — Encashment Request Submitted</p>
+            <p class="text-sm text-gray-500 mt-0.5">
+              Status: <strong><%= existing_request.status.titleize %></strong>.
+              <% if existing_request.approved? %>
+                ₹<%= number_with_delimiter(existing_request.encashment_amount) %> will be added to your next payroll.
+              <% elsif existing_request.pending? %>
+                Awaiting HR approval. If approved, <%= eligible_days %> days will be encashed instead of carried forward.
+              <% else %>
+                Request was rejected — your <%= eligible_days %> days will carry forward on April 1st.
+              <% end %>
+            </p>
+          </div>
+        <% end %>
+      <% end %>
+    <% end %>
+  <% end %>
+
   <%# Request History %>
   <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
     <div class="px-6 py-4 border-b border-gray-100">

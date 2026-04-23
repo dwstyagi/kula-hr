@@ -37,10 +37,17 @@ module Leave
         .where(financial_year: current_fy, employee_id: working_ids)
         .index_by { |b| [ b.employee_id, b.leave_type_id ] }
 
+      # Employees who chose encashment — their carry-forward days become 0
+      approved_encashments = LeaveEncashmentRequest
+        .where(financial_year: current_fy, status: :approved, employee_id: working_ids)
+        .pluck(:employee_id, :leave_type_id)
+        .to_set
+
       records = working_ids.flat_map do |employee_id|
         leave_types.map do |leave_type|
           current = current_balances[ [ employee_id, leave_type.id ] ]
-          carried = carried_days(leave_type, current)
+          encashed = approved_encashments.include?([ employee_id, leave_type.id ])
+          carried = encashed ? 0.0 : carried_days(leave_type, current)
           first_month = (leave_type.annual_quota / 12.0).round(2)
           total = first_month + carried
 

@@ -26,7 +26,7 @@ FactoryBot.define do
       code  { "EL" }
       annual_quota  { 15 }
       carry_forward { true }
-      max_carry_forward { 30 }
+      max_carry_forward { 10 }
     end
 
     trait :lop do

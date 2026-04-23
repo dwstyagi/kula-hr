@@ -13,6 +13,12 @@ Sidekiq.configure_server do |config|
       cron:  "0 1 1 4 *",
       class: "Leave::YearEndProcessingJob"
     )
+
+    Sidekiq::Cron::Job.create(
+      name:  "Leave Encashment Reminder — March 1st",
+      cron:  "0 9 1 3 *",
+      class: "Leave::EncashmentReminderJob"
+    )
   end
 end
 

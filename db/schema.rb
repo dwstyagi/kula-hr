@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_04_10_100001) do
+ActiveRecord::Schema[8.1].define(version: 2026_04_23_100001) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "pg_catalog.plpgsql"
@@ -160,6 +160,26 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_10_100001) do
     t.index ["employee_id"], name: "index_leave_balances_on_employee_id"
     t.index ["leave_type_id"], name: "index_leave_balances_on_leave_type_id"
     t.index ["tenant_id"], name: "index_leave_balances_on_tenant_id"
+  end
+
+  create_table "leave_encashment_requests", force: :cascade do |t|
+    t.datetime "approved_at"
+    t.bigint "approved_by_id"
+    t.datetime "created_at", null: false
+    t.bigint "employee_id", null: false
+    t.decimal "encashment_amount", precision: 12, scale: 2
+    t.string "financial_year", null: false
+    t.bigint "leave_type_id", null: false
+    t.decimal "number_of_days", precision: 5, scale: 1, null: false
+    t.string "rejection_reason"
+    t.integer "status", default: 0, null: false
+    t.bigint "tenant_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["approved_by_id"], name: "index_leave_encashment_requests_on_approved_by_id"
+    t.index ["employee_id", "leave_type_id", "financial_year"], name: "idx_encashment_emp_leavetype_fy", unique: true
+    t.index ["employee_id"], name: "index_leave_encashment_requests_on_employee_id"
+    t.index ["leave_type_id"], name: "index_leave_encashment_requests_on_leave_type_id"
+    t.index ["tenant_id"], name: "index_leave_encashment_requests_on_tenant_id"
   end
 
   create_table "leave_requests", force: :cascade do |t|
@@ -478,6 +498,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_10_100001) do
   add_foreign_key "leave_balances", "employees"
   add_foreign_key "leave_balances", "leave_types"
   add_foreign_key "leave_balances", "tenants"
+  add_foreign_key "leave_encashment_requests", "employees"
+  add_foreign_key "leave_encashment_requests", "leave_types"
+  add_foreign_key "leave_encashment_requests", "tenants"
+  add_foreign_key "leave_encashment_requests", "users", column: "approved_by_id"
   add_foreign_key "leave_requests", "employees"
   add_foreign_key "leave_requests", "leave_types"
   add_foreign_key "leave_requests", "tenants"

@@ -1,0 +1,47 @@
+<%# Banner %>
+<div style="background:linear-gradient(135deg,#D97706 0%,#F59E0B 100%);padding:36px 40px 32px;">
+  <table role="presentation" cellpadding="0" cellspacing="0" width="100%">
+    <tr>
+      <td>
+        <p style="margin:0 0 6px;font-size:12px;font-weight:600;color:#FEF3C7;letter-spacing:1px;text-transform:uppercase;">Year-End Leave</p>
+        <h1 style="margin:0;font-size:26px;font-weight:700;color:#ffffff;line-height:1.2;">You Have Days to Decide On</h1>
+        <p style="margin:10px 0 0;font-size:15px;color:#FDE68A;">Financial Year Close — March 31st</p>
+      </td>
+      <td align="right" valign="top">
+        <div style="background:rgba(255,255,255,0.15);border-radius:50%;width:56px;height:56px;line-height:56px;text-align:center;font-size:28px;">📅</div>
+      </td>
+    </tr>
+  </table>
+</div>
+
+<%# Body %>
+<div style="padding:36px 40px;">
+  <p style="margin:0 0 20px;font-size:15px;color:#374151;line-height:1.6;">
+    Hi <%= @employee.first_name %>,
+  </p>
+  <p style="margin:0 0 24px;font-size:15px;color:#374151;line-height:1.6;">
+    You have <strong><%= @eligible_days.to_i %> <%= @leave_type.name %> day(s)</strong> eligible at year-end.
+    By default, they will <strong>carry forward automatically on April 1st</strong>.
+  </p>
+
+  <div style="background:#FFFBEB;border:1px solid #FDE68A;border-radius:10px;padding:20px 24px;margin-bottom:28px;">
+    <p style="margin:0 0 8px;font-size:13px;font-weight:600;color:#92400E;text-transform:uppercase;letter-spacing:0.5px;">Your Options</p>
+    <table role="presentation" cellpadding="0" cellspacing="0" width="100%">
+      <tr>
+        <td style="padding:8px 0;font-size:14px;color:#374151;">✅ &nbsp;<strong>Carry Forward</strong> — Do nothing. Days roll over automatically.</td>
+      </tr>
+      <tr>
+        <td style="padding:8px 0;font-size:14px;color:#374151;">💰 &nbsp;<strong>Encash</strong> — Submit a request on the portal before <strong>March 31st</strong>.</td>
+      </tr>
+    </table>
+  </div>
+
+  <p style="margin:0 0 28px;font-size:14px;color:#6B7280;line-height:1.6;">
+    If you want encashment, log in to your portal and submit a request from the
+    <strong>My Leaves</strong> page. If no request is submitted, your days will carry forward.
+  </p>
+
+  <p style="margin:0;font-size:14px;color:#9CA3AF;">
+    — The Kula HR System
+  </p>
+</div>

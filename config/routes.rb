@@ -96,6 +96,12 @@ Rails.application.routes.draw do
           patch :cancel
         end
       end
+      resources :leave_encashment_requests, only: [ :index ] do
+        member do
+          patch :approve
+          patch :reject
+        end
+      end
       resources :attendance_summaries, only: [ :index, :show, :edit, :update ] do
         collection do
           post :generate
@@ -157,6 +163,7 @@ Rails.application.routes.draw do
           patch :cancel
         end
       end
+      resources :leave_encashment_requests, only: [ :index, :create ]
       resources :team_leave_requests, only: [ :index ] do
         member do
           patch :approve
