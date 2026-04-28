@@ -15,6 +15,11 @@ module Admin
     def approve
       authorize @leave_request
 
+      unless @leave_request.employee.hr_is_approver?
+        return redirect_to admin_leave_requests_path,
+          alert: "#{@leave_request.employee.full_name}'s leave approver is their reporting manager, not HR."
+      end
+
       @leave_request.with_lock do
         unless @leave_request.pending?
           return redirect_to admin_leave_requests_path, alert: "Only pending requests can be approved."
@@ -34,6 +39,11 @@ module Admin
 
     def reject
       authorize @leave_request
+
+      unless @leave_request.employee.hr_is_approver?
+        return redirect_to admin_leave_requests_path,
+          alert: "#{@leave_request.employee.full_name}'s leave approver is their reporting manager, not HR."
+      end
 
       @leave_request.with_lock do
         unless @leave_request.pending?

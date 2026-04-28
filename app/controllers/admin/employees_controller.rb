@@ -228,7 +228,8 @@ module Admin
         :pan_number, :aadhaar_number, :uan_number, :esi_number,
         :current_address, :city, :state, :pincode,
         :emergency_contact_first_name, :emergency_contact_last_name,
-        :emergency_contact_phone, :emergency_contact_relation
+        :emergency_contact_phone, :emergency_contact_relation,
+        :leave_approver
       )
     end
   end

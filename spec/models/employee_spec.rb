@@ -128,6 +128,52 @@ RSpec.describe Employee, type: :model do
     end
   end
 
+  describe "#hr_is_approver?" do
+    let(:employee) { create(:employee, tenant: tenant) }
+    let(:manager)  { create(:employee, tenant: tenant, email: "mgr@x.com") }
+
+    it "returns true when leave_approver is hr" do
+      employee.update!(leave_approver: :hr)
+      expect(employee.hr_is_approver?).to be true
+    end
+
+    it "returns true when leave_approver is reporting_manager but no manager assigned" do
+      employee.update!(leave_approver: :reporting_manager, reporting_manager: nil)
+      expect(employee.hr_is_approver?).to be true
+    end
+
+    it "returns false when leave_approver is reporting_manager and manager is assigned" do
+      employee.update!(leave_approver: :reporting_manager, reporting_manager: manager)
+      expect(employee.hr_is_approver?).to be false
+    end
+  end
+
+  describe "#approver_label" do
+    let(:employee) { create(:employee, tenant: tenant) }
+    let(:manager)  { create(:employee, tenant: tenant, email: "mgr2@x.com", first_name: "Rahul", last_name: "Sharma") }
+
+    it "returns HR / Admin when leave_approver is hr" do
+      employee.update!(leave_approver: :hr)
+      expect(employee.approver_label).to eq("HR / Admin")
+    end
+
+    it "returns manager name when leave_approver is reporting_manager" do
+      employee.update!(leave_approver: :reporting_manager, reporting_manager: manager)
+      expect(employee.approver_label).to eq("Rahul Sharma (Reporting Manager)")
+    end
+
+    it "falls back to HR / Admin when approver is reporting_manager but no manager set" do
+      employee.update!(leave_approver: :reporting_manager, reporting_manager: nil)
+      expect(employee.approver_label).to eq("HR / Admin")
+    end
+  end
+
+  describe "leave_approver enum" do
+    it "defaults to hr" do
+      expect(Employee.new.leave_approver).to eq("hr")
+    end
+  end
+
   describe "scopes" do
     before do
       create(:employee, tenant: tenant, employment_status: "active",  email: "a@x.com")

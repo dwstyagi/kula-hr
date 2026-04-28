@@ -50,6 +50,24 @@ RSpec.describe "Admin::LeaveRequests", type: :request do
       expect(leave_request.reload).to be_approved
       expect(balance.reload.remaining_days).to eq(11)
     end
+
+    context "when employee's leave approver is reporting_manager" do
+      let(:manager) { create(:employee, tenant: tenant, email: "mgr@x.com") }
+
+      before do
+        ActsAsTenant.with_tenant(tenant) do
+          employee.update!(leave_approver: :reporting_manager, reporting_manager: manager)
+        end
+      end
+
+      it "blocks HR from approving and redirects with alert" do
+        patch approve_admin_leave_request_path(leave_request),
+              headers: { "Host" => subdomain_host }
+
+        expect(response).to redirect_to(admin_leave_requests_path)
+        expect(leave_request.reload).to be_pending
+      end
+    end
   end
 
   describe "PATCH /admin/leave_requests/:id/reject" do

@@ -22,6 +22,8 @@ class Employee < ApplicationRecord
   EMPLOYMENT_STATUSES = %w[active probation notice_period resigned terminated].freeze
   GENDERS = %w[male female other].freeze
 
+  enum :leave_approver, { hr: 0, reporting_manager: 1 }, default: :hr, prefix: :leave_approver
+
   # Validations
   validates :employee_code, presence: true, uniqueness: { scope: :tenant_id }
   validates :first_name, presence: true
@@ -66,6 +68,20 @@ class Employee < ApplicationRecord
 
   def active?
     employment_status == "active"
+  end
+
+  # Returns true if HR is the effective approver for this employee's leave requests.
+  # Fallback: if approver is reporting_manager but none is assigned, HR handles it.
+  def hr_is_approver?
+    leave_approver_hr? || (leave_approver_reporting_manager? && reporting_manager.nil?)
+  end
+
+  def approver_label
+    if leave_approver_reporting_manager? && reporting_manager.present?
+      "#{reporting_manager.full_name} (Reporting Manager)"
+    else
+      "HR / Admin"
+    end
   end
 
   private

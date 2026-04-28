@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_04_23_100003) do
+ActiveRecord::Schema[8.1].define(version: 2026_04_24_100001) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "pg_catalog.plpgsql"
@@ -116,6 +116,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_23_100003) do
     t.date "joining_date", null: false
     t.string "last_name", null: false
     t.date "last_working_date"
+    t.integer "leave_approver", default: 0, null: false
     t.string "pan_number"
     t.boolean "pf_applicable", default: true, null: false
     t.boolean "pf_on_full_basic", default: false, null: false

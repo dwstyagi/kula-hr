@@ -10,17 +10,17 @@ module Leave
     end
 
     # Called when employee submits a new request.
-    # Notifies: all HR/admin users in the tenant + reporting manager.
+    # Notifies only the configured approver: HR admins or the reporting manager.
     def broadcast_new_request!
       message = "#{@employee.full_name} applied for " \
                 "#{@leave_request.number_of_days.to_i} day(s) of #{@leave_type.name}"
 
-      recipients_for_new_request.each do |user|
+      recipients_for_new_request.each do |user, url|
         broadcast_to(user, {
           title:   "New Leave Request",
           message: message,
           kind:    "info",
-          url:     "/admin/leave_requests"
+          url:     url
         })
       end
     end
@@ -61,15 +61,14 @@ module Leave
 
     private
 
+    # Returns [[user, url], ...] pairs for whoever should receive the new-request notification.
+    # Routing is based on the employee's leave_approver setting.
     def recipients_for_new_request
-      users = hr_and_admin_users
-
-      # Also notify reporting manager if they have a user account
-      if (manager = @employee.reporting_manager&.user)
-        users |= [ manager ]
+      if @employee.leave_approver_reporting_manager? && (manager = @employee.reporting_manager&.user)
+        [ [ manager, "/portal/team_leave_requests" ] ]
+      else
+        hr_and_admin_users.map { |u| [ u, "/admin/leave_requests" ] }
       end
-
-      users
     end
 
     def hr_and_admin_users
