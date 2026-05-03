@@ -9,6 +9,12 @@ class HomeController < ApplicationController
     @app_domain = Rails.env.development? ? "lvh.me:3000" : ENV.fetch("APP_DOMAIN", "kulahr.com")
   end
 
+  def privacy_policy
+  end
+
+  def terms_of_service
+  end
+
   def check_tenant
     subdomain = params[:subdomain].to_s.strip.downcase
     exists = subdomain.present? && Tenant.exists?(subdomain: subdomain, status: [ :trial, :active ])

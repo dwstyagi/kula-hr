@@ -202,6 +202,8 @@ Rails.application.routes.draw do
 
   # === Root domain routes (no subdomain) ===
   root "home#index"
+  get "privacy-policy", to: "home#privacy_policy", as: :privacy_policy
+  get "terms-of-service", to: "home#terms_of_service", as: :terms_of_service
   get "signup", to: "signups#new"
   post "signup", to: "signups#create"
   get  "beta-guide",     to: "beta_guide#show",      as: :beta_guide
