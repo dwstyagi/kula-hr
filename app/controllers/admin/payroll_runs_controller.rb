@@ -8,7 +8,7 @@ module Admin
     # GET /admin/payroll_runs
     def index
       authorize PayrollRun
-      @payroll_runs = policy_scope(PayrollRun).recent.includes(:initiated_by)
+      @payroll_runs = PayrollRunPresenter.wrap(policy_scope(PayrollRun).recent.includes(:initiated_by))
     end
 
     # GET /admin/payroll_runs/new
@@ -34,6 +34,7 @@ module Admin
     # GET /admin/payroll_runs/:id
     def show
       authorize @payroll_run
+      @payroll_run = PayrollRunPresenter.new(@payroll_run)
     end
 
     # POST /admin/payroll_runs/:id/process_payroll
@@ -131,19 +132,20 @@ module Admin
     # GET /admin/payroll_runs/:id/bank_file
     def bank_file
       authorize @payroll_run, :show?
-      generator = build_generator("generic_csv")  # default for warnings check
+      generator = Payroll::BankFileGenerators::Factory.for(nil, payroll_run: @payroll_run) # default for warnings check
       @missing   = generator.employees_missing_bank_details
+      @payroll_run = PayrollRunPresenter.new(@payroll_run)
     end
 
     # GET /admin/payroll_runs/:id/download_bank_file?bank=hdfc
     def download_bank_file
       authorize @payroll_run, :show?
 
-      bank   = params[:bank].presence || "generic_csv"
-      generator = build_generator(bank)
+      bank      = params[:bank].presence || "generic_csv"
+      generator = Payroll::BankFileGenerators::Factory.for(bank, payroll_run: @payroll_run)
       content   = generator.call
 
-      ext, mime = file_meta(bank)
+      ext, mime = Payroll::BankFileGenerators::Factory.file_meta(bank)
       filename  = "salary_#{@payroll_run.period_label.gsub(' ', '_')}_#{bank}.#{ext}"
       send_data content, filename: filename, type: mime, disposition: "attachment"
     rescue Payroll::BankFileGenerators::BankFileError => e
@@ -177,22 +179,6 @@ module Admin
 
     def payroll_run_params
       params.require(:payroll_run).permit(:month, :year, :notes)
-    end
-
-    BANK_GENERATORS = {
-      "hdfc"        => Payroll::BankFileGenerators::Hdfc,
-      "icici"       => Payroll::BankFileGenerators::Icici,
-      "sbi"         => Payroll::BankFileGenerators::Sbi,
-      "generic_csv" => Payroll::BankFileGenerators::GenericCsv
-    }.freeze
-
-    def build_generator(bank)
-      klass = BANK_GENERATORS[bank] || Payroll::BankFileGenerators::GenericCsv
-      klass.new(payroll_run: @payroll_run)
-    end
-
-    def file_meta(bank)
-      bank == "generic_csv" ? [ "csv", "text/csv" ] : [ "txt", "text/plain" ]
     end
   end
 end

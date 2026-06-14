@@ -53,7 +53,7 @@
               </td>
               <td class="px-4 py-3 text-left text-gray-900 font-medium">
                 <% if run.total_net_pay > 0 %>
-                  ₹<%= number_with_delimiter(run.total_net_pay.round(0)) %>
+                  <%= run.formatted_total_net_pay %>
                 <% else %>
                   <span class="text-gray-400">—</span>
                 <% end %>

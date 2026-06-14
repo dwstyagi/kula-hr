@@ -25,7 +25,7 @@
       </div>
       <div>
         <p class="text-xs text-gray-400 uppercase tracking-wide">Total Net Pay</p>
-        <p class="font-semibold text-gray-900 mt-1">₹<%= number_with_delimiter(@payroll_run.total_net_pay.round(0)) %></p>
+        <p class="font-semibold text-gray-900 mt-1"><%= @payroll_run.formatted_total_net_pay %></p>
       </div>
     </div>
   </div>
