@@ -4,6 +4,7 @@ class Payslip < ApplicationRecord
   belongs_to :payroll_run
   belongs_to :employee
   has_many :line_items, class_name: "PayslipLineItem", dependent: :destroy
+  has_many :leave_encashment_requests, dependent: :nullify
 
   STATUSES = %w[generated revised locked].freeze
 

@@ -4,8 +4,9 @@ class LeaveEncashmentRequest < ApplicationRecord
   belongs_to :employee
   belongs_to :leave_type
   belongs_to :approved_by, class_name: "User", optional: true
+  belongs_to :payslip, optional: true
 
-  enum :status, { pending: 0, approved: 1, rejected: 2 }
+  enum :status, { pending: 0, approved: 1, rejected: 2, paid: 3 }
 
   validates :financial_year, presence: true
   validates :number_of_days, numericality: { greater_than: 0 }
@@ -16,6 +17,8 @@ class LeaveEncashmentRequest < ApplicationRecord
 
   scope :for_year, ->(fy) { where(financial_year: fy) }
   scope :current,  -> { for_year(LeaveBalance.current_financial_year) }
+  # Approved encashments not yet paid out through a payslip — picked up by PayrollProcessor.
+  scope :payable,  -> { where(status: :approved, payslip_id: nil).where.not(encashment_amount: nil) }
 
   private
 

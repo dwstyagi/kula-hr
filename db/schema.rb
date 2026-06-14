@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_04_24_100001) do
+ActiveRecord::Schema[8.1].define(version: 2026_06_14_100001) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "pg_catalog.plpgsql"
@@ -191,6 +191,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_24_100001) do
     t.string "financial_year", null: false
     t.bigint "leave_type_id", null: false
     t.decimal "number_of_days", precision: 5, scale: 1, null: false
+    t.bigint "payslip_id"
     t.string "rejection_reason"
     t.integer "status", default: 0, null: false
     t.bigint "tenant_id", null: false
@@ -199,6 +200,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_24_100001) do
     t.index ["employee_id", "leave_type_id", "financial_year"], name: "idx_encashment_emp_leavetype_fy", unique: true
     t.index ["employee_id"], name: "index_leave_encashment_requests_on_employee_id"
     t.index ["leave_type_id"], name: "index_leave_encashment_requests_on_leave_type_id"
+    t.index ["payslip_id"], name: "index_leave_encashment_requests_on_payslip_id"
     t.index ["tenant_id"], name: "index_leave_encashment_requests_on_tenant_id"
   end
 
@@ -523,6 +525,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_24_100001) do
   add_foreign_key "leave_balances", "tenants"
   add_foreign_key "leave_encashment_requests", "employees"
   add_foreign_key "leave_encashment_requests", "leave_types"
+  add_foreign_key "leave_encashment_requests", "payslips"
   add_foreign_key "leave_encashment_requests", "tenants"
   add_foreign_key "leave_encashment_requests", "users", column: "approved_by_id"
   add_foreign_key "leave_requests", "employees"

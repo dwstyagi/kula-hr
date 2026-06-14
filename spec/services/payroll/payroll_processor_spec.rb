@@ -169,6 +169,59 @@ RSpec.describe Payroll::PayrollProcessor do
       end
     end
 
+    context "with an approved (payable) leave encashment" do
+      let!(:employee) { create_ready_employee }
+
+      # Build directly (validate: false) to bypass the March-only / balance create
+      # validations — this test only cares about the payroll payout path.
+      let!(:encashment) do
+        er = build(:leave_encashment_request, :approved,
+                   tenant: tenant, employee: employee, encashment_amount: 3_000)
+        er.save!(validate: false)
+        er
+      end
+
+      subject(:result) { described_class.new(payroll_run: payroll_run).call }
+
+      let(:payslip) { payroll_run.payslips.first }
+
+      it "adds a non-prorated 'Leave Encashment' earning line item" do
+        result
+        item = payslip.line_items.find_by(component_type: "earning", category: "variable")
+        expect(item).to be_present
+        expect(item.component_name).to match(/Leave Encashment/)
+        expect(item.amount).to eq(3_000)
+        expect(item.full_amount).to eq(3_000)
+      end
+
+      it "includes the encashment in gross and net pay" do
+        result
+        earnings_total = payslip.line_items.where(component_type: "earning").sum(:amount)
+        expect(payslip.gross_pay).to eq(earnings_total)
+        expect(payslip.net_pay).to eq([ payslip.gross_pay - payslip.total_deductions, 0 ].max)
+        expect(earnings_total).to be > 3_000 # regular salary + encashment
+      end
+
+      it "marks the encashment paid and links it to the payslip" do
+        result
+        encashment.reload
+        expect(encashment).to be_paid
+        expect(encashment.payslip_id).to eq(payslip.id)
+      end
+
+      it "does not pay an already-paid encashment again" do
+        encashment.update_columns(status: LeaveEncashmentRequest.statuses[:paid])
+        result
+        expect(payslip.line_items.where(category: "variable")).to be_empty
+      end
+
+      it "ignores a rejected encashment" do
+        encashment.update_columns(status: LeaveEncashmentRequest.statuses[:rejected])
+        result
+        expect(payslip.line_items.where(category: "variable")).to be_empty
+      end
+    end
+
     context "employee eligibility" do
       it "includes probation employees" do
         create_ready_employee(employment_status: "probation")

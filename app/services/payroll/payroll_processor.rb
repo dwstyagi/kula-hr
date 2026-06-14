@@ -80,22 +80,55 @@ module Payroll
     # ── Payslip creation ───────────────────────────────────────────────────────
 
     def create_payslip(result)
-      payslip = @run.payslips.create!(
-        tenant:             @tenant,
-        employee:           result.employee,
-        month:              @run.month,
-        year:               @run.year,
-        gross_pay:          result.gross_pay,
-        total_deductions:   result.total_deductions,
-        net_pay:            result.net_pay,
-        employer_pf:        result.employer_costs[:pf],
-        employer_esi:       result.employer_costs[:esi],
-        total_working_days: result.attendance[:working_days],
-        paid_days:          result.attendance[:paid_days],
-        lop_days:           result.attendance[:lop_days]
-      )
+      ActiveRecord::Base.transaction do
+        payslip = @run.payslips.create!(
+          tenant:             @tenant,
+          employee:           result.employee,
+          month:              @run.month,
+          year:               @run.year,
+          gross_pay:          result.gross_pay,
+          total_deductions:   result.total_deductions,
+          net_pay:            result.net_pay,
+          employer_pf:        result.employer_costs[:pf],
+          employer_esi:       result.employer_costs[:esi],
+          total_working_days: result.attendance[:working_days],
+          paid_days:          result.attendance[:paid_days],
+          lop_days:           result.attendance[:lop_days]
+        )
 
-      create_line_items(payslip, result)
+        create_line_items(payslip, result)
+        apply_encashments(payslip, result.employee)
+      end
+    end
+
+    # Pays out any approved-but-unpaid leave encashments for this employee as a
+    # separate (non-prorated) earning line item, then marks each request paid and
+    # links it to this payslip so it is never paid twice. Option A: encashment is
+    # not run through PF/ESI/PT/TDS — see docs/gaps.md #3 for the tax follow-up.
+    def apply_encashments(payslip, employee)
+      requests = LeaveEncashmentRequest.payable.where(employee: employee).includes(:leave_type).to_a
+      return if requests.empty?
+
+      now      = Time.current
+      max_sort = payslip.line_items.maximum(:sort_order) || 0
+
+      items = requests.map.with_index(1) do |req, i|
+        {
+          payslip_id:     payslip.id,
+          component_name: "Leave Encashment (#{req.leave_type.code})",
+          component_type: "earning",
+          amount:         req.encashment_amount,
+          full_amount:    req.encashment_amount,
+          sort_order:     max_sort + i,
+          category:       "variable",
+          created_at:     now,
+          updated_at:     now
+        }
+      end
+
+      PayslipLineItem.insert_all!(items)
+      requests.each { |req| req.update!(status: :paid, payslip: payslip) }
+      payslip.recalculate_totals!
     end
 
     def create_line_items(payslip, result)

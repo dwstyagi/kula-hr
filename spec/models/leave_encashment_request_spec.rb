@@ -80,5 +80,50 @@ RSpec.describe LeaveEncashmentRequest, type: :model do
       req = LeaveEncashmentRequest.new
       expect(req.status).to eq("pending")
     end
+
+    it "supports a paid status" do
+      expect(LeaveEncashmentRequest.statuses).to include("paid" => 3)
+    end
+  end
+
+  describe ".payable scope" do
+    # Distinct employee per call — (employee, leave_type, FY) is uniquely indexed.
+    def make(status:, amount: 3_000, payslip: nil)
+      req = build_request(
+        employee:          create(:employee, tenant: tenant, employment_status: :active),
+        status:            status,
+        encashment_amount: amount,
+        payslip:           payslip
+      )
+      req.save!(validate: false)
+      req
+    end
+
+    it "includes approved, unpaid requests with an amount" do
+      req = make(status: :approved)
+      expect(LeaveEncashmentRequest.payable).to include(req)
+    end
+
+    it "excludes pending and rejected requests" do
+      pending  = make(status: :pending)
+      rejected = make(status: :rejected)
+      expect(LeaveEncashmentRequest.payable).not_to include(pending, rejected)
+    end
+
+    it "excludes already-paid requests" do
+      paid = make(status: :paid)
+      expect(LeaveEncashmentRequest.payable).not_to include(paid)
+    end
+
+    it "excludes approved requests already linked to a payslip" do
+      payslip = create(:payslip, tenant: tenant, employee: employee)
+      linked  = make(status: :approved, payslip: payslip)
+      expect(LeaveEncashmentRequest.payable).not_to include(linked)
+    end
+
+    it "excludes approved requests with no amount" do
+      no_amount = make(status: :approved, amount: nil)
+      expect(LeaveEncashmentRequest.payable).not_to include(no_amount)
+    end
   end
 end
