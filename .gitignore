@@ -42,3 +42,6 @@ docs/
 /coverage/
 /app/assets/builds/*
 !/app/assets/builds/.keep
+
+# Added by code-review-graph
+.code-review-graph/

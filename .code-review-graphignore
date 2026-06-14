@@ -1,0 +1,8 @@
+# Tracked files not worth graphing.
+# Note: anything already in .gitignore (tmp/, log/, storage/,
+# public/assets/, coverage/, node_modules/) is skipped automatically,
+# so it does not need to be listed here.
+
+db/schema.rb
+db/migrate/**
+vendor/**
