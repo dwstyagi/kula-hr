@@ -3,7 +3,7 @@ module Admin
     before_action :set_holiday, only: [ :edit, :update, :destroy, :toggle_active ]
 
     def index
-      @holidays = policy_scope(Holiday).order(:date)
+      @holidays = policy_scope(Holiday).includes(:work_location).order(:date)
     end
 
     def new
@@ -56,7 +56,7 @@ module Admin
     end
 
     def holiday_params
-      params.require(:holiday).permit(:name, :date, :is_active)
+      params.require(:holiday).permit(:name, :date, :is_active, :work_location_id)
     end
   end
 end

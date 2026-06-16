@@ -25,6 +25,17 @@
     </div>
   </div>
 
+  <% locations = WorkLocation.active.order(:name) %>
+  <% if locations.any? %>
+    <div>
+      <%= f.label :work_location_id, "Work location", class: "block text-sm font-medium text-gray-700 mb-1" %>
+      <%= f.collection_select :work_location_id, locations, :id, :name,
+          { include_blank: "Company-wide (all locations)" },
+          class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm" %>
+      <p class="text-xs text-gray-500 mt-1">Leave blank for a holiday that applies to every location.</p>
+    </div>
+  <% end %>
+
   <div>
     <label class="flex items-center gap-2 cursor-pointer">
       <%= f.check_box :is_active, class: "rounded border-gray-300 text-blue-600 shadow-sm focus:ring-blue-500" %>

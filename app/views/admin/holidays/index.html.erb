@@ -25,6 +25,7 @@
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Day</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Location</th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
               <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
             </tr>
@@ -36,6 +37,7 @@
                   <td class="px-6 py-4 text-sm font-medium text-gray-900"><%= holiday.name %></td>
                   <td class="px-6 py-4 text-sm text-gray-700"><%= holiday.date.strftime("%d %b %Y") %></td>
                   <td class="px-6 py-4 text-sm text-gray-500"><%= holiday.date.strftime("%A") %></td>
+                  <td class="px-6 py-4 text-sm text-gray-500"><%= holiday.work_location&.name || "Company-wide" %></td>
                   <td class="px-6 py-4">
                     <% if holiday.is_active? %>
                       <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-700">Active</span>

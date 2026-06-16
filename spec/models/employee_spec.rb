@@ -129,8 +129,9 @@ RSpec.describe Employee, type: :model do
   end
 
   describe "#hr_is_approver?" do
-    let(:employee) { create(:employee, tenant: tenant) }
-    let(:manager)  { create(:employee, tenant: tenant, email: "mgr@x.com") }
+    let(:employee)        { create(:employee, tenant: tenant) }
+    let(:manager_no_user) { create(:employee, tenant: tenant, email: "mgr@x.com") }
+    let(:manager)         { create(:employee, :with_user, tenant: tenant, email: "mgr2@x.com") }
 
     it "returns true when leave_approver is hr" do
       employee.update!(leave_approver: :hr)
@@ -142,7 +143,12 @@ RSpec.describe Employee, type: :model do
       expect(employee.hr_is_approver?).to be true
     end
 
-    it "returns false when leave_approver is reporting_manager and manager is assigned" do
+    it "returns true when the assigned manager has no user/login account (no deadlock)" do
+      employee.update!(leave_approver: :reporting_manager, reporting_manager: manager_no_user)
+      expect(employee.hr_is_approver?).to be true
+    end
+
+    it "returns false when leave_approver is reporting_manager and the manager can log in" do
       employee.update!(leave_approver: :reporting_manager, reporting_manager: manager)
       expect(employee.hr_is_approver?).to be false
     end

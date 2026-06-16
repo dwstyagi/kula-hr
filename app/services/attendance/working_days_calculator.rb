@@ -11,17 +11,38 @@ module Attendance
   #   alternate_saturdays_sundays — 2nd & 4th Sat + every Sun off (~24 days/month)
   #   only_sundays              — Only Sun off (~26 days/month)
   class WorkingDaysCalculator
-    def initialize(month:, year:, tenant:)
-      @month   = month
-      @year    = year
-      @pattern = tenant.payroll_setting&.week_off_pattern || "all_saturdays_sundays"
+    # work_location: the WorkLocation (or its id) whose holidays apply. When nil,
+    # only company-wide holidays are subtracted. Pass an employee's work location
+    # to get a location-accurate working-day count for multi-state companies.
+    def initialize(month:, year:, tenant:, work_location: nil)
+      @month            = month
+      @year             = year
+      @tenant           = tenant
+      @work_location_id = work_location.respond_to?(:id) ? work_location.id : work_location
+      @pattern          = tenant.payroll_setting&.week_off_pattern || "all_saturdays_sundays"
     end
 
     def call
       start_date = Date.new(@year, @month, 1)
       end_date   = start_date.end_of_month
 
-      (start_date..end_date).count { |date| self.class.working_day?(date, @pattern) }
+      (start_date..end_date).count do |date|
+        self.class.working_day?(date, @pattern) && !holiday_dates.include?(date)
+      end
+    end
+
+    private
+
+    # Active holidays that apply to the configured work location (company-wide
+    # holidays plus that location's own), within the month, as a Set of dates.
+    # Holidays falling on a week-off are already excluded by #working_day?,
+    # so they are never double-counted.
+    def holiday_dates
+      @holiday_dates ||= @tenant.holidays.active
+                                .applicable_to(@work_location_id)
+                                .where(date: Date.new(@year, @month, 1)..Date.new(@year, @month, 1).end_of_month)
+                                .pluck(:date)
+                                .to_set
     end
 
     def self.working_day?(date, pattern)

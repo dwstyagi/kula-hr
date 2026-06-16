@@ -212,6 +212,7 @@ module Admin
       @departments = Department.order(:name)
       @designations = Designation.order(:name)
       @managers = Employee.where.not(id: @employee.id).order(:first_name)
+      @work_locations = WorkLocation.active.order(:name)
     end
 
     def salary_params
@@ -223,7 +224,7 @@ module Admin
         :first_name, :last_name, :email, :phone,
         :date_of_birth, :gender,
         :joining_date, :confirmation_date, :employment_status,
-        :department_id, :designation_id, :reporting_manager_id,
+        :department_id, :designation_id, :reporting_manager_id, :work_location_id,
         :bank_name, :bank_account_number, :ifsc_code,
         :pan_number, :aadhaar_number, :uan_number, :esi_number,
         :current_address, :city, :state, :pincode,

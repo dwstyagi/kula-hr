@@ -7,6 +7,8 @@ class Employee < ApplicationRecord
   belongs_to :department, optional: true
   belongs_to :designation, optional: true
   belongs_to :reporting_manager, class_name: "Employee", optional: true
+  # A nil work_location means the employee follows company-wide holidays only.
+  belongs_to :work_location, optional: true
 
   has_many :direct_reports, class_name: "Employee", foreign_key: :reporting_manager_id, dependent: :nullify, inverse_of: :reporting_manager
   has_many :employee_salaries, dependent: :destroy
@@ -71,9 +73,12 @@ class Employee < ApplicationRecord
   end
 
   # Returns true if HR is the effective approver for this employee's leave requests.
-  # Fallback: if approver is reporting_manager but none is assigned, HR handles it.
+  # Fallback: HR handles it whenever the configured reporting-manager approver
+  # cannot actually act — i.e. no manager is assigned, OR the assigned manager
+  # has no user/login account. This keeps HR as the catch-all and avoids a
+  # deadlock where neither HR nor a login-less manager can approve.
   def hr_is_approver?
-    leave_approver_hr? || (leave_approver_reporting_manager? && reporting_manager.nil?)
+    leave_approver_hr? || reporting_manager&.user.nil?
   end
 
   def approver_label

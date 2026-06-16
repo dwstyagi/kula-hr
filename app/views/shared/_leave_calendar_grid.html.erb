@@ -1,0 +1,64 @@
+<%# Renders a read-only month grid: employees (rows) × days (columns). %>
+<%# Locals: calendar (Leave::TeamCalendar) %>
+<div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
+  <% if calendar.empty? %>
+    <div class="p-12 text-center">
+      <svg class="mx-auto h-10 w-10 text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5"/>
+      </svg>
+      <p class="text-sm text-gray-500">No teammates to show for this view.</p>
+    </div>
+  <% else %>
+    <div class="overflow-x-auto">
+      <table class="min-w-full border-collapse text-xs">
+        <thead>
+          <tr>
+            <th class="sticky left-0 z-10 bg-gray-50 px-3 py-2 text-left font-medium text-gray-500 uppercase tracking-wider border-b border-r border-gray-200 min-w-40">
+              Employee
+            </th>
+            <% calendar.days.each do |day| %>
+              <th class="px-1 py-2 text-center font-medium border-b border-gray-200 <%= day.non_working? ? 'bg-gray-100 text-gray-400' : 'text-gray-500' %>"
+                  title="<%= day.holiday_name %>">
+                <div><%= day.date.day %></div>
+                <div class="text-[10px] uppercase font-normal"><%= day.date.strftime('%a').first %></div>
+              </th>
+            <% end %>
+          </tr>
+        </thead>
+        <tbody>
+          <% calendar.rows.each do |employee, cells| %>
+            <tr class="hover:bg-gray-50">
+              <td class="sticky left-0 z-10 bg-white px-3 py-2 text-gray-900 border-b border-r border-gray-200 whitespace-nowrap">
+                <%= employee.full_name %>
+              </td>
+              <% calendar.days.each do |day| %>
+                <% cell = cells[day.date] %>
+                <td class="px-1 py-1 text-center border-b border-gray-100 <%= day.non_working? ? 'bg-gray-50' : '' %>">
+                  <% if cell&.status == "approved" %>
+                    <span class="inline-block w-full rounded bg-indigo-500 px-1 py-0.5 text-[10px] font-medium text-white"
+                          title="<%= cell.leave_name %> (Approved)"><%= cell.leave_code %></span>
+                  <% elsif cell %>
+                    <span class="inline-block w-full rounded border border-dashed border-amber-400 bg-amber-50 px-1 py-0.5 text-[10px] font-medium text-amber-700"
+                          title="<%= cell.leave_name %> (Pending)"><%= cell.leave_code %></span>
+                  <% end %>
+                </td>
+              <% end %>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="flex items-center gap-4 px-4 py-3 border-t border-gray-100 text-xs text-gray-500">
+      <span class="flex items-center gap-1.5">
+        <span class="inline-block w-3 h-3 rounded bg-indigo-500"></span> Approved leave
+      </span>
+      <span class="flex items-center gap-1.5">
+        <span class="inline-block w-3 h-3 rounded border border-dashed border-amber-400 bg-amber-50"></span> Pending leave
+      </span>
+      <span class="flex items-center gap-1.5">
+        <span class="inline-block w-3 h-3 rounded bg-gray-100"></span> Week-off / Holiday
+      </span>
+    </div>
+  <% end %>
+</div>

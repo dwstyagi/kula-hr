@@ -10,12 +10,12 @@ module Attendance
     end
 
     def call
-      working_days = WorkingDaysCalculator.new(
-        month: @month, year: @year, tenant: @tenant
-      ).call
-
       # acts_as_tenant already scopes Employee to the current tenant
       Employee.where(employment_status: %w[active probation]).find_each do |employee|
+        # Working days are location-aware: each location can have its own holidays.
+        # Memoize per location so we query holidays once per distinct location.
+        working_days = working_days_for(employee.work_location_id)
+
         paid_leave_days = leave_days_for(employee, paid_only: true)
         lop_leave_days  = leave_days_for(employee, lop_only: true)
 
@@ -44,6 +44,13 @@ module Attendance
     end
 
     private
+
+    def working_days_for(work_location_id)
+      @working_days_by_location ||= {}
+      @working_days_by_location[work_location_id] ||= WorkingDaysCalculator.new(
+        month: @month, year: @year, tenant: @tenant, work_location: work_location_id
+      ).call
+    end
 
     def leave_days_for(employee, paid_only: false, lop_only: false)
       start_date = Date.new(@year, @month, 1)

@@ -89,6 +89,8 @@ Rails.application.routes.draw do
           patch :toggle_active
         end
       end
+      resources :work_locations
+      get "leave_calendar", to: "leave_calendar#index", as: :leave_calendar
       resources :leave_requests, only: [ :index ] do
         member do
           patch :approve
@@ -183,6 +185,7 @@ Rails.application.routes.draw do
           patch :reject
         end
       end
+      get "team_calendar", to: "team_calendar#index", as: :team_calendar
       resource :tax_declaration, only: [ :show, :edit, :update ] do
         patch :submit, on: :member
       end

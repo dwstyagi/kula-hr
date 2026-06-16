@@ -78,6 +78,21 @@ RSpec.describe Attendance::SummaryGenerator do
       expect(draft.reload.days_present).to eq(15)
     end
 
+    it "uses location-specific working days per employee" do
+      mumbai = create(:work_location, tenant: tenant, name: "Mumbai")
+      mumbai_employee = create(:employee, tenant: tenant, work_location: mumbai, email: "mum@x.com")
+      # Mumbai-only holiday on Jan 15, 2025 (a Wednesday)
+      create(:holiday, tenant: tenant, date: Date.new(2025, 1, 15), work_location: mumbai)
+
+      generator.call
+
+      company_wide = AttendanceSummary.find_by(employee: employee, month: 1, year: 2025)
+      mumbai_summary = AttendanceSummary.find_by(employee: mumbai_employee, month: 1, year: 2025)
+
+      expect(company_wide.total_working_days).to eq(23)    # no holidays apply
+      expect(mumbai_summary.total_working_days).to eq(22)  # minus Mumbai holiday
+    end
+
     it "pro-rates leave days that span across month boundaries" do
       # Leave from Dec 30, 2024 to Jan 3, 2025 — only Jan 2,3 count for January
       lr = build(:leave_request, :approved, tenant: tenant, employee: employee, leave_type: paid_type,

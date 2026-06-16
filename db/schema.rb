@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_06_14_100001) do
+ActiveRecord::Schema[8.1].define(version: 2026_06_16_100001) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "pg_catalog.plpgsql"
@@ -130,6 +130,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_14_100001) do
     t.string "uan_number"
     t.datetime "updated_at", null: false
     t.bigint "user_id"
+    t.bigint "work_location_id"
     t.index ["department_id"], name: "index_employees_on_department_id"
     t.index ["designation_id"], name: "index_employees_on_designation_id"
     t.index ["employment_status"], name: "index_employees_on_employment_status"
@@ -138,6 +139,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_14_100001) do
     t.index ["tenant_id", "employee_code"], name: "index_employees_on_tenant_id_and_employee_code", unique: true
     t.index ["tenant_id"], name: "index_employees_on_tenant_id"
     t.index ["user_id"], name: "index_employees_on_user_id"
+    t.index ["work_location_id"], name: "index_employees_on_work_location_id"
   end
 
   create_table "holidays", force: :cascade do |t|
@@ -147,8 +149,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_14_100001) do
     t.string "name", null: false
     t.bigint "tenant_id", null: false
     t.datetime "updated_at", null: false
-    t.index ["tenant_id", "date"], name: "index_holidays_on_tenant_id_and_date", unique: true
+    t.bigint "work_location_id"
+    t.index ["tenant_id", "work_location_id", "date"], name: "index_holidays_on_tenant_location_date", unique: true
     t.index ["tenant_id"], name: "index_holidays_on_tenant_id"
+    t.index ["work_location_id"], name: "index_holidays_on_work_location_id"
   end
 
   create_table "investment_declarations", force: :cascade do |t|
@@ -502,6 +506,17 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_14_100001) do
     t.index ["item_type", "item_id"], name: "index_versions_on_item_type_and_item_id"
   end
 
+  create_table "work_locations", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.boolean "is_active", default: true, null: false
+    t.string "name", null: false
+    t.string "state"
+    t.bigint "tenant_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["tenant_id", "name"], name: "index_work_locations_on_tenant_id_and_name", unique: true
+    t.index ["tenant_id"], name: "index_work_locations_on_tenant_id"
+  end
+
   add_foreign_key "attendance_summaries", "employees"
   add_foreign_key "attendance_summaries", "tenants"
   add_foreign_key "comp_off_requests", "employees"
@@ -517,7 +532,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_14_100001) do
   add_foreign_key "employees", "employees", column: "reporting_manager_id"
   add_foreign_key "employees", "tenants"
   add_foreign_key "employees", "users"
+  add_foreign_key "employees", "work_locations"
   add_foreign_key "holidays", "tenants"
+  add_foreign_key "holidays", "work_locations"
   add_foreign_key "investment_declarations", "tax_declarations"
   add_foreign_key "investment_declarations", "tenants"
   add_foreign_key "leave_balances", "employees"
@@ -550,4 +567,5 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_14_100001) do
   add_foreign_key "tax_declarations", "tenants"
   add_foreign_key "tenant_users", "tenants"
   add_foreign_key "tenant_users", "users"
+  add_foreign_key "work_locations", "tenants"
 end
