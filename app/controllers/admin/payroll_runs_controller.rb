@@ -12,9 +12,14 @@ module Admin
     end
 
     # GET /admin/payroll_runs/new
+    # Supports ?month=&year= so the readiness panel can refresh as HR picks a period.
     def new
       authorize PayrollRun
-      @payroll_run = PayrollRun.new
+      @payroll_run = PayrollRun.new(
+        month: params[:month].presence || Date.today.month,
+        year:  params[:year].presence  || Date.today.year
+      )
+      @readiness = readiness_for(@payroll_run)
     end
 
     # POST /admin/payroll_runs
@@ -27,6 +32,7 @@ module Admin
         redirect_to admin_payroll_run_path(@payroll_run),
                     notice: "Payroll run created for #{@payroll_run.period_label}."
       else
+        @readiness = readiness_for(@payroll_run)
         render :new, status: :unprocessable_entity
       end
     end
@@ -34,6 +40,9 @@ module Admin
     # GET /admin/payroll_runs/:id
     def show
       authorize @payroll_run
+      # Compute readiness while still in draft so the page can warn about
+      # employees who will be skipped before HR clicks "Process".
+      @readiness = readiness_for(@payroll_run) if @payroll_run.draft?
       @payroll_run = PayrollRunPresenter.new(@payroll_run)
     end
 
@@ -175,6 +184,14 @@ module Admin
 
     def set_payroll_run
       @payroll_run = policy_scope(PayrollRun).find(params[:id])
+    end
+
+    def readiness_for(payroll_run)
+      Payroll::ReadinessCheck.new(
+        month:  payroll_run.month,
+        year:   payroll_run.year,
+        tenant: ActsAsTenant.current_tenant
+      ).call
     end
 
     def payroll_run_params

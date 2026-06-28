@@ -40,17 +40,10 @@ module Payroll
     # ── Employee eligibility ───────────────────────────────────────────────────
 
     def eligible_employees
-      month_start = Date.new(@run.year, @run.month, 1)
-      month_end   = month_start.end_of_month
-
-      ActsAsTenant.with_tenant(@tenant) do
-        # Active + probation employees, plus anyone whose last working day falls in this month
-        Employee.where(
-          "employment_status IN (?) OR " \
-          "(employment_status IN (?) AND last_working_date BETWEEN ? AND ?)",
-          %w[active probation], %w[resigned terminated], month_start, month_end
-        )
-      end
+      # Single source of truth — see Payroll::ReadinessCheck.
+      Payroll::ReadinessCheck.eligible_employees(
+        month: @run.month, year: @run.year, tenant: @tenant
+      )
     end
 
     # ── Per-employee processing ────────────────────────────────────────────────

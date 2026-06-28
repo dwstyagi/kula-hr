@@ -24,7 +24,7 @@
 
   <%# Progress bar (shown while processing or in draft) %>
   <% if @payroll_run.draft? || @payroll_run.processing? %>
-    <%= render "progress", payroll_run: @payroll_run %>
+    <%= render "progress", payroll_run: @payroll_run, readiness: @readiness %>
   <% end %>
 
   <%# Summary cards (shown once processing is done) %>

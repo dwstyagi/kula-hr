@@ -96,19 +96,18 @@ class PayrollRun < ApplicationRecord
 
   private
 
-  # Guard: all payroll-eligible employees must have a locked attendance summary.
-  # Eligible = active + probation (both statuses receive salary).
+  # Guard: every active/probation employee must have a locked attendance summary
+  # before a run can be created. Delegates to Payroll::ReadinessCheck so the
+  # creation error, the new-page panel, and the processor never disagree.
   def attendance_must_be_locked
-    eligible      = Employee.where(employment_status: %w[active probation])
-    eligible_count = eligible.count
-    locked_count  = AttendanceSummary.where(
-      employee: eligible, month: month, year: year, status: :locked
-    ).count
+    readiness = Payroll::ReadinessCheck.new(
+      month: month, year: year, tenant: tenant || ActsAsTenant.current_tenant
+    ).call
+    return if readiness.can_create?
 
-    return if locked_count == eligible_count
-
+    blocked = readiness.blocking.map { |s| s.employee.full_name }.sort
     errors.add(:base,
-      "Attendance not locked. #{locked_count}/#{eligible_count} employees locked for #{month_name} #{year}.")
+      "Attendance not locked for #{blocked.size} employee(s) for #{month_name} #{year}: #{blocked.join(', ')}.")
   end
 
   # Callback: wipe all payslips and reset totals when reprocessing
