@@ -7,6 +7,10 @@ class SalaryStructurePolicy < ApplicationPolicy
     admin_or_hr?
   end
 
+  def update_component?
+    admin_or_hr?
+  end
+
   def remove_component?
     admin_or_hr?
   end

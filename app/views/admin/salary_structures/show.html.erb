@@ -71,15 +71,35 @@
                       <%= ssc.calculation_type.capitalize %>
                     </span>
                   </td>
-                  <td class="px-6 py-4 text-sm text-gray-900 font-mono">
-                    <% if ssc.calculation_type == "percentage" %>
-                      <%= ssc.value %>% of CTC
-                    <% else %>
-                      ₹<%= number_with_delimiter(ssc.value) %>/month
+                  <td class="px-6 py-4 text-sm text-gray-900">
+                    <%# Form lives here but its submit button sits in the Actions cell,
+                        bound via the HTML5 `form` attribute (keeps table markup valid). %>
+                    <%= form_with url: update_component_admin_salary_structure_path(@salary_structure, component_id: ssc.id),
+                          method: :patch, id: "update_component_#{ssc.id}", class: "flex items-center gap-1.5" do |f| %>
+                      <% if ssc.calculation_type == "percentage" %>
+                        <%= f.number_field "salary_structure_component[value]", value: ssc.value,
+                              step: "0.01", min: "0.01",
+                              class: "w-20 rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm font-mono" %>
+                        <span class="text-xs text-gray-500">% of CTC</span>
+                      <% else %>
+                        <span class="text-xs text-gray-500">₹</span>
+                        <%= f.number_field "salary_structure_component[value]", value: ssc.value,
+                              step: "0.01", min: "0.01",
+                              class: "w-24 rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm font-mono" %>
+                        <span class="text-xs text-gray-500">/month</span>
+                      <% end %>
                     <% end %>
                   </td>
                   <td class="px-6 py-4 text-right">
                     <div class="flex items-center justify-end gap-2">
+                      <%# Save value — submits the form in the previous cell %>
+                      <button type="submit" form="update_component_<%= ssc.id %>"
+                              title="Save value"
+                              class="p-1 rounded-md text-green-600 hover:bg-green-100 transition-colors cursor-pointer">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                        </svg>
+                      </button>
                       <%= button_to remove_component_admin_salary_structure_path(@salary_structure, component_id: ssc.id),
                           method: :delete,
                           title: "Remove from structure",

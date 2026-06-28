@@ -61,6 +61,7 @@ Rails.application.routes.draw do
         member do
           patch :toggle_active
           post :add_component
+          patch :update_component
           delete :remove_component
         end
       end

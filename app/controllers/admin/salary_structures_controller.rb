@@ -1,6 +1,6 @@
 module Admin
   class SalaryStructuresController < BaseController
-    before_action :set_salary_structure, only: [ :show, :edit, :update, :destroy, :toggle_active, :add_component, :remove_component ]
+    before_action :set_salary_structure, only: [ :show, :edit, :update, :destroy, :toggle_active, :add_component, :update_component, :remove_component ]
 
     def index
       @salary_structures = policy_scope(SalaryStructure)
@@ -79,6 +79,17 @@ module Admin
 
       if ssc.save
         redirect_to admin_salary_structure_path(@salary_structure), notice: "#{ssc.salary_component.name} added."
+      else
+        redirect_to admin_salary_structure_path(@salary_structure), alert: ssc.errors.full_messages.join(", ")
+      end
+    end
+
+    def update_component
+      authorize @salary_structure
+
+      ssc = @salary_structure.salary_structure_components.find(params[:component_id])
+      if ssc.update(value: component_params[:value])
+        redirect_to admin_salary_structure_path(@salary_structure), notice: "#{ssc.salary_component.name} updated."
       else
         redirect_to admin_salary_structure_path(@salary_structure), alert: ssc.errors.full_messages.join(", ")
       end

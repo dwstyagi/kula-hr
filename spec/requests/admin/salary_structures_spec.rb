@@ -37,7 +37,9 @@ RSpec.describe "Admin::SalaryStructures", type: :request do
       expect(response).to have_http_status(:ok)
       expect(response.body).to include("Standard CTC")
       expect(response.body).to include("Basic")
-      expect(response.body).to include("40.0% of CTC")
+      # value is now rendered as an inline-editable field + a "% of CTC" label
+      expect(response.body).to include("% of CTC")
+      expect(response.body).to include('value="40.0"')
     end
   end
 
@@ -177,6 +179,33 @@ RSpec.describe "Admin::SalaryStructures", type: :request do
       expect(response.body).to include("Special Allowance")      # earning is offered
       expect(response.body).not_to include("ProvidentFundDed")   # deduction is NOT offered
       expect(response.body).to match(/calculated automatically/i) # info note present
+    end
+  end
+
+  describe "PATCH /admin/salary_structures/:id/update_component" do
+    it "updates a component's value" do
+      structure = ActsAsTenant.with_tenant(tenant) { create(:salary_structure, tenant: tenant) }
+      component = ActsAsTenant.with_tenant(tenant) { create(:salary_component, :percentage, tenant: tenant, name: "Basic") }
+      ssc = create(:salary_structure_component, salary_structure: structure, salary_component: component, value: 40)
+
+      patch update_component_admin_salary_structure_path(structure, component_id: ssc.id),
+            params: { salary_structure_component: { value: 45 } },
+            headers: { "Host" => subdomain_host }
+
+      expect(response).to redirect_to(admin_salary_structure_path(structure))
+      expect(ssc.reload.value).to eq(45)
+    end
+
+    it "rejects an invalid (zero/blank) value" do
+      structure = ActsAsTenant.with_tenant(tenant) { create(:salary_structure, tenant: tenant) }
+      component = ActsAsTenant.with_tenant(tenant) { create(:salary_component, tenant: tenant) }
+      ssc = create(:salary_structure_component, salary_structure: structure, salary_component: component, value: 1600)
+
+      patch update_component_admin_salary_structure_path(structure, component_id: ssc.id),
+            params: { salary_structure_component: { value: "" } },
+            headers: { "Host" => subdomain_host }
+
+      expect(ssc.reload.value).to eq(1600)
     end
   end
 
