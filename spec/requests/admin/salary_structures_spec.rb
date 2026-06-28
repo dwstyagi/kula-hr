@@ -148,6 +148,36 @@ RSpec.describe "Admin::SalaryStructures", type: :request do
       expect(response).to redirect_to(admin_salary_structure_path(structure))
       expect(flash[:alert]).to be_present
     end
+
+    it "rejects a non-earning (statutory) component" do
+      structure = ActsAsTenant.with_tenant(tenant) { create(:salary_structure, tenant: tenant) }
+      pf = ActsAsTenant.with_tenant(tenant) { create(:salary_component, :deduction, tenant: tenant, name: "PF") }
+
+      expect {
+        post add_component_admin_salary_structure_path(structure),
+             params: { salary_structure_component: { salary_component_id: pf.id, value: 1800 } },
+             headers: { "Host" => subdomain_host }
+      }.not_to change { SalaryStructureComponent.count }
+
+      expect(response).to redirect_to(admin_salary_structure_path(structure))
+      expect(flash[:alert]).to match(/calculated automatically/i)
+    end
+  end
+
+  describe "GET /admin/salary_structures/:id picker" do
+    it "offers only earning components and shows the statutory note" do
+      structure = ActsAsTenant.with_tenant(tenant) { create(:salary_structure, tenant: tenant) }
+      ActsAsTenant.with_tenant(tenant) do
+        create(:salary_component, :earning, tenant: tenant, name: "Special Allowance")
+        create(:salary_component, :deduction, tenant: tenant, name: "ProvidentFundDed")
+      end
+
+      get admin_salary_structure_path(structure), headers: { "Host" => subdomain_host }
+
+      expect(response.body).to include("Special Allowance")      # earning is offered
+      expect(response.body).not_to include("ProvidentFundDed")   # deduction is NOT offered
+      expect(response.body).to match(/calculated automatically/i) # info note present
+    end
   end
 
   describe "DELETE /admin/salary_structures/:id/remove_component" do
