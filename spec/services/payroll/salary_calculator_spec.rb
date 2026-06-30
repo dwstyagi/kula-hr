@@ -172,4 +172,40 @@ RSpec.describe Payroll::SalaryCalculator do
       )
     end
   end
+
+  # ── Employer PF included in CTC ───────────────────────────────────────────────
+  context "when employer PF is part of CTC (full attendance, ₹12L)" do
+    # on-top gross = 40000 + 20000 + 30000 + 1600 = 91,600
+    # carve = employer PF 1800 + admin 75 + EDLI 75 = 1,950
+    let(:setting) do
+      create(:payroll_setting, tenant: tenant, pt_state: "maharashtra",
+             pf_enabled: true, esi_enabled: true, pt_enabled: true, tds_enabled: true,
+             employer_pf_in_ctc: true)
+    end
+
+    before do
+      setup_salary(annual_ctc: 1_200_000)
+      setup_attendance(days_present: 22, total_working_days: 22)
+    end
+
+    subject(:result) { calculator.call }
+
+    it "carves the employer PF charges (₹1,950) out of gross" do
+      expect(result.gross_pay).to eq(91_600 - 1_950)
+    end
+
+    it "keeps the employee PF deduction statutory (unchanged at ₹1,800)" do
+      expect(result.deductions["PF"]).to eq(1_800)
+    end
+
+    it "surfaces admin and EDLI in employer costs" do
+      expect(result.employer_costs[:admin]).to eq(75)
+      expect(result.employer_costs[:edli]).to eq(75)
+    end
+
+    it "reconciles: gross + employer PF charges equals the on-top gross" do
+      ec = result.employer_costs
+      expect(result.gross_pay + ec[:pf] + ec[:admin] + ec[:edli]).to eq(91_600)
+    end
+  end
 end

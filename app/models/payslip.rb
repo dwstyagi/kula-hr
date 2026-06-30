@@ -34,9 +34,12 @@ class Payslip < ApplicationRecord
 
   # ── Computed helpers ─────────────────────────────────────────────────────────
 
-  # Total cost to the company for this employee this month
+  # Total cost to the company for this employee this month — includes every
+  # employer-side charge (PF, ESI, PF admin, EDLI). When the tenant runs the
+  # "employer PF in CTC" model these are carved out of gross, so this still
+  # reconciles to the offered CTC.
   def ctc_this_month
-    gross_pay + employer_pf + employer_esi
+    gross_pay + employer_pf + employer_esi + employer_pf_admin + employer_edli
   end
 
   def proration_factor

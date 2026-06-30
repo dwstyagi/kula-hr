@@ -327,14 +327,23 @@ class Payroll::PayslipPdfGenerator
     top   = pdf.cursor
     col_w = (pdf.bounds.width - 30) / 2.0
 
-    mini_header(pdf, "Employer Contribution", "· not deducted", 0, top, col_w)
-    mini_header(pdf, "Year to Date", "· FY #{fy_label}", col_w + 30, top, col_w)
+    in_ctc = setting&.employer_pf_in_ctc?
+    hide   = setting&.hide_employer_contributions_on_slip?
 
-    emp_rows = [
-      [ "Employer PF (EPF + EPS)", num(@payslip.employer_pf) ],
-      [ "CTC This Month",          num(@payslip.ctc_this_month) ]
-    ]
-    emp_rows << [ "Employer ESI", num(@payslip.employer_esi) ] if @payslip.employer_esi.to_f.positive?
+    if hide
+      # Company convention: hide employer PF; show the carved gross as "CTC".
+      mini_header(pdf, "Cost to Company", "", 0, top, col_w)
+      emp_rows = cost_to_company_rows(in_ctc)
+    else
+      mini_header(pdf, "Employer Contribution", in_ctc ? "· included in CTC" : "· not deducted", 0, top, col_w)
+      emp_rows = [ [ "Employer PF (EPF + EPS)", num(@payslip.employer_pf) ] ]
+      emp_rows << [ "PF Admin Charges", num(@payslip.employer_pf_admin) ] if @payslip.employer_pf_admin.to_f.positive?
+      emp_rows << [ "EDLI Insurance",   num(@payslip.employer_edli) ]     if @payslip.employer_edli.to_f.positive?
+      emp_rows << [ "Employer ESI",     num(@payslip.employer_esi) ]      if @payslip.employer_esi.to_f.positive?
+      emp_rows << [ "CTC This Month",   num(@payslip.ctc_this_month) ]
+    end
+
+    mini_header(pdf, "Year to Date", "· FY #{fy_label}", col_w + 30, top, col_w)
     y = ytd
     ytd_rows = [
       [ "Gross Earnings",   num(y[:gross]) ],
@@ -428,6 +437,20 @@ class Payroll::PayslipPdfGenerator
   def proration
     wd = @payslip.total_working_days.to_f
     wd.zero? ? 1.0 : (@payslip.paid_days.to_f / wd)
+  end
+
+  def setting
+    @setting ||= @tenant.payroll_setting
+  end
+
+  # "Show Y as CTC": annual CTC net of the employer PF that's been carved in.
+  def cost_to_company_rows(in_ctc)
+    salary = @employee.current_salary
+    return [] unless salary
+
+    annual_employer = (@payslip.employer_pf + @payslip.employer_pf_admin + @payslip.employer_edli) * 12
+    annual_ctc = salary.annual_ctc - (in_ctc ? annual_employer : 0)
+    [ [ "Annual CTC", num(annual_ctc) ], [ "Monthly", num(annual_ctc / 12.0) ] ]
   end
 
   def fy_bounds

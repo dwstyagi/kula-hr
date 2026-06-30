@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_06_16_100001) do
+ActiveRecord::Schema[8.1].define(version: 2026_06_29_100002) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "pg_catalog.plpgsql"
@@ -272,10 +272,12 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_16_100001) do
 
   create_table "payroll_settings", force: :cascade do |t|
     t.datetime "created_at", null: false
+    t.boolean "employer_pf_in_ctc", default: false, null: false
     t.decimal "esi_ceiling", precision: 10, scale: 2, default: "21000.0"
     t.decimal "esi_employee_rate", precision: 5, scale: 2, default: "0.75"
     t.decimal "esi_employer_rate", precision: 5, scale: 2, default: "3.25"
     t.boolean "esi_enabled", default: true, null: false
+    t.boolean "hide_employer_contributions_on_slip", default: false, null: false
     t.decimal "pf_admin_charge_rate", precision: 5, scale: 2, default: "0.5", null: false
     t.decimal "pf_edli_rate", precision: 5, scale: 2, default: "0.5", null: false
     t.decimal "pf_employee_rate", precision: 5, scale: 2, default: "12.0"
@@ -310,8 +312,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_16_100001) do
   create_table "payslips", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.bigint "employee_id", null: false
+    t.decimal "employer_edli", precision: 10, scale: 2, default: "0.0", null: false
     t.decimal "employer_esi", precision: 10, scale: 2, default: "0.0"
     t.decimal "employer_pf", precision: 10, scale: 2, default: "0.0"
+    t.decimal "employer_pf_admin", precision: 10, scale: 2, default: "0.0", null: false
     t.decimal "gross_pay", precision: 12, scale: 2, default: "0.0", null: false
     t.boolean "is_revised", default: false
     t.decimal "lop_days", precision: 5, scale: 1, default: "0.0"

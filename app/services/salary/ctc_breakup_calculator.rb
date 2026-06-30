@@ -11,8 +11,9 @@ module Salary
 
     LineItem = Struct.new(:name, :component_type, :monthly, :annual, keyword_init: true)
 
-    def self.call(annual_ctc:, salary_structure:, payroll_setting:, professional_tax_slabs: [])
-      new(annual_ctc, salary_structure, payroll_setting, professional_tax_slabs).call
+    def self.call(annual_ctc:, salary_structure:, payroll_setting:, professional_tax_slabs: [], apply_employer_pf_carve: nil)
+      new(annual_ctc, salary_structure, payroll_setting, professional_tax_slabs)
+        .call(apply_employer_pf_carve: apply_employer_pf_carve)
     end
 
     def initialize(annual_ctc, salary_structure, payroll_setting, professional_tax_slabs)
@@ -24,17 +25,24 @@ module Salary
       @components = salary_structure.salary_structure_components.includes(:salary_component)
     end
 
-    def call
+    # apply_employer_pf_carve: nil → follow the tenant setting; true/false forces it.
+    # The payroll path (SalaryCalculator) passes false and carves itself, post-proration.
+    def call(apply_employer_pf_carve: nil)
       earnings = compute_earnings
+      basic_monthly = find_basic_monthly(earnings)
+
+      employer_pf, pf_admin, edli = employer_pf_charges(basic_monthly)
+
+      carve = apply_employer_pf_carve.nil? ? @settings.employer_pf_in_ctc? : apply_employer_pf_carve
+      reduce_special_allowance!(earnings, employer_pf + pf_admin + edli) if carve
+
       gross_monthly = earnings.sum(&:monthly)
       gross_annual = earnings.sum(&:annual)
-
-      basic_monthly = find_basic_monthly(earnings)
 
       deductions = compute_deductions(basic_monthly, gross_monthly)
       total_deductions_monthly = deductions.sum(&:monthly)
 
-      employer_contributions = compute_employer_contributions(basic_monthly, gross_monthly)
+      employer_contributions = build_employer_contributions(employer_pf, pf_admin, edli, gross_monthly)
       total_employer_monthly = employer_contributions.sum(&:monthly)
 
       net_monthly = (gross_monthly - total_deductions_monthly).round(2)
@@ -105,23 +113,45 @@ module Salary
       deductions
     end
 
-    def compute_employer_contributions(basic_monthly, gross_monthly)
-      contributions = []
+    # Employer-side PF charges (monthly): [employer_pf, pf_admin, edli].
+    # All computed on the capped PF wage base. Zero when PF is disabled.
+    def employer_pf_charges(basic_monthly)
+      return [ 0, 0, 0 ] unless @settings.pf_enabled?
 
-      # Employer PF: rate% of Basic, capped at ceiling
-      pf_base = [ basic_monthly, @settings.pf_wage_ceiling ].min
+      pf_base     = [ basic_monthly, @settings.pf_wage_ceiling ].min
       employer_pf = (pf_base * @settings.pf_employer_rate / 100).round(2)
-      contributions << LineItem.new(name: "Employer PF", component_type: "employer_contribution", monthly: employer_pf, annual: (employer_pf * 12).round(2))
+      pf_admin    = (pf_base * @settings.pf_admin_charge_rate / 100).round(2)
+      edli        = (pf_base * @settings.pf_edli_rate / 100).round(2)
+      [ employer_pf, pf_admin, edli ]
+    end
 
-      # Employer ESI: rate% of Gross, only if gross <= ceiling
-      if gross_monthly <= @settings.esi_ceiling
-        employer_esi = (gross_monthly * @settings.esi_employer_rate / 100).round(2)
-      else
-        employer_esi = 0
-      end
-      contributions << LineItem.new(name: "Employer ESI", component_type: "employer_contribution", monthly: employer_esi, annual: (employer_esi * 12).round(2))
+    def build_employer_contributions(employer_pf, pf_admin, edli, gross_monthly)
+      contributions = []
+      line = ->(name, amt) { LineItem.new(name: name, component_type: "employer_contribution", monthly: amt, annual: (amt * 12).round(2)) }
 
+      contributions << line.call("Employer PF", employer_pf)
+      contributions << line.call("PF Admin Charges", pf_admin) if pf_admin.positive?
+      contributions << line.call("EDLI", edli) if edli.positive?
+
+      employer_esi = gross_monthly <= @settings.esi_ceiling ? (gross_monthly * @settings.esi_employer_rate / 100).round(2) : 0
+      contributions << line.call("Employer ESI", employer_esi)
       contributions
+    end
+
+    # CTC-inclusive model: pull the employer PF charges out of Special Allowance
+    # (the flexible residual) so the employee bears them. Never touches Basic/HRA
+    # (keeps PF base and HRA exemption intact). Falls back to the largest other
+    # earning, and floors at zero if the structure leaves nothing to carve.
+    def reduce_special_allowance!(earnings, carve_amount)
+      return if carve_amount <= 0
+
+      target = earnings.find { |e| e.name == "Special Allowance" } ||
+               earnings.reject { |e| %w[Basic HRA].include?(e.name) }.max_by(&:monthly)
+      return unless target
+
+      new_monthly = [ target.monthly - carve_amount, 0 ].max
+      target.monthly = new_monthly
+      target.annual  = (new_monthly * 12).round(2)
     end
 
     def compute_professional_tax(gross_monthly)

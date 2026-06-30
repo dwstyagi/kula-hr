@@ -31,6 +31,10 @@ module Payroll
       proration        = attendance[:proration_factor]
 
       full_earnings    = fetch_earnings
+      # CTC-inclusive model: structurally carve the employer PF charges out of
+      # Special Allowance (full basis), so they prorate with everything else.
+      apply_employer_pf_carve!(full_earnings) if @setting.employer_pf_in_ctc?
+
       prorated_earnings = prorate(full_earnings, proration)
       gross            = prorated_earnings.values.sum.round(2)
 
@@ -51,7 +55,12 @@ module Payroll
         deductions:        deductions,
         total_deductions:  total_deductions,
         net_pay:           net_pay,
-        employer_costs:    { pf: pf_result.employer_pf, esi: esi_result.employer_amount },
+        employer_costs:    {
+          pf:    pf_result.employer_pf,
+          esi:   esi_result.employer_amount,
+          admin: pf_result.admin_charge,
+          edli:  pf_result.edli_charge
+        },
         attendance:        attendance,
         proration_factor:  proration
       )
@@ -91,13 +100,33 @@ module Payroll
         annual_ctc:              employee_salary.annual_ctc,
         salary_structure:        employee_salary.salary_structure,
         payroll_setting:         @setting,
-        professional_tax_slabs:  []   # PT handled separately via ProfessionalTaxCalculator
+        professional_tax_slabs:  [],   # PT handled separately via ProfessionalTaxCalculator
+        apply_employer_pf_carve: false # we carve here, proration-aware (see #call)
       )
 
       # Convert LineItem array → { "Basic" => 33333, "HRA" => 16667, ... }
       result.earnings.each_with_object({}) do |line_item, hash|
         hash[line_item.name] = line_item.monthly.to_f.round(2)
       end
+    end
+
+    # Reduce Special Allowance by the (full-basis) employer PF + admin + EDLI so
+    # the employee bears them. Mutates the earnings hash in place.
+    def apply_employer_pf_carve!(earnings)
+      pf = Statutory::PfCalculator.new(
+        basic:    earnings["Basic"] || 0,
+        da:       earnings["DA"] || earnings["Dearness Allowance"] || 0,
+        setting:  @setting,
+        employee: @employee
+      ).call
+      carve = (pf.employer_pf + pf.admin_charge + pf.edli_charge).to_f
+      return if carve <= 0
+
+      key = earnings.key?("Special Allowance") ? "Special Allowance" :
+              (earnings.except("Basic", "HRA").max_by { |_, v| v }&.first)
+      return unless key
+
+      earnings[key] = [ earnings[key] - carve, 0 ].max.round(2)
     end
 
     def prorate(earnings, factor)

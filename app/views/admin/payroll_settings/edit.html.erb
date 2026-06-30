@@ -57,6 +57,22 @@
             <%= f.number_field :pf_edli_rate, step: 0.01, min: 0,
                   class: "w-full text-sm border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500" %>
           </div>
+          <div class="md:col-span-2 pt-2 border-t border-gray-100">
+            <div class="flex items-center gap-3">
+              <%= f.check_box :employer_pf_in_ctc, class: "h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" %>
+              <%= f.label :employer_pf_in_ctc, "Employer PF is part of CTC", class: "text-sm font-medium text-gray-700" %>
+            </div>
+            <p class="text-xs text-gray-500 mt-1">
+              When on, employer PF + admin + EDLI are carved out of Special Allowance (borne by the employee) instead of paid on top of CTC.
+            </p>
+            <div class="flex items-center gap-3 mt-3">
+              <%= f.check_box :hide_employer_contributions_on_slip, class: "h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" %>
+              <%= f.label :hide_employer_contributions_on_slip, "Hide employer contributions on payslip", class: "text-sm font-medium text-gray-700" %>
+            </div>
+            <p class="text-xs text-gray-500 mt-1">
+              When on, the payslip omits the employer PF breakdown and shows the net-of-employer-PF figure as the employee's CTC.
+            </p>
+          </div>
         </div>
       </div>
 

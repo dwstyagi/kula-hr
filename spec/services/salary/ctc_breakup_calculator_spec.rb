@@ -215,4 +215,45 @@ RSpec.describe Salary::CtcBreakupCalculator do
       expect(pt.monthly).to eq(0)
     end
   end
+
+  describe "employer PF in CTC" do
+    let(:ctc_setting) do
+      create(:payroll_setting, tenant: tenant,
+        pf_employee_rate: 12.0, pf_employer_rate: 12.0, pf_wage_ceiling: 15_000,
+        pf_admin_charge_rate: 0.5, pf_edli_rate: 0.5,
+        employer_pf_in_ctc: true)
+    end
+
+    subject do
+      described_class.call(annual_ctc: 1_200_000, salary_structure: structure,
+                           payroll_setting: ctc_setting, professional_tax_slabs: pt_slabs)
+    end
+
+    # carve = employer PF (12% x 15k = 1800) + admin (0.5% = 75) + EDLI (0.5% = 75) = 1950
+    it "carves the employer PF charges out of Special Allowance" do
+      special = subject.earnings.find { |e| e.name == "Special Allowance" }
+      expect(special.monthly).to eq(30_000 - 1_950)
+    end
+
+    it "does not touch Basic or HRA" do
+      expect(subject.earnings.find { |e| e.name == "Basic" }.monthly).to eq(40_000)
+      expect(subject.earnings.find { |e| e.name == "HRA" }.monthly).to eq(20_000)
+    end
+
+    it "lowers gross by exactly the carve" do
+      # baseline gross (on-top model) = 40000 + 20000 + 30000 + 1600 = 91600
+      expect(subject.gross_monthly).to eq(91_600 - 1_950)
+    end
+
+    it "itemises PF admin and EDLI in employer contributions" do
+      names = subject.employer_contributions.map(&:name)
+      expect(names).to include("Employer PF", "PF Admin Charges", "EDLI")
+    end
+
+    it "leaves Special Allowance untouched when the flag is off (default)" do
+      off = described_class.call(annual_ctc: 1_200_000, salary_structure: structure,
+                                 payroll_setting: payroll_setting, professional_tax_slabs: pt_slabs)
+      expect(off.earnings.find { |e| e.name == "Special Allowance" }.monthly).to eq(30_000)
+    end
+  end
 end

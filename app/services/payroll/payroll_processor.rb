@@ -84,6 +84,8 @@ module Payroll
           net_pay:            result.net_pay,
           employer_pf:        result.employer_costs[:pf],
           employer_esi:       result.employer_costs[:esi],
+          employer_pf_admin:  result.employer_costs[:admin] || 0,
+          employer_edli:      result.employer_costs[:edli] || 0,
           total_working_days: result.attendance[:working_days],
           paid_days:          result.attendance[:paid_days],
           lop_days:           result.attendance[:lop_days]

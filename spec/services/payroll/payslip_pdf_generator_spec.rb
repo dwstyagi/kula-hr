@@ -36,6 +36,29 @@ RSpec.describe Payroll::PayslipPdfGenerator do
     end
   end
 
+  describe "hide employer contributions (show CTC = Y)" do
+    it "computes annual CTC net of the employer PF charges" do
+      structure = create(:salary_structure, tenant: tenant)
+      ps = payslip_with_lines(month: 6, year: 2026, gross: 92_307, net: 84_597)
+      create(:employee_salary, tenant: tenant, employee: ps.employee,
+             salary_structure: structure, annual_ctc: 1_200_000)
+      ps.update_columns(employer_pf: 1_800, employer_pf_admin: 75, employer_edli: 75)
+
+      rows = described_class.new(payslip: ps.reload).send(:cost_to_company_rows, true)
+
+      # 1,200,000 - (1800 + 75 + 75) * 12 = 11,76,600
+      expect(rows.first).to eq([ "Annual CTC", "11,76,600" ])
+    end
+
+    it "renders without error when the section is hidden" do
+      create(:payroll_setting, tenant: tenant,
+             employer_pf_in_ctc: true, hide_employer_contributions_on_slip: true)
+      ps = payslip_with_lines(month: 6, year: 2026, gross: 92_307, net: 84_597)
+
+      expect { described_class.new(payslip: ps).call }.not_to raise_error
+    end
+  end
+
   describe "year-to-date totals" do
     it "sums gross/net/PF/TDS across the FY up to and including the slip month" do
       emp = create(:employee, tenant: tenant)
