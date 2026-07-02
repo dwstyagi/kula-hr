@@ -18,6 +18,7 @@ class Employee < ApplicationRecord
   has_many :comp_off_requests, dependent: :destroy
   has_many :attendance_summaries, dependent: :destroy
   has_many :tax_declarations, dependent: :destroy
+  has_many :announcement_reads, dependent: :destroy
 
   has_paper_trail
 

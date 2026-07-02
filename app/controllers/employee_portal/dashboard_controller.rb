@@ -33,6 +33,9 @@ module EmployeePortal
 
       @attendance = current_employee.attendance_summaries
                       .find_by(month: today.month, year: today.year)
+
+      @announcements = Announcement.published.recent_first.limit(3)
+      @announcement_read_ids = current_employee.announcement_reads.pluck(:announcement_id).to_set
     end
   end
 end

@@ -63,6 +63,33 @@
       </div>
     <% end %>
 
+    <%# Latest Announcements %>
+    <% if @announcements&.any? %>
+      <div class="bg-white rounded-xl border border-gray-200 p-4">
+        <div class="flex items-center justify-between mb-3">
+          <h2 class="text-sm font-semibold text-gray-900">Announcements</h2>
+          <%= link_to "View all", employee_portal_announcements_path, class: "text-xs font-medium text-blue-600 hover:text-blue-700" %>
+        </div>
+        <div class="divide-y divide-gray-100">
+          <% @announcements.each do |announcement| %>
+            <% unread = !@announcement_read_ids.include?(announcement.id) %>
+            <%= link_to employee_portal_announcement_path(announcement), class: "flex items-start justify-between gap-3 py-2.5 group" do %>
+              <div class="flex items-start gap-2 min-w-0">
+                <span class="mt-1.5 h-2 w-2 rounded-full shrink-0 <%= unread ? 'bg-blue-600' : 'bg-transparent' %>"></span>
+                <div class="min-w-0">
+                  <p class="text-sm font-medium text-gray-900 truncate group-hover:text-blue-600"><%= announcement.title %></p>
+                  <p class="text-xs text-gray-500 truncate"><%= truncate(announcement.body.to_s, length: 80) %></p>
+                </div>
+              </div>
+              <span class="text-xs text-gray-400 shrink-0 whitespace-nowrap">
+                <%= (announcement.published_at || announcement.created_at).strftime("%d %b") %>
+              </span>
+            <% end %>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+
     <%# Quick Stats Row %>
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
       <%# Net Salary %>

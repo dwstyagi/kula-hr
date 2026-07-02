@@ -10,11 +10,39 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_06_29_100002) do
+ActiveRecord::Schema[8.1].define(version: 2026_07_02_100002) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
+
+  create_table "announcement_reads", force: :cascade do |t|
+    t.bigint "announcement_id", null: false
+    t.datetime "created_at", null: false
+    t.bigint "employee_id", null: false
+    t.datetime "read_at", null: false
+    t.bigint "tenant_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["announcement_id", "employee_id"], name: "index_announcement_reads_on_announcement_id_and_employee_id", unique: true
+    t.index ["announcement_id"], name: "index_announcement_reads_on_announcement_id"
+    t.index ["employee_id"], name: "index_announcement_reads_on_employee_id"
+    t.index ["tenant_id"], name: "index_announcement_reads_on_tenant_id"
+  end
+
+  create_table "announcements", force: :cascade do |t|
+    t.bigint "author_id", null: false
+    t.text "body"
+    t.datetime "created_at", null: false
+    t.datetime "last_edited_at"
+    t.boolean "published", default: false, null: false
+    t.datetime "published_at"
+    t.bigint "tenant_id", null: false
+    t.string "title", null: false
+    t.datetime "updated_at", null: false
+    t.index ["author_id"], name: "index_announcements_on_author_id"
+    t.index ["tenant_id", "published", "published_at"], name: "idx_on_tenant_id_published_published_at_53127ea824"
+    t.index ["tenant_id"], name: "index_announcements_on_tenant_id"
+  end
 
   create_table "attendance_summaries", force: :cascade do |t|
     t.decimal "approved_leaves", precision: 5, scale: 1, default: "0.0", null: false
@@ -521,6 +549,11 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_29_100002) do
     t.index ["tenant_id"], name: "index_work_locations_on_tenant_id"
   end
 
+  add_foreign_key "announcement_reads", "announcements"
+  add_foreign_key "announcement_reads", "employees"
+  add_foreign_key "announcement_reads", "tenants"
+  add_foreign_key "announcements", "tenants"
+  add_foreign_key "announcements", "users", column: "author_id"
   add_foreign_key "attendance_summaries", "employees"
   add_foreign_key "attendance_summaries", "tenants"
   add_foreign_key "comp_off_requests", "employees"

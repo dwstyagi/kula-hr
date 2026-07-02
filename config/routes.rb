@@ -91,6 +91,11 @@ Rails.application.routes.draw do
         end
       end
       resources :work_locations
+      resources :announcements do
+        member do
+          patch :publish
+        end
+      end
       get "leave_calendar", to: "leave_calendar#index", as: :leave_calendar
       resources :leave_requests, only: [ :index ] do
         member do
@@ -173,6 +178,7 @@ Rails.application.routes.draw do
         end
       end
       resources :leave_encashment_requests, only: [ :index, :create ]
+      resources :announcements, only: [ :index, :show ]
       resources :comp_off_requests, only: [ :index, :new, :create ]
       resources :team_comp_off_requests, only: [ :index ] do
         member do

@@ -35,6 +35,20 @@
     <% end %>
 
     <% if current_employee %>
+      <% unread_announcements = Announcement.published.where.not(id: current_employee.announcement_reads.select(:announcement_id)).count %>
+      <%= link_to employee_portal_announcements_path,
+          class: "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium #{request.path.start_with?('/portal/announcements') ? 'bg-blue-50 text-blue-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'}" do %>
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"/>
+        </svg>
+        <span class="flex-1">Announcements</span>
+        <% if unread_announcements.positive? %>
+          <span class="inline-flex items-center justify-center px-2 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-600">
+            <%= unread_announcements %>
+          </span>
+        <% end %>
+      <% end %>
+
       <% if current_employee.direct_reports.exists? %>
         <%= link_to employee_portal_team_leave_requests_path,
             class: "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium #{request.path.start_with?('/portal/team_leave_requests') ? 'bg-blue-50 text-blue-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'}" do %>
