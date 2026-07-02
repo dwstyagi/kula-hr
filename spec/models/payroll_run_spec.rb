@@ -30,7 +30,7 @@ RSpec.describe PayrollRun, type: :model do
       it "rejects a duplicate month/year for the same tenant" do
         dup = build(:payroll_run, tenant: tenant, initiated_by: hr_user, month: 3, year: 2026)
         dup.valid?
-        expect(dup.errors[:month]).not_to be_empty
+        expect(dup.errors[:base].join).to include("Payroll for March 2026")
       end
 
       it "allows same month/year for a different tenant" do

@@ -113,23 +113,23 @@ module Admin
     private
 
     def set_month_year
-      today   = Date.today
-      @month  = (params[:month] || today.month).to_i
-      @year   = (params[:year]  || today.year).to_i
+      default = Date.today.prev_month
+      @month  = (params[:month] || default.month).to_i
+      @year   = (params[:year]  || default.year).to_i
     end
 
     def check_future_month
-      redirect_to_current_month if future_month?
+      redirect_to_latest_allowed_month if future_month?
     end
 
     def future_month?
-      Date.new(@year, @month, 1) > Date.current.beginning_of_month
+      Date.new(@year, @month, 1) > Date.today.prev_month.beginning_of_month
     end
 
-    def redirect_to_current_month
-      today = Date.current
-      redirect_to admin_attendance_summaries_path(month: today.month, year: today.year),
-        alert: "Cannot process attendance for #{Date::MONTHNAMES[@month]} #{@year}. You can only manage attendance up to the current month (#{Date::MONTHNAMES[today.month]} #{today.year})."
+    def redirect_to_latest_allowed_month
+      latest = Date.today.prev_month
+      redirect_to admin_attendance_summaries_path(month: latest.month, year: latest.year),
+        alert: "Cannot process attendance for #{Date::MONTHNAMES[@month]} #{@year}. Attendance can only be managed up to the previous month (#{Date::MONTHNAMES[latest.month]} #{latest.year})."
     end
 
     def set_summary

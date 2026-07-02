@@ -35,6 +35,13 @@ module Admin
         @readiness = readiness_for(@payroll_run)
         render :new, status: :unprocessable_entity
       end
+    rescue ActiveRecord::RecordNotUnique
+      # Lost a concurrent create race: the DB unique index blocked the duplicate.
+      # Re-run validations so the friendly "already exists" message is populated
+      # (the winning run is now committed, so no_existing_run_for_period sees it).
+      @payroll_run.valid?
+      @readiness = readiness_for(@payroll_run)
+      render :new, status: :unprocessable_entity
     end
 
     # GET /admin/payroll_runs/:id

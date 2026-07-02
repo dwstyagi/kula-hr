@@ -11,11 +11,8 @@ class PayrollRun < ApplicationRecord
 
   validates :month, presence: true, inclusion: { in: 1..12 }
   validates :year,  presence: true
-  validates :month, uniqueness: {
-    scope: [ :tenant_id, :year ],
-    message: "payroll already exists for this month and year"
-  }
-  validate :attendance_must_be_locked, on: :create
+  validate  :no_existing_run_for_period, on: :create
+  validate  :attendance_must_be_locked, on: :create
 
   # ── Scopes ───────────────────────────────────────────────────────────────────
 
@@ -95,6 +92,30 @@ class PayrollRun < ApplicationRecord
   end
 
   private
+
+  # Guard: one payroll run per tenant/month/year. Instead of a generic
+  # "already exists" message, name who initiated it and its current state so
+  # HR understands why a new run is blocked.
+  def no_existing_run_for_period
+    return if month.blank? || year.blank?
+
+    existing = PayrollRun
+      .where(tenant_id: tenant_id || ActsAsTenant.current_tenant&.id, month: month, year: year)
+      .where.not(id: id)
+      .first
+    return unless existing
+
+    initiator = existing.initiated_by&.full_name || "an unknown user"
+    detail =
+      if existing.approved? || existing.paid?
+        approver = existing.approved_by&.full_name || "a super admin"
+        "was initiated by #{initiator} and #{existing.approved? ? 'approved' : 'paid'} by #{approver}"
+      else
+        "was initiated by #{initiator} and is currently #{existing.status.humanize.downcase}"
+      end
+
+    errors.add(:base, "Payroll for #{month_name} #{year} #{detail}.")
+  end
 
   # Guard: every active/probation employee must have a locked attendance summary
   # before a run can be created. Delegates to Payroll::ReadinessCheck so the

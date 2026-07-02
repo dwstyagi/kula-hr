@@ -79,6 +79,26 @@ RSpec.describe "Admin::PayrollRuns", type: :request do
         expect(response).to have_http_status(:unprocessable_entity)
       end
     end
+
+    context "when a concurrent create loses the DB unique-index race" do
+      before do
+        ActsAsTenant.with_tenant(tenant) do
+          create(:payroll_run, :approved, tenant: tenant, initiated_by: hr_user, month: 4, year: 2026)
+        end
+        # Simulate the race: validation passes but the DB rejects the duplicate insert.
+        allow_any_instance_of(PayrollRun).to receive(:save)
+          .and_raise(ActiveRecord::RecordNotUnique.new("duplicate key"))
+      end
+
+      it "re-renders new with 422 and the friendly duplicate message" do
+        post admin_payroll_runs_path,
+             params: { payroll_run: { month: 4, year: 2026 } },
+             headers: headers
+
+        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response.body).to include("Payroll for April 2026")
+      end
+    end
   end
 
   # ── Show ──────────────────────────────────────────────────────────────────
