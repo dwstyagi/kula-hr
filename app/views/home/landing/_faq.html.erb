@@ -1,0 +1,35 @@
+<%# ── FAQ ── %>
+<div id="faq" class="bg-white py-24 sm:py-32">
+  <div class="mx-auto max-w-3xl px-6 lg:px-8">
+    <div class="sr text-center mb-12">
+      <p class="text-base font-semibold leading-7 text-indigo-600">FAQ</p>
+      <h2 class="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">Questions, answered</h2>
+    </div>
+    <dl class="sr-stagger space-y-4">
+      <% [
+        [ "How long does it take to set up?",
+          "Most companies are ready to run their first payroll within 30 minutes — create your account, import employees via CSV, and configure salary structures (CTC breakup is auto-calculated)." ],
+        [ "Do I have to switch banks?",
+          "No. Kula HR generates a salary transfer file for HDFC, ICICI, or SBI, plus a generic CSV that works with most corporate net banking. You keep your existing bank." ],
+        [ "Which statutory requirements are handled?",
+          "PF/EPF, ESI, Professional Tax (state-wise slabs), and TDS (Old & New regime) are auto-calculated every run. You can export PF ECR, ESI, and PT reports in filing-ready formats." ],
+        [ "Can I import my existing employees?",
+          "Yes — bulk-import your team from a CSV or Excel file. You can download a template, and any rows with errors are flagged before anything is saved." ],
+        [ "What happens after my free payroll run?",
+          "The trial includes 1 full payroll run for up to 25 employees. When you're ready to continue, upgrade to the paid plan at ₹99 per employee per month — unlimited runs and employees." ],
+        [ "Do my employees get access?",
+          "Yes. Every employee gets a self-service portal to view and download payslips, apply for leave, submit tax declarations, and read company announcements — no extra cost." ],
+      ].each do |q, a| %>
+        <details class="sr-c group rounded-2xl border border-gray-200 bg-white p-6 [&_svg]:open:rotate-180">
+          <summary class="flex cursor-pointer items-center justify-between gap-4 text-base font-semibold text-gray-900 list-none">
+            <%= q %>
+            <svg class="h-5 w-5 shrink-0 text-indigo-600 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+            </svg>
+          </summary>
+          <p class="mt-4 text-sm leading-7 text-gray-600"><%= a %></p>
+        </details>
+      <% end %>
+    </dl>
+  </div>
+</div>

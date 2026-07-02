@@ -1,0 +1,30 @@
+<%# ── Security & trust ── %>
+<div id="security" class="bg-white py-24 sm:py-32">
+  <div class="mx-auto max-w-7xl px-6 lg:px-8">
+    <div class="sr mx-auto max-w-2xl text-center mb-16">
+      <p class="text-base font-semibold leading-7 text-indigo-600">Security &amp; trust</p>
+      <h2 class="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">You're trusting us with payroll. We take that seriously.</h2>
+      <p class="mt-6 text-lg leading-8 text-gray-600">
+        Salaries, PAN, and bank details are sensitive. Kula HR is built so your company's data stays yours — isolated, access-controlled, and never sold.
+      </p>
+    </div>
+    <div class="sr-stagger mx-auto grid max-w-2xl grid-cols-1 gap-8 sm:grid-cols-2 lg:max-w-none lg:grid-cols-4">
+      <% [
+        [ "Per-company isolation", "Every company's data is scoped to its own tenant. One customer can never see another's records." ],
+        [ "Role-based access", "Admins, HR, and employees each see only what their role allows — enforced on every request." ],
+        [ "Encrypted connections", "All traffic runs over TLS. Data in transit between you and Kula HR is encrypted end to end." ],
+        [ "We never sell your data", "Your payroll and employee data is used only to run your payroll. No ads, no resale, ever." ],
+      ].each do |title, desc| %>
+        <div class="sr-c flex flex-col">
+          <div class="h-10 w-10 flex items-center justify-center rounded-lg bg-indigo-50 text-indigo-600 shrink-0 mb-4">
+            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 01-1.043 3.296 3.745 3.745 0 01-3.296 1.043A3.745 3.745 0 0112 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 01-3.296-1.043 3.745 3.745 0 01-1.043-3.296A3.745 3.745 0 013 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 011.043-3.296 3.746 3.746 0 013.296-1.043A3.746 3.746 0 0112 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 013.296 1.043 3.746 3.746 0 011.043 3.296A3.745 3.745 0 0121 12z" />
+            </svg>
+          </div>
+          <h3 class="text-sm font-semibold text-gray-900"><%= title %></h3>
+          <p class="mt-2 text-sm leading-6 text-gray-600"><%= desc %></p>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>

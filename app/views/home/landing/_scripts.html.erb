@@ -1,0 +1,95 @@
+<script>
+  /* ── Login form ── */
+  async function goToLogin() {
+    const sub = document.getElementById('subdomain-input').value.trim().toLowerCase();
+    const errorEl = document.getElementById('login-error');
+    const wrapperEl = document.getElementById('subdomain-wrapper');
+    const btn = document.getElementById('login-btn');
+
+    errorEl.classList.add('hidden');
+    errorEl.textContent = '';
+    wrapperEl.classList.remove('ring-red-400');
+
+    if (!sub) {
+      wrapperEl.classList.add('ring-2', 'ring-red-400');
+      errorEl.textContent = 'Please enter your company subdomain.';
+      errorEl.classList.remove('hidden');
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = 'Checking…';
+
+    try {
+      const res = await fetch('/check_tenant?subdomain=' + encodeURIComponent(sub));
+      const data = await res.json();
+
+      if (!data.exists) {
+        wrapperEl.classList.add('ring-2', 'ring-red-400');
+        errorEl.textContent = "We couldn't find a company with that subdomain. Please check and try again.";
+        errorEl.classList.remove('hidden');
+        btn.disabled = false;
+        btn.textContent = 'Log in';
+        return;
+      }
+
+      const protocol = window.location.protocol;
+      const host = window.location.host;
+      window.location.href = protocol + '//' + sub + '.' + host + '/users/sign_in';
+    } catch (e) {
+      btn.disabled = false;
+      btn.textContent = 'Log in';
+    }
+  }
+
+  document.getElementById('subdomain-input').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') goToLogin();
+  });
+
+  document.getElementById('subdomain-input').addEventListener('input', function() {
+    document.getElementById('login-error').classList.add('hidden');
+    document.getElementById('subdomain-wrapper').classList.remove('ring-2', 'ring-red-400');
+  });
+
+  /* ── Navbar: glassmorphism on scroll ── */
+  (function() {
+    var header = document.getElementById('site-header');
+    if (!header) return;
+    window.addEventListener('scroll', function() {
+      header.classList.toggle('scrolled', window.scrollY > 24);
+    }, { passive: true });
+  })();
+
+  /* ── Scroll reveal: IntersectionObserver ── */
+  (function() {
+    if (!window.IntersectionObserver) return;
+
+    var observer = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('in');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+
+    document.querySelectorAll('.sr, .sr-stagger').forEach(function(el) {
+      observer.observe(el);
+    });
+
+    /* Step connector line */
+    var stepLine = document.getElementById('step-line');
+    var stepsGrid = document.getElementById('steps-grid');
+    if (stepLine && stepsGrid) {
+      var lineObs = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+          if (entry.isIntersecting) {
+            stepLine.classList.add('in');
+            lineObs.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.25 });
+      lineObs.observe(stepsGrid);
+    }
+  })();
+</script>

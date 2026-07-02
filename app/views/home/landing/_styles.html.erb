@@ -1,0 +1,145 @@
+<style>
+  /* ── Hero: staggered fade + slide-up ── */
+  @keyframes fadeSlideUp {
+    from { opacity: 0; transform: translateY(26px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .hero-reveal {
+    opacity: 0;
+    animation: fadeSlideUp 0.72s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  }
+  .d0 { animation-delay: 0.00s; }
+  .d1 { animation-delay: 0.14s; }
+  .d2 { animation-delay: 0.26s; }
+  .d3 { animation-delay: 0.40s; }
+  .d4 { animation-delay: 0.54s; }
+  .d5 { animation-delay: 0.70s; }
+
+  /* ── Dashboard mockup: infinite gentle float ── */
+  @keyframes floatY {
+    0%, 100% { transform: translateY(0px); }
+    50%       { transform: translateY(-10px); }
+  }
+  .dashboard-float {
+    animation: floatY 7s ease-in-out infinite;
+    animation-delay: 1.6s;
+  }
+
+  /* ── Background blobs: slow opacity pulse ── */
+  @keyframes blobPulse {
+    0%, 100% { opacity: 0.17; }
+    50%       { opacity: 0.3; }
+  }
+  .blob-a { animation: blobPulse 9s ease-in-out infinite; }
+  .blob-b { animation: blobPulse 11s ease-in-out infinite; animation-delay: 2.5s; }
+
+  /* ── Nav: glassmorphism on scroll ── */
+  #site-header {
+    transition: background 0.35s ease, box-shadow 0.35s ease;
+  }
+  #site-header.scrolled {
+    background: rgba(255, 255, 255, 0.84);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    box-shadow: 0 1px 0 rgba(0,0,0,0.07), 0 2px 16px rgba(0,0,0,0.05);
+  }
+
+  /* ── Nav links: sliding underline ── */
+  .nav-link {
+    position: relative;
+    padding-bottom: 2px;
+  }
+  .nav-link::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0;
+    width: 0; height: 1.5px;
+    background: #4f46e5;
+    transition: width 0.24s ease;
+  }
+  .nav-link:hover::after { width: 100%; }
+
+  /* ── Scroll reveal ── */
+  .sr {
+    opacity: 0;
+    transform: translateY(32px);
+    transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+                transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .sr.in { opacity: 1; transform: translateY(0); }
+
+  /* ── Stagger containers ── */
+  .sr-stagger > .sr-c {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.65s cubic-bezier(0.22, 1, 0.36, 1),
+                transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .sr-stagger.in > .sr-c:nth-child(1) { opacity:1; transform:none; transition-delay:0.00s; }
+  .sr-stagger.in > .sr-c:nth-child(2) { opacity:1; transform:none; transition-delay:0.10s; }
+  .sr-stagger.in > .sr-c:nth-child(3) { opacity:1; transform:none; transition-delay:0.20s; }
+  .sr-stagger.in > .sr-c:nth-child(4) { opacity:1; transform:none; transition-delay:0.30s; }
+  .sr-stagger.in > .sr-c:nth-child(5) { opacity:1; transform:none; transition-delay:0.40s; }
+  .sr-stagger.in > .sr-c:nth-child(6) { opacity:1; transform:none; transition-delay:0.50s; }
+
+  /* ── Feature cards: hover lift ── */
+  .feat-card {
+    transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+                box-shadow 0.28s ease, border-color 0.28s ease;
+  }
+  .feat-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 20px 44px -10px rgba(99, 102, 241, 0.2);
+    border-color: #c7d2fe;
+  }
+
+  /* ── Pricing cards: hover lift ── */
+  .price-card {
+    transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.3s ease;
+  }
+  .price-card:hover { transform: translateY(-8px); box-shadow: 0 28px 56px -16px rgba(0,0,0,0.18); }
+
+  /* ── Step connector line: draw in on scroll ── */
+  #step-line {
+    transform-origin: left center;
+    transform: scaleX(0);
+    transition: transform 1s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  #step-line.in { transform: scaleX(1); }
+
+  /* ── Step icons: hover bounce ── */
+  .step-icon {
+    transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1),
+                box-shadow 0.25s ease, border-color 0.25s ease;
+  }
+  .step-icon:hover {
+    transform: translateY(-4px) scale(1.05);
+    box-shadow: 0 8px 24px -4px rgba(99, 102, 241, 0.25);
+    border-color: #6366f1;
+  }
+
+  /* ── CTA buttons: shimmer sweep ── */
+  .btn-cta {
+    position: relative;
+    overflow: hidden;
+  }
+  .btn-cta::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.2) 50%, transparent 60%);
+    transform: translateX(-100%);
+    transition: transform 0.5s ease;
+  }
+  .btn-cta:hover::after { transform: translateX(100%); }
+
+  /* ── Reduced motion ── */
+  @media (prefers-reduced-motion: reduce) {
+    .hero-reveal  { animation: none; opacity: 1; }
+    .dashboard-float, .blob-a, .blob-b { animation: none; }
+    .sr, .sr-stagger > .sr-c { opacity: 1 !important; transform: none !important; transition: none; }
+    #step-line { transform: scaleX(1); transition: none; }
+    .feat-card, .price-card, .step-icon, .btn-cta::after, .nav-link::after { transition: none; }
+  }
+</style>

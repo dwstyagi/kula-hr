@@ -18,8 +18,8 @@ class Tenant < ApplicationRecord
   RESERVED_SUBDOMAINS = %w[www admin api app mail ftp smtp pop imap blog support help
                            status assets cdn static media platform dashboard].freeze
 
-  TRIAL_EMPLOYEE_LIMIT = 50
-  TRIAL_PAYROLL_RUN_LIMIT = 3
+  TRIAL_EMPLOYEE_LIMIT = 25
+  TRIAL_PAYROLL_RUN_LIMIT = 1
   WRITE_ALLOWED_STATUSES = %w[trial active].freeze
 
   validates :name, presence: true

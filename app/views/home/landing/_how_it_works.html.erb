@@ -1,0 +1,31 @@
+<%# ── How it works ── %>
+<div id="how-it-works" class="bg-gray-50 py-24 sm:py-32">
+  <div class="mx-auto max-w-7xl px-6 lg:px-8">
+    <div class="sr mx-auto max-w-2xl text-center mb-16">
+      <p class="text-base font-semibold leading-7 text-indigo-600">Simple workflow</p>
+      <h2 class="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">Payroll done in 5 steps</h2>
+    </div>
+    <div class="relative">
+      <%# Connector line — draws in on scroll %>
+      <div id="step-line" class="hidden lg:block absolute top-8 left-[10%] right-[10%] h-0.5 bg-indigo-100"></div>
+      <div id="steps-grid" class="sr-stagger grid grid-cols-1 gap-10 lg:grid-cols-5">
+        <% [
+          { step: "1", icon: "🏢", title: "Sign up",         desc: "Create your company account. Subdomain, state, admin user — done in 2 minutes." },
+          { step: "2", icon: "👥", title: "Add employees",   desc: "Import your team via CSV or add one by one. Salary structures auto-calculate CTC breakup." },
+          { step: "3", icon: "📅", title: "Mark attendance", desc: "Approve leaves, upload attendance template, or edit on-screen. Lock the month." },
+          { step: "4", icon: "⚙️",  title: "Run payroll",    desc: "One click. System calculates PF, ESI, PT, TDS, handles LOP, and generates payslips." },
+          { step: "5", icon: "🏦", title: "Pay & file",      desc: "Download the bank file. Transfer salaries. Download statutory reports for compliance." },
+        ].each do |s| %>
+          <div class="sr-c flex flex-col items-center text-center">
+            <div class="step-icon relative z-10 w-16 h-16 rounded-2xl bg-white border-2 border-indigo-100 shadow-sm flex items-center justify-center text-2xl mb-4">
+              <%= s[:icon] %>
+            </div>
+            <p class="text-xs font-bold text-indigo-600 uppercase tracking-widest mb-1">Step <%= s[:step] %></p>
+            <h3 class="text-sm font-semibold text-gray-900 mb-2"><%= s[:title] %></h3>
+            <p class="text-sm text-gray-500 leading-relaxed"><%= s[:desc] %></p>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>

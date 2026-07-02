@@ -23,7 +23,7 @@ module Admin
       tenant = ActsAsTenant.current_tenant
       return if tenant.nil? || tenant.write_allowed?
       msg = if tenant.trial?
-        "Your trial has ended — #{Tenant::TRIAL_PAYROLL_RUN_LIMIT} payroll runs completed. Upgrade to continue."
+        "Your trial has ended — #{ActionController::Base.helpers.pluralize(Tenant::TRIAL_PAYROLL_RUN_LIMIT, 'payroll run')} completed. Upgrade to continue."
       else
         "Your account is #{tenant.status}. Contact support to restore access."
       end
