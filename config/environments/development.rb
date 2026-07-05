@@ -1,4 +1,5 @@
 require "active_support/core_ext/integer/time"
+require Rails.root.join("lib/middleware/development_host_redirect")
 
 Rails.application.configure do
   # Settings specified here will take precedence over those in config/application.rb.
@@ -49,6 +50,9 @@ Rails.application.configure do
 
   # Allow lvh.me and all subdomains on any port
   config.hosts << /\A(.+\.)?lvh\.me(:\d+)?\z/
+
+  # Redirect local browser visits to lvh.me so tenant subdomains work in development.
+  config.middleware.insert_before 0, DevelopmentHostRedirect
 
   # Print deprecation notices to the Rails logger.
   config.active_support.deprecation = :log
