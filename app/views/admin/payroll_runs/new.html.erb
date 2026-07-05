@@ -34,7 +34,7 @@
             <%= f.number_field :year,
                   value: @payroll_run.year || Date.today.year,
                   min: 2020, max: 2099,
-                  class: "w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
+                  class: "w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
                   data: { action: "change->readiness#refresh" } %>
           </div>
         </div>
@@ -44,7 +44,7 @@
         <h2 class="text-base font-semibold text-gray-900 border-b border-gray-100 pb-3">Notes</h2>
         <%= f.text_area :notes, rows: 3,
               placeholder: "Any notes for this payroll run…",
-              class: "w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500" %>
+              class: "w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500" %>
       </div>
     </div>
 

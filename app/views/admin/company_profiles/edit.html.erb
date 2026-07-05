@@ -24,14 +24,14 @@
         <div>
           <%= f.label :name, "Company Name", class: "block text-sm font-medium text-gray-700 mb-1" %>
           <%= f.text_field :name,
-                class: "w-full text-sm border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
+                class: "w-full px-4 py-3 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
                 placeholder: "Acme Pvt. Ltd." %>
         </div>
 
         <div>
           <%= f.label :state, "State", class: "block text-sm font-medium text-gray-700 mb-1" %>
           <%= f.text_field :state,
-                class: "w-full text-sm border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
+                class: "w-full px-4 py-3 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
                 placeholder: "Maharashtra" %>
           <p class="text-xs text-gray-500 mt-1">Used for Professional Tax slab lookup. Must match the state set during signup.</p>
         </div>
@@ -45,7 +45,7 @@
           <div>
             <%= f.label :gstin, "GSTIN", class: "block text-sm font-medium text-gray-700 mb-1" %>
             <%= f.text_field :gstin,
-                  class: "w-full text-sm font-mono border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
+                  class: "w-full px-4 py-3 text-sm font-mono border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
                   placeholder: "22AAAAA0000A1Z5",
                   maxlength: 15 %>
           </div>
@@ -54,14 +54,14 @@
             <div>
               <%= f.label :pan, "PAN", class: "block text-sm font-medium text-gray-700 mb-1" %>
               <%= f.text_field :pan,
-                    class: "w-full text-sm font-mono border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
+                    class: "w-full px-4 py-3 text-sm font-mono border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
                     placeholder: "AAAAA0000A",
                     maxlength: 10 %>
             </div>
             <div>
               <%= f.label :tan, "TAN", class: "block text-sm font-medium text-gray-700 mb-1" %>
               <%= f.text_field :tan,
-                    class: "w-full text-sm font-mono border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
+                    class: "w-full px-4 py-3 text-sm font-mono border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
                     placeholder: "ABCD12345E",
                     maxlength: 10 %>
             </div>
@@ -71,13 +71,13 @@
             <div>
               <%= f.label :pf_establishment_code, "PF Establishment Code", class: "block text-sm font-medium text-gray-700 mb-1" %>
               <%= f.text_field :pf_establishment_code,
-                    class: "w-full text-sm font-mono border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
+                    class: "w-full px-4 py-3 text-sm font-mono border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
                     placeholder: "MH/BAN/0012345/000" %>
             </div>
             <div>
               <%= f.label :esi_code, "ESI Code", class: "block text-sm font-medium text-gray-700 mb-1" %>
               <%= f.text_field :esi_code,
-                    class: "w-full text-sm font-mono border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
+                    class: "w-full px-4 py-3 text-sm font-mono border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
                     placeholder: "12345678901" %>
             </div>
           </div>
@@ -92,7 +92,7 @@
       <div>
         <%= f.label :address, "Street Address", class: "block text-sm font-medium text-gray-700 mb-1" %>
         <%= f.text_area :address, rows: 2,
-              class: "w-full text-sm border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
+              class: "w-full px-4 py-3 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
               placeholder: "123, MG Road, Bandra West" %>
       </div>
 
@@ -100,19 +100,19 @@
         <div>
           <%= f.label :city, "City", class: "block text-sm font-medium text-gray-700 mb-1" %>
           <%= f.text_field :city,
-                class: "w-full text-sm border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
+                class: "w-full px-4 py-3 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
                 placeholder: "Mumbai" %>
         </div>
         <div>
           <%= f.label :state, "State", class: "block text-sm font-medium text-gray-700 mb-1" %>
           <%= f.text_field :state,
-                class: "w-full text-sm border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
+                class: "w-full px-4 py-3 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
                 placeholder: "Maharashtra" %>
         </div>
         <div>
           <%= f.label :pincode, "Pincode", class: "block text-sm font-medium text-gray-700 mb-1" %>
           <%= f.text_field :pincode,
-                class: "w-full text-sm border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
+                class: "w-full px-4 py-3 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
                 placeholder: "400050",
                 maxlength: 6 %>
         </div>

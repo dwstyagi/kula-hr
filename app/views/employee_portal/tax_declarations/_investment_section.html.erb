@@ -20,13 +20,13 @@
                name="tax_declaration[investment_declarations_attributes][<%= inv_index %>][description]"
                value="<%= inv.description %>"
                placeholder="e.g. PPF, LIC Premium"
-               class="flex-1 rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm">
+               class="flex-1 rounded-lg border-gray-300 px-4 py-3 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm">
         <input type="number"
                name="tax_declaration[investment_declarations_attributes][<%= inv_index %>][declared_amount]"
                value="<%= inv.declared_amount.to_i %>"
                min="1" step="100"
                placeholder="Amount"
-               class="w-36 rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm">
+               class="w-36 rounded-lg border-gray-300 px-4 py-3 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm">
         <button type="button"
                 class="text-red-400 hover:text-red-600"
                 data-action="click->tax-declaration#removeInvestment">
@@ -46,12 +46,12 @@
       <input type="text"
              name="tax_declaration[investment_declarations_attributes][NEW_RECORD][description]"
              placeholder="e.g. PPF, LIC Premium"
-             class="flex-1 rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm">
+             class="flex-1 rounded-lg border-gray-300 px-4 py-3 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm">
       <input type="number"
              name="tax_declaration[investment_declarations_attributes][NEW_RECORD][declared_amount]"
              min="1" step="100"
              placeholder="Amount"
-             class="w-36 rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm">
+             class="w-36 rounded-lg border-gray-300 px-4 py-3 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm">
       <button type="button"
               class="text-red-400 hover:text-red-600"
               data-action="click->tax-declaration#removeInvestment">

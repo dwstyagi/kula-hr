@@ -78,7 +78,7 @@
         <%# Reject form with reason %>
         <%= form_with url: reject_admin_payroll_run_path(@payroll_run), method: :patch, class: "flex items-center gap-2" do |f| %>
           <%= f.text_field :rejection_reason, placeholder: "Rejection reason…",
-                class: "border border-gray-300 rounded-lg px-3 py-2 text-sm w-64 focus:ring-2 focus:ring-red-500 focus:border-red-500" %>
+                class: "border border-gray-300 rounded-lg px-4 py-3 text-sm w-64 focus:ring-2 focus:ring-red-500 focus:border-red-500" %>
           <%= f.submit "Reject",
                 class: "px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 cursor-pointer" %>
         <% end %>

@@ -50,14 +50,14 @@
           <%= f.label :from_date, "From", class: "block text-sm font-medium text-gray-700 mb-1" %>
           <%= f.date_field :from_date,
               min: Date.today,
-              class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm",
+              class: "w-full rounded-lg border-gray-300 px-4 py-3 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm",
               data: { leave_calculator_target: "fromDate", action: "change->leave-calculator#recalculate" } %>
         </div>
         <div>
           <%= f.label :to_date, "To", class: "block text-sm font-medium text-gray-700 mb-1" %>
           <%= f.date_field :to_date,
               min: Date.today,
-              class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm",
+              class: "w-full rounded-lg border-gray-300 px-4 py-3 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm",
               data: { leave_calculator_target: "toDate", action: "change->leave-calculator#recalculate" } %>
         </div>
       </div>
@@ -76,7 +76,7 @@
         <%= f.label :reason, "Reason", class: "block text-sm font-medium text-gray-700 mb-1" %>
         <%= f.text_area :reason,
             rows: 3,
-            class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm",
+            class: "w-full rounded-lg border-gray-300 px-4 py-3 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm",
             placeholder: "Optional — briefly describe the reason for your leave" %>
       </div>
 

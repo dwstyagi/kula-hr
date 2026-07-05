@@ -20,14 +20,14 @@
     <div>
       <%= f.label :name, class: "block text-sm font-medium text-gray-700 mb-1" %>
       <%= f.text_field :name,
-          class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm",
+          class: "w-full rounded-lg border-gray-300 px-4 py-3 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm",
           autofocus: true, placeholder: "e.g. Maternity Leave" %>
     </div>
 
     <div>
       <%= f.label :code, "Short Code", class: "block text-sm font-medium text-gray-700 mb-1" %>
       <%= f.text_field :code,
-          class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm font-mono uppercase",
+          class: "w-full rounded-lg border-gray-300 px-4 py-3 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm font-mono uppercase",
           placeholder: "e.g. ML",
           oninput: "this.value = this.value.toUpperCase()" %>
     </div>
@@ -35,14 +35,14 @@
     <div>
       <%= f.label :annual_quota, "Days Per Year", class: "block text-sm font-medium text-gray-700 mb-1" %>
       <%= f.number_field :annual_quota,
-          class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm",
+          class: "w-full rounded-lg border-gray-300 px-4 py-3 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm",
           min: 0, step: 1, placeholder: "0 = unlimited" %>
     </div>
 
     <div>
       <%= f.label :max_carry_forward, "Max Carry Forward Days", class: "block text-sm font-medium text-gray-700 mb-1" %>
       <%= f.number_field :max_carry_forward,
-          class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm",
+          class: "w-full rounded-lg border-gray-300 px-4 py-3 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm",
           min: 0, step: 1, placeholder: "0" %>
       <p class="text-xs text-gray-400 mt-1">Only applies if carry forward is enabled.</p>
     </div>

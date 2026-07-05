@@ -48,11 +48,11 @@
         </div>
         <div>
           <%= f.label :phone, class: "block text-sm font-medium text-gray-700 mb-1" %>
-          <%= f.text_field :phone, class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm", placeholder: "e.g. 9876543210" %>
+          <%= f.text_field :phone, class: "w-full rounded-lg border-gray-300 px-4 py-3 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm", placeholder: "e.g. 9876543210" %>
         </div>
         <div>
           <%= f.label :date_of_birth, class: "block text-sm font-medium text-gray-700 mb-1" %>
-          <%= f.date_field :date_of_birth, class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm" %>
+          <%= f.date_field :date_of_birth, class: "w-full rounded-lg border-gray-300 px-4 py-3 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm" %>
         </div>
       </div>
     </div>
@@ -63,19 +63,19 @@
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div class="md:col-span-2">
           <%= f.label :current_address, class: "block text-sm font-medium text-gray-700 mb-1" %>
-          <%= f.text_area :current_address, rows: 3, class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm", placeholder: "Enter your current address" %>
+          <%= f.text_area :current_address, rows: 3, class: "w-full rounded-lg border-gray-300 px-4 py-3 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm", placeholder: "Enter your current address" %>
         </div>
         <div>
           <%= f.label :city, class: "block text-sm font-medium text-gray-700 mb-1" %>
-          <%= f.text_field :city, class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm" %>
+          <%= f.text_field :city, class: "w-full rounded-lg border-gray-300 px-4 py-3 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm" %>
         </div>
         <div>
           <%= f.label :state, class: "block text-sm font-medium text-gray-700 mb-1" %>
-          <%= f.text_field :state, class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm" %>
+          <%= f.text_field :state, class: "w-full rounded-lg border-gray-300 px-4 py-3 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm" %>
         </div>
         <div>
           <%= f.label :pincode, class: "block text-sm font-medium text-gray-700 mb-1" %>
-          <%= f.text_field :pincode, class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm", placeholder: "e.g. 560001" %>
+          <%= f.text_field :pincode, class: "w-full rounded-lg border-gray-300 px-4 py-3 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm", placeholder: "e.g. 560001" %>
         </div>
       </div>
     </div>
@@ -86,14 +86,14 @@
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <%= f.label :pan_number, "PAN Number", class: "block text-sm font-medium text-gray-700 mb-1" %>
-          <%= f.text_field :pan_number, class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm uppercase", placeholder: "e.g. ABCDE1234F", maxlength: 10 %>
+          <%= f.text_field :pan_number, class: "w-full rounded-lg border-gray-300 px-4 py-3 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm uppercase", placeholder: "e.g. ABCDE1234F", maxlength: 10 %>
           <% if current_employee.errors[:pan_number].any? %>
             <p class="text-xs text-red-600 mt-1"><%= current_employee.errors[:pan_number].first %></p>
           <% end %>
         </div>
         <div>
           <%= f.label :aadhaar_number, "Aadhaar Number", class: "block text-sm font-medium text-gray-700 mb-1" %>
-          <%= f.text_field :aadhaar_number, class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm", placeholder: "e.g. 123456789012", maxlength: 12 %>
+          <%= f.text_field :aadhaar_number, class: "w-full rounded-lg border-gray-300 px-4 py-3 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm", placeholder: "e.g. 123456789012", maxlength: 12 %>
           <% if current_employee.errors[:aadhaar_number].any? %>
             <p class="text-xs text-red-600 mt-1"><%= current_employee.errors[:aadhaar_number].first %></p>
           <% end %>
@@ -107,15 +107,15 @@
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <%= f.label :bank_name, class: "block text-sm font-medium text-gray-700 mb-1" %>
-          <%= f.text_field :bank_name, class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm", placeholder: "e.g. HDFC Bank" %>
+          <%= f.text_field :bank_name, class: "w-full rounded-lg border-gray-300 px-4 py-3 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm", placeholder: "e.g. HDFC Bank" %>
         </div>
         <div>
           <%= f.label :bank_account_number, "Account Number", class: "block text-sm font-medium text-gray-700 mb-1" %>
-          <%= f.text_field :bank_account_number, class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm" %>
+          <%= f.text_field :bank_account_number, class: "w-full rounded-lg border-gray-300 px-4 py-3 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm" %>
         </div>
         <div>
           <%= f.label :ifsc_code, "IFSC Code", class: "block text-sm font-medium text-gray-700 mb-1" %>
-          <%= f.text_field :ifsc_code, class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm", placeholder: "e.g. HDFC0001234" %>
+          <%= f.text_field :ifsc_code, class: "w-full rounded-lg border-gray-300 px-4 py-3 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm", placeholder: "e.g. HDFC0001234" %>
         </div>
       </div>
     </div>
@@ -126,15 +126,15 @@
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div>
           <%= f.label :emergency_contact_name, "Name", class: "block text-sm font-medium text-gray-700 mb-1" %>
-          <%= f.text_field :emergency_contact_name, class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm" %>
+          <%= f.text_field :emergency_contact_name, class: "w-full rounded-lg border-gray-300 px-4 py-3 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm" %>
         </div>
         <div>
           <%= f.label :emergency_contact_phone, "Phone", class: "block text-sm font-medium text-gray-700 mb-1" %>
-          <%= f.text_field :emergency_contact_phone, class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm" %>
+          <%= f.text_field :emergency_contact_phone, class: "w-full rounded-lg border-gray-300 px-4 py-3 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm" %>
         </div>
         <div>
           <%= f.label :emergency_contact_relation, "Relation", class: "block text-sm font-medium text-gray-700 mb-1" %>
-          <%= f.text_field :emergency_contact_relation, class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm", placeholder: "e.g. Spouse, Parent" %>
+          <%= f.text_field :emergency_contact_relation, class: "w-full rounded-lg border-gray-300 px-4 py-3 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm", placeholder: "e.g. Spouse, Parent" %>
         </div>
       </div>
     </div>
