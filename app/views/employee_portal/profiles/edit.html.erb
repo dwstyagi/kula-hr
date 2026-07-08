@@ -2,11 +2,11 @@
 
   <div class="flex items-center justify-between">
     <div>
-      <h1 class="text-2xl font-bold text-gray-900">Edit Profile</h1>
-      <p class="text-sm text-gray-500 mt-0.5">Update your personal and banking details</p>
+      <h1 class="page-title text-2xl">Edit Profile</h1>
+      <p class="text-sm text-stone-500 mt-0.5">Update your personal and banking details</p>
     </div>
     <%= link_to employee_portal_profile_path,
-        class: "inline-flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50" do %>
+        class: "inline-flex items-center gap-2 px-4 py-2 border border-stone-300 text-stone-700 text-sm font-medium rounded-lg hover:bg-stone-50" do %>
       Cancel
     <% end %>
   </div>
@@ -33,67 +33,67 @@
 
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
     <%# Personal Information %>
-    <div class="bg-white rounded-xl border border-gray-200 p-6">
-      <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">Personal Information</h2>
+    <div class="card card-pad">
+      <h2 class="text-sm font-semibold text-stone-500 uppercase tracking-wider mb-4">Personal Information</h2>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
-          <p class="text-sm text-gray-500 bg-gray-50 rounded-lg px-3 py-2 border border-gray-200"><%= current_employee.full_name %></p>
-          <p class="text-xs text-gray-400 mt-1">Contact HR to change your name</p>
+          <label class="label">Full Name</label>
+          <p class="text-sm text-stone-500 bg-stone-50 rounded-lg px-3 py-2 border border-stone-200"><%= current_employee.full_name %></p>
+          <p class="text-xs text-stone-400 mt-1">Contact HR to change your name</p>
         </div>
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-          <p class="text-sm text-gray-500 bg-gray-50 rounded-lg px-3 py-2 border border-gray-200"><%= current_employee.email %></p>
-          <p class="text-xs text-gray-400 mt-1">Contact HR to change your email</p>
+          <label class="label">Email</label>
+          <p class="text-sm text-stone-500 bg-stone-50 rounded-lg px-3 py-2 border border-stone-200"><%= current_employee.email %></p>
+          <p class="text-xs text-stone-400 mt-1">Contact HR to change your email</p>
         </div>
         <div>
-          <%= f.label :phone, class: "block text-sm font-medium text-gray-700 mb-1" %>
-          <%= f.text_field :phone, class: "w-full rounded-lg border-gray-300 px-4 py-3 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm", placeholder: "e.g. 9876543210" %>
+          <%= f.label :phone, class: "label" %>
+          <%= f.text_field :phone, class: "input", placeholder: "e.g. 9876543210" %>
         </div>
         <div>
-          <%= f.label :date_of_birth, class: "block text-sm font-medium text-gray-700 mb-1" %>
-          <%= f.date_field :date_of_birth, class: "w-full rounded-lg border-gray-300 px-4 py-3 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm" %>
+          <%= f.label :date_of_birth, class: "label" %>
+          <%= f.date_field :date_of_birth, class: "input" %>
         </div>
       </div>
     </div>
 
     <%# Address %>
-    <div class="bg-white rounded-xl border border-gray-200 p-6">
-      <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">Address</h2>
+    <div class="card card-pad">
+      <h2 class="text-sm font-semibold text-stone-500 uppercase tracking-wider mb-4">Address</h2>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div class="md:col-span-2">
-          <%= f.label :current_address, class: "block text-sm font-medium text-gray-700 mb-1" %>
-          <%= f.text_area :current_address, rows: 3, class: "w-full rounded-lg border-gray-300 px-4 py-3 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm", placeholder: "Enter your current address" %>
+          <%= f.label :current_address, class: "label" %>
+          <%= f.text_area :current_address, rows: 3, class: "input", placeholder: "Enter your current address" %>
         </div>
         <div>
-          <%= f.label :city, class: "block text-sm font-medium text-gray-700 mb-1" %>
-          <%= f.text_field :city, class: "w-full rounded-lg border-gray-300 px-4 py-3 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm" %>
+          <%= f.label :city, class: "label" %>
+          <%= f.text_field :city, class: "input" %>
         </div>
         <div>
-          <%= f.label :state, class: "block text-sm font-medium text-gray-700 mb-1" %>
-          <%= f.text_field :state, class: "w-full rounded-lg border-gray-300 px-4 py-3 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm" %>
+          <%= f.label :state, class: "label" %>
+          <%= f.text_field :state, class: "input" %>
         </div>
         <div>
-          <%= f.label :pincode, class: "block text-sm font-medium text-gray-700 mb-1" %>
-          <%= f.text_field :pincode, class: "w-full rounded-lg border-gray-300 px-4 py-3 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm", placeholder: "e.g. 560001" %>
+          <%= f.label :pincode, class: "label" %>
+          <%= f.text_field :pincode, class: "input", placeholder: "e.g. 560001" %>
         </div>
       </div>
     </div>
 
     <%# Identity Documents %>
-    <div class="bg-white rounded-xl border border-gray-200 p-6">
-      <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">Identity Documents</h2>
+    <div class="card card-pad">
+      <h2 class="text-sm font-semibold text-stone-500 uppercase tracking-wider mb-4">Identity Documents</h2>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <%= f.label :pan_number, "PAN Number", class: "block text-sm font-medium text-gray-700 mb-1" %>
-          <%= f.text_field :pan_number, class: "w-full rounded-lg border-gray-300 px-4 py-3 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm uppercase", placeholder: "e.g. ABCDE1234F", maxlength: 10 %>
+          <%= f.label :pan_number, "PAN Number", class: "label" %>
+          <%= f.text_field :pan_number, class: "input uppercase", placeholder: "e.g. ABCDE1234F", maxlength: 10 %>
           <% if current_employee.errors[:pan_number].any? %>
             <p class="text-xs text-red-600 mt-1"><%= current_employee.errors[:pan_number].first %></p>
           <% end %>
         </div>
         <div>
-          <%= f.label :aadhaar_number, "Aadhaar Number", class: "block text-sm font-medium text-gray-700 mb-1" %>
-          <%= f.text_field :aadhaar_number, class: "w-full rounded-lg border-gray-300 px-4 py-3 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm", placeholder: "e.g. 123456789012", maxlength: 12 %>
+          <%= f.label :aadhaar_number, "Aadhaar Number", class: "label" %>
+          <%= f.text_field :aadhaar_number, class: "input", placeholder: "e.g. 123456789012", maxlength: 12 %>
           <% if current_employee.errors[:aadhaar_number].any? %>
             <p class="text-xs text-red-600 mt-1"><%= current_employee.errors[:aadhaar_number].first %></p>
           <% end %>
@@ -102,47 +102,47 @@
     </div>
 
     <%# Bank Details %>
-    <div class="bg-white rounded-xl border border-gray-200 p-6">
-      <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">Bank Details</h2>
+    <div class="card card-pad">
+      <h2 class="text-sm font-semibold text-stone-500 uppercase tracking-wider mb-4">Bank Details</h2>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <%= f.label :bank_name, class: "block text-sm font-medium text-gray-700 mb-1" %>
-          <%= f.text_field :bank_name, class: "w-full rounded-lg border-gray-300 px-4 py-3 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm", placeholder: "e.g. HDFC Bank" %>
+          <%= f.label :bank_name, class: "label" %>
+          <%= f.text_field :bank_name, class: "input", placeholder: "e.g. HDFC Bank" %>
         </div>
         <div>
-          <%= f.label :bank_account_number, "Account Number", class: "block text-sm font-medium text-gray-700 mb-1" %>
-          <%= f.text_field :bank_account_number, class: "w-full rounded-lg border-gray-300 px-4 py-3 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm" %>
+          <%= f.label :bank_account_number, "Account Number", class: "label" %>
+          <%= f.text_field :bank_account_number, class: "input" %>
         </div>
         <div>
-          <%= f.label :ifsc_code, "IFSC Code", class: "block text-sm font-medium text-gray-700 mb-1" %>
-          <%= f.text_field :ifsc_code, class: "w-full rounded-lg border-gray-300 px-4 py-3 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm", placeholder: "e.g. HDFC0001234" %>
+          <%= f.label :ifsc_code, "IFSC Code", class: "label" %>
+          <%= f.text_field :ifsc_code, class: "input", placeholder: "e.g. HDFC0001234" %>
         </div>
       </div>
     </div>
 
     <%# Emergency Contact %>
-    <div class="bg-white rounded-xl border border-gray-200 p-6">
-      <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">Emergency Contact</h2>
+    <div class="card card-pad">
+      <h2 class="text-sm font-semibold text-stone-500 uppercase tracking-wider mb-4">Emergency Contact</h2>
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div>
-          <%= f.label :emergency_contact_name, "Name", class: "block text-sm font-medium text-gray-700 mb-1" %>
-          <%= f.text_field :emergency_contact_name, class: "w-full rounded-lg border-gray-300 px-4 py-3 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm" %>
+          <%= f.label :emergency_contact_name, "Name", class: "label" %>
+          <%= f.text_field :emergency_contact_name, class: "input" %>
         </div>
         <div>
-          <%= f.label :emergency_contact_phone, "Phone", class: "block text-sm font-medium text-gray-700 mb-1" %>
-          <%= f.text_field :emergency_contact_phone, class: "w-full rounded-lg border-gray-300 px-4 py-3 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm" %>
+          <%= f.label :emergency_contact_phone, "Phone", class: "label" %>
+          <%= f.text_field :emergency_contact_phone, class: "input" %>
         </div>
         <div>
-          <%= f.label :emergency_contact_relation, "Relation", class: "block text-sm font-medium text-gray-700 mb-1" %>
-          <%= f.text_field :emergency_contact_relation, class: "w-full rounded-lg border-gray-300 px-4 py-3 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm", placeholder: "e.g. Spouse, Parent" %>
+          <%= f.label :emergency_contact_relation, "Relation", class: "label" %>
+          <%= f.text_field :emergency_contact_relation, class: "input", placeholder: "e.g. Spouse, Parent" %>
         </div>
       </div>
     </div>
     </div>
     <%# Submit %>
     <div class="flex justify-end gap-3">
-      <%= link_to "Cancel", employee_portal_profile_path, class: "px-4 py-2 border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50" %>
-      <%= f.submit "Save Changes", class: "px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 cursor-pointer" %>
+      <%= link_to "Cancel", employee_portal_profile_path, class: "px-4 py-2 border border-stone-300 text-stone-700 text-sm font-medium rounded-lg hover:bg-stone-50" %>
+      <%= f.submit "Save Changes", class: "btn btn-primary cursor-pointer" %>
     </div>
   <% end %>
 

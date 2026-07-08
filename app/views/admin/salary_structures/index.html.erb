@@ -1,8 +1,8 @@
 <div class="max-w-5xl mx-auto">
   <div class="flex items-center justify-between mb-6">
-    <h1 class="text-2xl font-bold text-gray-900">Salary Structures</h1>
+    <h1 class="page-title text-2xl">Salary Structures</h1>
     <%= link_to new_admin_salary_structure_path,
-        class: "inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700" do %>
+        class: "btn btn-primary" do %>
       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
       </svg>
@@ -10,41 +10,41 @@
     <% end %>
   </div>
 
-  <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
+  <div class="card overflow-hidden">
     <% if @salary_structures.any? %>
       <div class="overflow-x-auto">
-      <table class="min-w-full divide-y divide-gray-200">
-        <thead class="bg-gray-50">
+      <table class="tbl">
+        <thead>
           <tr>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Components</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+            <th>Name</th>
+            <th>Components</th>
+            <th>Status</th>
+            <th class="text-right">Actions</th>
           </tr>
         </thead>
-        <tbody class="divide-y divide-gray-200">
+        <tbody>
           <% @salary_structures.each do |structure| %>
-            <tr class="hover:bg-gray-50 <%= 'opacity-50' unless structure.active? %>">
-              <td class="px-6 py-4">
-                <%= link_to admin_salary_structure_path(structure), class: "text-sm font-medium text-blue-600 hover:text-blue-800" do %>
+            <tr class="hover:bg-stone-50 <%= 'opacity-50' unless structure.active? %>">
+              <td>
+                <%= link_to admin_salary_structure_path(structure), class: "text-sm font-medium text-kula-700 hover:text-kula-900" do %>
                   <%= structure.name %>
                 <% end %>
               </td>
-              <td class="px-6 py-4 text-sm text-gray-500">
+              <td class="text-sm text-stone-500">
                 <%= structure.component_count %> component<%= structure.component_count == 1 ? "" : "s" %>
               </td>
-              <td class="px-6 py-4">
+              <td>
                 <% if structure.active? %>
                   <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-700">Active</span>
                 <% else %>
-                  <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-500">Inactive</span>
+                  <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-stone-100 text-stone-500">Inactive</span>
                 <% end %>
               </td>
-              <td class="px-6 py-4 text-right">
+              <td class="text-right">
                 <div class="flex items-center justify-end gap-2">
                   <%= link_to admin_salary_structure_path(structure),
                       title: "View",
-                      class: "p-1 rounded-md text-blue-600 hover:bg-blue-200 transition-colors cursor-pointer" do %>
+                      class: "p-1 rounded-md text-kula-700 hover:bg-kula-100 transition-colors cursor-pointer" do %>
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
                       <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
                       <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
@@ -84,11 +84,11 @@
       </div>
     <% else %>
       <div class="p-12 text-center">
-        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg class="mx-auto h-12 w-12 text-stone-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
         </svg>
-        <h3 class="mt-2 text-sm font-medium text-gray-900">No salary structures</h3>
-        <p class="mt-1 text-sm text-gray-500">Create a structure to group salary components into a reusable template.</p>
+        <h3 class="mt-2 text-sm font-medium text-stone-900">No salary structures</h3>
+        <p class="mt-1 text-sm text-stone-500">Create a structure to group salary components into a reusable template.</p>
       </div>
     <% end %>
   </div>

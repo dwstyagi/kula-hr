@@ -3,101 +3,63 @@ module Admin
     skip_after_action :verify_authorized
     skip_after_action :verify_policy_scoped
 
+    # The dashboard is an action center: "what do I need to do before pay day?"
+    # Deep-dive analytics (departments, salary ranges, hiring trend) live under
+    # Reports, not here.
     def index
-      @total_employees = Employee.count
-      @active_employees = Employee.active.count
-      @probation_employees = Employee.probation.count
-      @resigned_employees = Employee.resigned.count
+      today = Date.current
 
-      # Department distribution
-      @department_data = Employee.active.joins(:department)
-                                    .group("departments.name")
+      @total_employees     = Employee.count
+      @active_employees    = Employee.active.count
+      @probation_employees = Employee.probation.count
+
+      @on_leave_today = LeaveRequest.where(status: :approved)
+                                    .where("from_date <= ? AND to_date >= ?", today, today)
                                     .count
 
-      # Gender distribution
-      @gender_data = Employee.active.group(:gender).count
+      # ── Needs attention queue ────────────────────────────────────────────
+      @missing_bank_count = Employee.active
+        .where("bank_account_number IS NULL OR bank_account_number = '' OR ifsc_code IS NULL OR ifsc_code = ''")
+        .count
 
-      # Employment status distribution
-      @status_data = Employee.group(:employment_status).count
+      @missing_salary_count = Employee.active
+        .where.not(id: EmployeeSalary.where(effective_to: nil).select(:employee_id))
+        .count
 
-      # Monthly hires trend (last 6 months)
-      # Note: group_by_month is from groupdate gem
-      @hiring_trend = Employee.active
-                              .where(joining_date: 6.months.ago.beginning_of_month..Date.current)
-                              .group_by_month(:joining_date, format: "%b %Y")
-                              .count
-
-      # Top departments by employee count
-      @top_departments = Employee.active.joins(:department)
-                                      .group("departments.name")
-                                      .order("count_all DESC")
-                                      .limit(5)
-                                      .count
-
-      # Average tenure calculation
-      current_date = Date.current
-      @avg_tenure = Employee.active.average(
-        "EXTRACT(YEAR FROM AGE('#{current_date}', joining_date)) * 12 + EXTRACT(MONTH FROM AGE('#{current_date}', joining_date)) / 12.0"
-      ) || 0
-
-      # Salary range distribution
-      if Employee.active.joins(:employee_salaries).exists?
-        @salary_ranges = Employee.active.joins(:employee_salaries)
-                                      .where(employee_salaries: { effective_to: nil })
-                                      .group(
-                                        "CASE
-                                          WHEN employee_salaries.annual_ctc < 300000 THEN 'Below 3L'
-                                          WHEN employee_salaries.annual_ctc < 600000 THEN '3L - 6L'
-                                          WHEN employee_salaries.annual_ctc < 1200000 THEN '6L - 12L'
-                                          ELSE 'Above 12L'
-                                        END"
-                                      )
-                                      .count
-      else
-        @salary_ranges = {}
-      end
-
-      # Recent hires
-      @recent_hires = Employee.active.order(joining_date: :desc).limit(5)
-
-      # Upcoming work anniversaries (next 30 days)
-      today = Date.current
-      end_date = today + 30.days
-
-      if today.month == end_date.month
-        @upcoming_anniversaries = Employee.active.where(
-          "EXTRACT(MONTH FROM joining_date) = ? AND EXTRACT(DAY FROM joining_date) BETWEEN ? AND ?",
-          today.month, today.day, end_date.day
-        )
-      else
-        @upcoming_anniversaries = Employee.active.where(
-          "(EXTRACT(MONTH FROM joining_date) = ? AND EXTRACT(DAY FROM joining_date) >= ?) OR (EXTRACT(MONTH FROM joining_date) = ? AND EXTRACT(DAY FROM joining_date) <= ?)",
-          today.month, today.day, end_date.month, end_date.day
-        )
-      end
+      locked = AttendanceSummary.where(month: today.month, year: today.year, status: :locked)
+                                .distinct.count(:employee_id)
+      @unlocked_attendance_count = [ @active_employees - locked, 0 ].max
 
       @payroll_data = Dashboard::AdminDashboardService.new(tenant: ActsAsTenant.current_tenant).call
 
-      @upcoming_anniversaries = @upcoming_anniversaries.order(
-        Arel.sql("EXTRACT(MONTH FROM joining_date), EXTRACT(DAY FROM joining_date)")
-      ).limit(5)
+      # ── People moments ───────────────────────────────────────────────────
+      @recent_hires = Employee.active.order(joining_date: :desc).limit(5)
+      @upcoming_birthdays     = upcoming_by_date(:date_of_birth)
+      @upcoming_anniversaries = upcoming_by_date(:joining_date)
+    end
 
-      # Upcoming birthdays (next 30 days)
-      if today.month == end_date.month
-        @upcoming_birthdays = Employee.active.where(
-          "EXTRACT(MONTH FROM date_of_birth) = ? AND EXTRACT(DAY FROM date_of_birth) BETWEEN ? AND ?",
-          today.month, today.day, end_date.day
-        )
-      else
-        @upcoming_birthdays = Employee.active.where(
-          "(EXTRACT(MONTH FROM date_of_birth) = ? AND EXTRACT(DAY FROM date_of_birth) >= ?) OR (EXTRACT(MONTH FROM date_of_birth) = ? AND EXTRACT(DAY FROM date_of_birth) <= ?)",
-          today.month, today.day, end_date.month, end_date.day
-        )
-      end
+    private
 
-      @upcoming_birthdays = @upcoming_birthdays.order(
-        Arel.sql("EXTRACT(MONTH FROM date_of_birth), EXTRACT(DAY FROM date_of_birth)")
-      ).limit(5)
+    # Employees whose +column+'s month/day falls within the next 30 days.
+    def upcoming_by_date(column)
+      today    = Date.current
+      end_date = today + 30.days
+
+      scope =
+        if today.month == end_date.month
+          Employee.active.where(
+            "EXTRACT(MONTH FROM #{column}) = ? AND EXTRACT(DAY FROM #{column}) BETWEEN ? AND ?",
+            today.month, today.day, end_date.day
+          )
+        else
+          Employee.active.where(
+            "(EXTRACT(MONTH FROM #{column}) = ? AND EXTRACT(DAY FROM #{column}) >= ?) OR " \
+            "(EXTRACT(MONTH FROM #{column}) = ? AND EXTRACT(DAY FROM #{column}) <= ?)",
+            today.month, today.day, end_date.month, end_date.day
+          )
+        end
+
+      scope.order(Arel.sql("EXTRACT(MONTH FROM #{column}), EXTRACT(DAY FROM #{column})")).limit(5)
     end
   end
 end

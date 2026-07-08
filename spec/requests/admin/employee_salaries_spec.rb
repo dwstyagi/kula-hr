@@ -34,7 +34,7 @@ RSpec.describe "Admin::Employee Salary Assignment", type: :request do
                headers: { "Host" => subdomain_host }
         }.to change { EmployeeSalary.count }.by(1)
 
-        expect(response).to redirect_to(admin_employee_path(employee, tab: "salary"))
+        expect(response).to redirect_to(admin_employee_path(employee, anchor: "salary"))
         expect(flash[:notice]).to eq("Salary assigned successfully.")
       end
     end
@@ -91,7 +91,7 @@ RSpec.describe "Admin::Employee Salary Assignment", type: :request do
                headers: { "Host" => subdomain_host }
         }.to change { EmployeeSalary.count }.by(1)
 
-        expect(response).to redirect_to(admin_employee_path(employee, tab: "salary"))
+        expect(response).to redirect_to(admin_employee_path(employee, anchor: "salary"))
 
         # Old salary should now have effective_to set
         current_salary.reload

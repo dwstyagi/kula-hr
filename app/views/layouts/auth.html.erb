@@ -4,13 +4,14 @@
     <title>Sign In — Kula HR</title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <%= csrf_meta_tags %>
-    <%= csp_meta_tag %>
+    <meta name="view-transition" content="same-origin">    <%= csp_meta_tag %>
     <link rel="icon" href="/favicon.ico" sizes="any">
     <link rel="icon" href="/icon.svg" type="image/svg+xml">
+    <%= render "shared/fonts" %>
     <%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
   </head>
-  <body class="bg-white min-h-screen">
+  <body class="bg-stone-50 text-stone-900 antialiased min-h-screen">
     <%= render "shared/flash" %>
     <%= yield %>
   </body>

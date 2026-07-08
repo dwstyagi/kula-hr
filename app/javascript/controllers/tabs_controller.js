@@ -17,10 +17,10 @@ export default class extends Controller {
   showTab(name) {
     this.tabTargets.forEach(tab => {
       const isActive = tab.dataset.tab === name
-      tab.classList.toggle("border-blue-600", isActive)
-      tab.classList.toggle("text-blue-600", isActive)
+      tab.classList.toggle("border-kula-700", isActive)
+      tab.classList.toggle("text-kula-800", isActive)
       tab.classList.toggle("border-transparent", !isActive)
-      tab.classList.toggle("text-gray-500", !isActive)
+      tab.classList.toggle("text-stone-500", !isActive)
     })
 
     this.panelTargets.forEach(panel => {

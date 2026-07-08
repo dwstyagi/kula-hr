@@ -1,23 +1,23 @@
 <div class="max-w-6xl mx-auto">
   <div class="flex items-center justify-between mb-6">
     <div>
-      <h1 class="text-2xl font-bold text-gray-900">Team Leave Calendar</h1>
-      <p class="text-sm text-gray-500 mt-1">See who on your team is on leave before you apply.</p>
+      <h1 class="page-title text-2xl">Team Leave Calendar</h1>
+      <p class="text-sm text-stone-500 mt-1">See who on your team is on leave before you apply.</p>
     </div>
     <%= link_to "Apply for leave", new_employee_portal_leave_request_path,
-        class: "inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700" %>
+        class: "inline-flex items-center btn btn-primary" %>
   </div>
 
   <% prev_month = @date.prev_month %>
   <% next_month = @date.next_month %>
   <div class="flex items-center justify-center gap-4 mb-4">
     <%= link_to employee_portal_team_calendar_path(month: prev_month.month, year: prev_month.year),
-        class: "p-1.5 rounded-md text-gray-600 hover:bg-gray-100" do %>
+        class: "p-1.5 rounded-md text-stone-600 hover:bg-stone-100" do %>
       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
     <% end %>
-    <span class="text-sm font-semibold text-gray-900 w-40 text-center"><%= @date.strftime("%B %Y") %></span>
+    <span class="text-sm font-semibold text-stone-900 w-40 text-center"><%= @date.strftime("%B %Y") %></span>
     <%= link_to employee_portal_team_calendar_path(month: next_month.month, year: next_month.year),
-        class: "p-1.5 rounded-md text-gray-600 hover:bg-gray-100" do %>
+        class: "p-1.5 rounded-md text-stone-600 hover:bg-stone-100" do %>
       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
     <% end %>
   </div>

@@ -1,9 +1,9 @@
 <div class="max-w-2xl mx-auto">
   <div class="mb-6">
-    <h1 class="text-2xl font-bold text-gray-900">Edit Salary Structure</h1>
+    <h1 class="page-title text-2xl">Edit Salary Structure</h1>
   </div>
 
-  <div class="bg-white rounded-lg border border-gray-200 p-6">
+  <div class="card card-pad">
     <%= render "form", salary_structure: @salary_structure, url: admin_salary_structure_path(@salary_structure), method: :patch %>
   </div>
 </div>

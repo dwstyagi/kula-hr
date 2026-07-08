@@ -1,15 +1,15 @@
 <div class="max-w-4xl mx-auto">
   <div class="mb-6">
-    <h1 class="text-2xl font-bold text-gray-900">Revise Salary</h1>
-    <p class="mt-1 text-sm text-gray-500">
+    <h1 class="page-title text-2xl">Revise Salary</h1>
+    <p class="mt-1 text-sm text-stone-500">
       Revise salary for
-      <span class="font-medium text-gray-700"><%= @employee.full_name %></span>
+      <span class="font-medium text-stone-700"><%= @employee.full_name %></span>
       (<%= @employee.employee_code %>)
     </p>
     <% if @current_salary %>
-      <p class="mt-1 text-sm text-gray-500">
-        Current CTC: <span class="font-medium text-gray-700 font-mono">₹<%= number_with_delimiter(@current_salary.annual_ctc) %></span>/year
-        &middot; Structure: <span class="font-medium text-gray-700"><%= @current_salary.salary_structure.name %></span>
+      <p class="mt-1 text-sm text-stone-500">
+        Current CTC: <span class="font-medium text-stone-700 font-mono">₹<%= number_with_delimiter(@current_salary.annual_ctc) %></span>/year
+        &middot; Structure: <span class="font-medium text-stone-700"><%= @current_salary.salary_structure.name %></span>
       </p>
     <% end %>
   </div>

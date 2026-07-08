@@ -1,0 +1,82 @@
+<%# Sticky action bar — totals always in view, one primary action per state.
+    `payroll_run` is a PayrollRunPresenter; `readiness` may be nil. %>
+<div class="sticky bottom-0 z-30 -mx-4 md:-mx-8 px-4 md:px-8 pt-6 pb-4 pointer-events-none">
+  <div class="pointer-events-auto card bg-white/95 backdrop-blur shadow-lg ring-1 ring-stone-900/5
+              px-5 py-4 flex flex-wrap items-center gap-x-8 gap-y-3 animate-slide-up">
+
+    <% if payroll_run.draft? %>
+      <% issues = readiness&.will_skip&.size.to_i %>
+      <% ready  = readiness&.ready_count.to_i %>
+      <div class="flex-1 min-w-40">
+        <p class="eyebrow">Ready to process</p>
+        <p class="text-sm font-semibold text-stone-900 mt-0.5">
+          <%= ready %> employee<%= "s" unless ready == 1 %>
+          <% if issues.positive? %>
+            <span class="font-normal text-marigold-700">· <%= issues %> will be skipped</span>
+          <% end %>
+        </p>
+      </div>
+      <% confirm_msg = issues.positive? ?
+           "#{issues} employee(s) will be EXCLUDED and not paid. Process payroll for #{payroll_run.period_label} anyway?" :
+           "Start processing payroll for #{payroll_run.period_label}? This runs in the background." %>
+      <%= button_to process_payroll_admin_payroll_run_path(payroll_run), method: :post,
+            class: "btn btn-primary btn-lg cursor-pointer", disabled: ready.zero?,
+            form: { data: { turbo_confirm: confirm_msg } } do %>
+        <%= issues.positive? ? "Process anyway" : "Start processing" %>
+        <svg class="size-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
+      <% end %>
+
+    <% elsif payroll_run.processing? %>
+      <div class="flex-1 flex items-center gap-3">
+        <svg class="size-4 text-kula-600 animate-spin" style="animation-duration: 1.6s" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99"/></svg>
+        <p class="text-sm text-stone-600">Processing <%= payroll_run.total_employees %> employees…</p>
+      </div>
+
+    <% else %>
+      <div class="flex flex-wrap items-center gap-x-8 gap-y-2 flex-1">
+        <div>
+          <p class="eyebrow">Employees</p>
+          <p class="text-sm font-semibold text-stone-900 amount mt-0.5"><%= payroll_run.processed_employees %></p>
+        </div>
+        <div class="hidden sm:block">
+          <p class="eyebrow">Gross</p>
+          <p class="text-sm font-semibold text-stone-900 amount mt-0.5"><%= payroll_run.formatted_total_gross %></p>
+        </div>
+        <div class="hidden sm:block">
+          <p class="eyebrow">Deductions</p>
+          <p class="text-sm font-semibold text-stone-900 amount mt-0.5">− <%= payroll_run.formatted_total_deductions %></p>
+        </div>
+        <div>
+          <p class="eyebrow">Net pay</p>
+          <p class="text-lg font-bold text-kula-700 amount mt-0.5"
+             data-controller="countup"
+             data-countup-value-value="<%= payroll_run.total_net_pay.to_f.round %>"
+             data-countup-prefix-value="₹"><%= payroll_run.formatted_total_net_pay %></p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <% if payroll_run.processed? && policy(payroll_run).submit_for_review? %>
+          <%= button_to "Submit for review", submit_for_review_admin_payroll_run_path(payroll_run),
+                method: :patch, class: "btn btn-primary btn-lg cursor-pointer" %>
+        <% elsif payroll_run.under_review? && policy(payroll_run).approve? %>
+          <%= button_to "Approve payroll", approve_admin_payroll_run_path(payroll_run),
+                method: :patch, class: "btn btn-primary btn-lg cursor-pointer",
+                form: { data: { turbo_confirm: "Approve payroll for #{payroll_run.period_label}? This will lock all payslips." } } %>
+        <% elsif payroll_run.under_review? %>
+          <span class="badge badge-warning">Awaiting super admin review</span>
+        <% elsif payroll_run.rejected? && policy(payroll_run).resubmit_for_review? %>
+          <%= button_to "Resubmit for review", resubmit_for_review_admin_payroll_run_path(payroll_run),
+                method: :patch, class: "btn btn-primary btn-lg cursor-pointer",
+                form: { data: { turbo_confirm: "Resubmit this payroll for review? Make sure you've corrected the payslips first." } } %>
+        <% elsif payroll_run.approved? && policy(payroll_run).mark_paid? %>
+          <%= button_to "Mark as paid", mark_paid_admin_payroll_run_path(payroll_run),
+                method: :patch, class: "btn btn-lg bg-emerald-600 text-white hover:bg-emerald-700 shadow-xs cursor-pointer",
+                form: { data: { turbo_confirm: "Confirm bank transfer is complete and mark payroll as Paid?" } } %>
+        <% elsif payroll_run.paid? %>
+          <span class="badge badge-success">Payroll paid</span>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+</div>

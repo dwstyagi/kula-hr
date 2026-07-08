@@ -2,11 +2,11 @@
 
   <div class="flex items-center justify-between">
     <div>
-      <h1 class="text-2xl font-bold text-gray-900">My Profile</h1>
-      <p class="text-sm text-gray-500 mt-0.5"><%= current_employee.employee_code %> &middot; <%= current_employee.employment_status.titleize %></p>
+      <h1 class="page-title text-2xl">My Profile</h1>
+      <p class="text-sm text-stone-500 mt-0.5"><%= current_employee.employee_code %> &middot; <%= current_employee.employment_status.titleize %></p>
     </div>
     <%= link_to edit_employee_portal_profile_path,
-        class: "inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700" do %>
+        class: "btn btn-primary" do %>
       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
       </svg>
@@ -16,87 +16,87 @@
 
   <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
     <%# Personal Information %>
-    <div class="bg-white rounded-xl border border-gray-200 p-6">
-      <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">Personal Information</h2>
+    <div class="card card-pad">
+      <h2 class="text-sm font-semibold text-stone-500 uppercase tracking-wider mb-4">Personal Information</h2>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <p class="text-xs text-gray-500">Full Name</p>
-          <p class="text-sm font-medium text-gray-900"><%= current_employee.full_name %></p>
+          <p class="text-xs text-stone-500">Full Name</p>
+          <p class="text-sm font-medium text-stone-900"><%= current_employee.full_name %></p>
         </div>
         <div>
-          <p class="text-xs text-gray-500">Email</p>
-          <p class="text-sm font-medium text-gray-900"><%= current_employee.email %></p>
+          <p class="text-xs text-stone-500">Email</p>
+          <p class="text-sm font-medium text-stone-900"><%= current_employee.email %></p>
         </div>
         <div>
-          <p class="text-xs text-gray-500">Phone</p>
+          <p class="text-xs text-stone-500">Phone</p>
           <% if current_employee.phone.present? %>
-            <p class="text-sm font-medium text-gray-900"><%= current_employee.phone %></p>
+            <p class="text-sm font-medium text-stone-900"><%= current_employee.phone %></p>
           <% else %>
             <p class="text-sm text-amber-600">Not provided</p>
           <% end %>
         </div>
         <div>
-          <p class="text-xs text-gray-500">Date of Birth</p>
+          <p class="text-xs text-stone-500">Date of Birth</p>
           <% if current_employee.date_of_birth.present? %>
-            <p class="text-sm font-medium text-gray-900"><%= current_employee.date_of_birth.strftime("%d %B %Y") %></p>
+            <p class="text-sm font-medium text-stone-900"><%= current_employee.date_of_birth.strftime("%d %B %Y") %></p>
           <% else %>
             <p class="text-sm text-amber-600">Not provided</p>
           <% end %>
         </div>
         <div>
-          <p class="text-xs text-gray-500">Gender</p>
-          <p class="text-sm font-medium text-gray-900"><%= current_employee.gender&.titleize || "—" %></p>
+          <p class="text-xs text-stone-500">Gender</p>
+          <p class="text-sm font-medium text-stone-900"><%= current_employee.gender&.titleize || "—" %></p>
         </div>
         <div>
-          <p class="text-xs text-gray-500">Joining Date</p>
-          <p class="text-sm font-medium text-gray-900"><%= current_employee.joining_date.strftime("%d %B %Y") %></p>
+          <p class="text-xs text-stone-500">Joining Date</p>
+          <p class="text-sm font-medium text-stone-900"><%= current_employee.joining_date.strftime("%d %B %Y") %></p>
         </div>
       </div>
     </div>
 
     <%# Address %>
-    <div class="bg-white rounded-xl border border-gray-200 p-6">
-      <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">Address</h2>
+    <div class="card card-pad">
+      <h2 class="text-sm font-semibold text-stone-500 uppercase tracking-wider mb-4">Address</h2>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div class="md:col-span-2">
-          <p class="text-xs text-gray-500">Current Address</p>
+          <p class="text-xs text-stone-500">Current Address</p>
           <% if current_employee.current_address.present? %>
-            <p class="text-sm font-medium text-gray-900"><%= current_employee.current_address %></p>
+            <p class="text-sm font-medium text-stone-900"><%= current_employee.current_address %></p>
           <% else %>
             <p class="text-sm text-amber-600">Not provided</p>
           <% end %>
         </div>
         <div>
-          <p class="text-xs text-gray-500">City</p>
-          <p class="text-sm font-medium text-gray-900"><%= current_employee.city.presence || "—" %></p>
+          <p class="text-xs text-stone-500">City</p>
+          <p class="text-sm font-medium text-stone-900"><%= current_employee.city.presence || "—" %></p>
         </div>
         <div>
-          <p class="text-xs text-gray-500">State</p>
-          <p class="text-sm font-medium text-gray-900"><%= current_employee.state&.titleize.presence || "—" %></p>
+          <p class="text-xs text-stone-500">State</p>
+          <p class="text-sm font-medium text-stone-900"><%= current_employee.state&.titleize.presence || "—" %></p>
         </div>
         <div>
-          <p class="text-xs text-gray-500">Pincode</p>
-          <p class="text-sm font-medium text-gray-900"><%= current_employee.pincode.presence || "—" %></p>
+          <p class="text-xs text-stone-500">Pincode</p>
+          <p class="text-sm font-medium text-stone-900"><%= current_employee.pincode.presence || "—" %></p>
         </div>
       </div>
     </div>
 
     <%# Identity Documents %>
-    <div class="bg-white rounded-xl border border-gray-200 p-6">
-      <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">Identity Documents</h2>
+    <div class="card card-pad">
+      <h2 class="text-sm font-semibold text-stone-500 uppercase tracking-wider mb-4">Identity Documents</h2>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <p class="text-xs text-gray-500">PAN Number</p>
+          <p class="text-xs text-stone-500">PAN Number</p>
           <% if current_employee.pan_number.present? %>
-            <p class="text-sm font-medium text-gray-900"><%= current_employee.pan_number %></p>
+            <p class="text-sm font-medium text-stone-900"><%= current_employee.pan_number %></p>
           <% else %>
             <p class="text-sm text-amber-600">Not provided</p>
           <% end %>
         </div>
         <div>
-          <p class="text-xs text-gray-500">Aadhaar Number</p>
+          <p class="text-xs text-stone-500">Aadhaar Number</p>
           <% if current_employee.aadhaar_number.present? %>
-            <p class="text-sm font-medium text-gray-900"><%= current_employee.aadhaar_number.gsub(/(\d{4})(\d{4})(\d{4})/, '\1 \2 \3') %></p>
+            <p class="text-sm font-medium text-stone-900"><%= current_employee.aadhaar_number.gsub(/(\d{4})(\d{4})(\d{4})/, '\1 \2 \3') %></p>
           <% else %>
             <p class="text-sm text-amber-600">Not provided</p>
           <% end %>
@@ -105,43 +105,43 @@
     </div>
 
     <%# Bank Details %>
-    <div class="bg-white rounded-xl border border-gray-200 p-6">
-      <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">Bank Details</h2>
+    <div class="card card-pad">
+      <h2 class="text-sm font-semibold text-stone-500 uppercase tracking-wider mb-4">Bank Details</h2>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <p class="text-xs text-gray-500">Bank Name</p>
-          <p class="text-sm font-medium text-gray-900"><%= current_employee.bank_name.presence || "—" %></p>
+          <p class="text-xs text-stone-500">Bank Name</p>
+          <p class="text-sm font-medium text-stone-900"><%= current_employee.bank_name.presence || "—" %></p>
         </div>
         <div>
-          <p class="text-xs text-gray-500">Account Number</p>
+          <p class="text-xs text-stone-500">Account Number</p>
           <% if current_employee.bank_account_number.present? %>
-            <p class="text-sm font-medium text-gray-900"><%= current_employee.bank_account_number %></p>
+            <p class="text-sm font-medium text-stone-900"><%= current_employee.bank_account_number %></p>
           <% else %>
             <p class="text-sm text-amber-600">Not provided</p>
           <% end %>
         </div>
         <div>
-          <p class="text-xs text-gray-500">IFSC Code</p>
-          <p class="text-sm font-medium text-gray-900"><%= current_employee.ifsc_code.presence || "—" %></p>
+          <p class="text-xs text-stone-500">IFSC Code</p>
+          <p class="text-sm font-medium text-stone-900"><%= current_employee.ifsc_code.presence || "—" %></p>
         </div>
       </div>
     </div>
 
     <%# Emergency Contact %>
-    <div class="bg-white rounded-xl border border-gray-200 p-6">
-      <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">Emergency Contact</h2>
+    <div class="card card-pad">
+      <h2 class="text-sm font-semibold text-stone-500 uppercase tracking-wider mb-4">Emergency Contact</h2>
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div>
-          <p class="text-xs text-gray-500">Name</p>
-          <p class="text-sm font-medium text-gray-900"><%= current_employee.emergency_contact_name.presence || "—" %></p>
+          <p class="text-xs text-stone-500">Name</p>
+          <p class="text-sm font-medium text-stone-900"><%= current_employee.emergency_contact_name.presence || "—" %></p>
         </div>
         <div>
-          <p class="text-xs text-gray-500">Phone</p>
-          <p class="text-sm font-medium text-gray-900"><%= current_employee.emergency_contact_phone.presence || "—" %></p>
+          <p class="text-xs text-stone-500">Phone</p>
+          <p class="text-sm font-medium text-stone-900"><%= current_employee.emergency_contact_phone.presence || "—" %></p>
         </div>
         <div>
-          <p class="text-xs text-gray-500">Relation</p>
-          <p class="text-sm font-medium text-gray-900"><%= current_employee.emergency_contact_relation&.titleize.presence || "—" %></p>
+          <p class="text-xs text-stone-500">Relation</p>
+          <p class="text-sm font-medium text-stone-900"><%= current_employee.emergency_contact_relation&.titleize.presence || "—" %></p>
         </div>
       </div>
     </div>

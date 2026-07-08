@@ -2,12 +2,12 @@
   <%# Header %>
   <div class="flex items-start justify-between">
     <div>
-      <h1 class="text-2xl font-bold text-gray-900">Company Profile</h1>
-      <p class="text-sm text-gray-500 mt-0.5">Statutory identifiers and registered address for this organisation</p>
+      <h1 class="page-title text-2xl">Company Profile</h1>
+      <p class="text-sm text-stone-500 mt-0.5">Statutory identifiers and registered address for this organisation</p>
     </div>
     <% if policy(@tenant).update? %>
       <%= link_to edit_admin_company_profile_path,
-            class: "inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700" do %>
+            class: "btn btn-primary" do %>
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
         </svg>
@@ -18,70 +18,70 @@
 
   <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
     <%# Company Details %>
-    <div class="bg-white rounded-xl border border-gray-200 p-6 space-y-4">
-      <h2 class="text-base font-semibold text-gray-900 border-b border-gray-100 pb-3">Company Details</h2>
+    <div class="card card-pad space-y-4">
+      <h2 class="text-base font-semibold text-stone-900 border-b border-stone-100 pb-3">Company Details</h2>
       <dl class="space-y-3 text-sm">
         <div class="grid grid-cols-2 gap-x-4">
-          <dt class="text-gray-500">Company Name</dt>
-          <dd class="font-medium text-gray-900"><%= @tenant.name %></dd>
+          <dt class="text-stone-500">Company Name</dt>
+          <dd class="font-medium text-stone-900"><%= @tenant.name %></dd>
         </div>
         <div class="grid grid-cols-2 gap-x-4">
-          <dt class="text-gray-500">Subdomain</dt>
-          <dd class="font-medium text-gray-900"><%= @tenant.subdomain %></dd>
+          <dt class="text-stone-500">Subdomain</dt>
+          <dd class="font-medium text-stone-900"><%= @tenant.subdomain %></dd>
         </div>
         <div class="grid grid-cols-2 gap-x-4">
-          <dt class="text-gray-500">State</dt>
-          <dd class="font-medium text-gray-900"><%= @tenant.state.presence&.humanize || "—" %></dd>
+          <dt class="text-stone-500">State</dt>
+          <dd class="font-medium text-stone-900"><%= @tenant.state.presence&.humanize || "—" %></dd>
         </div>
       </dl>
     </div>
 
     <%# Statutory Identifiers %>
-    <div class="bg-white rounded-xl border border-gray-200 p-6 space-y-4">
-      <h2 class="text-base font-semibold text-gray-900 border-b border-gray-100 pb-3">Statutory Identifiers</h2>
+    <div class="card card-pad space-y-4">
+      <h2 class="text-base font-semibold text-stone-900 border-b border-stone-100 pb-3">Statutory Identifiers</h2>
       <dl class="space-y-3 text-sm">
         <div class="grid grid-cols-2 gap-x-4">
-          <dt class="text-gray-500">GSTIN</dt>
-          <dd class="font-medium text-gray-900 font-mono"><%= @tenant.gstin.presence || "—" %></dd>
+          <dt class="text-stone-500">GSTIN</dt>
+          <dd class="font-medium text-stone-900 font-mono"><%= @tenant.gstin.presence || "—" %></dd>
         </div>
         <div class="grid grid-cols-2 gap-x-4">
-          <dt class="text-gray-500">PAN</dt>
-          <dd class="font-medium text-gray-900 font-mono"><%= @tenant.pan.presence || "—" %></dd>
+          <dt class="text-stone-500">PAN</dt>
+          <dd class="font-medium text-stone-900 font-mono"><%= @tenant.pan.presence || "—" %></dd>
         </div>
         <div class="grid grid-cols-2 gap-x-4">
-          <dt class="text-gray-500">TAN</dt>
-          <dd class="font-medium text-gray-900 font-mono"><%= @tenant.tan.presence || "—" %></dd>
+          <dt class="text-stone-500">TAN</dt>
+          <dd class="font-medium text-stone-900 font-mono"><%= @tenant.tan.presence || "—" %></dd>
         </div>
         <div class="grid grid-cols-2 gap-x-4">
-          <dt class="text-gray-500">PF Establishment Code</dt>
-          <dd class="font-medium text-gray-900 font-mono"><%= @tenant.pf_establishment_code.presence || "—" %></dd>
+          <dt class="text-stone-500">PF Establishment Code</dt>
+          <dd class="font-medium text-stone-900 font-mono"><%= @tenant.pf_establishment_code.presence || "—" %></dd>
         </div>
         <div class="grid grid-cols-2 gap-x-4">
-          <dt class="text-gray-500">ESI Code</dt>
-          <dd class="font-medium text-gray-900 font-mono"><%= @tenant.esi_code.presence || "—" %></dd>
+          <dt class="text-stone-500">ESI Code</dt>
+          <dd class="font-medium text-stone-900 font-mono"><%= @tenant.esi_code.presence || "—" %></dd>
         </div>
       </dl>
     </div>
 
     <%# Registered Address %>
-    <div class="bg-white rounded-xl border border-gray-200 p-6 space-y-4 lg:col-span-2">
-      <h2 class="text-base font-semibold text-gray-900 border-b border-gray-100 pb-3">Registered Address</h2>
+    <div class="card card-pad space-y-4 lg:col-span-2">
+      <h2 class="text-base font-semibold text-stone-900 border-b border-stone-100 pb-3">Registered Address</h2>
       <dl class="grid grid-cols-2 lg:grid-cols-4 gap-x-4 gap-y-3 text-sm">
         <div>
-          <dt class="text-gray-500">Street Address</dt>
-          <dd class="font-medium text-gray-900"><%= @tenant.address.presence || "—" %></dd>
+          <dt class="text-stone-500">Street Address</dt>
+          <dd class="font-medium text-stone-900"><%= @tenant.address.presence || "—" %></dd>
         </div>
         <div>
-          <dt class="text-gray-500">City</dt>
-          <dd class="font-medium text-gray-900"><%= @tenant.city.presence || "—" %></dd>
+          <dt class="text-stone-500">City</dt>
+          <dd class="font-medium text-stone-900"><%= @tenant.city.presence || "—" %></dd>
         </div>
         <div>
-          <dt class="text-gray-500">State</dt>
-          <dd class="font-medium text-gray-900"><%= @tenant.state.presence&.humanize || "—" %></dd>
+          <dt class="text-stone-500">State</dt>
+          <dd class="font-medium text-stone-900"><%= @tenant.state.presence&.humanize || "—" %></dd>
         </div>
         <div>
-          <dt class="text-gray-500">Pincode</dt>
-          <dd class="font-medium text-gray-900"><%= @tenant.pincode.presence || "—" %></dd>
+          <dt class="text-stone-500">Pincode</dt>
+          <dd class="font-medium text-stone-900"><%= @tenant.pincode.presence || "—" %></dd>
         </div>
       </dl>
     </div>

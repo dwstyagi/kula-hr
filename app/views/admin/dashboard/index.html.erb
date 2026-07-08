@@ -1,398 +1,231 @@
-<% content_for(:page_title, "Admin Dashboard") %>
+<% content_for(:page_title, "Dashboard") %>
 <div class="space-y-6">
-  <!-- Stats Overview -->
-  <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-    <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-100 transition hover:shadow-md duration-300">
-      <div class="flex items-center justify-between">
-        <div>
-          <p class="text-sm font-medium text-gray-500">Total Employees</p>
-          <p class="mt-1 text-2xl font-bold text-gray-900"><%= @total_employees %></p>
-        </div>
-        <div class="p-3 bg-blue-50 rounded-full">
-          <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
-          </svg>
-        </div>
-      </div>
-    </div>
-    <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-100 transition hover:shadow-md duration-300">
-      <div class="flex items-center justify-between">
-        <div>
-          <p class="text-sm font-medium text-gray-500">Active Employees</p>
-          <p class="mt-1 text-2xl font-bold text-green-600"><%= @active_employees %></p>
-        </div>
-        <div class="p-3 bg-green-50 rounded-full">
-          <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-          </svg>
-        </div>
-      </div>
-    </div>
-    <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-100 transition hover:shadow-md duration-300">
-      <div class="flex items-center justify-between">
-        <div>
-          <p class="text-sm font-medium text-gray-500">On Probation</p>
-          <p class="mt-1 text-2xl font-bold text-yellow-600"><%= @probation_employees %></p>
-        </div>
-        <div class="p-3 bg-yellow-50 rounded-full">
-          <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-          </svg>
-        </div>
-      </div>
-    </div>
-    <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-100 transition hover:shadow-md duration-300">
-      <div class="flex items-center justify-between">
-        <div>
-          <p class="text-sm font-medium text-gray-500">Pending Leaves</p>
-          <p class="mt-1 text-2xl font-bold <%= @payroll_data.pending_leave_count > 0 ? 'text-amber-600' : 'text-gray-400' %>"><%= @payroll_data.pending_leave_count %></p>
-          <% if @payroll_data.pending_leave_count > 0 %>
-            <p class="text-xs text-amber-600 mt-0.5">Needs review</p>
+
+  <%# ── Row 1: pay-date hero + needs-attention queue ─────────────────────── %>
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+    <%# Hero — the one thing this product exists for %>
+    <% run = @payroll_data.current_run %>
+    <% pay_date = Date.current.end_of_month %>
+    <% days_left = (pay_date - Date.current).to_i %>
+    <div class="lg:col-span-2 card bg-kula-950 border-kula-900 text-white overflow-hidden relative animate-fade-up">
+      <div class="absolute -top-16 -right-16 size-64 rounded-full bg-white/5 pointer-events-none" aria-hidden="true"></div>
+      <div class="absolute -bottom-24 right-24 size-48 rounded-full bg-marigold-400/10 pointer-events-none" aria-hidden="true"></div>
+      <div class="relative p-6 sm:p-8 flex flex-col gap-6 h-full">
+        <div class="flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <p class="text-[11px] font-semibold uppercase tracking-widest text-kula-300">Next pay date</p>
+            <p class="text-3xl sm:text-4xl font-bold tracking-tight mt-2"><%= pay_date.strftime("%d %B") %></p>
+            <p class="text-sm text-kula-200 mt-1">
+              <% if days_left.zero? %>
+                Today — make sure salaries go out.
+              <% else %>
+                in <span class="font-semibold text-white amount"><%= days_left %></span> day<%= "s" unless days_left == 1 %>
+              <% end %>
+            </p>
+          </div>
+          <% if run %>
+            <span class="badge bg-white/10 ring-white/20 text-white">
+              <%= run.period_label %> · <%= PayrollRunPresenter.new(run).status_badge_label %>
+            </span>
           <% end %>
         </div>
-        <div class="p-3 bg-amber-50 rounded-full">
-          <svg class="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-          </svg>
+
+        <div class="flex flex-wrap items-end justify-between gap-4 mt-auto">
+          <div class="flex gap-8">
+            <div>
+              <p class="text-[11px] font-semibold uppercase tracking-widest text-kula-300">Net pay<%= " · #{run.period_label}" if run %></p>
+              <p class="text-xl font-bold amount mt-1"
+                 data-controller="countup"
+                 data-countup-value-value="<%= @payroll_data.current_run_net.to_f.round %>"
+                 data-countup-prefix-value="₹"><%= inr(@payroll_data.current_run_net) %></p>
+            </div>
+            <div class="hidden sm:block">
+              <p class="text-[11px] font-semibold uppercase tracking-widest text-kula-300">Employees</p>
+              <p class="text-xl font-bold amount mt-1"><%= @payroll_data.current_run_employees %></p>
+            </div>
+          </div>
+
+          <% cta_path, cta_label = run.nil? || run.paid? ? [new_admin_payroll_run_path, "Start payroll run"] : [admin_payroll_run_path(run), "Continue payroll run"] %>
+          <%= link_to cta_path, class: "btn btn-lg bg-marigold-400 text-kula-950 hover:bg-marigold-300 shadow-xs" do %>
+            <%= cta_label %>
+            <svg class="size-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
+          <% end %>
         </div>
       </div>
+    </div>
+
+    <%# Needs attention — the to-do queue %>
+    <% attention_items = [
+      { count: @payroll_data.pending_leave_count,
+        text: "leave #{"request".pluralize(@payroll_data.pending_leave_count)} waiting for approval",
+        path: admin_leave_requests_path(status: "pending") },
+      { count: @missing_bank_count,
+        text: "#{"employee".pluralize(@missing_bank_count)} missing bank details",
+        path: admin_employees_path },
+      { count: @missing_salary_count,
+        text: "#{"employee".pluralize(@missing_salary_count)} with no salary assigned",
+        path: admin_employees_path },
+      { count: @unlocked_attendance_count,
+        text: "attendance #{"record".pluralize(@unlocked_attendance_count)} not locked for #{Date.current.strftime('%B')}",
+        path: admin_attendance_summaries_path }
+    ].select { |i| i[:count].positive? } %>
+
+    <div class="card overflow-hidden animate-fade-up flex flex-col" style="animation-delay: 80ms">
+      <div class="card-header py-3.5">
+        <h3 class="card-title text-sm">Needs attention</h3>
+        <% if attention_items.any? %>
+          <span class="text-[10px] font-bold rounded-full bg-marigold-400 text-kula-950 px-2 py-0.5 amount"><%= attention_items.sum { |i| i[:count] } %></span>
+        <% end %>
+      </div>
+      <% if attention_items.any? %>
+        <ul class="divide-y divide-stone-100 flex-1" data-controller="reveal" data-reveal-delay-value="60">
+          <% attention_items.each do |item| %>
+            <li>
+              <%= link_to item[:path], class: "flex items-center gap-3 px-5 py-3.5 hover:bg-stone-50 transition-colors group" do %>
+                <span class="flex size-7 shrink-0 items-center justify-center rounded-full bg-marigold-50 text-marigold-700 text-xs font-bold amount"><%= item[:count] %></span>
+                <p class="text-sm text-stone-700 flex-1"><%= item[:text] %></p>
+                <svg class="size-4 text-stone-300 group-hover:text-stone-500 group-hover:translate-x-0.5 transition-all shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
+              <% end %>
+            </li>
+          <% end %>
+        </ul>
+      <% else %>
+        <div class="empty-state flex-1">
+          <span class="flex size-10 items-center justify-center rounded-full bg-emerald-50 mb-2">
+            <svg class="size-5 text-emerald-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" class="draw-stroke"/></svg>
+          </span>
+          <p class="text-sm font-medium text-stone-700">All clear</p>
+          <p class="text-xs text-stone-400 mt-0.5">Nothing needs your attention right now.</p>
+        </div>
+      <% end %>
     </div>
   </div>
-  <!-- Payroll Summary -->
-  <% if @payroll_data.current_run %>
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-      <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-100 transition hover:shadow-md duration-300">
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-sm font-medium text-gray-500">Payroll Status</p>
-            <p class="mt-1 text-2xl font-bold text-gray-900"><%= @payroll_data.current_run_status %></p>
-            <p class="text-xs text-gray-400"><%= @payroll_data.current_run.period_label %></p>
-          </div>
-          <div class="p-3 bg-indigo-50 rounded-full">
-            <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
-            </svg>
-          </div>
-        </div>
-      </div>
-      <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-100 transition hover:shadow-md duration-300">
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-sm font-medium text-gray-500">Net Pay</p>
-            <p class="mt-1 text-2xl font-bold text-green-600">₹<%= number_with_delimiter(@payroll_data.current_run_net.round(0)) %></p>
-          </div>
-          <div class="p-3 bg-green-50 rounded-full">
-            <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-            </svg>
-          </div>
-        </div>
-      </div>
-      <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-100 transition hover:shadow-md duration-300">
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-sm font-medium text-gray-500">CTC Cost</p>
-            <p class="mt-1 text-2xl font-bold text-gray-900">₹<%= number_with_delimiter(@payroll_data.current_run_ctc.round(0)) %></p>
-          </div>
-          <div class="p-3 bg-purple-50 rounded-full">
-            <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
-            </svg>
-          </div>
-        </div>
-      </div>
-      <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-100 transition hover:shadow-md duration-300">
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-sm font-medium text-gray-500">Employees Processed</p>
-            <p class="mt-1 text-2xl font-bold text-gray-900"><%= @payroll_data.current_run_employees %></p>
-          </div>
-          <div class="p-3 bg-amber-50 rounded-full">
-            <svg class="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
-            </svg>
-          </div>
-        </div>
-      </div>
-    </div>
-  <% end %>
 
-  <!-- Payroll Trend & Recent Activity (side by side) -->
-  <% if @payroll_data.payroll_trend.any? || @payroll_data.recent_activity.any? %>
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+  <%# ── Row 2: compact stat strip ─────────────────────────────────────────── %>
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-4" data-controller="reveal" data-reveal-delay-value="50">
+    <div class="stat-card">
+      <p class="stat-label">Headcount</p>
+      <p class="stat-value" data-controller="countup" data-countup-value-value="<%= @total_employees %>"><%= @total_employees %></p>
+    </div>
+    <div class="stat-card">
+      <p class="stat-label">Active</p>
+      <p class="stat-value" data-controller="countup" data-countup-value-value="<%= @active_employees %>"><%= @active_employees %></p>
+    </div>
+    <div class="stat-card">
+      <p class="stat-label">On probation</p>
+      <p class="stat-value" data-controller="countup" data-countup-value-value="<%= @probation_employees %>"><%= @probation_employees %></p>
+    </div>
+    <div class="stat-card">
+      <p class="stat-label">On leave today</p>
+      <p class="stat-value" data-controller="countup" data-countup-value-value="<%= @on_leave_today %>"><%= @on_leave_today %></p>
+    </div>
+  </div>
+
+  <%# ── Row 3: one chart + payroll activity ───────────────────────────────── %>
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div class="card card-pad animate-fade-up">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="card-title">Payroll cost <span class="text-stone-400 font-normal">· last 6 months</span></h3>
+        <%= link_to "All reports →", admin_reports_path, class: "link text-sm" %>
+      </div>
       <% if @payroll_data.payroll_trend.any? %>
-        <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
-          <h3 class="text-lg font-medium text-gray-900 mb-4">Payroll Trend (Last 6 Months)</h3>
-          <%= line_chart [
-                { name: "Gross", data: @payroll_data.payroll_trend.map { |t| [t[:label], t[:gross]] } },
-                { name: "Net", data: @payroll_data.payroll_trend.map { |t| [t[:label], t[:net]] } },
-                { name: "CTC", data: @payroll_data.payroll_trend.map { |t| [t[:label], t[:ctc]] } }
-              ], height: "300px", prefix: "₹", thousands: ",", library: { tension: 0.4 } %>
+        <%= line_chart [
+              { name: "Gross", data: @payroll_data.payroll_trend.map { |t| [t[:label], t[:gross]] } },
+              { name: "Net", data: @payroll_data.payroll_trend.map { |t| [t[:label], t[:net]] } }
+            ], height: "260px", prefix: "₹", thousands: ",",
+            colors: ["#276b50", "#e8a823"], library: { tension: 0.4 } %>
+      <% else %>
+        <div class="empty-state">
+          <p class="text-sm text-stone-500">No approved payroll runs yet.</p>
+          <p class="text-xs text-stone-400 mt-1">The cost trend appears after your first approved run.</p>
         </div>
       <% end %>
+    </div>
 
+    <div class="card overflow-hidden animate-fade-up" style="animation-delay: 60ms">
+      <div class="card-header">
+        <h3 class="card-title">Recent payroll activity</h3>
+        <%= link_to "View all", admin_payroll_runs_path, class: "link text-sm" %>
+      </div>
       <% if @payroll_data.recent_activity.any? %>
-        <div class="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
-          <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
-            <h3 class="text-lg font-medium text-gray-900">Recent Payroll Activity</h3>
-            <%= link_to "View All", admin_payroll_runs_path, class: "text-sm text-blue-600 hover:text-blue-800" %>
-          </div>
-          <div class="divide-y divide-gray-100">
-            <% status_colors = { "draft" => "bg-gray-100 text-gray-700", "processing" => "bg-blue-100 text-blue-700", "processed" => "bg-yellow-100 text-yellow-700", "under_review" => "bg-purple-100 text-purple-700", "approved" => "bg-green-100 text-green-700", "rejected" => "bg-red-100 text-red-700", "paid" => "bg-emerald-100 text-emerald-700" } %>
-            <% @payroll_data.recent_activity.each do |activity| %>
-              <div class="px-6 py-3 flex items-center justify-between">
-                <div>
-                  <p class="text-sm font-medium text-gray-900"><%= activity[:period] %></p>
-                  <p class="text-xs text-gray-500">by <%= activity[:initiator] || "System" %> &middot; <%= time_ago_in_words(activity[:updated_at]) %> ago</p>
-                </div>
-                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium <%= status_colors[activity[:status]] || 'bg-gray-100 text-gray-700' %>">
-                  <%= activity[:status].titleize %>
-                </span>
+        <div class="divide-y divide-stone-100">
+          <% @payroll_data.recent_activity.each do |activity| %>
+            <div class="px-5 sm:px-6 py-3 flex items-center justify-between gap-3">
+              <div class="min-w-0">
+                <p class="text-sm font-medium text-stone-900"><%= activity[:period] %></p>
+                <p class="text-xs text-stone-500">by <%= activity[:initiator] || "System" %> &middot; <%= time_ago_in_words(activity[:updated_at]) %> ago</p>
               </div>
-            <% end %>
-          </div>
+              <%= status_badge activity[:status] %>
+            </div>
+          <% end %>
+        </div>
+      <% else %>
+        <div class="empty-state">
+          <p class="text-sm text-stone-500">No payroll activity yet.</p>
         </div>
       <% end %>
     </div>
-  <% end %>
-
-  <!-- Deduction Breakdown -->
-  <% if @payroll_data.deduction_breakdown.any? %>
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
-        <h3 class="text-lg font-medium text-gray-900 mb-4">Deduction Breakdown (Current Month)</h3>
-        <%= pie_chart @payroll_data.deduction_breakdown, height: "300px", prefix: "₹", thousands: ",", donut: true %>
-      </div>
-    </div>
-  <% end %>
-
-  <!-- Charts Section 1 -->
-  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-    <!-- Hiring Trend -->
-    <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
-      <h3 class="text-lg font-medium text-gray-900 mb-4">Hiring Trend (Last 6 Months)</h3>
-      <%= line_chart @hiring_trend, height: "300px", colors: ["#3B82F6"], library: { tension: 0.4 } %>
-    </div>
-    <!-- Department Distribution -->
-    <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
-      <h3 class="text-lg font-medium text-gray-900 mb-4">Employees by Department</h3>
-      <%= pie_chart @department_data, height: "300px", donut: true %>
-    </div>
   </div>
-  <!-- Charts Section 2 -->
-  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-    <!-- Employment Status -->
-    <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
-      <h3 class="text-lg font-medium text-gray-900 mb-4">Employment Status</h3>
-      <%= pie_chart @status_data, height: "250px", legend: "bottom" %>
-    </div>
-    <!-- Gender Distribution -->
-    <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
-      <h3 class="text-lg font-medium text-gray-900 mb-4">Gender Distribution</h3>
-      <%= pie_chart @gender_data, height: "250px", donut: true, legend: "bottom" %>
-    </div>
-    <!-- Average Tenure & Salary Range -->
-    <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-100 flex flex-col justify-between">
-      <div>
-        <h3 class="text-lg font-medium text-gray-900 mb-2">Average Tenure</h3>
-        <p class="text-3xl font-bold text-gray-900"><%= number_with_precision(@avg_tenure, precision: 1) %> <span class="text-lg font-normal text-gray-500">Years</span></p>
-      </div>
-      <div class="mt-6">
-        <h3 class="text-lg font-medium text-gray-900 mb-2">Salary Distribution</h3>
-        <% if @salary_ranges.present? %>
-          <%= bar_chart @salary_ranges, height: "150px", colors: ["#10B981"] %>
-        <% else %>
-          <p class="text-gray-500 text-sm">No salary data available</p>
-        <% end %>
-      </div>
-    </div>
-  </div>
-  <!-- Pending Leave Requests -->
-  <% if @payroll_data.pending_leave_requests.any? %>
-    <div class="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
-      <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
-        <h3 class="text-lg font-medium text-gray-900">Pending Leave Requests</h3>
-        <%= link_to "View All", admin_leave_requests_path, class: "text-sm text-blue-600 hover:text-blue-800" %>
-      </div>
-      <div class="overflow-x-auto">
-        <table class="min-w-full divide-y divide-gray-200">
-          <thead class="bg-gray-50">
-            <tr>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Employee</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden sm:table-cell">Period</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Days</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">Reason</th>
-              <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-            </tr>
-          </thead>
-          <tbody class="bg-white divide-y divide-gray-100">
-            <% @payroll_data.pending_leave_requests.each do |lr| %>
-              <tr class="hover:bg-gray-50">
-                <td class="px-6 py-3">
-                  <p class="text-sm font-medium text-gray-900"><%= lr.employee.full_name %></p>
-                  <p class="text-xs text-gray-500"><%= lr.employee.employee_code %></p>
-                </td>
-                <td class="px-6 py-3">
-                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
-                    <%= lr.leave_type.name %>
-                  </span>
-                </td>
-                <td class="px-6 py-3 hidden sm:table-cell text-sm text-gray-700">
-                  <%= lr.from_date.strftime("%d %b") %> — <%= lr.to_date.strftime("%d %b %Y") %>
-                </td>
-                <td class="px-6 py-3 text-sm font-medium text-gray-900"><%= lr.number_of_days.to_i %></td>
-                <td class="px-6 py-3 hidden md:table-cell text-sm text-gray-500 max-w-48 truncate"><%= lr.reason %></td>
-                <td class="px-6 py-3 text-right">
-                  <div class="flex justify-end gap-1">
-                    <%= link_to approve_admin_leave_request_path(lr),
-                          class: "inline-flex items-center px-2.5 py-1.5 text-xs font-medium text-green-700 bg-green-50 border border-green-200 rounded-md hover:bg-green-100",
-                          data: { turbo_method: :patch, turbo_confirm: "Approve this leave request?" } do %>
-                      <svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                      Approve
-                    <% end %>
-                    <%= link_to reject_admin_leave_request_path(lr),
-                          class: "inline-flex items-center px-2.5 py-1.5 text-xs font-medium text-red-700 bg-red-50 border border-red-200 rounded-md hover:bg-red-100",
-                          data: { turbo_method: :patch, turbo_confirm: "Reject this leave request?" } do %>
-                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                    <% end %>
-                  </div>
-                </td>
-              </tr>
-            <% end %>
-          </tbody>
-        </table>
-      </div>
-    </div>
-  <% end %>
 
-  <!-- Detailed Lists -->
-  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-    <!-- Recent Hires -->
-    <div class="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
-      <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
-        <h3 class="text-lg font-medium text-gray-900">Recent Hires</h3>
-        <%= link_to "View All", admin_employees_path, class: "text-sm text-blue-600 hover:text-blue-800" %>
-      </div>
-      <div class="divide-y divide-gray-100">
-        <% @recent_hires.each do |employee| %>
-          <div class="px-6 py-4 flex items-center">
-            <div class="shrink-0 h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 font-bold">
-              <%= employee.first_name[0] %><%= employee.last_name[0] %>
-            </div>
-            <div class="ml-4 min-w-0 flex-1">
-              <div class="text-sm font-medium text-gray-900 truncate"><%= employee.full_name %></div>
-              <div class="text-sm text-gray-500 truncate"><%= employee.designation&.name || 'No Designation' %> • <%= employee.department&.name || 'No Dept' %></div>
-            </div>
-            <div class="ml-3 shrink-0 text-xs text-gray-400 hidden sm:block">
-              <%= time_ago_in_words(employee.joining_date) %> ago
-            </div>
-          </div>
-        <% end %>
-        <% if @recent_hires.empty? %>
-          <div class="px-6 py-4 text-gray-500 text-center">No recent hires found.</div>
-        <% end %>
-      </div>
-    </div>
-    <!-- Upcoming Celebrations -->
-    <div class="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
-      <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-linear-to-r from-purple-50 to-white">
-        <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
-          <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-          </svg>
-          Upcoming Celebrations
-        </h3>
-        <span class="text-xs font-semibold px-2 py-1 bg-purple-100 text-purple-700 rounded-full">Next 30 Days</span>
-      </div>
-      <div class="p-4 space-y-4">
-        <% @upcoming_anniversaries.each do |employee| %>
-          <% years = (Date.current.year - employee.joining_date.year) %>
-          <% anniversary_date = Date.new(Date.current.year, employee.joining_date.month, employee.joining_date.day) %>
-          <% anniversary_date = anniversary_date + 1.year if anniversary_date < Date.current %>
-          <div class="flex items-center justify-between p-3 bg-white border border-gray-100 rounded-xl hover:shadow-md transition-all duration-200 group">
-            <div class="flex items-center gap-3 min-w-0">
-              <div class="relative shrink-0">
-                <div class="h-10 w-10 rounded-full bg-linear-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm shadow-sm">
-                  <%= employee.first_name[0] %><%= employee.last_name[0] %>
-                </div>
-                <div class="absolute -bottom-1 -right-1 bg-yellow-400 text-yellow-900 text-[10px] font-bold px-1 py-0.5 rounded-full border border-white shadow-sm">
-                  <%= years %>y
-                </div>
-              </div>
+  <%# ── Row 4: people moments ─────────────────────────────────────────────── %>
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6" data-controller="reveal" data-reveal-delay-value="70">
+    <div class="card overflow-hidden">
+      <div class="card-header py-3.5"><h3 class="card-title text-sm">Recent hires</h3></div>
+      <% if @recent_hires.any? %>
+        <ul class="divide-y divide-stone-100">
+          <% @recent_hires.each do |emp| %>
+            <li class="px-5 py-3 flex items-center gap-3">
+              <%= avatar_chip(emp.full_name) %>
               <div class="min-w-0">
-                <h4 class="text-sm font-bold text-gray-900 group-hover:text-purple-700 transition-colors truncate">
-                  <%= employee.full_name %>
-                </h4>
-                <div class="flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-xs text-gray-500 mt-0.5">
-                  <span class="bg-purple-100 px-1.5 py-0.5 rounded text-purple-700 font-medium shrink-0">Anniversary</span>
-                  <span class="hidden sm:inline truncate"><%= employee.department&.name || 'Team' %></span>
-                  <span class="shrink-0"><%= years.ordinalize %> yr</span>
-                </div>
+                <p class="text-sm font-medium text-stone-900 truncate"><%= emp.full_name %></p>
+                <p class="text-xs text-stone-500">Joined <%= emp.joining_date.strftime("%d %b %Y") %></p>
               </div>
-            </div>
-            <div class="flex flex-col items-end gap-2">
-              <div class="text-sm font-semibold text-gray-900 bg-gray-50 px-3 py-1 rounded-lg border border-gray-200 group-hover:border-purple-200 group-hover:bg-purple-50 transition-colors">
-                <%= anniversary_date.strftime("%b %d") %>
-              </div>
-              <a href="mailto:<%= employee.email %>?subject=Happy Work Anniversary!&body=Hi <%= employee.first_name %>,%0D%0A%0D%0AWishing you a very happy <%= years.ordinalize %> work anniversary! Thank you for your contributions.%0D%0A%0D%0ABest,%0D%0A[Your Name]"
-                 class="text-xs font-medium text-purple-600 hover:text-purple-800 hover:underline flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                Send Wish
-                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
-                </svg>
-              </a>
-            </div>
-          </div>
-        <% end %>
+            </li>
+          <% end %>
+        </ul>
+      <% else %>
+        <div class="empty-state py-8"><p class="text-sm text-stone-400">No recent hires.</p></div>
+      <% end %>
+    </div>
 
-        <% @upcoming_birthdays.each do |employee| %>
-          <% birthday_date = Date.new(Date.current.year, employee.date_of_birth.month, employee.date_of_birth.day) %>
-          <% birthday_date = birthday_date + 1.year if birthday_date < Date.current %>
-          <div class="flex items-center justify-between p-3 bg-white border border-gray-100 rounded-xl hover:shadow-md transition-all duration-200 group">
-            <div class="flex items-center gap-3 min-w-0">
-              <div class="relative shrink-0">
-                <div class="h-10 w-10 rounded-full bg-linear-to-br from-pink-400 to-rose-500 flex items-center justify-center text-white font-bold text-sm shadow-sm">
-                  <%= employee.first_name[0] %><%= employee.last_name[0] %>
-                </div>
-                <div class="absolute -bottom-1 -right-1 text-sm leading-none border border-white rounded-full bg-white shadow-sm">
-                  🎂
-                </div>
-              </div>
+    <div class="card overflow-hidden">
+      <div class="card-header py-3.5"><h3 class="card-title text-sm">Birthdays <span class="text-stone-400 font-normal">· next 30 days</span></h3></div>
+      <% if @upcoming_birthdays.any? %>
+        <ul class="divide-y divide-stone-100">
+          <% @upcoming_birthdays.each do |emp| %>
+            <li class="px-5 py-3 flex items-center gap-3">
+              <%= avatar_chip(emp.full_name) %>
               <div class="min-w-0">
-                <h4 class="text-sm font-bold text-gray-900 group-hover:text-rose-600 transition-colors truncate">
-                  <%= employee.full_name %>
-                </h4>
-                <div class="flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-xs text-gray-500 mt-0.5">
-                  <span class="bg-rose-100 px-1.5 py-0.5 rounded text-rose-700 font-medium shrink-0">Birthday</span>
-                  <span class="hidden sm:inline truncate"><%= employee.department&.name || 'Team' %></span>
-                </div>
+                <p class="text-sm font-medium text-stone-900 truncate"><%= emp.full_name %></p>
+                <p class="text-xs text-stone-500"><%= emp.date_of_birth.strftime("%d %B") %></p>
               </div>
-            </div>
-            <div class="flex flex-col items-end gap-2">
-              <div class="text-sm font-semibold text-gray-900 bg-gray-50 px-3 py-1 rounded-lg border border-gray-200 group-hover:border-rose-200 group-hover:bg-rose-50 transition-colors">
-                <%= birthday_date.strftime("%b %d") %>
-              </div>
-              <a href="mailto:<%= employee.email %>?subject=Happy Birthday!&body=Hi <%= employee.first_name %>,%0D%0A%0D%0AWishing you a very happy birthday! Hope you have a wonderful day.%0D%0A%0D%0ABest,%0D%0A[Your Name]"
-                 class="text-xs font-medium text-rose-600 hover:text-rose-800 hover:underline flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                Send Wish
-                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
-                </svg>
-              </a>
-            </div>
-          </div>
-        <% end %>
+            </li>
+          <% end %>
+        </ul>
+      <% else %>
+        <div class="empty-state py-8"><p class="text-sm text-stone-400">No birthdays coming up.</p></div>
+      <% end %>
+    </div>
 
-        <% if @upcoming_anniversaries.empty? && @upcoming_birthdays.empty? %>
-          <div class="flex flex-col items-center justify-center py-8 text-center text-gray-400">
-            <svg class="w-12 h-12 mb-3 text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-            </svg>
-            <p class="text-sm font-medium">No celebrations in the next 30 days.</p>
-          </div>
-        <% end %>
-      </div>
+    <div class="card overflow-hidden">
+      <div class="card-header py-3.5"><h3 class="card-title text-sm">Work anniversaries</h3></div>
+      <% if @upcoming_anniversaries.any? %>
+        <ul class="divide-y divide-stone-100">
+          <% @upcoming_anniversaries.each do |emp| %>
+            <% years = Date.current.year - emp.joining_date.year %>
+            <li class="px-5 py-3 flex items-center gap-3">
+              <%= avatar_chip(emp.full_name) %>
+              <div class="min-w-0">
+                <p class="text-sm font-medium text-stone-900 truncate"><%= emp.full_name %></p>
+                <p class="text-xs text-stone-500"><%= emp.joining_date.strftime("%d %B") %><%= " · #{years} #{"year".pluralize(years)}" if years.positive? %></p>
+              </div>
+            </li>
+          <% end %>
+        </ul>
+      <% else %>
+        <div class="empty-state py-8"><p class="text-sm text-stone-400">No anniversaries coming up.</p></div>
+      <% end %>
     </div>
   </div>
 </div>

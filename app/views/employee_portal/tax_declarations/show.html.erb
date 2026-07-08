@@ -4,73 +4,73 @@
   <%# ── Header ──────────────────────────────────────────────────────────── %>
   <div class="flex items-center justify-between mb-6">
     <div>
-      <h1 class="text-2xl font-bold text-gray-900">Tax Declaration</h1>
-      <p class="text-sm text-gray-500 mt-0.5">Financial Year <%= @declaration.financial_year %></p>
+      <h1 class="page-title text-2xl">Tax Declaration</h1>
+      <p class="text-sm text-stone-500 mt-0.5">Financial Year <%= @declaration.financial_year %></p>
     </div>
 
     <div class="flex items-center gap-3">
       <% if @declaration.status_draft? %>
         <span class="inline-flex items-center rounded-full bg-amber-100 px-3 py-1 text-xs font-medium text-amber-800">Draft</span>
         <%= link_to "Edit Declaration", edit_employee_portal_tax_declaration_path,
-            class: "px-4 py-2 bg-white border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50" %>
+            class: "btn btn-secondary" %>
         <%= button_to "Submit Declaration", submit_employee_portal_tax_declaration_path,
             method: :patch,
-            class: "px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700",
+            class: "btn btn-primary",
             data: { confirm: "Once submitted, you cannot edit this declaration. Continue?" } %>
       <% elsif @declaration.status_submitted? %>
         <span class="inline-flex items-center rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-800">Submitted</span>
       <% elsif @declaration.status_verified? %>
-        <span class="inline-flex items-center rounded-full bg-blue-100 px-3 py-1 text-xs font-medium text-blue-800">Verified</span>
+        <span class="inline-flex items-center rounded-full bg-kula-100 px-3 py-1 text-xs font-medium text-kula-900">Verified</span>
       <% end %>
     </div>
   </div>
 
   <%# ── Regime ────────────────────────────────────────────────────────────── %>
-  <div class="bg-white rounded-lg border border-gray-200 p-6 mb-4">
-    <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">Tax Regime</h2>
+  <div class="card card-pad mb-4">
+    <h2 class="text-sm font-semibold text-stone-500 uppercase tracking-wide mb-3">Tax Regime</h2>
     <% if @declaration.regime_old_regime? %>
       <div class="flex items-center gap-2">
-        <span class="text-sm font-medium text-gray-900">Old Regime</span>
-        <span class="text-xs text-gray-500">(deductions allowed: 80C, 80D, HRA, etc.)</span>
+        <span class="text-sm font-medium text-stone-900">Old Regime</span>
+        <span class="text-xs text-stone-500">(deductions allowed: 80C, 80D, HRA, etc.)</span>
       </div>
     <% else %>
       <div class="flex items-center gap-2">
-        <span class="text-sm font-medium text-gray-900">New Regime</span>
-        <span class="text-xs text-gray-500">(standard deduction ₹75,000 only)</span>
+        <span class="text-sm font-medium text-stone-900">New Regime</span>
+        <span class="text-xs text-stone-500">(standard deduction ₹75,000 only)</span>
       </div>
     <% end %>
   </div>
 
   <% if @declaration.regime_old_regime? %>
     <%# ── Investments ──────────────────────────────────────────────────────── %>
-    <div class="bg-white rounded-lg border border-gray-200 p-6 mb-4">
-      <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4">Investments & Deductions</h2>
+    <div class="card card-pad mb-4">
+      <h2 class="text-sm font-semibold text-stone-500 uppercase tracking-wide mb-4">Investments & Deductions</h2>
 
       <% grouped = @declaration.investment_declarations.group_by(&:section) %>
 
       <% if grouped.empty? %>
-        <p class="text-sm text-gray-400 italic">No investments declared yet.</p>
+        <p class="text-sm text-stone-400 italic">No investments declared yet.</p>
       <% else %>
         <div class="space-y-5">
           <% grouped.each do |section, investments| %>
             <div>
               <div class="flex items-center justify-between mb-2">
-                <span class="text-sm font-semibold text-gray-700">
+                <span class="text-sm font-semibold text-stone-700">
                   Section <%= section %>
                   <% limit = InvestmentDeclaration::SECTION_LIMITS[section] %>
                   <% if limit %>
-                    <span class="text-xs font-normal text-gray-400">(limit ₹<%= number_with_delimiter(limit) %>)</span>
+                    <span class="text-xs font-normal text-stone-400">(limit ₹<%= number_with_delimiter(limit) %>)</span>
                   <% end %>
                 </span>
-                <span class="text-sm font-medium text-gray-900">
+                <span class="text-sm font-medium text-stone-900">
                   ₹<%= number_with_delimiter(investments.sum { |i| i.declared_amount.to_i }) %>
                 </span>
               </div>
-              <ul class="divide-y divide-gray-100 border border-gray-100 rounded-lg">
+              <ul class="divide-y divide-stone-100 border border-stone-100 rounded-lg">
                 <% investments.each do |inv| %>
                   <li class="flex items-center justify-between px-4 py-2.5 text-sm">
-                    <span class="text-gray-700"><%= inv.description %></span>
-                    <span class="text-gray-900 font-medium">₹<%= number_with_delimiter(inv.declared_amount.to_i) %></span>
+                    <span class="text-stone-700"><%= inv.description %></span>
+                    <span class="text-stone-900 font-medium">₹<%= number_with_delimiter(inv.declared_amount.to_i) %></span>
                   </li>
                 <% end %>
               </ul>
@@ -82,24 +82,24 @@
 
     <%# ── HRA ────────────────────────────────────────────────────────────── %>
     <% if @declaration.claiming_hra? %>
-      <div class="bg-white rounded-lg border border-gray-200 p-6 mb-4">
-        <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">HRA Exemption</h2>
+      <div class="card card-pad mb-4">
+        <h2 class="text-sm font-semibold text-stone-500 uppercase tracking-wide mb-3">HRA Exemption</h2>
         <dl class="grid grid-cols-2 gap-x-6 gap-y-3 text-sm">
-          <div><dt class="text-gray-500">Monthly Rent</dt><dd class="font-medium text-gray-900">₹<%= number_with_delimiter(@declaration.monthly_rent.to_i) %></dd></div>
-          <div><dt class="text-gray-500">City Type</dt><dd class="font-medium text-gray-900"><%= @declaration.rental_city&.humanize %></dd></div>
-          <div><dt class="text-gray-500">Landlord Name</dt><dd class="font-medium text-gray-900"><%= @declaration.landlord_name.presence || "—" %></dd></div>
-          <div><dt class="text-gray-500">Landlord PAN</dt><dd class="font-medium text-gray-900"><%= @declaration.landlord_pan.presence || "—" %></dd></div>
+          <div><dt class="text-stone-500">Monthly Rent</dt><dd class="font-medium text-stone-900">₹<%= number_with_delimiter(@declaration.monthly_rent.to_i) %></dd></div>
+          <div><dt class="text-stone-500">City Type</dt><dd class="font-medium text-stone-900"><%= @declaration.rental_city&.humanize %></dd></div>
+          <div><dt class="text-stone-500">Landlord Name</dt><dd class="font-medium text-stone-900"><%= @declaration.landlord_name.presence || "—" %></dd></div>
+          <div><dt class="text-stone-500">Landlord PAN</dt><dd class="font-medium text-stone-900"><%= @declaration.landlord_pan.presence || "—" %></dd></div>
         </dl>
       </div>
     <% end %>
 
     <%# ── Home Loan ───────────────────────────────────────────────────────── %>
     <% if @declaration.home_loan_interest.to_f > 0 || @declaration.home_loan_principal.to_f > 0 %>
-      <div class="bg-white rounded-lg border border-gray-200 p-6 mb-4">
-        <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">Home Loan (Section 24b)</h2>
+      <div class="card card-pad mb-4">
+        <h2 class="text-sm font-semibold text-stone-500 uppercase tracking-wide mb-3">Home Loan (Section 24b)</h2>
         <dl class="grid grid-cols-2 gap-x-6 gap-y-3 text-sm">
-          <div><dt class="text-gray-500">Interest Paid</dt><dd class="font-medium text-gray-900">₹<%= number_with_delimiter(@declaration.home_loan_interest.to_i) %></dd></div>
-          <div><dt class="text-gray-500">Principal Repaid</dt><dd class="font-medium text-gray-900">₹<%= number_with_delimiter(@declaration.home_loan_principal.to_i) %></dd></div>
+          <div><dt class="text-stone-500">Interest Paid</dt><dd class="font-medium text-stone-900">₹<%= number_with_delimiter(@declaration.home_loan_interest.to_i) %></dd></div>
+          <div><dt class="text-stone-500">Principal Repaid</dt><dd class="font-medium text-stone-900">₹<%= number_with_delimiter(@declaration.home_loan_principal.to_i) %></dd></div>
         </dl>
       </div>
     <% end %>
@@ -107,15 +107,15 @@
 
   <%# ── TDS Summary placeholder (will be populated by Module 7) ──────────── %>
   <% if @declaration.estimated_monthly_tds.to_f > 0 %>
-    <div class="bg-blue-50 border border-blue-200 rounded-lg p-6">
-      <h2 class="text-sm font-semibold text-blue-800 uppercase tracking-wide mb-3">Estimated TDS</h2>
+    <div class="bg-kula-50 border border-kula-200 rounded-lg p-6">
+      <h2 class="text-sm font-semibold text-kula-900 uppercase tracking-wide mb-3">Estimated TDS</h2>
       <div class="flex items-center justify-between">
-        <span class="text-sm text-blue-700">Monthly TDS deduction</span>
-        <span class="text-lg font-bold text-blue-900">₹<%= number_with_delimiter(@declaration.estimated_monthly_tds.to_i) %></span>
+        <span class="text-sm text-kula-800">Monthly TDS deduction</span>
+        <span class="text-lg font-bold text-kula-950">₹<%= number_with_delimiter(@declaration.estimated_monthly_tds.to_i) %></span>
       </div>
     </div>
   <% else %>
-    <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 text-sm text-gray-500 text-center">
+    <div class="bg-stone-50 border border-stone-200 rounded-lg p-4 text-sm text-stone-500 text-center">
       TDS estimate will be calculated once the declaration is submitted.
     </div>
   <% end %>

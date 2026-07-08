@@ -1,11 +1,11 @@
 <div class="max-w-4xl mx-auto">
   <div class="flex items-center justify-between mb-6">
     <div>
-      <h1 class="text-2xl font-bold text-gray-900">Work Locations</h1>
-      <p class="text-sm text-gray-500 mt-1">Define office locations. Holidays and employees can be assigned per location for multi-state companies.</p>
+      <h1 class="page-title text-2xl">Work Locations</h1>
+      <p class="text-sm text-stone-500 mt-1">Define office locations. Holidays and employees can be assigned per location for multi-state companies.</p>
     </div>
     <%= link_to new_admin_work_location_path,
-        class: "inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700" do %>
+        class: "btn btn-primary" do %>
       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
       </svg>
@@ -13,35 +13,35 @@
     <% end %>
   </div>
 
-  <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
+  <div class="card overflow-hidden">
     <% if @work_locations.any? %>
       <div class="overflow-x-auto">
-        <table class="min-w-full divide-y divide-gray-200">
-          <thead class="bg-gray-50">
+        <table class="tbl">
+          <thead>
             <tr>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">State</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-              <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+              <th>Name</th>
+              <th>State</th>
+              <th>Status</th>
+              <th class="text-right">Actions</th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-gray-200">
+          <tbody>
             <% @work_locations.each do |location| %>
-              <tr class="hover:bg-gray-50 <%= 'opacity-50' unless location.is_active? %>">
-                <td class="px-6 py-4 text-sm font-medium text-gray-900"><%= location.name %></td>
-                <td class="px-6 py-4 text-sm text-gray-700"><%= location.state.presence || "—" %></td>
-                <td class="px-6 py-4">
+              <tr class="hover:bg-stone-50 <%= 'opacity-50' unless location.is_active? %>">
+                <td class="text-sm font-medium text-stone-900"><%= location.name %></td>
+                <td class="text-sm text-stone-700"><%= location.state.presence || "—" %></td>
+                <td>
                   <% if location.is_active? %>
                     <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-700">Active</span>
                   <% else %>
-                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-500">Inactive</span>
+                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-stone-100 text-stone-500">Inactive</span>
                   <% end %>
                 </td>
-                <td class="px-6 py-4 text-right">
+                <td class="text-right">
                   <div class="flex items-center justify-end gap-2">
                     <%= link_to edit_admin_work_location_path(location),
                         title: "Edit",
-                        class: "p-1.5 rounded-md text-blue-600 hover:bg-blue-100 transition-colors cursor-pointer" do %>
+                        class: "p-1.5 rounded-md text-kula-700 hover:bg-kula-100 transition-colors cursor-pointer" do %>
                       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                       </svg>
@@ -65,11 +65,11 @@
       </div>
     <% else %>
       <div class="p-12 text-center">
-        <svg class="mx-auto h-10 w-10 text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg class="mx-auto h-10 w-10 text-stone-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"/>
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"/>
         </svg>
-        <p class="text-sm text-gray-500">No work locations yet. Add one to enable location-based holidays.</p>
+        <p class="text-sm text-stone-500">No work locations yet. Add one to enable location-based holidays.</p>
       </div>
     <% end %>
   </div>

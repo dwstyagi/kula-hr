@@ -1,43 +1,43 @@
-<div class="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+<div class="min-h-screen bg-stone-50 flex items-center justify-center px-4">
   <div class="w-full max-w-md">
     <div class="text-center mb-8">
-      <div class="inline-flex items-center justify-center w-14 h-14 bg-indigo-100 rounded-full mb-4">
-        <svg class="w-7 h-7 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <div class="inline-flex items-center justify-center w-14 h-14 bg-kula-100 rounded-full mb-4">
+        <svg class="w-7 h-7 text-kula-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
         </svg>
       </div>
-      <h1 class="text-2xl font-bold text-gray-900">Activate Your Account</h1>
-      <p class="mt-2 text-sm text-gray-500">Welcome to <strong><%= @tenant.name %></strong>. Enter your details to get started.</p>
+      <h1 class="page-title text-2xl">Activate Your Account</h1>
+      <p class="mt-2 text-sm text-stone-500">Welcome to <strong><%= @tenant.name %></strong>. Enter your details to get started.</p>
     </div>
 
-    <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-8">
+    <div class="card shadow-sm p-8">
       <%= form_with url: employee_activation_submit_path(params[:token]), method: :post, class: "space-y-5" do |f| %>
         <div>
-          <label class="block text-sm font-medium text-gray-700">Work Email <span class="text-red-500">*</span></label>
+          <label class="block text-sm font-medium text-stone-700">Work Email <span class="text-red-500">*</span></label>
           <%= email_field_tag :email, nil,
               required: true,
               autocomplete: "email",
               placeholder: "you@company.com",
-              class: "mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 focus:outline-none sm:text-sm" %>
-          <p class="mt-1 text-xs text-gray-400">Use the email address your HR has on file.</p>
+              class: "mt-1 block w-full rounded-lg border border-stone-300 px-3 py-2 shadow-sm focus:border-kula-500 focus:ring-kula-500 focus:outline-none sm:text-sm" %>
+          <p class="mt-1 text-xs text-stone-400">Use the email address your HR has on file.</p>
         </div>
 
         <div>
-          <label class="block text-sm font-medium text-gray-700">Employee Code <span class="text-red-500">*</span></label>
+          <label class="block text-sm font-medium text-stone-700">Employee Code <span class="text-red-500">*</span></label>
           <%= text_field_tag :employee_code, nil,
               required: true,
               autocomplete: "off",
               placeholder: "e.g. EMP0042",
-              class: "mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 focus:outline-none sm:text-sm" %>
+              class: "mt-1 block w-full rounded-lg border border-stone-300 px-3 py-2 shadow-sm focus:border-kula-500 focus:ring-kula-500 focus:outline-none sm:text-sm" %>
         </div>
 
         <div>
-          <label class="block text-sm font-medium text-gray-700">Date of Birth <span class="text-red-500">*</span></label>
+          <label class="block text-sm font-medium text-stone-700">Date of Birth <span class="text-red-500">*</span></label>
           <%= text_field_tag :date_of_birth, nil,
               required: true,
               autocomplete: "bday",
               placeholder: "DD/MM/YYYY",
-              class: "mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 focus:outline-none sm:text-sm" %>
+              class: "mt-1 block w-full rounded-lg border border-stone-300 px-3 py-2 shadow-sm focus:border-kula-500 focus:ring-kula-500 focus:outline-none sm:text-sm" %>
         </div>
 
         <%# Honeypot — bots fill this in, humans don't see it %>
@@ -46,15 +46,15 @@
         </div>
 
         <button type="submit"
-                class="w-full flex justify-center py-2.5 px-4 rounded-lg bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition cursor-pointer">
+                class="w-full flex justify-center py-2.5 px-4 rounded-lg bg-kula-600 text-white text-sm font-medium hover:bg-kula-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-kula-500 transition cursor-pointer">
           Send Activation Email
         </button>
       <% end %>
     </div>
 
-    <p class="mt-6 text-center text-xs text-gray-400">
+    <p class="mt-6 text-center text-xs text-stone-400">
       Already have an account?
-      <%= link_to "Sign in", new_user_session_path, class: "text-indigo-600 hover:underline" %>
+      <%= link_to "Sign in", new_user_session_path, class: "text-kula-600 hover:underline" %>
     </p>
   </div>
 </div>

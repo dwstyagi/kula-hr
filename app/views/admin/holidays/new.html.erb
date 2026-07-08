@@ -1,6 +1,6 @@
 <%= turbo_frame_tag "holiday_form" do %>
-  <div class="bg-white rounded-lg border border-gray-200 p-6 mb-6">
-    <h2 class="text-lg font-semibold text-gray-900 mb-4">New Holiday</h2>
+  <div class="card card-pad mb-6">
+    <h2 class="card-title mb-4">New Holiday</h2>
     <%= render "form", holiday: @holiday, url: admin_holidays_path %>
   </div>
 <% end %>

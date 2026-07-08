@@ -2,19 +2,19 @@
   <%# Breadcrumb + header %>
   <div class="flex items-start justify-between">
     <div>
-      <div class="flex items-center gap-2 text-sm text-gray-500 mb-1">
-        <%= link_to "Payroll Runs", admin_payroll_runs_path, class: "hover:text-gray-700" %>
+      <div class="flex items-center gap-2 text-sm text-stone-500 mb-1">
+        <%= link_to "Payroll Runs", admin_payroll_runs_path, class: "hover:text-stone-700" %>
         <span>/</span>
-        <%= link_to @payroll_run.period_label, admin_payroll_run_path(@payroll_run), class: "hover:text-gray-700" %>
+        <%= link_to @payroll_run.period_label, admin_payroll_run_path(@payroll_run), class: "hover:text-stone-700" %>
         <span>/</span>
-        <%= link_to "Payslips", admin_payroll_run_payslips_path(@payroll_run), class: "hover:text-gray-700" %>
+        <%= link_to "Payslips", admin_payroll_run_payslips_path(@payroll_run), class: "hover:text-stone-700" %>
         <span>/</span>
-        <span class="text-gray-900"><%= @payslip.employee.full_name %></span>
+        <span class="text-stone-900"><%= @payslip.employee.full_name %></span>
       </div>
-      <h1 class="text-2xl font-bold text-gray-900">
+      <h1 class="page-title text-2xl">
         Payslip — <%= @payslip.employee.full_name %>
       </h1>
-      <p class="text-sm text-gray-500 mt-0.5">
+      <p class="text-sm text-stone-500 mt-0.5">
         <%= @payslip.period_label %> &middot; <%= @payslip.employee.employee_code %>
         <% if @payslip.is_revised? %>
           &middot; <span class="text-amber-600 font-medium">Revised</span>
@@ -24,7 +24,7 @@
 
     <div class="flex items-center gap-2">
       <%= link_to download_admin_payslip_path(@payslip),
-            class: "inline-flex items-center gap-1.5 px-4 py-2 bg-white border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50" do %>
+            class: "inline-flex items-center gap-1.5 btn btn-secondary" do %>
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3M3 17V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
         </svg>
@@ -35,7 +35,7 @@
               class: "px-4 py-2 bg-amber-500 text-white text-sm font-medium rounded-lg hover:bg-amber-600" %>
       <% end %>
       <%= link_to "← All Payslips", admin_payroll_run_payslips_path(@payroll_run),
-            class: "px-4 py-2 bg-white border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50" %>
+            class: "btn btn-secondary" %>
     </div>
   </div>
 
@@ -48,24 +48,24 @@
   <% end %>
 
   <%# Attendance snapshot %>
-  <div class="bg-white rounded-xl border border-gray-200 p-4">
-    <h2 class="text-sm font-semibold text-gray-700 mb-3">Attendance</h2>
+  <div class="card p-4">
+    <h2 class="text-sm font-semibold text-stone-700 mb-3">Attendance</h2>
     <div class="grid grid-cols-3 gap-4 text-sm">
       <div>
-        <p class="text-gray-400 text-xs uppercase tracking-wide">Working Days</p>
-        <p class="text-gray-900 font-medium mt-0.5"><%= @payslip.total_working_days %></p>
+        <p class="text-stone-400 text-xs uppercase tracking-wide">Working Days</p>
+        <p class="text-stone-900 font-medium mt-0.5"><%= @payslip.total_working_days %></p>
       </div>
       <div>
-        <p class="text-gray-400 text-xs uppercase tracking-wide">Paid Days</p>
-        <p class="text-gray-900 font-medium mt-0.5"><%= @payslip.paid_days %></p>
+        <p class="text-stone-400 text-xs uppercase tracking-wide">Paid Days</p>
+        <p class="text-stone-900 font-medium mt-0.5"><%= @payslip.paid_days %></p>
       </div>
       <div>
-        <p class="text-gray-400 text-xs uppercase tracking-wide">LOP Days</p>
+        <p class="text-stone-400 text-xs uppercase tracking-wide">LOP Days</p>
         <p class="mt-0.5">
           <% if @payslip.lop_days > 0 %>
             <span class="text-red-600 font-medium"><%= @payslip.lop_days %></span>
           <% else %>
-            <span class="text-gray-300">—</span>
+            <span class="text-stone-300">—</span>
           <% end %>
         </p>
       </div>
@@ -75,36 +75,36 @@
   <%# Earnings + Deductions side by side %>
   <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
     <%# Earnings %>
-    <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
-      <div class="bg-green-50 border-b border-gray-200 px-4 py-3">
+    <div class="card overflow-hidden">
+      <div class="bg-green-50 border-b border-stone-200 px-4 py-3">
         <h2 class="text-sm font-semibold text-green-800">Earnings</h2>
       </div>
       <table class="w-full text-sm">
-        <thead class="bg-gray-50 border-b border-gray-100">
+        <thead class="bg-stone-50 border-b border-stone-100">
           <tr>
-            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500">Component</th>
-            <th class="px-4 py-2 text-right text-xs font-medium text-gray-500">Full</th>
-            <th class="px-4 py-2 text-right text-xs font-medium text-gray-500">Earned</th>
+            <th class="px-4 py-2 text-left text-xs font-medium text-stone-500">Component</th>
+            <th class="px-4 py-2 text-right text-xs font-medium text-stone-500">Full</th>
+            <th class="px-4 py-2 text-right text-xs font-medium text-stone-500">Earned</th>
           </tr>
         </thead>
-        <tbody class="divide-y divide-gray-50">
+        <tbody class="divide-y divide-stone-50">
           <% @payslip.earnings.each do |item| %>
             <tr>
-              <td class="px-4 py-2.5 text-gray-700"><%= item.component_name %></td>
-              <td class="px-4 py-2.5 text-right text-gray-400">
+              <td class="px-4 py-2.5 text-stone-700"><%= item.component_name %></td>
+              <td class="px-4 py-2.5 text-right text-stone-400">
                 <% if item.full_amount.present? && item.full_amount != item.amount %>
                   ₹<%= number_with_delimiter(item.full_amount.round(0)) %>
                 <% else %>
                   —
                 <% end %>
               </td>
-              <td class="px-4 py-2.5 text-right font-medium text-gray-900">
+              <td class="px-4 py-2.5 text-right font-medium text-stone-900">
                 ₹<%= number_with_delimiter(item.amount.round(0)) %>
               </td>
             </tr>
           <% end %>
         </tbody>
-        <tfoot class="border-t-2 border-gray-200 bg-green-50">
+        <tfoot class="border-t-2 border-stone-200 bg-green-50">
           <tr>
             <td class="px-4 py-3 font-semibold text-green-900" colspan="2">Gross Pay</td>
             <td class="px-4 py-3 text-right font-bold text-green-900">
@@ -116,33 +116,33 @@
     </div>
 
     <%# Deductions %>
-    <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
-      <div class="bg-red-50 border-b border-gray-200 px-4 py-3">
+    <div class="card overflow-hidden">
+      <div class="bg-red-50 border-b border-stone-200 px-4 py-3">
         <h2 class="text-sm font-semibold text-red-800">Deductions</h2>
       </div>
       <table class="w-full text-sm">
-        <thead class="bg-gray-50 border-b border-gray-100">
+        <thead class="bg-stone-50 border-b border-stone-100">
           <tr>
-            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500">Component</th>
-            <th class="px-4 py-2 text-right text-xs font-medium text-gray-500">Amount</th>
+            <th class="px-4 py-2 text-left text-xs font-medium text-stone-500">Component</th>
+            <th class="px-4 py-2 text-right text-xs font-medium text-stone-500">Amount</th>
           </tr>
         </thead>
-        <tbody class="divide-y divide-gray-50">
+        <tbody class="divide-y divide-stone-50">
           <% @payslip.deductions.each do |item| %>
             <tr>
-              <td class="px-4 py-2.5 text-gray-700"><%= item.component_name %></td>
-              <td class="px-4 py-2.5 text-right font-medium text-gray-900">
+              <td class="px-4 py-2.5 text-stone-700"><%= item.component_name %></td>
+              <td class="px-4 py-2.5 text-right font-medium text-stone-900">
                 ₹<%= number_with_delimiter(item.amount.round(0)) %>
               </td>
             </tr>
           <% end %>
           <% if @payslip.deductions.empty? %>
             <tr>
-              <td colspan="2" class="px-4 py-4 text-center text-gray-400 text-xs">No deductions</td>
+              <td colspan="2" class="px-4 py-4 text-center text-stone-400 text-xs">No deductions</td>
             </tr>
           <% end %>
         </tbody>
-        <tfoot class="border-t-2 border-gray-200 bg-red-50">
+        <tfoot class="border-t-2 border-stone-200 bg-red-50">
           <tr>
             <td class="px-4 py-3 font-semibold text-red-900">Total Deductions</td>
             <td class="px-4 py-3 text-right font-bold text-red-900">
@@ -156,20 +156,20 @@
 
   <%# Net Pay + Employer Cost summary %>
   <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-    <div class="bg-white rounded-xl border border-gray-200 p-4">
-      <p class="text-xs text-gray-400 uppercase tracking-wide">Net Pay</p>
-      <p class="text-2xl font-bold text-gray-900 mt-1">₹<%= number_with_delimiter(@payslip.net_pay.round(0)) %></p>
+    <div class="card p-4">
+      <p class="text-xs text-stone-400 uppercase tracking-wide">Net Pay</p>
+      <p class="page-title text-2xl mt-1">₹<%= number_with_delimiter(@payslip.net_pay.round(0)) %></p>
     </div>
-    <div class="bg-white rounded-xl border border-gray-200 p-4">
-      <p class="text-xs text-gray-400 uppercase tracking-wide">Employer PF</p>
-      <p class="text-2xl font-bold text-gray-600 mt-1">₹<%= number_with_delimiter(@payslip.employer_pf.round(0)) %></p>
+    <div class="card p-4">
+      <p class="text-xs text-stone-400 uppercase tracking-wide">Employer PF</p>
+      <p class="text-2xl font-bold text-stone-600 mt-1">₹<%= number_with_delimiter(@payslip.employer_pf.round(0)) %></p>
     </div>
-    <div class="bg-white rounded-xl border border-gray-200 p-4">
-      <p class="text-xs text-gray-400 uppercase tracking-wide">Employer ESI</p>
-      <p class="text-2xl font-bold text-gray-600 mt-1">₹<%= number_with_delimiter(@payslip.employer_esi.round(0)) %></p>
+    <div class="card p-4">
+      <p class="text-xs text-stone-400 uppercase tracking-wide">Employer ESI</p>
+      <p class="text-2xl font-bold text-stone-600 mt-1">₹<%= number_with_delimiter(@payslip.employer_esi.round(0)) %></p>
     </div>
-    <div class="bg-white rounded-xl border border-gray-200 p-4">
-      <p class="text-xs text-gray-400 uppercase tracking-wide">CTC This Month</p>
+    <div class="card p-4">
+      <p class="text-xs text-stone-400 uppercase tracking-wide">CTC This Month</p>
       <p class="text-2xl font-bold text-purple-700 mt-1">₹<%= number_with_delimiter(@payslip.ctc_this_month.round(0)) %></p>
     </div>
   </div>

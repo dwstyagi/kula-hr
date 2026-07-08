@@ -2,11 +2,11 @@
 <div id="features" class="bg-white py-24 sm:py-32">
   <div class="mx-auto max-w-7xl px-6 lg:px-8">
     <div class="sr mx-auto max-w-2xl text-center">
-      <p class="text-base font-semibold leading-7 text-indigo-600">Everything in one platform</p>
-      <h2 class="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
+      <p class="text-base font-semibold leading-7 text-kula-600">Everything in one platform</p>
+      <h2 class="mt-2 text-3xl font-bold tracking-tight text-stone-900 sm:text-4xl">
         From onboarding to payslip — done.
       </h2>
-      <p class="mt-6 text-lg leading-8 text-gray-600">
+      <p class="mt-6 text-lg leading-8 text-stone-600">
         Kula HR replaces spreadsheets, tally adjustments, and manual bank transfers with a single, compliant workflow built for Indian companies.
       </p>
     </div>
@@ -32,16 +32,16 @@
             icon: "M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z",
             desc: "Generate PF ECR files, ESI contribution statements, PT challans, and YTD earnings reports in the exact format required for filing. No more manual Excel work." },
         ].each do |f| %>
-          <div class="feat-card sr-c flex flex-col bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
-            <dt class="flex items-center gap-x-3 text-base font-semibold leading-7 text-gray-900">
-              <div class="h-10 w-10 flex items-center justify-center rounded-lg <%= f[:color] == "violet" ? "bg-violet-600" : "bg-indigo-600" %> text-white shrink-0">
+          <div class="feat-card sr-c flex flex-col bg-white p-8 rounded-2xl shadow-sm border border-stone-100">
+            <dt class="flex items-center gap-x-3 text-base font-semibold leading-7 text-stone-900">
+              <div class="h-10 w-10 flex items-center justify-center rounded-lg <%= f[:color] == "violet" ? "bg-marigold-500" : "bg-kula-600" %> text-white shrink-0">
                 <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" d="<%= f[:icon] %>" />
                 </svg>
               </div>
               <%= f[:title] %>
             </dt>
-            <dd class="mt-4 flex flex-auto flex-col text-base leading-7 text-gray-600">
+            <dd class="mt-4 flex flex-auto flex-col text-base leading-7 text-stone-600">
               <p class="flex-auto"><%= f[:desc] %></p>
             </dd>
           </div>

@@ -1,69 +1,69 @@
 <div class="max-w-3xl mx-auto">
   <div class="flex items-center justify-between mb-6">
     <div>
-      <h1 class="text-2xl font-bold text-gray-900"><%= @salary_component.name %></h1>
+      <h1 class="page-title text-2xl"><%= @salary_component.name %></h1>
       <div class="flex items-center gap-2 mt-1">
-        <% type_colors = { "earning" => "bg-green-100 text-green-700", "deduction" => "bg-red-100 text-red-700", "employer_contribution" => "bg-blue-100 text-blue-700" } %>
+        <% type_colors = { "earning" => "bg-green-100 text-green-700", "deduction" => "bg-red-100 text-red-700", "employer_contribution" => "bg-kula-100 text-kula-800" } %>
         <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium <%= type_colors[@salary_component.component_type] %>">
           <%= @salary_component.component_type.titleize %>
         </span>
         <% if @salary_component.active? %>
           <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-700">Active</span>
         <% else %>
-          <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-500">Inactive</span>
+          <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-stone-100 text-stone-500">Inactive</span>
         <% end %>
       </div>
     </div>
     <div class="flex items-center gap-2">
       <%= link_to "Edit", edit_admin_salary_component_path(@salary_component),
-          class: "px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700" %>
+          class: "btn btn-primary" %>
       <%= link_to "All Components", admin_salary_components_path,
-          class: "px-4 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200" %>
+          class: "btn btn-ghost" %>
     </div>
   </div>
 
   <%# Details %>
-  <div class="bg-white rounded-lg border border-gray-200 p-6 mb-6">
-    <h3 class="text-base font-semibold text-gray-900 mb-4">Details</h3>
+  <div class="card card-pad mb-6">
+    <h3 class="card-title mb-4">Details</h3>
     <dl class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-5">
       <div>
-        <dt class="text-xs font-medium text-gray-500 uppercase tracking-wide">Calculation Type</dt>
-        <dd class="mt-1 text-sm text-gray-900"><%= @salary_component.calculation_type.capitalize %></dd>
+        <dt class="text-xs font-medium text-stone-500 uppercase tracking-wide">Calculation Type</dt>
+        <dd class="mt-1 text-sm text-stone-900"><%= @salary_component.calculation_type.capitalize %></dd>
       </div>
       <div>
-        <dt class="text-xs font-medium text-gray-500 uppercase tracking-wide">Taxable</dt>
-        <dd class="mt-1 text-sm text-gray-900"><%= @salary_component.taxable? ? "Yes" : "No" %></dd>
+        <dt class="text-xs font-medium text-stone-500 uppercase tracking-wide">Taxable</dt>
+        <dd class="mt-1 text-sm text-stone-900"><%= @salary_component.taxable? ? "Yes" : "No" %></dd>
       </div>
       <div>
-        <dt class="text-xs font-medium text-gray-500 uppercase tracking-wide">Display Order</dt>
-        <dd class="mt-1 text-sm text-gray-900 font-mono"><%= @salary_component.sort_order %></dd>
+        <dt class="text-xs font-medium text-stone-500 uppercase tracking-wide">Display Order</dt>
+        <dd class="mt-1 text-sm text-stone-900 font-mono"><%= @salary_component.sort_order %></dd>
       </div>
       <div>
-        <dt class="text-xs font-medium text-gray-500 uppercase tracking-wide">Created</dt>
-        <dd class="mt-1 text-sm text-gray-900"><%= @salary_component.created_at.strftime("%d %b %Y") %></dd>
+        <dt class="text-xs font-medium text-stone-500 uppercase tracking-wide">Created</dt>
+        <dd class="mt-1 text-sm text-stone-900"><%= @salary_component.created_at.strftime("%d %b %Y") %></dd>
       </div>
     </dl>
   </div>
 
   <%# Used in structures %>
-  <div class="bg-white rounded-lg border border-gray-200 p-6">
-    <h3 class="text-base font-semibold text-gray-900 mb-4">Used in Structures</h3>
+  <div class="card card-pad">
+    <h3 class="card-title mb-4">Used in Structures</h3>
     <% if @used_in_structures.any? %>
-      <ul class="divide-y divide-gray-200">
+      <ul class="divide-y divide-stone-200">
         <% @used_in_structures.each do |structure| %>
           <li class="py-3 flex items-center justify-between">
             <%= link_to structure.name, admin_salary_structure_path(structure),
-                class: "text-sm text-blue-600 hover:text-blue-800 font-medium" %>
+                class: "text-sm text-kula-700 hover:text-kula-900 font-medium" %>
             <% if structure.active? %>
               <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-700">Active</span>
             <% else %>
-              <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-500">Inactive</span>
+              <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-stone-100 text-stone-500">Inactive</span>
             <% end %>
           </li>
         <% end %>
       </ul>
     <% else %>
-      <p class="text-sm text-gray-500">Not used in any salary structure yet.</p>
+      <p class="text-sm text-stone-500">Not used in any salary structure yet.</p>
     <% end %>
   </div>
 </div>

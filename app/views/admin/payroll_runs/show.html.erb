@@ -1,150 +1,148 @@
-<div class="space-y-6">
+<% content_for :page_title, "Payroll · #{@payroll_run.period_label}" %>
+
+<div class="space-y-6 pb-2">
   <%# Header %>
-  <div class="flex items-start justify-between">
+  <div class="flex items-start justify-between gap-4">
     <div>
       <div class="flex items-center gap-3">
-        <h1 class="text-2xl font-bold text-gray-900">Payroll — <%= @payroll_run.period_label %></h1>
-        <%= render "status_badge", payroll_run: @payroll_run %>
+        <h1 class="page-title text-2xl">Payroll — <%= @payroll_run.period_label %></h1>
+        <span class="badge <%= @payroll_run.status_badge_classes %>"><%= @payroll_run.status_badge_label %></span>
       </div>
-      <p class="text-sm text-gray-500 mt-1">
+      <p class="page-sub">
         Initiated by <%= @payroll_run.initiated_by.full_name %> on <%= @payroll_run.created_at.strftime("%d %b %Y") %>
+        <% if @payroll_run.approved_by.present? %>
+          · approved by <%= @payroll_run.approved_by.full_name %>
+        <% end %>
       </p>
     </div>
-    <%= link_to "← All Runs", admin_payroll_runs_path,
-          class: "text-sm text-gray-500 hover:text-gray-700" %>
+    <%= link_to "← All runs", admin_payroll_runs_path, class: "text-sm text-stone-500 hover:text-stone-700 whitespace-nowrap mt-1" %>
   </div>
 
-  <%# Rejection reason banner %>
-  <% if @payroll_run.rejected? && @payroll_run.rejection_reason.present? %>
-    <div class="rounded-lg bg-red-50 border border-red-200 p-4 text-sm text-red-700">
-      <p class="font-medium">Rejection Reason:</p>
-      <p class="mt-1"><%= @payroll_run.rejection_reason %></p>
+  <%# The guided flow %>
+  <%= render "stepper", payroll_run: @payroll_run %>
+
+  <%# Step content %>
+  <% if @payroll_run.draft? %>
+    <%= render "step_review", payroll_run: @payroll_run, readiness: @readiness %>
+
+  <% elsif @payroll_run.processing? %>
+    <%= render "progress", payroll_run: @payroll_run %>
+
+  <% else %>
+    <%# Rejection reason — pinned above everything while it needs attention %>
+    <% if @payroll_run.rejected? && @payroll_run.rejection_reason.present? %>
+      <div class="alert alert-error animate-fade-up">
+        <svg class="size-5 shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"/>
+        </svg>
+        <div>
+          <p class="font-semibold">Rejected by reviewer</p>
+          <p class="mt-0.5"><%= @payroll_run.rejection_reason %></p>
+          <p class="mt-1 text-xs opacity-80">Correct the payslips (or reprocess from scratch), then resubmit for review.</p>
+        </div>
+      </div>
+    <% end %>
+
+    <%# Totals %>
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4" data-controller="reveal" data-reveal-delay-value="50">
+      <div class="stat-card">
+        <p class="stat-label">Gross pay</p>
+        <p class="stat-value"><%= @payroll_run.formatted_total_gross %></p>
+      </div>
+      <div class="stat-card">
+        <p class="stat-label">Deductions</p>
+        <p class="stat-value">− <%= @payroll_run.formatted_total_deductions %></p>
+        <p class="stat-sub">PF, ESI, PT &amp; TDS withheld</p>
+      </div>
+      <div class="stat-card">
+        <p class="stat-label">Net pay</p>
+        <p class="stat-value text-kula-700"
+           data-controller="countup"
+           data-countup-value-value="<%= @payroll_run.total_net_pay.to_f.round %>"
+           data-countup-prefix-value="₹"><%= @payroll_run.formatted_total_net_pay %></p>
+        <p class="stat-sub">To be transferred to employees</p>
+      </div>
+      <div class="stat-card">
+        <p class="stat-label">Total cost to company</p>
+        <p class="stat-value"><%= @payroll_run.money(@payroll_run.total_gross + @payroll_run.total_employer_cost) %></p>
+        <p class="stat-sub">Incl. employer PF <%= @payroll_run.money(@payroll_run.payslips.sum(:employer_pf)) %> · ESI <%= @payroll_run.money(@payroll_run.payslips.sum(:employer_esi)) %></p>
+      </div>
     </div>
-  <% end %>
 
-  <%# Progress bar (shown while processing or in draft) %>
-  <% if @payroll_run.draft? || @payroll_run.processing? %>
-    <%= render "progress", payroll_run: @payroll_run, readiness: @readiness %>
-  <% end %>
+    <%# Skipped employees — the exception that still matters after processing %>
+    <% skipped = @payroll_run.total_employees - @payroll_run.processed_employees %>
+    <% if skipped.positive? %>
+      <div class="alert alert-warning animate-fade-up">
+        <svg class="size-5 shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/>
+        </svg>
+        <p><strong><%= skipped %> employee<%= "s" unless skipped == 1 %></strong> <%= skipped == 1 ? "was" : "were" %> skipped in this run (missing locked attendance or salary). They will not be paid unless you fix and reprocess.</p>
+      </div>
+    <% end %>
 
-  <%# Summary cards (shown once processing is done) %>
-  <% if @payroll_run.processed? || @payroll_run.under_review? || @payroll_run.approved? || @payroll_run.rejected? || @payroll_run.paid? %>
-    <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
-      <%= render "summary_card", label: "Total Gross",      value: @payroll_run.total_gross,         color: "blue" %>
-      <%= render "summary_card", label: "Total Deductions", value: @payroll_run.total_deductions,    color: "orange" %>
-      <%= render "summary_card", label: "Total Net Pay",    value: @payroll_run.total_net_pay,        color: "green" %>
-      <%= render "summary_card", label: "Employer PF",      value: @payroll_run.payslips.sum(:employer_pf),  color: "gray" %>
-      <%= render "summary_card", label: "Employer ESI",     value: @payroll_run.payslips.sum(:employer_esi), color: "gray" %>
-      <%= render "summary_card", label: "Total CTC Cost",   value: @payroll_run.total_gross + @payroll_run.total_employer_cost, color: "purple" %>
-    </div>
-
-    <%# Processed / skipped counts %>
-    <div class="bg-white rounded-xl border border-gray-200 p-4 flex items-center gap-6 text-sm">
-      <span class="text-gray-600">
-        <strong class="text-gray-900"><%= @payroll_run.processed_employees %></strong> processed
-      </span>
-      <% skipped = @payroll_run.total_employees - @payroll_run.processed_employees %>
-      <% if skipped > 0 %>
-        <span class="text-amber-600">
-          <strong><%= skipped %></strong> skipped
-        </span>
-      <% end %>
-    </div>
-
-    <%# Action buttons based on current state %>
-    <div class="flex flex-wrap items-center gap-3">
-      <% if @payroll_run.processed? && policy(@payroll_run).submit_for_review? %>
-        <%= button_to "Submit for Review",
-              submit_for_review_admin_payroll_run_path(@payroll_run),
-              method: :patch,
-              class: "px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 cursor-pointer" %>
+    <%# Payslips + documents %>
+    <div class="grid gap-4 <%= (@payroll_run.approved? || @payroll_run.paid?) ? "md:grid-cols-2" : "" %>">
+      <%= link_to admin_payroll_run_payslips_path(@payroll_run), class: "card card-pad flex items-center justify-between gap-4 group hover:border-kula-300 transition-colors" do %>
+        <div>
+          <p class="text-sm font-semibold text-stone-900">Payslips
+            <span class="ml-2 text-xs font-normal text-stone-400 amount"><%= @payroll_run.processed_employees %> generated</span>
+          </p>
+          <p class="text-xs text-stone-500 mt-0.5">Review individual payslips before <%= @payroll_run.processed? ? "submitting" : "paying" %></p>
+        </div>
+        <span class="text-kula-700 text-sm font-medium group-hover:translate-x-0.5 transition-transform">Open →</span>
       <% end %>
 
-      <% if @payroll_run.processed? && policy(@payroll_run).reprocess? %>
-        <%= button_to "Reprocess",
-              reprocess_admin_payroll_run_path(@payroll_run),
-              method: :patch,
-              class: "px-4 py-2 bg-white border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 cursor-pointer",
-              form: { data: { turbo_confirm: "This will delete all payslips and re-run payroll. Are you sure?" } } %>
-      <% end %>
-
-      <% if @payroll_run.under_review? && policy(@payroll_run).approve? %>
-        <%= button_to "Approve",
-              approve_admin_payroll_run_path(@payroll_run),
-              method: :patch,
-              class: "px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 cursor-pointer",
-              form: { data: { turbo_confirm: "Approve payroll for #{@payroll_run.period_label}? This will lock all payslips." } } %>
-
-        <%# Reject form with reason %>
-        <%= form_with url: reject_admin_payroll_run_path(@payroll_run), method: :patch, class: "flex items-center gap-2" do |f| %>
-          <%= f.text_field :rejection_reason, placeholder: "Rejection reason…",
-                class: "border border-gray-300 rounded-lg px-4 py-3 text-sm w-64 focus:ring-2 focus:ring-red-500 focus:border-red-500" %>
-          <%= f.submit "Reject",
-                class: "px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 cursor-pointer" %>
+      <% if @payroll_run.approved? || @payroll_run.paid? %>
+        <%= link_to bank_file_admin_payroll_run_path(@payroll_run), class: "card card-pad flex items-center justify-between gap-4 group hover:border-kula-300 transition-colors" do %>
+          <div>
+            <p class="text-sm font-semibold text-stone-900">Bank transfer file</p>
+            <p class="text-xs text-stone-500 mt-0.5">HDFC · ICICI · SBI · generic CSV for salary disbursement</p>
+          </div>
+          <span class="text-kula-700 text-sm font-medium group-hover:translate-x-0.5 transition-transform">Generate →</span>
         <% end %>
       <% end %>
+    </div>
 
-      <% if @payroll_run.rejected? && policy(@payroll_run).resubmit_for_review? %>
-        <%= button_to "Resubmit for Review",
-              resubmit_for_review_admin_payroll_run_path(@payroll_run),
-              method: :patch,
-              class: "px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 cursor-pointer",
-              form: { data: { turbo_confirm: "Resubmit this payroll for review? Make sure you've corrected the payslips first." } } %>
+    <%# Secondary / destructive actions live here, not in the sticky bar %>
+    <div class="flex flex-wrap items-center gap-3">
+      <%= link_to download_payslips_admin_payroll_run_path(@payroll_run), class: "btn btn-secondary btn-sm" do %>
+        <svg class="size-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/></svg>
+        Download all payslips (ZIP)
       <% end %>
 
-      <% if @payroll_run.rejected? && policy(@payroll_run).reprocess? %>
-        <%= button_to "Reprocess from Scratch",
-              reprocess_admin_payroll_run_path(@payroll_run),
-              method: :patch,
-              class: "px-4 py-2 bg-white border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 cursor-pointer",
+      <% if (@payroll_run.processed? || @payroll_run.rejected?) && policy(@payroll_run).reprocess? %>
+        <%= button_to "Reprocess from scratch", reprocess_admin_payroll_run_path(@payroll_run),
+              method: :patch, class: "btn btn-ghost btn-sm cursor-pointer",
               form: { data: { turbo_confirm: "This will delete all payslips and re-run payroll. Are you sure?" } } %>
       <% end %>
-
-      <% if @payroll_run.approved? && policy(@payroll_run).mark_paid? %>
-        <%= button_to "Mark as Paid",
-              mark_paid_admin_payroll_run_path(@payroll_run),
-              method: :patch,
-              class: "px-4 py-2 bg-emerald-600 text-white text-sm font-medium rounded-lg hover:bg-emerald-700 cursor-pointer",
-              form: { data: { turbo_confirm: "Confirm bank transfer is complete and mark payroll as Paid?" } } %>
-      <% end %>
     </div>
 
-    <%# Link to payslips + bulk download %>
-    <div class="bg-white rounded-xl border border-gray-200 p-4 flex items-center justify-between">
-      <%= link_to admin_payroll_run_payslips_path(@payroll_run),
-            class: "flex items-center gap-3 hover:opacity-80 transition-opacity" do %>
-        <div>
-          <p class="text-sm font-medium text-gray-700">
-            Payslips
-            <span class="ml-2 text-xs font-normal text-gray-400"><%= @payroll_run.processed_employees %> generated</span>
-          </p>
-          <p class="text-xs text-blue-600 font-medium mt-0.5">Review individual payslips →</p>
-        </div>
-      <% end %>
-      <%= link_to download_payslips_admin_payroll_run_path(@payroll_run),
-            class: "inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 text-gray-700 text-xs font-medium rounded-lg hover:bg-gray-200 transition-colors" do %>
-        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3M3 17V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
-        </svg>
-        Download All (ZIP)
-      <% end %>
-    </div>
-
-    <%# Bank file — only once approved or paid %>
-    <% if @payroll_run.approved? || @payroll_run.paid? %>
-      <div class="bg-white rounded-xl border border-gray-200 p-4 flex items-center justify-between">
-        <div>
-          <p class="text-sm font-medium text-gray-700">Bank Transfer File</p>
-          <p class="text-xs text-gray-400 mt-0.5">Generate HDFC / ICICI / SBI / CSV file for salary disbursement</p>
-        </div>
-        <%= link_to bank_file_admin_payroll_run_path(@payroll_run),
-              class: "inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-700 text-xs font-medium rounded-lg hover:bg-blue-100 transition-colors" do %>
-          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
-          </svg>
-          Generate Bank File
+    <%# Reviewer's reject form %>
+    <% if @payroll_run.under_review? && policy(@payroll_run).approve? %>
+      <div class="card card-pad">
+        <p class="text-sm font-semibold text-stone-900">Something wrong?</p>
+        <p class="text-xs text-stone-500 mt-0.5 mb-3">Send it back to HR with a reason — they can correct payslips and resubmit.</p>
+        <%= form_with url: reject_admin_payroll_run_path(@payroll_run), method: :patch, class: "flex flex-wrap items-center gap-2" do |f| %>
+          <%= f.text_field :rejection_reason, placeholder: "Reason for rejection…", required: true, class: "input max-w-md flex-1" %>
+          <%= f.submit "Reject payroll", class: "btn btn-danger cursor-pointer" %>
         <% end %>
       </div>
     <% end %>
+
+    <%# Paid — the finish line %>
+    <% if @payroll_run.paid? %>
+      <div class="card card-pad text-center space-y-2 animate-scale-in">
+        <span class="mx-auto flex size-12 items-center justify-center rounded-full bg-emerald-50">
+          <svg class="size-6 text-emerald-600" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" class="draw-stroke"/>
+          </svg>
+        </span>
+        <p class="text-base font-semibold text-stone-900">Payroll complete for <%= @payroll_run.period_label %></p>
+        <p class="text-sm text-stone-500"><%= @payroll_run.processed_employees %> employees paid <%= @payroll_run.formatted_total_net_pay %> — payslips are locked and visible in the employee portal.</p>
+      </div>
+    <% end %>
   <% end %>
+
+  <%# Sticky totals + primary action %>
+  <%= render "totals_bar", payroll_run: @payroll_run, readiness: @readiness %>
 </div>

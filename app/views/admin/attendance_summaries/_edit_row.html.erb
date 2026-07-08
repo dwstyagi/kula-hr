@@ -1,8 +1,8 @@
 <% form_id = "edit_attendance_#{summary.id}" %>
-<tr class="bg-blue-50">
+<tr class="bg-kula-50">
   <td class="px-5 py-3">
-    <p class="text-sm font-medium text-gray-900"><%= summary.employee.full_name %></p>
-    <p class="text-xs text-gray-400 mt-0.5">
+    <p class="text-sm font-medium text-stone-900"><%= summary.employee.full_name %></p>
+    <p class="text-xs text-stone-400 mt-0.5">
       <%= summary.employee.employee_code %>
       <% if summary.employee.department %>
         &middot; <%= summary.employee.department.name %>
@@ -11,7 +11,7 @@
   </td>
 
   <%# Working days (read-only) %>
-  <td class="px-5 py-3 text-center text-sm font-medium text-gray-700">
+  <td class="px-5 py-3 text-center text-sm font-medium text-stone-700">
     <%= summary.total_working_days.to_i %>
   </td>
 
@@ -21,7 +21,7 @@
            value="<%= summary.days_present %>"
            min="0" max="<%= summary.total_working_days %>" step="0.5"
            form="<%= form_id %>"
-           class="w-20 text-sm text-center border border-blue-300 rounded-lg px-2 py-1 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+           class="w-20 text-sm text-center border border-kula-300 rounded-lg px-2 py-1 focus:ring-2 focus:ring-kula-600 focus:border-kula-600">
   </td>
 
   <%# Half days — editable %>
@@ -30,25 +30,25 @@
            value="<%= summary.half_days %>"
            min="0" max="<%= summary.total_working_days %>" step="1"
            form="<%= form_id %>"
-           class="w-16 text-sm text-center border border-blue-300 rounded-lg px-2 py-1 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+           class="w-16 text-sm text-center border border-kula-300 rounded-lg px-2 py-1 focus:ring-2 focus:ring-kula-600 focus:border-kula-600">
   </td>
 
   <%# Approved leaves (read-only) %>
-  <td class="px-5 py-3 text-center text-sm text-gray-500">
+  <td class="px-5 py-3 text-center text-sm text-stone-500">
     <%= summary.approved_leaves.to_i %>
   </td>
 
   <%# Unapproved absences (will recalculate) %>
-  <td class="px-5 py-3 text-center text-xs text-gray-400 italic">auto</td>
+  <td class="px-5 py-3 text-center text-xs text-stone-400 italic">auto</td>
 
   <%# LOP days (will recalculate) %>
-  <td class="px-5 py-3 text-center text-xs text-gray-400 italic">auto</td>
+  <td class="px-5 py-3 text-center text-xs text-stone-400 italic">auto</td>
 
   <%# Paid days (will recalculate) %>
-  <td class="px-5 py-3 text-center text-xs text-gray-400 italic">auto</td>
+  <td class="px-5 py-3 text-center text-xs text-stone-400 italic">auto</td>
 
   <td class="px-5 py-3 text-center">
-    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
+    <span class="badge bg-kula-100 text-kula-800">
       Editing
     </span>
   </td>
@@ -56,12 +56,12 @@
   <td class="px-5 py-3 text-right">
     <div class="flex items-center justify-end gap-2">
       <button type="submit" form="<%= form_id %>"
-              class="text-xs px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 cursor-pointer">
+              class="text-xs px-3 py-1.5 bg-kula-700 text-white rounded-lg hover:bg-kula-800 cursor-pointer">
         Save
       </button>
       <%= link_to "Cancel",
             admin_attendance_summaries_path(month: summary.month, year: summary.year),
-            class: "text-xs px-3 py-1.5 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200" %>
+            class: "text-xs px-3 py-1.5 bg-stone-100 text-stone-600 rounded-lg hover:bg-stone-200" %>
     </div>
     <% if summary.errors.any? %>
       <p class="text-xs text-red-500 mt-1"><%= summary.errors.full_messages.first %></p>

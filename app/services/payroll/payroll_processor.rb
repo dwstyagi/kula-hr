@@ -188,6 +188,9 @@ module Payroll
       )
 
       @run.finish_processing!
+      # One last broadcast in the final state so a watching run page can
+      # advance itself past the Process step.
+      broadcast_progress
 
       ProcessingResult.new(
         payroll_run: @run,

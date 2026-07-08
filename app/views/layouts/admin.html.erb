@@ -4,10 +4,11 @@
     <title><%= content_for(:title) || "Admin - Kula HR" %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <%= csrf_meta_tags %>
-    <%= csp_meta_tag %>
+    <meta name="view-transition" content="same-origin">    <%= csp_meta_tag %>
     <link rel="icon" href="/favicon.ico" sizes="any">
     <link rel="icon" href="/icon.svg" type="image/svg+xml">
     <link rel="apple-touch-icon" href="/icon.png">
+    <%= render "shared/fonts" %>
     <%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/date-fns@3.3.1/cdn.min.js"></script>
@@ -15,19 +16,19 @@
     <script src="https://cdn.jsdelivr.net/npm/chartkick@5.0.1/dist/chartkick.min.js"></script>
     <%= javascript_importmap_tags %>
   </head>
-  <body class="bg-gray-50" data-controller="tooltip">
+  <body class="bg-stone-50 text-stone-900 antialiased" data-controller="tooltip">
     <div data-controller="notifications"></div>
     <%= render "shared/flash" %>
 
     <div data-controller="sidebar">
       <%# Mobile topbar with hamburger %>
-      <div class="md:hidden fixed top-0 left-0 right-0 z-30 bg-white border-b border-gray-200 px-4 py-3 flex items-center gap-3">
-        <button data-action="sidebar#toggle" class="p-1 rounded-lg hover:bg-gray-100">
-          <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+      <div class="md:hidden fixed top-0 left-0 right-0 z-30 bg-kula-950 px-4 py-3 flex items-center gap-3">
+        <button data-action="sidebar#toggle" class="p-1 rounded-lg text-kula-100 hover:bg-white/10" aria-label="Open menu">
+          <svg class="size-6" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
           </svg>
         </button>
-        <span class="font-bold text-gray-900">Kula HR</span>
+        <span class="font-bold text-white">Kula HR</span>
       </div>
 
       <%# Overlay %>
@@ -41,16 +42,16 @@
       <div class="md:ml-64 pt-14 md:pt-0">
         <%= render "shared/admin_topbar" %>
         <% if (t = ActsAsTenant.current_tenant)&.trial? %>
-          <div class="bg-amber-50 border-b border-amber-200 px-6 py-2 text-sm text-amber-800 flex items-center justify-between">
+          <div class="bg-marigold-50 border-b border-marigold-200 px-4 md:px-8 py-2 text-sm text-marigold-800 flex items-center justify-between gap-4">
             <span>
               <strong>Trial account</strong> —
-              <%= t.trial_payroll_runs_used %> / <%= Tenant::TRIAL_PAYROLL_RUN_LIMIT %> payroll runs used.
+              <span class="amount"><%= t.trial_payroll_runs_used %> / <%= Tenant::TRIAL_PAYROLL_RUN_LIMIT %></span> payroll runs used.
               All features included. Upgrade before your trial ends.
             </span>
-            <a href="mailto:support@kula-hr.com" class="font-medium underline">Upgrade →</a>
+            <a href="mailto:support@kula-hr.com" class="font-semibold underline underline-offset-2 whitespace-nowrap">Upgrade →</a>
           </div>
         <% end %>
-        <main class="p-4 md:p-6">
+        <main class="p-4 md:p-8 max-w-[1440px]">
           <%= yield %>
         </main>
       </div>

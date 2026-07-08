@@ -1,0 +1,39 @@
+<%# Guided-flow stepper. `payroll_run` is a PayrollRunPresenter. %>
+<nav aria-label="Payroll progress" class="card px-4 sm:px-8 py-5 animate-fade-in">
+  <ol class="flex items-start">
+    <% PayrollRunPresenter::STEPS.each_with_index do |step, i| %>
+      <% state = payroll_run.step_state(i) %>
+      <% attention = payroll_run.rejected? && state == :current %>
+      <li class="flex items-start <%= "flex-1" unless i == PayrollRunPresenter::STEPS.size - 1 %>">
+        <div class="flex flex-col items-center gap-1.5 shrink-0">
+          <% if state == :done %>
+            <span class="flex size-8 items-center justify-center rounded-full bg-kula-700 text-white shadow-xs">
+              <svg class="size-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" class="<%= "draw-stroke" if payroll_run.paid? && i == 4 %>"/>
+              </svg>
+            </span>
+          <% elsif state == :current %>
+            <span class="relative flex size-8 items-center justify-center rounded-full bg-white ring-2 <%= attention ? "ring-red-500" : "ring-kula-700" %>">
+              <span class="absolute inline-flex size-3 rounded-full <%= attention ? "bg-red-400" : "bg-kula-500" %> opacity-60 animate-ping" aria-hidden="true"></span>
+              <span class="relative size-2.5 rounded-full <%= attention ? "bg-red-500" : "bg-kula-700" %>"></span>
+            </span>
+          <% else %>
+            <span class="flex size-8 items-center justify-center rounded-full bg-white ring-1 ring-stone-300 text-xs font-semibold text-stone-400 amount">
+              <%= i + 1 %>
+            </span>
+          <% end %>
+          <span class="text-[11px] font-semibold uppercase tracking-wider whitespace-nowrap
+                       <%= state == :current ? (attention ? "text-red-600" : "text-kula-800") : (state == :done ? "text-stone-600" : "text-stone-400") %>
+                       <%= "hidden sm:block" unless state == :current %>">
+            <%= attention ? "Rejected" : step[:label] %>
+          </span>
+        </div>
+        <% unless i == PayrollRunPresenter::STEPS.size - 1 %>
+          <span class="mx-2 sm:mx-3 mt-4 h-0.5 flex-1 rounded-full <%= state == :done ? "bg-kula-600" : "bg-stone-200" %>
+                       <%= "animate-grow-x" if state == :done && payroll_run.step_state(i + 1) == :current %>"
+                aria-hidden="true"></span>
+        <% end %>
+      </li>
+    <% end %>
+  </ol>
+</nav>

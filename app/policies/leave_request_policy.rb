@@ -8,6 +8,16 @@ class LeaveRequestPolicy < ApplicationPolicy
     create?
   end
 
+  # Detail drawer on the admin queue; managers and owners may also look.
+  def show?
+    admin_or_hr? || is_reporting_manager? || own_record?
+  end
+
+  # Queue-level action — per-record approve? is still checked for each request.
+  def bulk_approve?
+    admin_or_hr?
+  end
+
   # Employees can cancel their own pending requests; HR/admin can cancel any
   def cancel?
     admin_or_hr? || (employee? && own_record? && record.pending?)

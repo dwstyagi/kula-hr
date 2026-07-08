@@ -1,8 +1,8 @@
 <div class="max-w-7xl mx-auto">
   <div class="flex items-center justify-between mb-6">
     <div>
-      <h1 class="text-2xl font-bold text-gray-900">Leave Calendar</h1>
-      <p class="text-sm text-gray-500 mt-1">Company-wide view of who is on leave each day.</p>
+      <h1 class="page-title text-2xl">Leave Calendar</h1>
+      <p class="text-sm text-stone-500 mt-1">Company-wide view of who is on leave each day.</p>
     </div>
   </div>
 
@@ -11,12 +11,12 @@
     <% next_month = @date.next_month %>
     <div class="flex items-center gap-4">
       <%= link_to admin_leave_calendar_path(month: prev_month.month, year: prev_month.year, department_id: @selected_department_id),
-          class: "p-1.5 rounded-md text-gray-600 hover:bg-gray-100" do %>
+          class: "p-1.5 rounded-md text-stone-600 hover:bg-stone-100" do %>
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
       <% end %>
-      <span class="text-sm font-semibold text-gray-900 w-40 text-center"><%= @date.strftime("%B %Y") %></span>
+      <span class="text-sm font-semibold text-stone-900 w-40 text-center"><%= @date.strftime("%B %Y") %></span>
       <%= link_to admin_leave_calendar_path(month: next_month.month, year: next_month.year, department_id: @selected_department_id),
-          class: "p-1.5 rounded-md text-gray-600 hover:bg-gray-100" do %>
+          class: "p-1.5 rounded-md text-stone-600 hover:bg-stone-100" do %>
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
       <% end %>
     </div>
@@ -26,7 +26,7 @@
       <%= f.hidden_field :year, value: @year %>
       <%= f.collection_select :department_id, @departments, :id, :name,
           { selected: @selected_department_id, include_blank: "All departments" },
-          class: "rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm",
+          class: "rounded-lg border-stone-300 shadow-sm focus:border-kula-600 focus:ring-kula-600 text-sm",
           onchange: "this.form.requestSubmit()" %>
     <% end %>
   </div>

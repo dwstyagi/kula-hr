@@ -1,7 +1,7 @@
 <%= turbo_frame_tag @salary_component do %>
   <tr>
     <td colspan="6" class="px-6 py-4">
-      <h3 class="text-sm font-semibold text-gray-900 mb-3">Edit Salary Component</h3>
+      <h3 class="text-sm font-semibold text-stone-900 mb-3">Edit Salary Component</h3>
       <%= render "form", salary_component: @salary_component, url: admin_salary_component_path(@salary_component), method: :patch %>
     </td>
   </tr>

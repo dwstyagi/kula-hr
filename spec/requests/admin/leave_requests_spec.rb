@@ -128,4 +128,55 @@ RSpec.describe "Admin::LeaveRequests", type: :request do
       expect(balance.reload.remaining_days).to eq(12)
     end
   end
+
+  describe "GET /admin/leave_requests/:id" do
+    let!(:leave_request) do
+      ActsAsTenant.with_tenant(tenant) do
+        lr = build(:leave_request, tenant: tenant, employee: employee, leave_type: leave_type,
+                   from_date: future_monday, to_date: future_monday)
+        lr.save(validate: false)
+        lr
+      end
+    end
+
+    it "renders the detail drawer" do
+      get admin_leave_request_path(leave_request), headers: { "Host" => subdomain_host }
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include(employee.full_name)
+    end
+  end
+
+  describe "PATCH /admin/leave_requests/bulk_approve" do
+    let!(:leave_request) do
+      ActsAsTenant.with_tenant(tenant) do
+        balance
+        lr = build(:leave_request, tenant: tenant, employee: employee, leave_type: leave_type,
+                   from_date: future_monday, to_date: future_monday)
+        lr.save(validate: false)
+        lr
+      end
+    end
+
+    it "approves all selected pending requests" do
+      patch bulk_approve_admin_leave_requests_path, params: { ids: [ leave_request.id ] },
+            headers: { "Host" => subdomain_host }
+
+      expect(response).to redirect_to(admin_leave_requests_path)
+      expect(leave_request.reload).to be_approved
+      expect(balance.reload.remaining_days).to eq(11)
+    end
+
+    it "skips requests whose approver is the reporting manager" do
+      manager = create(:employee, :with_user, tenant: tenant, email: "bulkmgr@x.com")
+      ActsAsTenant.with_tenant(tenant) do
+        employee.update!(leave_approver: :reporting_manager, reporting_manager: manager)
+      end
+
+      patch bulk_approve_admin_leave_requests_path, params: { ids: [ leave_request.id ] },
+            headers: { "Host" => subdomain_host }
+
+      expect(leave_request.reload).to be_pending
+      expect(flash[:alert]).to include("manager approves")
+    end
+  end
 end

@@ -1,65 +1,45 @@
-<div id="payroll_progress" class="space-y-4">
-  <% if payroll_run.processing? %>
-    <%# Live progress — Turbo Stream replaces this div each employee %>
-    <%= turbo_stream_from "payroll_run_#{payroll_run.id}" %>
+<%# Step 2 — live processing region. PayrollProcessor broadcasts replacements
+    of #payroll_progress over "payroll_run_<id>"; keep the id and stream name. %>
+<div id="payroll_progress">
+  <%= turbo_stream_from "payroll_run_#{payroll_run.id}" if payroll_run.processing? %>
 
-    <div class="bg-white rounded-xl border border-gray-200 p-6 space-y-4">
-      <div class="flex items-center justify-between text-sm">
-        <span class="font-medium text-gray-700">Processing employees…</span>
-        <span class="text-gray-500">
-          <%= payroll_run.processed_employees %> / <%= payroll_run.total_employees %>
+  <% if payroll_run.processing? %>
+    <div class="card card-pad space-y-5 animate-fade-up">
+      <div class="flex items-center gap-3">
+        <span class="relative flex size-9 items-center justify-center rounded-full bg-kula-50">
+          <span class="absolute inline-flex size-5 rounded-full bg-kula-400 opacity-40 animate-ping" aria-hidden="true"></span>
+          <svg class="relative size-5 text-kula-700 animate-spin" style="animation-duration: 1.6s" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99"/>
+          </svg>
         </span>
+        <div class="flex-1">
+          <p class="text-sm font-semibold text-stone-900">Calculating salaries…</p>
+          <p class="text-xs text-stone-500">PF, ESI, PT and TDS are computed per employee.</p>
+        </div>
+        <p class="text-sm font-semibold text-stone-700 amount">
+          <%= payroll_run.processed_employees %><span class="text-stone-400 font-normal"> / <%= payroll_run.total_employees %></span>
+        </p>
       </div>
 
-      <%# Progress bar %>
-      <div class="w-full bg-gray-100 rounded-full h-3">
-        <div class="bg-blue-600 h-3 rounded-full transition-all duration-300"
+      <div class="w-full bg-stone-100 rounded-full h-2.5 overflow-hidden">
+        <div class="bg-kula-600 h-2.5 rounded-full transition-all duration-500 ease-out"
              style="width: <%= payroll_run.progress_percentage %>%"></div>
       </div>
 
-      <p class="text-xs text-gray-400 text-center">
-        This page updates automatically. You can leave and come back.
-      </p>
+      <p class="text-xs text-stone-400 text-center">This page updates live — you can leave and come back.</p>
     </div>
 
-  <% elsif payroll_run.draft? %>
-    <% readiness = local_assigns[:readiness] %>
-    <% skip_count = readiness&.will_skip&.size.to_i %>
-
-    <%# Pre-flight warning: who will be silently dropped from this run %>
-    <% if skip_count.positive? %>
-      <div class="bg-white rounded-xl border border-amber-300 p-5 space-y-2">
-        <p class="text-sm font-semibold text-amber-800">
-          ⚠️ <%= skip_count %> employee<%= "s" if skip_count > 1 %> will be excluded from this run (not paid):
-        </p>
-        <ul class="list-disc list-inside text-sm text-amber-700 space-y-0.5">
-          <% readiness.will_skip.each do |s| %>
-            <li><%= s.employee.full_name %> — <%= s.reasons.join(", ") %></li>
-          <% end %>
-        </ul>
-        <p class="text-xs text-gray-500">Fix these (assign salary / lock attendance) and reprocess, or proceed to pay everyone else.</p>
-      </div>
-    <% end %>
-
-    <% confirm_msg =
-         if skip_count.positive?
-           "#{skip_count} employee(s) will be EXCLUDED and not paid. Process payroll for #{payroll_run.period_label} anyway?"
-         else
-           "Start processing payroll for #{payroll_run.period_label}? This will run in the background."
-         end %>
-
-    <div class="bg-white rounded-xl border border-gray-200 p-6 text-center space-y-4">
-      <p class="text-gray-600 text-sm">Ready to process payroll for <strong><%= payroll_run.period_label %></strong>.</p>
-      <%= button_to process_payroll_admin_payroll_run_path(payroll_run),
-            method: :post,
-            class: "inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 cursor-pointer",
-            form: { data: { turbo_confirm: confirm_msg } } do %>
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+  <% elsif payroll_run.status.in?(%w[processed under_review approved rejected paid]) %>
+    <%# Processing just finished while the user watched — advance the wizard. %>
+    <div class="card card-pad text-center space-y-3 animate-scale-in">
+      <span class="mx-auto flex size-12 items-center justify-center rounded-full bg-emerald-50">
+        <svg class="size-6 text-emerald-600" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" class="draw-stroke"/>
         </svg>
-        Start Processing
-      <% end %>
+      </span>
+      <p class="text-sm font-semibold text-stone-900">Processing complete</p>
+      <a href="<%= admin_payroll_run_path(payroll_run) %>" class="link text-sm">Review the results →</a>
     </div>
+    <script>setTimeout(function () { window.Turbo && Turbo.visit(window.location.href, { action: "replace" }) }, 900)</script>
   <% end %>
 </div>

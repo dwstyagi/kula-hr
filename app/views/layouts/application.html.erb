@@ -7,7 +7,7 @@
     <meta name="application-name" content="<%= t('app_name') %>">
     <meta name="mobile-web-app-capable" content="yes">
     <%= csrf_meta_tags %>
-    <%= csp_meta_tag %>
+    <meta name="view-transition" content="same-origin">    <%= csp_meta_tag %>
 
     <%= yield :head %>
 
@@ -18,11 +18,12 @@
     <link rel="icon" href="/icon.svg" type="image/svg+xml">
     <link rel="apple-touch-icon" href="/icon.png">
 
+    <%= render "shared/fonts" %>
     <%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
   </head>
 
-  <body class="bg-white">
+  <body class="bg-white antialiased">
     <%= yield %>
   </body>
 </html>

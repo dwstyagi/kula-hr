@@ -2,12 +2,12 @@
   <%# Header %>
   <div class="flex items-start justify-between">
     <div>
-      <h1 class="text-2xl font-bold text-gray-900">Payroll Settings</h1>
-      <p class="text-sm text-gray-500 mt-0.5">Statutory compliance configuration for this organisation</p>
+      <h1 class="page-title text-2xl">Payroll Settings</h1>
+      <p class="text-sm text-stone-500 mt-0.5">Statutory compliance configuration for this organisation</p>
     </div>
     <% if policy(@payroll_setting).edit? %>
       <%= link_to edit_admin_payroll_setting_path,
-            class: "inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700" do %>
+            class: "btn btn-primary" do %>
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
         </svg>
@@ -18,100 +18,100 @@
   <%# Cards %>
   <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
     <%# PF %>
-    <div class="bg-white rounded-xl border border-gray-200 p-6 space-y-4">
+    <div class="card card-pad space-y-4">
       <div class="flex items-center justify-between">
-        <h2 class="text-base font-semibold text-gray-900">Provident Fund</h2>
-        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium <%= @payroll_setting.pf_enabled? ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500' %>">
+        <h2 class="text-base font-semibold text-stone-900">Provident Fund</h2>
+        <span class="badge <%= @payroll_setting.pf_enabled? ? 'bg-green-100 text-green-700' : 'bg-stone-100 text-stone-500' %>">
           <%= @payroll_setting.pf_enabled? ? "Enabled" : "Disabled" %>
         </span>
       </div>
       <% if @payroll_setting.pf_enabled? %>
         <dl class="grid grid-cols-2 gap-x-4 gap-y-3 text-sm">
           <div>
-            <dt class="text-gray-500">Employee Rate</dt>
-            <dd class="font-medium text-gray-900"><%= @payroll_setting.pf_employee_rate %>%</dd>
+            <dt class="text-stone-500">Employee Rate</dt>
+            <dd class="font-medium text-stone-900"><%= @payroll_setting.pf_employee_rate %>%</dd>
           </div>
           <div>
-            <dt class="text-gray-500">Employer Rate</dt>
-            <dd class="font-medium text-gray-900"><%= @payroll_setting.pf_employer_rate %>%</dd>
+            <dt class="text-stone-500">Employer Rate</dt>
+            <dd class="font-medium text-stone-900"><%= @payroll_setting.pf_employer_rate %>%</dd>
           </div>
           <div>
-            <dt class="text-gray-500">Wage Ceiling</dt>
-            <dd class="font-medium text-gray-900">₹<%= number_with_delimiter(@payroll_setting.pf_wage_ceiling.to_i) %>/month</dd>
+            <dt class="text-stone-500">Wage Ceiling</dt>
+            <dd class="font-medium text-stone-900">₹<%= number_with_delimiter(@payroll_setting.pf_wage_ceiling.to_i) %>/month</dd>
           </div>
           <div>
-            <dt class="text-gray-500">Include DA in Base</dt>
-            <dd class="font-medium text-gray-900"><%= @payroll_setting.pf_include_da? ? "Yes" : "No" %></dd>
+            <dt class="text-stone-500">Include DA in Base</dt>
+            <dd class="font-medium text-stone-900"><%= @payroll_setting.pf_include_da? ? "Yes" : "No" %></dd>
           </div>
           <div>
-            <dt class="text-gray-500">Admin Charge</dt>
-            <dd class="font-medium text-gray-900"><%= @payroll_setting.pf_admin_charge_rate %>%</dd>
+            <dt class="text-stone-500">Admin Charge</dt>
+            <dd class="font-medium text-stone-900"><%= @payroll_setting.pf_admin_charge_rate %>%</dd>
           </div>
           <div>
-            <dt class="text-gray-500">EDLI Rate</dt>
-            <dd class="font-medium text-gray-900"><%= @payroll_setting.pf_edli_rate %>%</dd>
+            <dt class="text-stone-500">EDLI Rate</dt>
+            <dd class="font-medium text-stone-900"><%= @payroll_setting.pf_edli_rate %>%</dd>
           </div>
         </dl>
       <% end %>
     </div>
     <%# ESI %>
-    <div class="bg-white rounded-xl border border-gray-200 p-6 space-y-4">
+    <div class="card card-pad space-y-4">
       <div class="flex items-center justify-between">
-        <h2 class="text-base font-semibold text-gray-900">ESI</h2>
-        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium <%= @payroll_setting.esi_enabled? ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500' %>">
+        <h2 class="text-base font-semibold text-stone-900">ESI</h2>
+        <span class="badge <%= @payroll_setting.esi_enabled? ? 'bg-green-100 text-green-700' : 'bg-stone-100 text-stone-500' %>">
           <%= @payroll_setting.esi_enabled? ? "Enabled" : "Disabled" %>
         </span>
       </div>
       <% if @payroll_setting.esi_enabled? %>
         <dl class="grid grid-cols-2 gap-x-4 gap-y-3 text-sm">
           <div>
-            <dt class="text-gray-500">Employee Rate</dt>
-            <dd class="font-medium text-gray-900"><%= @payroll_setting.esi_employee_rate %>%</dd>
+            <dt class="text-stone-500">Employee Rate</dt>
+            <dd class="font-medium text-stone-900"><%= @payroll_setting.esi_employee_rate %>%</dd>
           </div>
           <div>
-            <dt class="text-gray-500">Employer Rate</dt>
-            <dd class="font-medium text-gray-900"><%= @payroll_setting.esi_employer_rate %>%</dd>
+            <dt class="text-stone-500">Employer Rate</dt>
+            <dd class="font-medium text-stone-900"><%= @payroll_setting.esi_employer_rate %>%</dd>
           </div>
           <div>
-            <dt class="text-gray-500">Gross Ceiling</dt>
-            <dd class="font-medium text-gray-900">₹<%= number_with_delimiter(@payroll_setting.esi_ceiling.to_i) %>/month</dd>
+            <dt class="text-stone-500">Gross Ceiling</dt>
+            <dd class="font-medium text-stone-900">₹<%= number_with_delimiter(@payroll_setting.esi_ceiling.to_i) %>/month</dd>
           </div>
         </dl>
       <% end %>
     </div>
     <%# Professional Tax %>
-    <div class="bg-white rounded-xl border border-gray-200 p-6 space-y-4">
+    <div class="card card-pad space-y-4">
       <div class="flex items-center justify-between">
-        <h2 class="text-base font-semibold text-gray-900">Professional Tax</h2>
-        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium <%= @payroll_setting.pt_enabled? ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500' %>">
+        <h2 class="text-base font-semibold text-stone-900">Professional Tax</h2>
+        <span class="badge <%= @payroll_setting.pt_enabled? ? 'bg-green-100 text-green-700' : 'bg-stone-100 text-stone-500' %>">
           <%= @payroll_setting.pt_enabled? ? "Enabled" : "Disabled" %>
         </span>
       </div>
       <% if @payroll_setting.pt_enabled? %>
         <dl class="grid grid-cols-2 gap-x-4 gap-y-3 text-sm">
           <div>
-            <dt class="text-gray-500">State</dt>
-            <dd class="font-medium text-gray-900"><%= @payroll_setting.pt_state.to_s.humanize %></dd>
+            <dt class="text-stone-500">State</dt>
+            <dd class="font-medium text-stone-900"><%= @payroll_setting.pt_state.to_s.humanize %></dd>
           </div>
           <div>
-            <dt class="text-gray-500">Slabs</dt>
-            <dd class="font-medium text-gray-900">Auto-loaded from state</dd>
+            <dt class="text-stone-500">Slabs</dt>
+            <dd class="font-medium text-stone-900">Auto-loaded from state</dd>
           </div>
         </dl>
       <% end %>
     </div>
     <%# TDS + Working Days %>
-    <div class="bg-white rounded-xl border border-gray-200 p-6 space-y-4">
+    <div class="card card-pad space-y-4">
       <div class="flex items-center justify-between">
-        <h2 class="text-base font-semibold text-gray-900">TDS &amp; Working Days</h2>
-        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium <%= @payroll_setting.tds_enabled? ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500' %>">
+        <h2 class="text-base font-semibold text-stone-900">TDS &amp; Working Days</h2>
+        <span class="badge <%= @payroll_setting.tds_enabled? ? 'bg-green-100 text-green-700' : 'bg-stone-100 text-stone-500' %>">
           <%= @payroll_setting.tds_enabled? ? "Enabled" : "TDS Disabled" %>
         </span>
       </div>
       <dl class="grid grid-cols-2 gap-x-4 gap-y-3 text-sm">
         <div>
-          <dt class="text-gray-500">Week-off Pattern</dt>
-          <dd class="font-medium text-gray-900"><%= @payroll_setting.week_off_pattern.humanize %></dd>
+          <dt class="text-stone-500">Week-off Pattern</dt>
+          <dd class="font-medium text-stone-900"><%= @payroll_setting.week_off_pattern.humanize %></dd>
         </div>
       </dl>
     </div>

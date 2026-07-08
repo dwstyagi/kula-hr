@@ -1,8 +1,8 @@
 <% content_for(:page_title, "Tenants") %>
 
 <div class="mb-4 flex items-center justify-between">
-  <p class="text-sm text-gray-500"><%= @pagy.count %> tenants total</p>
-  <%= link_to new_platform_admin_tenant_path, class: "inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition" do %>
+  <p class="text-sm text-stone-500"><%= @pagy.count %> tenants total</p>
+  <%= link_to new_platform_admin_tenant_path, class: "inline-flex items-center gap-2 px-4 py-2 bg-kula-600 text-white text-sm font-medium rounded-lg hover:bg-kula-700 transition" do %>
     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
     </svg>
@@ -10,49 +10,49 @@
   <% end %>
 </div>
 
-<div class="bg-white rounded-lg border border-gray-200">
+<div class="card">
   <div class="overflow-x-auto">
-    <table class="min-w-full divide-y divide-gray-200">
-      <thead class="bg-gray-50">
+    <table class="tbl">
+      <thead>
         <tr>
-          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Company</th>
-          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">URL</th>
-          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created</th>
-          <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+          <th>Company</th>
+          <th>URL</th>
+          <th>Status</th>
+          <th>Created</th>
+          <th class="text-right">Actions</th>
         </tr>
       </thead>
-      <tbody class="bg-white divide-y divide-gray-200">
+      <tbody>
         <% @tenants.each do |tenant| %>
-          <tr class="hover:bg-gray-50">
-            <td class="px-6 py-4 whitespace-nowrap">
-              <div class="text-sm font-medium text-gray-900"><%= tenant.name %></div>
+          <tr class="hover:bg-stone-50">
+            <td class="whitespace-nowrap">
+              <div class="text-sm font-medium text-stone-900"><%= tenant.name %></div>
             </td>
-            <td class="px-6 py-4 whitespace-nowrap">
+            <td class="whitespace-nowrap">
               <% tenant_url = root_url(subdomain: tenant.subdomain, host: ENV.fetch("APP_DOMAIN", "lvh.me")) %>
-              <%= link_to tenant_url, target: "_blank", class: "text-sm text-blue-600 hover:underline font-mono" do %>
+              <%= link_to tenant_url, target: "_blank", class: "text-sm text-kula-700 hover:underline font-mono" do %>
                 <%= tenant_url.sub(/\Ahttps?:\/\//, "") %>
               <% end %>
             </td>
-            <td class="px-6 py-4 whitespace-nowrap">
+            <td class="whitespace-nowrap">
               <% badge_class = case tenant.status
-                               when "active"    then "bg-green-100 text-green-800"
-                               when "trial"     then "bg-yellow-100 text-yellow-800"
-                               when "suspended" then "bg-red-100 text-red-800"
-                               else                  "bg-gray-100 text-gray-800"
+                               when "active"    then "badge-success"
+                               when "trial"     then "badge-warning"
+                               when "suspended" then "badge-danger"
+                               else                  "badge-neutral"
                                end %>
-              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium <%= badge_class %>">
+              <span class="badge <%= badge_class %>">
                 <%= tenant.status.capitalize %>
               </span>
             </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+            <td class="whitespace-nowrap text-sm text-stone-500">
               <%= tenant.created_at.strftime("%b %d, %Y") %>
             </td>
-            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+            <td class="whitespace-nowrap text-right text-sm font-medium">
               <div class="flex items-center justify-end gap-3">
-                <%= link_to platform_admin_tenant_path(tenant), class: "relative group inline-block text-blue-600 hover:text-blue-800" do %>
+                <%= link_to platform_admin_tenant_path(tenant), class: "relative group inline-block text-kula-700 hover:text-kula-900" do %>
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                  <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-800 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">View</span>
+                  <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-stone-800 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">View</span>
                 <% end %>
                 <%= button_to toggle_status_platform_admin_tenant_path(tenant), method: :patch,
                     form: { class: "inline-flex items-center" },
@@ -60,10 +60,10 @@
                     data: { turbo_confirm: "Are you sure you want to #{tenant.status == 'active' ? 'suspend' : 'activate'} #{tenant.name}?" } do %>
                   <% if tenant.status == "active" %>
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/></svg>
-                    <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-800 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">Suspend</span>
+                    <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-stone-800 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">Suspend</span>
                   <% else %>
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                    <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-800 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">Activate</span>
+                    <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-stone-800 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">Activate</span>
                   <% end %>
                 <% end %>
               </div>

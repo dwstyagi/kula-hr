@@ -1,7 +1,7 @@
 <div class="min-h-screen flex">
 
   <%# Left panel — branding %>
-  <div class="hidden lg:flex lg:w-1/2 bg-linear-to-br from-blue-600 via-blue-700 to-indigo-800 flex-col justify-between p-12 relative overflow-hidden">
+  <div class="hidden lg:flex lg:w-1/2 bg-linear-to-br from-kula-600 via-kula-700 to-kula-800 flex-col justify-between p-12 relative overflow-hidden">
 
     <%# Background decoration %>
     <div class="absolute inset-0 overflow-hidden pointer-events-none">
@@ -23,7 +23,7 @@
         <h2 class="text-4xl font-bold text-white leading-tight">
           Payroll & HR<br>made simple.
         </h2>
-        <p class="text-blue-200 mt-4 text-lg leading-relaxed">
+        <p class="text-kula-200 mt-4 text-lg leading-relaxed">
           Manage your team, leaves, and payroll — all in one place, built for Indian companies.
         </p>
       </div>
@@ -40,30 +40,30 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
               </svg>
             </div>
-            <span class="text-blue-100 text-sm leading-relaxed"><%= text %></span>
+            <span class="text-kula-100 text-sm leading-relaxed"><%= text %></span>
           </div>
         <% end %>
       </div>
     </div>
 
     <div class="relative z-10">
-      <p class="text-blue-300 text-sm">© <%= Date.today.year %> Kula HR. Built for India.</p>
+      <p class="text-kula-300 text-sm">© <%= Date.today.year %> Kula HR. Built for India.</p>
     </div>
   </div>
 
   <%# Right panel — form %>
-  <div class="flex-1 flex flex-col justify-center px-8 sm:px-16 lg:px-20 py-12 bg-gray-50">
+  <div class="flex-1 flex flex-col justify-center px-8 sm:px-16 lg:px-20 py-12 bg-stone-50">
     <div class="w-full max-w-sm mx-auto">
 
       <%# Mobile logo (hidden on lg) %>
       <div class="flex items-center gap-2 mb-10 lg:hidden">
-        <div class="h-8 w-8 rounded-lg bg-blue-600 flex items-center justify-center text-white font-bold text-lg">K</div>
-        <span class="font-bold text-xl text-gray-900">Kula HR</span>
+        <div class="h-8 w-8 rounded-lg bg-kula-700 flex items-center justify-center text-white font-bold text-lg">K</div>
+        <span class="font-bold text-xl text-stone-900">Kula HR</span>
       </div>
 
       <div class="mb-8">
-        <h1 class="text-2xl font-bold text-gray-900">Welcome back</h1>
-        <p class="text-gray-500 text-sm mt-1">Sign in to your company account</p>
+        <h1 class="page-title text-2xl">Welcome back</h1>
+        <p class="text-stone-500 text-sm mt-1">Sign in to your company account</p>
       </div>
 
       <%= form_for(resource, as: resource_name, url: session_path(resource_name),
@@ -82,38 +82,38 @@
         <% end %>
 
         <div>
-          <%= f.label :email, "Work email", class: "block text-sm font-medium text-gray-700 mb-1.5" %>
+          <%= f.label :email, "Work email", class: "label" %>
           <%= f.email_field :email,
               autofocus: true,
               autocomplete: "email",
               placeholder: "you@company.com",
-              class: "w-full rounded-lg border-gray-300 bg-white px-4 py-3 shadow-sm text-sm focus:border-blue-500 focus:ring-blue-500 placeholder-gray-400" %>
+              class: "input py-3" %>
         </div>
 
         <div>
           <div class="flex items-center justify-between mb-1.5">
-            <%= f.label :password, "Password", class: "block text-sm font-medium text-gray-700" %>
+            <%= f.label :password, "Password", class: "label mb-0" %>
           </div>
           <%= f.password_field :password,
               autocomplete: "current-password",
               placeholder: "••••••••",
-              class: "w-full rounded-lg border-gray-300 bg-white px-4 py-3 shadow-sm text-sm focus:border-blue-500 focus:ring-blue-500 placeholder-gray-400" %>
+              class: "input py-3" %>
         </div>
 
         <% if devise_mapping.rememberable? %>
           <div class="flex items-center gap-2">
             <%= f.check_box :remember_me,
-                class: "rounded border-gray-300 text-blue-600 shadow-sm focus:ring-blue-500" %>
+                class: "checkbox" %>
             <%= f.label :remember_me, "Keep me signed in",
-                class: "text-sm text-gray-600 cursor-pointer" %>
+                class: "text-sm text-stone-600 cursor-pointer" %>
           </div>
         <% end %>
 
         <%= f.submit "Sign in",
-            class: "w-full py-2.5 px-4 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg shadow-sm transition-colors cursor-pointer" %>
+            class: "btn btn-primary w-full py-2.5 cursor-pointer" %>
       <% end %>
 
-      <p class="mt-8 text-center text-xs text-gray-400">
+      <p class="mt-8 text-center text-xs text-stone-400">
         Having trouble signing in? Contact your HR administrator.
       </p>
     </div>

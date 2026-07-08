@@ -165,7 +165,7 @@ module Admin
       @employee_salary = @employee.employee_salaries.build(salary_params.merge(tenant: ActsAsTenant.current_tenant))
 
       if @employee_salary.save
-        redirect_to admin_employee_path(@employee, tab: "salary"), notice: "Salary assigned successfully."
+        redirect_to admin_employee_path(@employee, anchor: "salary"), notice: "Salary assigned successfully."
       else
         @salary_structures = SalaryStructure.active.order(:name)
         render :assign_salary, status: :unprocessable_content
@@ -194,7 +194,7 @@ module Admin
         @employee.employee_salaries.create!(salary_params.merge(tenant: ActsAsTenant.current_tenant))
       end
 
-      redirect_to admin_employee_path(@employee, tab: "salary"), notice: "Salary revised successfully."
+      redirect_to admin_employee_path(@employee, anchor: "salary"), notice: "Salary revised successfully."
     rescue ActiveRecord::RecordInvalid => e
       @employee_salary = EmployeeSalary.new(salary_params)
       @salary_structures = SalaryStructure.active.order(:name)

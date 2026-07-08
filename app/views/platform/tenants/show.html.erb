@@ -1,26 +1,26 @@
 <% content_for(:page_title, @tenant.name) %>
 
 <div class="max-w-3xl">
-  <div class="bg-white rounded-lg border border-gray-200 p-6 mb-6">
+  <div class="card card-pad mb-6">
     <div class="flex items-center justify-between mb-6">
-      <h2 class="text-lg font-semibold text-gray-900">Company Details</h2>
-      <%= link_to edit_platform_admin_tenant_path(@tenant), class: "relative group inline-block text-blue-600 hover:text-blue-800" do %>
+      <h2 class="text-lg font-semibold text-stone-900">Company Details</h2>
+      <%= link_to edit_platform_admin_tenant_path(@tenant), class: "relative group inline-block text-kula-700 hover:text-kula-900" do %>
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-        <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-800 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">Edit</span>
+        <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-stone-800 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">Edit</span>
       <% end %>
     </div>
 
     <dl class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
       <div>
-        <dt class="text-sm font-medium text-gray-500">Name</dt>
-        <dd class="mt-1 text-sm text-gray-900"><%= @tenant.name %></dd>
+        <dt class="text-sm font-medium text-stone-500">Name</dt>
+        <dd class="mt-1 text-sm text-stone-900"><%= @tenant.name %></dd>
       </div>
       <div>
-        <dt class="text-sm font-medium text-gray-500">Subdomain</dt>
-        <dd class="mt-1 text-sm text-gray-900"><code class="bg-gray-100 px-2 py-0.5 rounded"><%= @tenant.subdomain %></code></dd>
+        <dt class="text-sm font-medium text-stone-500">Subdomain</dt>
+        <dd class="mt-1 text-sm text-stone-900"><code class="bg-stone-100 px-2 py-0.5 rounded"><%= @tenant.subdomain %></code></dd>
       </div>
       <div>
-        <dt class="text-sm font-medium text-gray-500">Status</dt>
+        <dt class="text-sm font-medium text-stone-500">Status</dt>
         <dd class="mt-1">
           <% color = case @tenant.status
                      when "active" then "green"
@@ -28,31 +28,31 @@
                      when "suspended" then "red"
                      else "gray"
                      end %>
-          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-<%= color %>-100 text-<%= color %>-800">
+          <span class="badge bg-<%= color %>-100 text-<%= color %>-800">
             <%= @tenant.status.capitalize %>
           </span>
         </dd>
       </div>
       <div>
-        <dt class="text-sm font-medium text-gray-500">State</dt>
-        <dd class="mt-1 text-sm text-gray-900"><%= @tenant.state || "—" %></dd>
+        <dt class="text-sm font-medium text-stone-500">State</dt>
+        <dd class="mt-1 text-sm text-stone-900"><%= @tenant.state || "—" %></dd>
       </div>
       <div>
-        <dt class="text-sm font-medium text-gray-500">GSTIN</dt>
-        <dd class="mt-1 text-sm text-gray-900"><%= @tenant.gstin || "—" %></dd>
+        <dt class="text-sm font-medium text-stone-500">GSTIN</dt>
+        <dd class="mt-1 text-sm text-stone-900"><%= @tenant.gstin || "—" %></dd>
       </div>
       <div>
-        <dt class="text-sm font-medium text-gray-500">PAN</dt>
-        <dd class="mt-1 text-sm text-gray-900"><%= @tenant.pan || "—" %></dd>
+        <dt class="text-sm font-medium text-stone-500">PAN</dt>
+        <dd class="mt-1 text-sm text-stone-900"><%= @tenant.pan || "—" %></dd>
       </div>
       <div>
-        <dt class="text-sm font-medium text-gray-500">Created</dt>
-        <dd class="mt-1 text-sm text-gray-900"><%= @tenant.created_at.strftime("%b %d, %Y at %I:%M %p") %></dd>
+        <dt class="text-sm font-medium text-stone-500">Created</dt>
+        <dd class="mt-1 text-sm text-stone-900"><%= @tenant.created_at.strftime("%b %d, %Y at %I:%M %p") %></dd>
       </div>
     </dl>
   </div>
 
-  <%= link_to platform_admin_tenants_path, class: "relative group inline-flex items-center gap-1.5 text-sm text-gray-600 hover:text-gray-900" do %>
+  <%= link_to platform_admin_tenants_path, class: "relative group inline-flex items-center gap-1.5 text-sm text-stone-600 hover:text-stone-900" do %>
     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
     Back to Tenants
   <% end %>

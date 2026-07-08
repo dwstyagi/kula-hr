@@ -5,143 +5,71 @@
   <%# Row 1: Key Stats — 2 rows of 4 cards %>
   <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
     <%# Total Tenants %>
-    <div class="bg-white p-4 md:p-6 rounded-lg shadow-sm border border-gray-100 transition hover:shadow-md duration-300">
-      <div class="flex items-center justify-between">
-        <div>
-          <p class="text-sm font-medium text-gray-500">Total Tenants</p>
-          <p class="mt-1 text-2xl font-bold text-gray-900"><%= @stats.total_tenants %></p>
-        </div>
-        <div class="p-3 bg-gray-100 rounded-full">
-          <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
-          </svg>
-        </div>
-      </div>
+    <div class="stat-card">
+      <p class="stat-label">Total Tenants</p>
+      <p class="stat-value"><%= @stats.total_tenants %></p>
     </div>
 
     <%# Active Tenants %>
-    <div class="bg-white p-4 md:p-6 rounded-lg shadow-sm border border-gray-100 transition hover:shadow-md duration-300">
-      <div class="flex items-center justify-between">
-        <div>
-          <p class="text-sm font-medium text-gray-500">Active Tenants</p>
-          <p class="mt-1 text-2xl font-bold text-green-600"><%= @stats.active_tenants %></p>
-        </div>
-        <div class="p-3 bg-green-50 rounded-full">
-          <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-          </svg>
-        </div>
-      </div>
+    <div class="stat-card">
+      <p class="stat-label">Active Tenants</p>
+      <p class="stat-value text-kula-700"><%= @stats.active_tenants %></p>
     </div>
 
     <%# Trial Tenants %>
-    <div class="bg-white p-4 md:p-6 rounded-lg shadow-sm border border-gray-100 transition hover:shadow-md duration-300">
-      <div class="flex items-center justify-between">
-        <div>
-          <p class="text-sm font-medium text-gray-500">Trial Tenants</p>
-          <p class="mt-1 text-2xl font-bold text-yellow-600"><%= @stats.trial_tenants %></p>
-        </div>
-        <div class="p-3 bg-yellow-50 rounded-full">
-          <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-          </svg>
-        </div>
-      </div>
+    <div class="stat-card">
+      <p class="stat-label">Trial Tenants</p>
+      <p class="stat-value text-marigold-600"><%= @stats.trial_tenants %></p>
     </div>
 
     <%# Suspended %>
-    <div class="bg-white p-4 md:p-6 rounded-lg shadow-sm border border-gray-100 transition hover:shadow-md duration-300">
-      <div class="flex items-center justify-between">
-        <div>
-          <p class="text-sm font-medium text-gray-500">Suspended</p>
-          <p class="mt-1 text-2xl font-bold text-red-600"><%= @stats.suspended_tenants %></p>
-        </div>
-        <div class="p-3 bg-red-50 rounded-full">
-          <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/>
-          </svg>
-        </div>
-      </div>
+    <div class="stat-card">
+      <p class="stat-label">Suspended</p>
+      <p class="stat-value text-red-600"><%= @stats.suspended_tenants %></p>
     </div>
 
     <%# Signups This Month %>
-    <div class="bg-white p-4 md:p-6 rounded-lg shadow-sm border border-gray-100 transition hover:shadow-md duration-300">
-      <div class="flex items-center justify-between">
-        <div>
-          <p class="text-sm font-medium text-gray-500">Signups This Month</p>
-          <p class="mt-1 text-2xl font-bold text-blue-600"><%= @stats.signups_this_month %></p>
-        </div>
-        <div class="p-3 bg-blue-50 rounded-full">
-          <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
-          </svg>
-        </div>
-      </div>
+    <div class="stat-card">
+      <p class="stat-label">Signups This Month</p>
+      <p class="stat-value text-kula-700"><%= @stats.signups_this_month %></p>
     </div>
 
     <%# Total Users %>
-    <div class="bg-white p-4 md:p-6 rounded-lg shadow-sm border border-gray-100 transition hover:shadow-md duration-300">
-      <div class="flex items-center justify-between">
-        <div>
-          <p class="text-sm font-medium text-gray-500">Total Users</p>
-          <p class="mt-1 text-2xl font-bold text-gray-900"><%= @stats.total_users %></p>
-        </div>
-        <div class="p-3 bg-gray-100 rounded-full">
-          <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
-          </svg>
-        </div>
-      </div>
+    <div class="stat-card">
+      <p class="stat-label">Total Users</p>
+      <p class="stat-value"><%= @stats.total_users %></p>
     </div>
 
     <%# Total Employees %>
-    <div class="bg-white p-4 md:p-6 rounded-lg shadow-sm border border-gray-100 transition hover:shadow-md duration-300">
-      <div class="flex items-center justify-between">
-        <div>
-          <p class="text-sm font-medium text-gray-500">Total Employees</p>
-          <p class="mt-1 text-2xl font-bold text-indigo-600"><%= @stats.total_employees %></p>
-        </div>
-        <div class="p-3 bg-indigo-50 rounded-full">
-          <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
-          </svg>
-        </div>
-      </div>
+    <div class="stat-card">
+      <p class="stat-label">Total Employees</p>
+      <p class="stat-value text-kula-600"><%= @stats.total_employees %></p>
     </div>
 
     <%# Avg Company Size %>
-    <div class="bg-white p-4 md:p-6 rounded-lg shadow-sm border border-gray-100 transition hover:shadow-md duration-300">
-      <div class="flex items-center justify-between">
-        <div>
-          <p class="text-sm font-medium text-gray-500">Avg Company Size</p>
-          <p class="mt-1 text-2xl font-bold text-purple-600"><%= @stats.avg_company_size %></p>
-        </div>
-        <div class="p-3 bg-purple-50 rounded-full">
-          <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
-          </svg>
-        </div>
-      </div>
+    <div class="stat-card">
+      <p class="stat-label">Avg Company Size</p>
+      <p class="stat-value text-purple-600"><%= @stats.avg_company_size %></p>
     </div>
   </div>
 
   <%# Row 2: Charts — Growth + Status Distribution %>
   <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-    <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
-      <h3 class="text-lg font-medium text-gray-900 mb-4">Tenant Growth (Last 6 Months)</h3>
+    <div class="card card-pad">
+      <h3 class="card-title mb-4">Tenant Growth (Last 6 Months)</h3>
       <% if @stats.tenant_growth.any? %>
         <%= bar_chart @stats.tenant_growth, height: "300px", colors: ["#3B82F6"] %>
       <% else %>
-        <div class="flex items-center justify-center h-[300px] text-gray-400 text-sm">No signup data yet</div>
+        <div class="flex items-center justify-center h-[300px] text-stone-400 text-sm">No signup data yet</div>
       <% end %>
     </div>
 
-    <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
-      <h3 class="text-lg font-medium text-gray-900 mb-4">Tenant Status Distribution</h3>
+    <div class="card card-pad">
+      <h3 class="card-title mb-4">Tenant Status Distribution</h3>
       <% if @stats.status_distribution.values.sum > 0 %>
         <%= pie_chart @stats.status_distribution, height: "300px", donut: true, legend: "bottom" %>
       <% else %>
-        <div class="flex items-center justify-center h-[300px] text-gray-400 text-sm">No tenants yet</div>
+        <div class="flex items-center justify-center h-[300px] text-stone-400 text-sm">No tenants yet</div>
       <% end %>
     </div>
   </div>
@@ -149,54 +77,54 @@
   <%# Row 3: Platform Usage + Tenant Size Distribution %>
   <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
     <%# Platform Usage %>
-    <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
-      <h3 class="text-lg font-medium text-gray-900 mb-4">Platform Usage</h3>
+    <div class="card card-pad">
+      <h3 class="card-title mb-4">Platform Usage</h3>
       <div class="grid grid-cols-1 gap-4">
-        <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+        <div class="flex items-center justify-between p-4 bg-stone-50 rounded-lg">
           <div class="flex items-center gap-3">
-            <div class="p-2 bg-blue-100 rounded-lg">
-              <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="p-2 bg-kula-100 rounded-lg">
+              <svg class="w-5 h-5 text-kula-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
               </svg>
             </div>
-            <span class="text-sm font-medium text-gray-700">Payroll Runs This Month</span>
+            <span class="text-sm font-medium text-stone-700">Payroll Runs This Month</span>
           </div>
-          <span class="text-xl font-bold text-gray-900"><%= @stats.payroll_runs_this_month %></span>
+          <span class="text-xl font-bold text-stone-900"><%= @stats.payroll_runs_this_month %></span>
         </div>
 
-        <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+        <div class="flex items-center justify-between p-4 bg-stone-50 rounded-lg">
           <div class="flex items-center gap-3">
             <div class="p-2 bg-green-100 rounded-lg">
               <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
               </svg>
             </div>
-            <span class="text-sm font-medium text-gray-700">Total Payroll Processed</span>
+            <span class="text-sm font-medium text-stone-700">Total Payroll Processed</span>
           </div>
           <span class="text-xl font-bold text-green-600">₹<%= number_with_delimiter(@stats.total_payroll_processed.round(0)) %></span>
         </div>
 
-        <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+        <div class="flex items-center justify-between p-4 bg-stone-50 rounded-lg">
           <div class="flex items-center gap-3">
-            <div class="p-2 bg-indigo-100 rounded-lg">
-              <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="p-2 bg-kula-100 rounded-lg">
+              <svg class="w-5 h-5 text-kula-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
               </svg>
             </div>
-            <span class="text-sm font-medium text-gray-700">Tenants Ran Payroll This Month</span>
+            <span class="text-sm font-medium text-stone-700">Tenants Ran Payroll This Month</span>
           </div>
-          <span class="text-xl font-bold text-gray-900"><%= @stats.tenants_ran_payroll_this_month %></span>
+          <span class="text-xl font-bold text-stone-900"><%= @stats.tenants_ran_payroll_this_month %></span>
         </div>
       </div>
     </div>
 
     <%# Tenant Size Distribution %>
-    <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
-      <h3 class="text-lg font-medium text-gray-900 mb-4">Tenant Size Distribution</h3>
+    <div class="card card-pad">
+      <h3 class="card-title mb-4">Tenant Size Distribution</h3>
       <% if @stats.tenant_size_distribution.values.sum > 0 %>
         <%= bar_chart @stats.tenant_size_distribution, height: "300px", colors: ["#10B981"], library: { plugins: { legend: { display: false } } } %>
       <% else %>
-        <div class="flex items-center justify-center h-[300px] text-gray-400 text-sm">No employee data yet</div>
+        <div class="flex items-center justify-center h-[300px] text-stone-400 text-sm">No employee data yet</div>
       <% end %>
     </div>
   </div>
@@ -204,26 +132,26 @@
   <%# Row 4: Recent Tenants + Recent Payroll Activity %>
   <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
     <%# Recent Tenants %>
-    <div class="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
-      <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
-        <h3 class="text-lg font-medium text-gray-900">Recent Tenants</h3>
-        <%= link_to platform_admin_tenants_path, class: "relative group inline-block text-blue-600 hover:text-blue-800" do %>
+    <div class="card overflow-hidden">
+      <div class="px-6 py-4 border-b border-stone-100 flex justify-between items-center">
+        <h3 class="text-lg font-medium text-stone-900">Recent Tenants</h3>
+        <%= link_to platform_admin_tenants_path, class: "relative group inline-block text-kula-700 hover:text-kula-900" do %>
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
-          <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-800 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">View All</span>
+          <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-stone-800 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">View All</span>
         <% end %>
       </div>
       <% if @stats.recent_tenants.any? %>
-        <div class="divide-y divide-gray-100">
+        <div class="divide-y divide-stone-100">
           <% @stats.recent_tenants.each do |tenant| %>
             <div class="px-4 md:px-6 py-3 flex items-center gap-3">
-              <div class="h-9 w-9 rounded-full bg-linear-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold text-sm shrink-0">
+              <div class="h-9 w-9 rounded-full bg-linear-to-br from-kula-500 to-kula-600 flex items-center justify-center text-white font-bold text-sm shrink-0">
                 <%= tenant[:name][0..1].upcase %>
               </div>
               <div class="min-w-0 flex-1">
-                <p class="text-sm font-medium text-gray-900 truncate"><%= tenant[:name] %></p>
-                <p class="text-xs text-gray-400 truncate">
+                <p class="text-sm font-medium text-stone-900 truncate"><%= tenant[:name] %></p>
+                <p class="text-xs text-stone-400 truncate">
                   <% tenant_url = root_url(subdomain: tenant[:subdomain], host: ENV.fetch("APP_DOMAIN", "lvh.me")) %>
-                  <%= link_to tenant_url, target: "_blank", class: "text-blue-500 hover:underline font-mono" do %>
+                  <%= link_to tenant_url, target: "_blank", class: "text-kula-600 hover:underline font-mono" do %>
                     <%= tenant[:subdomain] %>.<%= ENV.fetch("APP_DOMAIN", "lvh.me") %>
                   <% end %>
                   &middot; <%= tenant[:employee_count] %> emp
@@ -231,41 +159,41 @@
               </div>
               <div class="flex items-center gap-2 shrink-0">
                 <% color = { "active" => "green", "trial" => "yellow", "suspended" => "red" }[tenant[:status]] || "gray" %>
-                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-<%= color %>-100 text-<%= color %>-700">
+                <span class="badge bg-<%= color %>-100 text-<%= color %>-700">
                   <%= tenant[:status].capitalize %>
                 </span>
-                <span class="text-xs text-gray-400 hidden sm:inline"><%= time_ago_in_words(tenant[:created_at]) %> ago</span>
+                <span class="text-xs text-stone-400 hidden sm:inline"><%= time_ago_in_words(tenant[:created_at]) %> ago</span>
               </div>
             </div>
           <% end %>
         </div>
       <% else %>
-        <div class="px-6 py-8 text-center text-gray-400 text-sm">No tenants yet</div>
+        <div class="px-6 py-8 text-center text-stone-400 text-sm">No tenants yet</div>
       <% end %>
     </div>
 
     <%# Recent Payroll Activity %>
-    <div class="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
-      <div class="px-6 py-4 border-b border-gray-100">
-        <h3 class="text-lg font-medium text-gray-900">Recent Payroll Activity</h3>
+    <div class="card overflow-hidden">
+      <div class="px-6 py-4 border-b border-stone-100">
+        <h3 class="text-lg font-medium text-stone-900">Recent Payroll Activity</h3>
       </div>
       <% if @stats.recent_payroll_activity.any? %>
-        <% status_colors = { "draft" => "bg-gray-100 text-gray-700", "processing" => "bg-blue-100 text-blue-700", "processed" => "bg-yellow-100 text-yellow-700", "under_review" => "bg-purple-100 text-purple-700", "approved" => "bg-green-100 text-green-700", "rejected" => "bg-red-100 text-red-700", "paid" => "bg-emerald-100 text-emerald-700" } %>
-        <div class="divide-y divide-gray-100">
+        <% status_colors = { "draft" => "badge-neutral", "processing" => "badge-processing", "processed" => "badge-info", "under_review" => "badge-warning", "approved" => "badge-success", "rejected" => "badge-danger", "paid" => "badge-success" } %>
+        <div class="divide-y divide-stone-100">
           <% @stats.recent_payroll_activity.each do |activity| %>
             <div class="px-4 md:px-6 py-3 flex items-center gap-3">
               <div class="min-w-0 flex-1">
-                <p class="text-sm font-medium text-gray-900 truncate"><%= activity[:tenant_name] %></p>
-                <p class="text-xs text-gray-500 truncate"><%= activity[:period] %> &middot; <%= activity[:initiator] %></p>
+                <p class="text-sm font-medium text-stone-900 truncate"><%= activity[:tenant_name] %></p>
+                <p class="text-xs text-stone-500 truncate"><%= activity[:period] %> &middot; <%= activity[:initiator] %></p>
               </div>
-              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium shrink-0 <%= status_colors[activity[:status]] || 'bg-gray-100 text-gray-700' %>">
+              <span class="badge shrink-0 <%= status_colors[activity[:status]] || 'badge-neutral' %>">
                 <%= activity[:status].titleize %>
               </span>
             </div>
           <% end %>
         </div>
       <% else %>
-        <div class="px-6 py-8 text-center text-gray-400 text-sm">No payroll activity yet</div>
+        <div class="px-6 py-8 text-center text-stone-400 text-sm">No payroll activity yet</div>
       <% end %>
     </div>
   </div>
@@ -273,31 +201,31 @@
   <%# Row 5: Top Tenants + Risk Signals %>
   <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
     <%# Top Tenants by Employees %>
-    <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
-      <h3 class="text-lg font-medium text-gray-900 mb-4">Top Tenants by Employees</h3>
+    <div class="card card-pad">
+      <h3 class="card-title mb-4">Top Tenants by Employees</h3>
       <% if @stats.top_tenants_by_employees.any? %>
         <% max_count = @stats.top_tenants_by_employees.first[:employee_count] %>
         <div class="space-y-3">
           <% @stats.top_tenants_by_employees.each do |tenant| %>
             <div>
               <div class="flex items-center justify-between mb-1">
-                <span class="text-sm font-medium text-gray-700"><%= tenant[:name] %></span>
-                <span class="text-sm font-bold text-gray-900"><%= tenant[:employee_count] %></span>
+                <span class="text-sm font-medium text-stone-700"><%= tenant[:name] %></span>
+                <span class="text-sm font-bold text-stone-900"><%= tenant[:employee_count] %></span>
               </div>
-              <div class="w-full bg-gray-100 rounded-full h-2">
-                <div class="h-2 rounded-full bg-indigo-500 transition-all" style="width: <%= (tenant[:employee_count].to_f / [max_count, 1].max * 100).round %>%"></div>
+              <div class="w-full bg-stone-100 rounded-full h-2">
+                <div class="h-2 rounded-full bg-kula-500 transition-all" style="width: <%= (tenant[:employee_count].to_f / [max_count, 1].max * 100).round %>%"></div>
               </div>
             </div>
           <% end %>
         </div>
       <% else %>
-        <div class="flex items-center justify-center h-40 text-gray-400 text-sm">No tenant data yet</div>
+        <div class="flex items-center justify-center h-40 text-stone-400 text-sm">No tenant data yet</div>
       <% end %>
     </div>
 
     <%# Risk Signals %>
-    <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
-      <h3 class="text-lg font-medium text-gray-900 mb-4 flex items-center gap-2">
+    <div class="card card-pad">
+      <h3 class="card-title mb-4 flex items-center gap-2">
         <svg class="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/>
         </svg>
@@ -341,15 +269,15 @@
 
         <%# Inactive Tenants %>
         <% if @stats.inactive_tenants.any? %>
-          <div class="rounded-lg bg-gray-50 border border-gray-200 p-4">
-            <p class="text-sm font-semibold text-gray-800 mb-1">
+          <div class="rounded-lg bg-stone-50 border border-stone-200 p-4">
+            <p class="text-sm font-semibold text-stone-800 mb-1">
               Inactive &mdash; No activity in 60 days
             </p>
             <% @stats.inactive_tenants.each do |tenant| %>
-              <p class="text-xs text-gray-600">
+              <p class="text-xs text-stone-600">
                 <%= tenant[:name] %>
                 <% inactive_tenant_url = root_url(subdomain: tenant[:subdomain], host: ENV.fetch("APP_DOMAIN", "lvh.me")) %>
-                <%= link_to inactive_tenant_url.sub(/\Ahttps?:\/\//, "").chomp("/"), inactive_tenant_url, target: "_blank", class: "text-gray-400 hover:underline font-mono" %>
+                <%= link_to inactive_tenant_url.sub(/\Ahttps?:\/\//, "").chomp("/"), inactive_tenant_url, target: "_blank", class: "text-stone-400 hover:underline font-mono" %>
               </p>
             <% end %>
           </div>

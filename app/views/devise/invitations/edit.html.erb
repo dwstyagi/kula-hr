@@ -1,16 +1,16 @@
 <% tenant = ActsAsTenant.current_tenant %>
 
-<div class="min-h-screen bg-linear-to-br from-blue-50 via-white to-slate-50 flex items-center justify-center px-4 py-12">
+<div class="min-h-screen bg-linear-to-br from-kula-50 via-white to-slate-50 flex items-center justify-center px-4 py-12">
   <div class="w-full max-w-md">
 
     <%# Card %>
-    <div class="bg-white rounded-2xl shadow-xl shadow-blue-100/50 border border-gray-100 overflow-hidden">
+    <div class="bg-white rounded-2xl shadow-xl shadow-stone-200/50 border border-stone-100 overflow-hidden">
 
       <%# Header %>
-      <div class="bg-linear-to-r from-blue-600 to-blue-700 px-8 py-8 text-center">
+      <div class="bg-linear-to-r from-kula-600 to-kula-700 px-8 py-8 text-center">
         <div class="inline-flex items-center gap-1 mb-4">
           <span class="text-2xl font-black text-white tracking-tight">Kula</span>
-          <span class="text-2xl font-light text-blue-200 tracking-tight">HR</span>
+          <span class="text-2xl font-light text-kula-200 tracking-tight">HR</span>
         </div>
         <div class="h-14 w-14 rounded-full bg-white/20 flex items-center justify-center mx-auto mb-3">
           <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -18,7 +18,7 @@
           </svg>
         </div>
         <h1 class="text-xl font-bold text-white">Set your password</h1>
-        <p class="text-blue-200 text-sm mt-1">
+        <p class="text-kula-200 text-sm mt-1">
           Welcome to
           <% if tenant %>
             <span class="text-white font-medium"><%= tenant.name %></span>
@@ -32,8 +32,8 @@
       <div class="px-8 py-8">
 
         <%# Greeting %>
-        <div class="mb-6 p-4 bg-blue-50 rounded-xl border border-blue-100">
-          <p class="text-sm text-blue-800">
+        <div class="mb-6 p-4 bg-kula-50 rounded-xl border border-kula-100">
+          <p class="text-sm text-kula-900">
             Hi <strong><%= resource.first_name %></strong>, you've been invited to join the team.
             Set a password below to activate your account.
           </p>
@@ -66,12 +66,12 @@
 
             <%# Password %>
             <div>
-              <%= f.label :password, class: "block text-sm font-medium text-gray-700 mb-1.5" do %>
+              <%= f.label :password, class: "label" do %>
                 Password
               <% end %>
               <div class="relative">
                 <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                  <svg class="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg class="h-4 w-4 text-stone-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
                   </svg>
                 </div>
@@ -80,9 +80,9 @@
                     autocomplete: "new-password",
                     placeholder: "Minimum 8 characters",
                     data: { password_target: "password", action: "input->password#checkMatch" },
-                    class: "w-full pl-10 pr-10 rounded-xl border border-gray-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-gray-400 transition" %>
+                    class: "w-full pl-10 pr-10 rounded-xl border border-stone-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-kula-600 focus:border-transparent placeholder-stone-400 transition" %>
                 <button type="button" data-action="click->password#toggle"
-                        class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600 cursor-pointer">
+                        class="absolute inset-y-0 right-0 flex items-center pr-3 text-stone-400 hover:text-stone-600 cursor-pointer">
                   <svg class="icon-show w-4 h-4 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
@@ -96,12 +96,12 @@
 
             <%# Password Confirmation %>
             <div>
-              <%= f.label :password_confirmation, class: "block text-sm font-medium text-gray-700 mb-1.5" do %>
+              <%= f.label :password_confirmation, class: "label" do %>
                 Confirm password
               <% end %>
               <div class="relative">
                 <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                  <svg class="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg class="h-4 w-4 text-stone-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
                   </svg>
                 </div>
@@ -109,9 +109,9 @@
                     autocomplete: "new-password",
                     placeholder: "Re-enter your password",
                     data: { password_target: "confirmation", action: "input->password#checkMatch" },
-                    class: "w-full pl-10 pr-10 rounded-xl border border-gray-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-gray-400 transition" %>
+                    class: "w-full pl-10 pr-10 rounded-xl border border-stone-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-kula-600 focus:border-transparent placeholder-stone-400 transition" %>
                 <button type="button" data-action="click->password#toggle"
-                        class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600 cursor-pointer">
+                        class="absolute inset-y-0 right-0 flex items-center pr-3 text-stone-400 hover:text-stone-600 cursor-pointer">
                   <svg class="icon-show w-4 h-4 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
@@ -128,15 +128,15 @@
 
           <%# Submit %>
           <%= f.submit "Activate My Account",
-              class: "w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-xl shadow-sm shadow-blue-200 transition cursor-pointer" %>
+              class: "w-full py-3 px-4 bg-kula-700 hover:bg-kula-800 text-white text-sm font-semibold rounded-xl shadow-sm shadow-kula-200 transition cursor-pointer" %>
 
         <% end %>
 
       </div>
 
       <%# Footer %>
-      <div class="px-8 py-4 bg-gray-50 border-t border-gray-100 text-center">
-        <p class="text-xs text-gray-400">
+      <div class="px-8 py-4 bg-stone-50 border-t border-stone-100 text-center">
+        <p class="text-xs text-stone-400">
           By activating your account you agree to Kula HR's terms of service.
         </p>
       </div>
@@ -144,7 +144,7 @@
     </div>
 
     <%# Help text %>
-    <p class="text-center text-xs text-gray-400 mt-6">
+    <p class="text-center text-xs text-stone-400 mt-6">
       Having trouble? Contact your HR administrator.
     </p>
 

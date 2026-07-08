@@ -1,6 +1,6 @@
 <%
   payroll_run = PayrollRunPresenter.new(payroll_run) unless payroll_run.is_a?(PayrollRunPresenter)
 %>
-<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium <%= payroll_run.status_badge_classes %>">
+<span class="badge <%= payroll_run.status_badge_classes %>">
   <%= payroll_run.status_badge_label %>
 </span>

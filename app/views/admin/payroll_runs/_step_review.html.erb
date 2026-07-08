@@ -1,0 +1,75 @@
+<%# Step 1 — Review employees before processing. `readiness` is a
+    Payroll::ReadinessCheck::Result; exceptions sort to the top so HR fixes
+    problems instead of scanning 50 healthy rows. %>
+<% issues = readiness ? readiness.will_skip : [] %>
+<% ready  = readiness ? readiness.ready : [] %>
+
+<div class="card overflow-hidden animate-fade-up">
+  <div class="card-header">
+    <div>
+      <h2 class="card-title">Review employees</h2>
+      <p class="text-xs text-stone-500 mt-0.5">
+        <%= readiness&.eligible_count.to_i %> eligible this period —
+        <%= ready.size %> ready<%= ", #{issues.size} with issues" if issues.any? %>
+      </p>
+    </div>
+    <% if issues.any? %>
+      <span class="badge badge-warning"><%= issues.size %> need<%= "s" if issues.size == 1 %> fixing</span>
+    <% else %>
+      <span class="badge badge-success">All clear</span>
+    <% end %>
+  </div>
+
+  <% if issues.any? %>
+    <div class="px-5 sm:px-6 py-3 bg-marigold-50/70 border-b border-marigold-200/60">
+      <p class="text-[13px] text-marigold-800">
+        These employees will be <strong>excluded and not paid</strong> unless fixed before processing.
+      </p>
+    </div>
+    <ul data-controller="reveal" data-reveal-delay-value="40">
+      <% issues.each do |status| %>
+        <li class="flex flex-wrap items-center gap-3 px-5 sm:px-6 py-3.5 border-b border-stone-100 bg-marigold-50/30">
+          <svg class="size-5 shrink-0 text-marigold-500" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/>
+          </svg>
+          <div class="min-w-0 flex-1">
+            <p class="text-sm font-medium text-stone-900 truncate"><%= status.employee.full_name %></p>
+            <p class="text-xs text-marigold-800 capitalize"><%= status.reasons.join(" · ") %></p>
+          </div>
+          <div class="flex items-center gap-2">
+            <% unless status.has_salary %>
+              <%= link_to "Assign salary →", assign_salary_admin_employee_path(status.employee), class: "btn btn-secondary btn-sm" %>
+            <% end %>
+            <% unless status.has_attendance %>
+              <%= link_to "Attendance →", admin_attendance_summaries_path(month: payroll_run.month, year: payroll_run.year), class: "btn btn-secondary btn-sm" %>
+            <% end %>
+          </div>
+        </li>
+      <% end %>
+    </ul>
+  <% end %>
+
+  <% if ready.any? %>
+    <ul>
+      <% ready.first(8).each do |status| %>
+        <li class="flex items-center gap-3 px-5 sm:px-6 py-3 border-b border-stone-100 last:border-b-0">
+          <svg class="size-5 shrink-0 text-kula-600" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+          <p class="text-sm text-stone-700 flex-1 truncate"><%= status.employee.full_name %></p>
+          <span class="text-xs text-stone-400">attendance locked · salary assigned</span>
+        </li>
+      <% end %>
+      <% if ready.size > 8 %>
+        <li class="px-5 sm:px-6 py-3 text-xs text-stone-400">
+          + <%= ready.size - 8 %> more employees ready to pay
+        </li>
+      <% end %>
+    </ul>
+  <% elsif issues.empty? %>
+    <div class="empty-state">
+      <p class="text-sm text-stone-500">No eligible employees for this period yet.</p>
+      <p class="text-xs text-stone-400 mt-1">Generate and lock attendance for <%= payroll_run.period_label %> first.</p>
+    </div>
+  <% end %>
+</div>

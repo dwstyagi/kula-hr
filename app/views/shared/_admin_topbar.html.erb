@@ -1,8 +1,4 @@
-<header class="bg-white border-b border-gray-200 px-6 py-4">
-  <div class="flex items-center justify-between">
-    <h1 class="text-xl font-semibold text-gray-900"><%= yield(:page_title) || "Dashboard" %></h1>
-    <div class="flex items-center gap-4">
-      <span class="text-sm text-gray-600"><%= current_user&.full_name %></span>
-    </div>
-  </div>
+<header class="bg-white border-b border-stone-200 px-4 md:px-8 h-14 flex items-center justify-between gap-4">
+  <h1 class="text-[15px] font-semibold text-stone-900 tracking-tight truncate"><%= content_for(:page_title).presence || controller.controller_name.titleize %></h1>
+  <time class="code hidden sm:block" datetime="<%= Date.current.iso8601 %>"><%= Date.current.strftime("%d %b %Y") %></time>
 </header>

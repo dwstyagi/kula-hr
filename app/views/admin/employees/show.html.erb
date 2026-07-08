@@ -1,206 +1,179 @@
-<div class="max-w-4xl mx-auto">
-  <%# Profile Header %>
-  <div class="bg-white rounded-lg border border-gray-200 p-6 mb-6">
-    <div class="flex items-center justify-between">
-      <div class="flex items-center gap-4">
-        <div class="h-16 w-16 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-2xl">
+<% content_for(:page_title, @employee.full_name) %>
+
+<div class="max-w-6xl mx-auto" data-controller="scrollspy"
+     data-scrollspy-active-class="bg-kula-50 text-kula-800 font-semibold">
+  <div class="grid grid-cols-1 lg:grid-cols-[300px_1fr] gap-6 items-start">
+
+    <%# ── Identity rail — always in view ─────────────────────────────────── %>
+    <aside class="lg:sticky lg:top-8 space-y-4 animate-fade-up">
+      <div class="card card-pad text-center">
+        <div class="mx-auto size-20 rounded-full bg-kula-100 flex items-center justify-center text-kula-800 font-bold text-3xl">
           <%= @employee.first_name.first %><%= @employee.last_name.first %>
         </div>
-        <div>
-          <h1 class="text-2xl font-bold text-gray-900"><%= @employee.full_name %></h1>
-          <p class="text-sm text-gray-500 mt-0.5">
-            <%= @employee.employee_code %>
-            <% if @employee.designation.present? %>
-              &middot; <%= @employee.designation.name %>
-            <% end %>
-            <% if @employee.department.present? %>
-              &middot; <%= @employee.department.name %>
-            <% end %>
-          </p>
-          <div class="mt-2 flex items-center gap-2 flex-wrap">
-            <% status_colors = {
-              "active"        => "bg-green-100 text-green-800",
-              "probation"     => "bg-yellow-100 text-yellow-800",
-              "notice_period" => "bg-orange-100 text-orange-800",
-              "resigned"      => "bg-red-100 text-red-800",
-              "terminated"    => "bg-gray-100 text-gray-800"
-            } %>
-            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium <%= status_colors[@employee.employment_status] %>">
-              <%= @employee.employment_status.titleize %>
-            </span>
-            <% if @employee.user&.invitation_accepted_at.present? %>
-              <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700">
-                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
-                Invite Accepted
-              </span>
-            <% elsif @employee.user&.invitation_sent_at.present? %>
-              <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-700">
-                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/></svg>
-                Invite Pending
-              </span>
-            <% elsif @employee.user.nil? %>
-              <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
-                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/></svg>
-                Not Invited
-              </span>
-            <% elsif @employee.user.present? && @employee.user.account_active? %>
-              <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
-                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/></svg>
-                Account Active
-              </span>
-            <% elsif @employee.user.present? && !@employee.user.account_active? %>
-              <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-700">
-                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M13.477 14.89A6 6 0 015.11 6.524L13.477 14.89zm1.414-1.414L6.524 5.11A6 6 0 0114.89 13.476zM18 10a8 8 0 11-16 0 8 8 0 0116 0z" clip-rule="evenodd"/></svg>
-                Account Deactivated
-              </span>
-            <% end %>
-          </div>
-        </div>
-      </div>
-      <div class="flex items-center gap-2">
-        <% unless @employee.user&.invitation_accepted_at.present? %>
-          <%= button_to @employee.user ? "Resend Invite" : "Send Invite", resend_invite_admin_employee_path(@employee),
-              method: :post,
-              class: "px-4 py-2 bg-yellow-500 text-white text-sm font-medium rounded-lg hover:bg-yellow-600 cursor-pointer" %>
-        <% end %>
-        <% if @employee.user %>
-          <% if @employee.user.account_active? %>
-            <%= button_to "Deactivate Account", toggle_account_status_admin_employee_path(@employee),
-                method: :patch,
-                data: { turbo_confirm: "Deactivate portal access for #{@employee.full_name}? They will no longer be able to log in." },
-                class: "px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 cursor-pointer" %>
+        <h1 class="page-title mt-3"><%= @employee.full_name %></h1>
+        <p class="code mt-1"><%= @employee.employee_code %></p>
+        <p class="text-sm text-stone-500 mt-1">
+          <%= [@employee.designation&.name, @employee.department&.name].compact_blank.join(" · ").presence || "—" %>
+        </p>
+        <div class="mt-3 flex items-center justify-center gap-2 flex-wrap">
+          <%= status_badge @employee.employment_status %>
+          <% if @employee.user&.invitation_accepted_at.present? %>
+            <span class="badge badge-success">Invite accepted</span>
+          <% elsif @employee.user&.invitation_sent_at.present? %>
+            <span class="badge badge-warning">Invite pending</span>
+          <% elsif @employee.user.nil? %>
+            <span class="badge badge-neutral">Not invited</span>
+          <% elsif @employee.user.account_active? %>
+            <span class="badge badge-info">Account active</span>
           <% else %>
-            <%= button_to "Reactivate Account", toggle_account_status_admin_employee_path(@employee),
-                method: :patch,
-                class: "px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 cursor-pointer" %>
+            <span class="badge badge-danger">Account deactivated</span>
           <% end %>
-        <% end %>
-        <%= link_to "Edit", edit_admin_employee_path(@employee),
-            class: "px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700" %>
-        <%= link_to "All Employees", admin_employees_path,
-            class: "px-4 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200" %>
-      </div>
-    </div>
-  </div>
-  <%# Tabs %>
-  <div data-controller="tabs" data-tabs-active-value="<%= params[:tab].presence || 'personal' %>">
-    <%# Tab Navigation %>
-    <div class="border-b border-gray-200 mb-6">
-      <nav class="-mb-px flex space-x-8">
-        <button data-tabs-target="tab" data-tab="personal"
-            data-action="click->tabs#switch"
-          class="py-3 px-1 border-b-2 text-sm font-medium whitespace-nowrap border-transparent text-gray-500 cursor-pointer">
-          Personal
-        </button>
-        <button data-tabs-target="tab" data-tab="employment"
-            data-action="click->tabs#switch"
-          class="py-3 px-1 border-b-2 text-sm font-medium whitespace-nowrap border-transparent text-gray-500 cursor-pointer">
-          Employment
-        </button>
-        <button data-tabs-target="tab" data-tab="bank"
-            data-action="click->tabs#switch"
-          class="py-3 px-1 border-b-2 text-sm font-medium whitespace-nowrap border-transparent text-gray-500 cursor-pointer">
-          Bank & Statutory
-        </button>
-        <button data-tabs-target="tab" data-tab="salary"
-            data-action="click->tabs#switch"
-          class="py-3 px-1 border-b-2 text-sm font-medium whitespace-nowrap border-transparent text-gray-500 cursor-pointer">
-          Salary
-        </button>
-        <button data-tabs-target="tab" data-tab="leave"
-            data-action="click->tabs#switch"
-          class="py-3 px-1 border-b-2 text-sm font-medium whitespace-nowrap border-transparent text-gray-500 cursor-pointer">
-          Leave
-        </button>
-      </nav>
-    </div>
-    <%# Personal Panel %>
-    <div data-tabs-target="panel" data-panel="personal" class="space-y-6">
-      <div class="bg-white rounded-lg border border-gray-200 p-6">
-        <h3 class="text-base font-semibold text-gray-900 mb-4">Personal Information</h3>
-        <dl class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-5">
-          <div>
-            <dt class="text-xs font-medium text-gray-500 uppercase tracking-wide">Email</dt>
-            <dd class="mt-1 text-sm text-gray-900"><%= @employee.email %></dd>
+        </div>
+
+        <dl class="mt-5 pt-5 border-t border-stone-100 space-y-3 text-left">
+          <div class="flex items-center justify-between gap-3">
+            <dt class="text-xs text-stone-400 shrink-0">Email</dt>
+            <dd class="text-xs text-stone-700 truncate"><%= @employee.email %></dd>
           </div>
-          <div>
-            <dt class="text-xs font-medium text-gray-500 uppercase tracking-wide">Phone</dt>
-            <dd class="mt-1 text-sm text-gray-900"><%= @employee.phone.presence || "—" %></dd>
+          <div class="flex items-center justify-between gap-3">
+            <dt class="text-xs text-stone-400 shrink-0">Phone</dt>
+            <dd class="text-xs text-stone-700 amount"><%= @employee.phone.presence || "—" %></dd>
           </div>
-          <div>
-            <dt class="text-xs font-medium text-gray-500 uppercase tracking-wide">Date of Birth</dt>
-            <dd class="mt-1 text-sm text-gray-900"><%= @employee.date_of_birth&.strftime("%d %b %Y") || "—" %></dd>
+          <div class="flex items-center justify-between gap-3">
+            <dt class="text-xs text-stone-400 shrink-0">Joined</dt>
+            <dd class="text-xs text-stone-700"><%= @employee.joining_date.strftime("%d %b %Y") %></dd>
           </div>
-          <div>
-            <dt class="text-xs font-medium text-gray-500 uppercase tracking-wide">Gender</dt>
-            <dd class="mt-1 text-sm text-gray-900"><%= @employee.gender&.titleize || "—" %></dd>
+          <div class="flex items-center justify-between gap-3">
+            <dt class="text-xs text-stone-400 shrink-0">Manager</dt>
+            <dd class="text-xs truncate">
+              <% if @employee.reporting_manager %>
+                <%= link_to @employee.reporting_manager.full_name, admin_employee_path(@employee.reporting_manager), class: "link" %>
+              <% else %>
+                <span class="text-stone-700">—</span>
+              <% end %>
+            </dd>
           </div>
         </dl>
-      </div>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div class="bg-white rounded-lg border border-gray-200 p-6">
-          <h3 class="text-base font-semibold text-gray-900 mb-4">Address</h3>
-          <% if @employee.current_address.present? %>
-            <p class="text-sm text-gray-900"><%= @employee.current_address %></p>
-            <p class="text-sm text-gray-600 mt-1">
-              <%= [@employee.city, @employee.state, @employee.pincode].compact_blank.join(", ") %>
-            </p>
+
+        <div class="mt-5 pt-5 border-t border-stone-100 space-y-2">
+          <%= link_to "Edit profile", edit_admin_employee_path(@employee), class: "btn btn-primary w-full" %>
+          <% if @current_salary %>
+            <%= link_to "Revise salary", revise_salary_admin_employee_path(@employee), class: "btn btn-secondary w-full" %>
           <% else %>
-            <p class="text-sm text-gray-400">No address provided.</p>
+            <%= link_to "Assign salary", assign_salary_admin_employee_path(@employee), class: "btn btn-secondary w-full" %>
+          <% end %>
+          <% unless @employee.user&.invitation_accepted_at.present? %>
+            <%= button_to @employee.user ? "Resend invite" : "Send invite", resend_invite_admin_employee_path(@employee),
+                method: :post, class: "btn btn-secondary w-full cursor-pointer" %>
+          <% end %>
+          <% if @employee.user %>
+            <% if @employee.user.account_active? %>
+              <%= button_to "Deactivate account", toggle_account_status_admin_employee_path(@employee),
+                  method: :patch,
+                  data: { turbo_confirm: "Deactivate portal access for #{@employee.full_name}? They will no longer be able to log in." },
+                  class: "btn btn-ghost w-full text-red-600 cursor-pointer" %>
+            <% else %>
+              <%= button_to "Reactivate account", toggle_account_status_admin_employee_path(@employee),
+                  method: :patch, class: "btn btn-ghost w-full text-kula-700 cursor-pointer" %>
+            <% end %>
           <% end %>
         </div>
-        <div class="bg-white rounded-lg border border-gray-200 p-6">
-          <h3 class="text-base font-semibold text-gray-900 mb-4">Emergency Contact</h3>
-          <% if @employee.emergency_contact_name.present? %>
-            <p class="text-sm font-medium text-gray-900"><%= @employee.emergency_contact_name %></p>
-            <p class="text-sm text-gray-500"><%= @employee.emergency_contact_relation %></p>
-            <p class="text-sm text-gray-900 mt-1"><%= @employee.emergency_contact_phone %></p>
-          <% else %>
-            <p class="text-sm text-gray-400">No emergency contact provided.</p>
-          <% end %>
-        </div>
       </div>
-    </div>
-    <%# Employment Panel %>
-    <div data-tabs-target="panel" data-panel="employment" class="hidden">
-      <div class="bg-white rounded-lg border border-gray-200 p-6">
-        <h3 class="text-base font-semibold text-gray-900 mb-4">Employment Details</h3>
+
+      <%# Section nav — sticks with the rail, highlights on scroll %>
+      <nav class="card p-2 hidden lg:block" aria-label="Profile sections">
+        <% { personal: "Personal", employment: "Employment", bank: "Bank & statutory", salary: "Salary", leave: "Leave" }.each do |key, label| %>
+          <a href="#<%= key %>" data-scrollspy-target="link" data-action="scrollspy#jump"
+             class="block rounded-lg px-3 py-2 text-sm text-stone-600 hover:bg-stone-50 hover:text-stone-900 transition-colors">
+            <%= label %>
+          </a>
+        <% end %>
+      </nav>
+
+      <%= link_to "← All employees", admin_employees_path, class: "block text-center text-sm text-stone-500 hover:text-stone-700" %>
+    </aside>
+
+    <%# ── Record sections — everything visible, nothing hidden in tabs ────── %>
+    <div class="space-y-6 min-w-0" data-controller="reveal" data-reveal-delay-value="70">
+
+      <section id="personal" data-scrollspy-target="section" class="card card-pad scroll-mt-24">
+        <h3 class="card-title mb-4">Personal</h3>
         <dl class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-5">
           <div>
-            <dt class="text-xs font-medium text-gray-500 uppercase tracking-wide">Employee Code</dt>
-            <dd class="mt-1 text-sm text-gray-900 font-mono"><%= @employee.employee_code %></dd>
+            <dt class="eyebrow">Email</dt>
+            <dd class="mt-1 text-sm text-stone-900"><%= @employee.email %></dd>
           </div>
           <div>
-            <dt class="text-xs font-medium text-gray-500 uppercase tracking-wide">Status</dt>
-            <dd class="mt-1">
-              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium <%= status_colors[@employee.employment_status] %>">
-                <%= @employee.employment_status.titleize %>
-              </span>
+            <dt class="eyebrow">Phone</dt>
+            <dd class="mt-1 text-sm text-stone-900 amount"><%= @employee.phone.presence || "—" %></dd>
+          </div>
+          <div>
+            <dt class="eyebrow">Date of birth</dt>
+            <dd class="mt-1 text-sm text-stone-900"><%= @employee.date_of_birth&.strftime("%d %b %Y") || "—" %></dd>
+          </div>
+          <div>
+            <dt class="eyebrow">Gender</dt>
+            <dd class="mt-1 text-sm text-stone-900"><%= @employee.gender&.titleize || "—" %></dd>
+          </div>
+          <div>
+            <dt class="eyebrow">Address</dt>
+            <dd class="mt-1 text-sm text-stone-900">
+              <% if @employee.current_address.present? %>
+                <%= @employee.current_address %><br>
+                <span class="text-stone-600"><%= [@employee.city, @employee.state, @employee.pincode].compact_blank.join(", ") %></span>
+              <% else %>
+                —
+              <% end %>
             </dd>
           </div>
           <div>
-            <dt class="text-xs font-medium text-gray-500 uppercase tracking-wide">Joining Date</dt>
-            <dd class="mt-1 text-sm text-gray-900"><%= @employee.joining_date.strftime("%d %b %Y") %></dd>
+            <dt class="eyebrow">Emergency contact</dt>
+            <dd class="mt-1 text-sm text-stone-900">
+              <% if @employee.emergency_contact_name.present? %>
+                <%= @employee.emergency_contact_name %>
+                <span class="text-stone-500">(<%= @employee.emergency_contact_relation %>)</span><br>
+                <span class="amount"><%= @employee.emergency_contact_phone %></span>
+              <% else %>
+                —
+              <% end %>
+            </dd>
+          </div>
+        </dl>
+      </section>
+
+      <section id="employment" data-scrollspy-target="section" class="card card-pad scroll-mt-24">
+        <h3 class="card-title mb-4">Employment</h3>
+        <dl class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-5">
+          <div>
+            <dt class="eyebrow">Employee code</dt>
+            <dd class="mt-1"><span class="code text-stone-900"><%= @employee.employee_code %></span></dd>
           </div>
           <div>
-            <dt class="text-xs font-medium text-gray-500 uppercase tracking-wide">Confirmation Date</dt>
-            <dd class="mt-1 text-sm text-gray-900"><%= @employee.confirmation_date&.strftime("%d %b %Y") || "—" %></dd>
+            <dt class="eyebrow">Status</dt>
+            <dd class="mt-1"><%= status_badge @employee.employment_status %></dd>
           </div>
           <div>
-            <dt class="text-xs font-medium text-gray-500 uppercase tracking-wide">Department</dt>
-            <dd class="mt-1 text-sm text-gray-900"><%= @employee.department&.name || "—" %></dd>
+            <dt class="eyebrow">Joining date</dt>
+            <dd class="mt-1 text-sm text-stone-900"><%= @employee.joining_date.strftime("%d %b %Y") %></dd>
           </div>
           <div>
-            <dt class="text-xs font-medium text-gray-500 uppercase tracking-wide">Designation</dt>
-            <dd class="mt-1 text-sm text-gray-900"><%= @employee.designation&.name || "—" %></dd>
+            <dt class="eyebrow">Confirmation date</dt>
+            <dd class="mt-1 text-sm text-stone-900"><%= @employee.confirmation_date&.strftime("%d %b %Y") || "—" %></dd>
           </div>
           <div>
-            <dt class="text-xs font-medium text-gray-500 uppercase tracking-wide">Reporting Manager</dt>
-            <dd class="mt-1 text-sm text-gray-900">
+            <dt class="eyebrow">Department</dt>
+            <dd class="mt-1 text-sm text-stone-900"><%= @employee.department&.name || "—" %></dd>
+          </div>
+          <div>
+            <dt class="eyebrow">Designation</dt>
+            <dd class="mt-1 text-sm text-stone-900"><%= @employee.designation&.name || "—" %></dd>
+          </div>
+          <div>
+            <dt class="eyebrow">Reporting manager</dt>
+            <dd class="mt-1 text-sm text-stone-900">
               <% if @employee.reporting_manager %>
                 <%= link_to @employee.reporting_manager.full_name,
-                    admin_employee_path(@employee.reporting_manager),
-                    class: "text-blue-600 hover:text-blue-800" %>
+                    admin_employee_path(@employee.reporting_manager), class: "link" %>
               <% else %>
                 —
               <% end %>
@@ -208,165 +181,150 @@
           </div>
           <% if @employee.direct_reports.any? %>
             <div>
-              <dt class="text-xs font-medium text-gray-500 uppercase tracking-wide">Direct Reports</dt>
-              <dd class="mt-1 text-sm text-gray-900"><%= @employee.direct_reports.count %></dd>
+              <dt class="eyebrow">Direct reports</dt>
+              <dd class="mt-1 text-sm text-stone-900 amount"><%= @employee.direct_reports.count %></dd>
             </div>
           <% end %>
         </dl>
-      </div>
-    </div>
-    <%# Bank & Statutory Panel %>
-    <div data-tabs-target="panel" data-panel="bank" class="hidden space-y-6">
-      <div class="bg-white rounded-lg border border-gray-200 p-6">
-        <h3 class="text-base font-semibold text-gray-900 mb-4">Bank Details</h3>
+      </section>
+
+      <section id="bank" data-scrollspy-target="section" class="card card-pad scroll-mt-24">
+        <h3 class="card-title mb-4">Bank &amp; statutory</h3>
         <dl class="grid grid-cols-1 md:grid-cols-3 gap-x-8 gap-y-5">
           <div>
-            <dt class="text-xs font-medium text-gray-500 uppercase tracking-wide">Bank Name</dt>
-            <dd class="mt-1 text-sm text-gray-900"><%= @employee.bank_name.presence || "—" %></dd>
+            <dt class="eyebrow">Bank name</dt>
+            <dd class="mt-1 text-sm text-stone-900"><%= @employee.bank_name.presence || "—" %></dd>
           </div>
           <div>
-            <dt class="text-xs font-medium text-gray-500 uppercase tracking-wide">Account Number</dt>
-            <dd class="mt-1 text-sm text-gray-900 font-mono"><%= @employee.bank_account_number.presence || "—" %></dd>
+            <dt class="eyebrow">Account number</dt>
+            <dd class="mt-1"><span class="code text-stone-900"><%= @employee.bank_account_number.presence || "—" %></span></dd>
           </div>
           <div>
-            <dt class="text-xs font-medium text-gray-500 uppercase tracking-wide">IFSC Code</dt>
-            <dd class="mt-1 text-sm text-gray-900 font-mono"><%= @employee.ifsc_code.presence || "—" %></dd>
+            <dt class="eyebrow">IFSC code</dt>
+            <dd class="mt-1"><span class="code text-stone-900"><%= @employee.ifsc_code.presence || "—" %></span></dd>
+          </div>
+          <div>
+            <dt class="eyebrow">PAN number</dt>
+            <dd class="mt-1"><span class="code text-stone-900"><%= @employee.pan_number.presence || "—" %></span></dd>
+          </div>
+          <div>
+            <dt class="eyebrow">Aadhaar number</dt>
+            <dd class="mt-1"><span class="code text-stone-900"><%= @employee.aadhaar_number.presence || "—" %></span></dd>
+          </div>
+          <div>
+            <dt class="eyebrow">UAN (PF)</dt>
+            <dd class="mt-1"><span class="code text-stone-900"><%= @employee.uan_number.presence || "—" %></span></dd>
+          </div>
+          <div>
+            <dt class="eyebrow">ESI number</dt>
+            <dd class="mt-1"><span class="code text-stone-900"><%= @employee.esi_number.presence || "—" %></span></dd>
           </div>
         </dl>
-      </div>
-      <div class="bg-white rounded-lg border border-gray-200 p-6">
-        <h3 class="text-base font-semibold text-gray-900 mb-4">Statutory Details</h3>
-        <dl class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-5">
-          <div>
-            <dt class="text-xs font-medium text-gray-500 uppercase tracking-wide">PAN Number</dt>
-            <dd class="mt-1 text-sm text-gray-900 font-mono"><%= @employee.pan_number.presence || "—" %></dd>
-          </div>
-          <div>
-            <dt class="text-xs font-medium text-gray-500 uppercase tracking-wide">Aadhaar Number</dt>
-            <dd class="mt-1 text-sm text-gray-900 font-mono"><%= @employee.aadhaar_number.presence || "—" %></dd>
-          </div>
-          <div>
-            <dt class="text-xs font-medium text-gray-500 uppercase tracking-wide">UAN (PF)</dt>
-            <dd class="mt-1 text-sm text-gray-900 font-mono"><%= @employee.uan_number.presence || "—" %></dd>
-          </div>
-          <div>
-            <dt class="text-xs font-medium text-gray-500 uppercase tracking-wide">ESI Number</dt>
-            <dd class="mt-1 text-sm text-gray-900 font-mono"><%= @employee.esi_number.presence || "—" %></dd>
-          </div>
-        </dl>
-      </div>
-    </div>
-    <%# Salary Panel %>
-    <div data-tabs-target="panel" data-panel="salary" class="hidden space-y-6">
-      <% if @current_salary %>
-        <%# Current Salary Card %>
-        <div class="bg-white rounded-lg border border-gray-200 p-6">
-          <div class="flex items-center justify-between mb-4">
-            <h3 class="text-base font-semibold text-gray-900">Current Salary</h3>
-            <%= link_to "Revise Salary", revise_salary_admin_employee_path(@employee),
-                class: "px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700" %>
-          </div>
-          <dl class="grid grid-cols-1 md:grid-cols-3 gap-x-8 gap-y-5">
-            <div>
-              <dt class="text-xs font-medium text-gray-500 uppercase tracking-wide">Annual CTC</dt>
-              <dd class="mt-1 text-lg font-bold text-gray-900 font-mono">₹<%= number_with_delimiter(@current_salary.annual_ctc) %></dd>
-            </div>
-            <div>
-              <dt class="text-xs font-medium text-gray-500 uppercase tracking-wide">Monthly CTC</dt>
-              <dd class="mt-1 text-lg font-bold text-gray-900 font-mono">₹<%= number_with_delimiter(@current_salary.monthly_ctc) %></dd>
-            </div>
-            <div>
-              <dt class="text-xs font-medium text-gray-500 uppercase tracking-wide">Structure</dt>
-              <dd class="mt-1 text-sm text-gray-900">
-                <%= link_to @current_salary.salary_structure.name, admin_salary_structure_path(@current_salary.salary_structure),
-                    class: "text-blue-600 hover:text-blue-800" %>
-              </dd>
-            </div>
-            <div>
-              <dt class="text-xs font-medium text-gray-500 uppercase tracking-wide">Effective From</dt>
-              <dd class="mt-1 text-sm text-gray-900"><%= @current_salary.effective_from.strftime("%d %b %Y") %></dd>
-            </div>
-          </dl>
-        </div>
-        <%# Salary History %>
-        <% if @salary_history.any? %>
-          <div class="bg-white rounded-lg border border-gray-200 p-6">
-            <h3 class="text-base font-semibold text-gray-900 mb-4">Salary History</h3>
-            <table class="min-w-full divide-y divide-gray-200">
-              <thead class="bg-gray-50">
-                <tr>
-                  <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Annual CTC</th>
-                  <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Structure</th>
-                  <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">From</th>
-                  <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">To</th>
-                </tr>
-              </thead>
-              <tbody class="divide-y divide-gray-100">
-                <% @salary_history.each do |salary| %>
-                  <tr>
-                    <td class="px-4 py-2 text-sm text-gray-900 font-mono">₹<%= number_with_delimiter(salary.annual_ctc) %></td>
-                    <td class="px-4 py-2 text-sm text-gray-900"><%= salary.salary_structure.name %></td>
-                    <td class="px-4 py-2 text-sm text-gray-500"><%= salary.effective_from.strftime("%d %b %Y") %></td>
-                    <td class="px-4 py-2 text-sm text-gray-500"><%= salary.effective_to&.strftime("%d %b %Y") || "—" %></td>
-                  </tr>
-                <% end %>
-              </tbody>
-            </table>
+        <% if @employee.bank_account_number.blank? || @employee.ifsc_code.blank? %>
+          <div class="alert alert-warning mt-5 text-xs">
+            Bank details are incomplete — this employee will be missing from bank transfer files.
           </div>
         <% end %>
-      <% else %>
-        <%# No salary assigned %>
-        <div class="bg-white rounded-lg border border-gray-200 p-12 text-center">
-          <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-          </svg>
-          <h3 class="mt-2 text-sm font-medium text-gray-900">No salary assigned</h3>
-          <p class="mt-1 text-sm text-gray-500">Assign a salary structure and CTC to this employee.</p>
-          <div class="mt-4">
-            <%= link_to assign_salary_admin_employee_path(@employee),
-                class: "inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700" do %>
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-              </svg>
-              Assign Salary
-            <% end %>
+      </section>
+
+      <section id="salary" data-scrollspy-target="section" class="scroll-mt-24 space-y-6">
+        <% if @current_salary %>
+          <div class="card card-pad">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="card-title">Salary</h3>
+              <%= link_to "Revise salary", revise_salary_admin_employee_path(@employee), class: "btn btn-secondary btn-sm" %>
+            </div>
+            <dl class="grid grid-cols-1 md:grid-cols-3 gap-x-8 gap-y-5">
+              <div>
+                <dt class="eyebrow">Annual CTC</dt>
+                <dd class="mt-1 text-lg font-bold text-stone-900 amount"><%= inr(@current_salary.annual_ctc) %></dd>
+              </div>
+              <div>
+                <dt class="eyebrow">Monthly CTC</dt>
+                <dd class="mt-1 text-lg font-bold text-stone-900 amount"><%= inr(@current_salary.monthly_ctc) %></dd>
+              </div>
+              <div>
+                <dt class="eyebrow">Structure</dt>
+                <dd class="mt-1 text-sm">
+                  <%= link_to @current_salary.salary_structure.name, admin_salary_structure_path(@current_salary.salary_structure), class: "link" %>
+                </dd>
+              </div>
+              <div>
+                <dt class="eyebrow">Effective from</dt>
+                <dd class="mt-1 text-sm text-stone-900"><%= @current_salary.effective_from.strftime("%d %b %Y") %></dd>
+              </div>
+            </dl>
           </div>
-        </div>
-      <% end %>
-    </div>
-    <%# Leave Panel %>
-    <div data-tabs-target="panel" data-panel="leave" class="hidden space-y-6">
-      <div class="bg-white rounded-lg border border-gray-200 p-6">
+          <% if @salary_history.any? %>
+            <div class="card overflow-hidden">
+              <div class="card-header">
+                <h3 class="card-title">Salary history</h3>
+              </div>
+              <table class="tbl">
+                <thead>
+                  <tr>
+                    <th class="text-right">Annual CTC</th>
+                    <th>Structure</th>
+                    <th>From</th>
+                    <th>To</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% @salary_history.each do |salary| %>
+                    <tr>
+                      <td class="num font-medium text-stone-900"><%= inr(salary.annual_ctc) %></td>
+                      <td class="text-stone-700"><%= salary.salary_structure.name %></td>
+                      <td class="text-stone-500"><%= salary.effective_from.strftime("%d %b %Y") %></td>
+                      <td class="text-stone-500"><%= salary.effective_to&.strftime("%d %b %Y") || "—" %></td>
+                    </tr>
+                  <% end %>
+                </tbody>
+              </table>
+            </div>
+          <% end %>
+        <% else %>
+          <div class="card">
+            <div class="empty-state">
+              <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+              <h3 class="text-sm font-semibold text-stone-900">No salary assigned</h3>
+              <p class="mt-1 text-sm text-stone-500">Assign a salary structure and CTC to this employee.</p>
+              <%= link_to "Assign salary", assign_salary_admin_employee_path(@employee), class: "btn btn-primary mt-4" %>
+            </div>
+          </div>
+        <% end %>
+      </section>
+
+      <section id="leave" data-scrollspy-target="section" class="card card-pad scroll-mt-24">
         <div class="flex items-center justify-between mb-4">
-          <h3 class="text-base font-semibold text-gray-900">
-            Leave Balances
-            <span class="text-xs font-normal text-gray-400 ml-1"><%= LeaveBalance.current_financial_year %></span>
+          <h3 class="card-title">
+            Leave balances
+            <span class="code ml-1"><%= LeaveBalance.current_financial_year %></span>
           </h3>
         </div>
         <% if @leave_balances.any? %>
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <% @leave_balances.each do |balance| %>
-              <div class="rounded-lg border border-gray-200 p-4">
+              <div class="rounded-lg border border-stone-200 p-4">
                 <div class="flex items-center justify-between mb-2">
-                  <span class="text-sm font-medium text-gray-900"><%= balance.leave_type.name %></span>
-                  <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-mono font-medium bg-gray-100 text-gray-600">
-                    <%= balance.leave_type.code %>
-                  </span>
+                  <span class="text-sm font-medium text-stone-900"><%= balance.leave_type.name %></span>
+                  <span class="code"><%= balance.leave_type.code %></span>
                 </div>
                 <% used_pct = balance.total_days > 0 ? (balance.used_days / balance.total_days * 100).round : 0 %>
-                <div class="w-full bg-gray-100 rounded-full h-1.5 mb-2">
-                  <div class="h-1.5 rounded-full <%= used_pct > 80 ? 'bg-red-500' : 'bg-blue-500' %>"
+                <div class="w-full bg-stone-100 rounded-full h-1.5 mb-2 overflow-hidden">
+                  <div class="h-1.5 rounded-full animate-grow-x <%= used_pct > 80 ? 'bg-red-500' : 'bg-kula-600' %>"
                        style="width: <%= used_pct %>%"></div>
                 </div>
                 <div class="flex items-end justify-between">
                   <div>
-                    <p class="text-2xl font-bold text-gray-900"><%= balance.remaining_days.to_i %></p>
-                    <p class="text-xs text-gray-400">remaining of <%= balance.total_days.to_i %></p>
+                    <p class="amount text-2xl font-bold text-stone-900"><%= balance.remaining_days.to_i %></p>
+                    <p class="text-xs text-stone-400">remaining of <%= balance.total_days.to_i %></p>
                   </div>
-                  <div class="text-right text-xs text-gray-400">
+                  <div class="text-right text-xs text-stone-400">
                     <p><%= balance.used_days.to_i %> used</p>
                     <% if balance.carried_forward_days > 0 %>
-                      <p class="text-blue-500"><%= balance.carried_forward_days.to_i %> carried</p>
+                      <p class="text-kula-600"><%= balance.carried_forward_days.to_i %> carried</p>
                     <% end %>
                   </div>
                 </div>
@@ -374,14 +332,14 @@
             <% end %>
           </div>
         <% else %>
-          <div class="py-10 text-center">
-            <svg class="mx-auto h-10 w-10 text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5"/>
+          <div class="empty-state">
+            <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5"/>
             </svg>
-            <p class="text-sm text-gray-500">No leave balances for the current financial year.</p>
+            <p class="text-sm text-stone-500">No leave balances for the current financial year.</p>
           </div>
         <% end %>
-      </div>
+      </section>
     </div>
   </div>
 </div>

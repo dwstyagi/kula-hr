@@ -1,13 +1,13 @@
 <%# locals: readiness (Payroll::ReadinessCheck::Result), payroll_run %>
 <%= turbo_frame_tag "readiness", data: { readiness_target: "frame" } do %>
   <div class="space-y-3">
-    <div class="flex items-center justify-between border-b border-gray-100 pb-3">
-      <h2 class="text-base font-semibold text-gray-900">Readiness</h2>
-      <span class="text-xs text-gray-400"><%= payroll_run.month_name %> <%= payroll_run.year %></span>
+    <div class="flex items-center justify-between border-b border-stone-100 pb-3">
+      <h2 class="text-base font-semibold text-stone-900">Readiness</h2>
+      <span class="text-xs text-stone-400"><%= payroll_run.month_name %> <%= payroll_run.year %></span>
     </div>
 
     <% if readiness.eligible_count.zero? %>
-      <p class="text-sm text-gray-500">No eligible employees for this period.</p>
+      <p class="text-sm text-stone-500">No eligible employees for this period.</p>
     <% else %>
       <%# Headline counts %>
       <div class="flex items-center gap-4 text-sm">

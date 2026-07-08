@@ -2,17 +2,17 @@
   <%# Header %>
   <div class="flex items-center justify-between">
     <div>
-      <div class="flex items-center gap-2 text-sm text-gray-500 mb-1">
-        <%= link_to "Payroll Runs", admin_payroll_runs_path, class: "hover:text-gray-700" %>
+      <div class="flex items-center gap-2 text-sm text-stone-500 mb-1">
+        <%= link_to "Payroll Runs", admin_payroll_runs_path, class: "hover:text-stone-700" %>
         <span>/</span>
-        <%= link_to @payroll_run.period_label, admin_payroll_run_path(@payroll_run), class: "hover:text-gray-700" %>
+        <%= link_to @payroll_run.period_label, admin_payroll_run_path(@payroll_run), class: "hover:text-stone-700" %>
         <span>/</span>
-        <span class="text-gray-900">Payslips</span>
+        <span class="text-stone-900">Payslips</span>
       </div>
-      <h1 class="text-2xl font-bold text-gray-900">
+      <h1 class="page-title text-2xl">
         Payslips — <%= @payroll_run.period_label %>
       </h1>
-      <p class="text-sm text-gray-500 mt-0.5">
+      <p class="text-sm text-stone-500 mt-0.5">
         <%= @payroll_run.processed_employees %> payslips generated
         <% if @payroll_run.payslips.revised.any? %>
           · <span class="text-amber-600"><%= @payroll_run.payslips.revised.count %> revised</span>
@@ -24,26 +24,27 @@
     <%= form_with url: admin_payroll_run_payslips_path(@payroll_run), method: :get,
           class: "flex items-center gap-2" do |f| %>
       <div class="relative">
-        <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
+        <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400"
              fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                 d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
         </svg>
         <%= f.text_field :q, value: params[:q], placeholder: "Search employee…",
-              class: "pl-9 pr-4 px-4 py-3 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 w-56" %>
+              class: "input pl-9 w-56" %>
       </div>
-      <%= f.submit "Search", class: "px-3 py-2 text-sm bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 cursor-pointer" %>
+      <%= f.submit "Search", class: "btn btn-secondary cursor-pointer" %>
       <% if params[:q].present? %>
         <%= link_to "Clear", admin_payroll_run_payslips_path(@payroll_run),
-              class: "text-sm text-gray-500 hover:text-gray-700" %>
+              class: "text-sm text-stone-500 hover:text-stone-700" %>
       <% end %>
     <% end %>
   </div>
 
   <%# Table %>
-  <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+  <div class="card overflow-hidden">
     <% if @payslips.any? %>
-      <table class="w-full text-sm table-fixed">
+      <div class="overflow-x-auto">
+      <table class="tbl table-fixed">
         <colgroup>
           <col class="w-28">
           <col class="w-44">
@@ -54,51 +55,51 @@
           <col class="w-20">
           <col class="w-20">
         </colgroup>
-        <thead class="bg-gray-50 border-b border-gray-200">
+        <thead>
           <tr>
-            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Code</th>
-            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Employee</th>
-            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Gross</th>
-            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Deductions</th>
-            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Net Pay</th>
-            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">LOP</th>
-            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-            <th class="px-4 py-3"></th>
+            <th>Code</th>
+            <th>Employee</th>
+            <th class="text-right">Gross</th>
+            <th class="text-right">Deductions</th>
+            <th class="text-right">Net Pay</th>
+            <th class="text-center">LOP</th>
+            <th>Status</th>
+            <th></th>
           </tr>
         </thead>
-        <tbody class="divide-y divide-gray-100">
+        <tbody>
           <% @payslips.each do |payslip| %>
-            <tr class="hover:bg-gray-50 <%= 'bg-amber-50' if payslip.is_revised? %>">
-              <td class="px-4 py-3 text-gray-500 font-mono text-xs"><%= payslip.employee.employee_code %></td>
-              <td class="px-4 py-3">
-                <div class="font-medium text-gray-900 truncate"><%= payslip.employee.full_name %></div>
-                <div class="text-xs text-gray-400 truncate"><%= payslip.employee.department&.name %></div>
+            <tr class="<%= 'bg-marigold-50/60' if payslip.is_revised? %>">
+              <td><span class="code"><%= payslip.employee.employee_code %></span></td>
+              <td>
+                <div class="font-medium text-stone-900 truncate"><%= payslip.employee.full_name %></div>
+                <div class="text-xs text-stone-400 truncate"><%= payslip.employee.department&.name %></div>
               </td>
-              <td class="px-4 py-3 text-gray-900">₹<%= number_with_delimiter(payslip.gross_pay.round(0)) %></td>
-              <td class="px-4 py-3 text-gray-600">₹<%= number_with_delimiter(payslip.total_deductions.round(0)) %></td>
-              <td class="px-4 py-3 font-medium text-gray-900">₹<%= number_with_delimiter(payslip.net_pay.round(0)) %></td>
-              <td class="px-4 py-3 text-center">
+              <td class="num text-stone-900">₹<%= number_with_delimiter(payslip.gross_pay.round(0)) %></td>
+              <td class="num text-stone-600">₹<%= number_with_delimiter(payslip.total_deductions.round(0)) %></td>
+              <td class="num font-semibold text-stone-900">₹<%= number_with_delimiter(payslip.net_pay.round(0)) %></td>
+              <td class="text-center amount">
                 <% if payslip.lop_days > 0 %>
                   <span class="text-red-600 font-medium"><%= payslip.lop_days %></span>
                 <% else %>
-                  <span class="text-gray-300">—</span>
+                  <span class="text-stone-300">—</span>
                 <% end %>
               </td>
-              <td class="px-4 py-3">
+              <td>
                 <% if payslip.is_revised? %>
-                  <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-700">Revised</span>
+                  <span class="badge badge-warning">Revised</span>
                 <% elsif payslip.locked? %>
-                  <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-500">Locked</span>
+                  <span class="badge badge-neutral">Locked</span>
                 <% else %>
-                  <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700">Generated</span>
+                  <span class="badge badge-success">Generated</span>
                 <% end %>
               </td>
-              <td class="px-4 py-3 text-right">
+              <td class="text-right">
                 <div class="flex items-center justify-end gap-1">
                   <%# View %>
                   <%= link_to admin_payslip_path(payslip),
                         title: "View",
-                        class: "inline-flex items-center justify-center w-8 h-8 rounded-lg text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-colors" do %>
+                        class: "inline-flex items-center justify-center w-8 h-8 rounded-lg text-stone-400 hover:text-kula-700 hover:bg-kula-50 transition-colors" do %>
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
@@ -107,7 +108,7 @@
                   <%# Download PDF %>
                   <%= link_to download_admin_payslip_path(payslip),
                         title: "Download PDF",
-                        class: "inline-flex items-center justify-center w-8 h-8 rounded-lg text-gray-400 hover:text-green-600 hover:bg-green-50 transition-colors" do %>
+                        class: "inline-flex items-center justify-center w-8 h-8 rounded-lg text-stone-400 hover:text-green-600 hover:bg-green-50 transition-colors" do %>
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3M3 17V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
                     </svg>
@@ -116,7 +117,7 @@
                   <% if policy(payslip).edit? %>
                     <%= link_to edit_admin_payslip_path(payslip),
                           title: "Edit",
-                          class: "inline-flex items-center justify-center w-8 h-8 rounded-lg text-gray-400 hover:text-amber-600 hover:bg-amber-50 transition-colors" do %>
+                          class: "inline-flex items-center justify-center w-8 h-8 rounded-lg text-stone-400 hover:text-amber-600 hover:bg-amber-50 transition-colors" do %>
                       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                               d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
@@ -129,8 +130,9 @@
           <% end %>
         </tbody>
       </table>
+      </div>
     <% else %>
-      <div class="text-center py-16 text-gray-400">
+      <div class="text-center py-16 text-stone-400">
         <p class="font-medium">No payslips found</p>
         <% if params[:q].present? %>
           <p class="text-sm mt-1">Try a different search term.</p>
@@ -141,5 +143,5 @@
 
   <%# Back link %>
   <%= link_to "← Back to Payroll Run", admin_payroll_run_path(@payroll_run),
-        class: "text-sm text-gray-500 hover:text-gray-700" %>
+        class: "text-sm text-stone-500 hover:text-stone-700" %>
 </div>

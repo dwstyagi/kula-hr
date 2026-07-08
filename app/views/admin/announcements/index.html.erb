@@ -1,11 +1,11 @@
 <div class="max-w-4xl mx-auto">
   <div class="flex items-center justify-between mb-6">
     <div>
-      <h1 class="text-2xl font-bold text-gray-900">Announcements</h1>
-      <p class="text-sm text-gray-500 mt-1">Share news, events and updates with all employees.</p>
+      <h1 class="page-title text-2xl">Announcements</h1>
+      <p class="text-sm text-stone-500 mt-1">Share news, events and updates with all employees.</p>
     </div>
     <%= link_to new_admin_announcement_path,
-        class: "inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700" do %>
+        class: "btn btn-primary" do %>
       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
       </svg>
@@ -13,44 +13,44 @@
     <% end %>
   </div>
 
-  <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
+  <div class="card overflow-hidden">
     <% if @announcements.any? %>
       <div class="overflow-x-auto">
-        <table class="min-w-full divide-y divide-gray-200">
-          <thead class="bg-gray-50">
+        <table class="tbl">
+          <thead>
             <tr>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Read</th>
-              <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+              <th>Title</th>
+              <th>Status</th>
+              <th>Date</th>
+              <th>Read</th>
+              <th class="text-right">Actions</th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-gray-200">
+          <tbody>
             <% @announcements.each do |announcement| %>
-              <tr class="hover:bg-gray-50">
-                <td class="px-6 py-4 text-sm font-medium text-gray-900">
-                  <%= link_to announcement.title, admin_announcement_path(announcement), class: "hover:text-blue-600" %>
+              <tr class="hover:bg-stone-50">
+                <td class="text-sm font-medium text-stone-900">
+                  <%= link_to announcement.title, admin_announcement_path(announcement), class: "hover:text-kula-700" %>
                 </td>
-                <td class="px-6 py-4">
+                <td>
                   <% if announcement.published? %>
                     <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-700">Published</span>
                   <% else %>
-                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-500">Draft</span>
+                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-stone-100 text-stone-500">Draft</span>
                   <% end %>
                 </td>
-                <td class="px-6 py-4 text-sm text-gray-500">
+                <td class="text-sm text-stone-500">
                   <%= (announcement.published_at || announcement.created_at).strftime("%d %b %Y") %>
                 </td>
-                <td class="px-6 py-4 text-sm text-gray-500">
+                <td class="text-sm text-stone-500">
                   <% if announcement.published? %>
-                    <span class="font-medium text-gray-900"><%= @read_counts[announcement.id] || 0 %></span>
-                    <span class="text-gray-400">/ <%= @active_count %></span>
+                    <span class="font-medium text-stone-900"><%= @read_counts[announcement.id] || 0 %></span>
+                    <span class="text-stone-400">/ <%= @active_count %></span>
                   <% else %>
-                    <span class="text-gray-300">&mdash;</span>
+                    <span class="text-stone-300">&mdash;</span>
                   <% end %>
                 </td>
-                <td class="px-6 py-4 text-right">
+                <td class="text-right">
                   <div class="flex items-center justify-end gap-2">
                     <% unless announcement.published? %>
                       <%= button_to publish_admin_announcement_path(announcement), method: :patch,
@@ -64,7 +64,7 @@
 
                     <%= link_to edit_admin_announcement_path(announcement),
                         title: "Edit",
-                        class: "p-1.5 rounded-md text-blue-600 hover:bg-blue-100 transition-colors cursor-pointer" do %>
+                        class: "p-1.5 rounded-md text-kula-700 hover:bg-kula-100 transition-colors cursor-pointer" do %>
                       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                       </svg>
@@ -87,10 +87,10 @@
       </div>
     <% else %>
       <div class="p-12 text-center">
-        <svg class="mx-auto h-10 w-10 text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg class="mx-auto h-10 w-10 text-stone-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"/>
         </svg>
-        <p class="text-sm text-gray-500">No announcements yet. Create one to share news with your team.</p>
+        <p class="text-sm text-stone-500">No announcements yet. Create one to share news with your team.</p>
       </div>
     <% end %>
   </div>

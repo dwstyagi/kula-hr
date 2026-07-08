@@ -1,0 +1,117 @@
+<%# Detail drawer content — loaded lazily into the queue's slide-over. Forms
+    target _top so approve/reject reloads the queue (and closes the drawer). %>
+<%= turbo_frame_tag "drawer" do %>
+  <% lr = @leave_request %>
+  <% balance = LeaveBalance.current.find_by(employee: lr.employee, leave_type: lr.leave_type) %>
+
+  <div class="flex items-start justify-between gap-4 px-6 py-5 border-b border-stone-100">
+    <div class="flex items-center gap-3 min-w-0">
+      <%= avatar_chip(lr.employee.full_name) %>
+      <div class="min-w-0">
+        <p class="text-sm font-semibold text-stone-900 truncate"><%= lr.employee.full_name %></p>
+        <p class="code text-xs"><%= lr.employee.employee_code %></p>
+      </div>
+    </div>
+    <button type="button" class="btn btn-ghost btn-sm -mr-2" data-action="drawer#close" aria-label="Close">
+      <svg class="size-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+    </button>
+  </div>
+
+  <div class="flex-1 overflow-y-auto px-6 py-5 space-y-6">
+    <div class="flex items-center justify-between">
+      <%= status_badge(lr.status) %>
+      <p class="text-xs text-stone-400">Applied <%= lr.created_at.strftime("%d %b %Y") %></p>
+    </div>
+
+    <div class="card card-pad bg-stone-50/60">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="eyebrow"><%= lr.leave_type.name %></p>
+          <p class="text-2xl font-bold text-stone-900 amount mt-1">
+            <%= lr.number_of_days.to_i %><span class="text-sm font-medium text-stone-500"> day<%= "s" unless lr.number_of_days.to_i == 1 %></span>
+          </p>
+        </div>
+        <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-sm font-semibold bg-kula-100 text-kula-800"><%= lr.leave_type.code %></span>
+      </div>
+      <div class="mt-4 flex items-center gap-3 text-sm text-stone-700">
+        <span class="font-medium"><%= lr.from_date.strftime("%a, %d %b %Y") %></span>
+        <% if lr.from_date != lr.to_date %>
+          <svg class="size-4 text-stone-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
+          <span class="font-medium"><%= lr.to_date.strftime("%a, %d %b %Y") %></span>
+        <% end %>
+      </div>
+    </div>
+
+    <% if balance %>
+      <div class="flex items-center justify-between text-sm">
+        <span class="text-stone-500">Remaining <%= lr.leave_type.code %> balance</span>
+        <span class="font-semibold amount <%= balance.remaining_days < lr.number_of_days ? "text-red-600" : "text-stone-900" %>">
+          <%= balance.remaining_days.to_f % 1 == 0 ? balance.remaining_days.to_i : balance.remaining_days %> days
+        </span>
+      </div>
+      <% if lr.pending? && balance.remaining_days < lr.number_of_days %>
+        <div class="alert alert-warning text-xs">Approving this will fail — the request exceeds the remaining balance.</div>
+      <% end %>
+    <% end %>
+
+    <% if lr.reason.present? %>
+      <div>
+        <p class="eyebrow mb-1.5">Reason</p>
+        <p class="text-sm text-stone-700 leading-relaxed"><%= lr.reason %></p>
+      </div>
+    <% end %>
+
+    <div>
+      <p class="eyebrow mb-1.5">Approver</p>
+      <% mgr = lr.employee.reporting_manager %>
+      <p class="text-sm text-stone-700">
+        <% if lr.employee.hr_is_approver? %>
+          HR admin
+        <% elsif mgr.present? %>
+          <%= mgr.full_name %> <span class="text-stone-400">(reporting manager)</span>
+        <% end %>
+      </p>
+    </div>
+
+    <% if lr.approved_by.present? %>
+      <div>
+        <p class="eyebrow mb-1.5"><%= lr.rejected? ? "Rejected by" : "Actioned by" %></p>
+        <p class="text-sm text-stone-700"><%= lr.approved_by.full_name %>
+          <% if lr.approved_at %><span class="text-stone-400">· <%= lr.approved_at.strftime("%d %b %Y, %l:%M %p") %></span><% end %>
+        </p>
+      </div>
+    <% end %>
+
+    <% if lr.rejected? && lr.rejection_reason.present? %>
+      <div class="alert alert-error text-sm"><%= lr.rejection_reason %></div>
+    <% end %>
+  </div>
+
+  <%# Footer actions %>
+  <div class="border-t border-stone-100 px-6 py-4 space-y-3 bg-stone-50/50">
+    <% if lr.pending? %>
+      <% if lr.employee.hr_is_approver? && policy(lr).approve? %>
+        <%= button_to approve_admin_leave_request_path(lr), method: :patch,
+              class: "btn btn-primary w-full cursor-pointer", form: { data: { turbo_frame: "_top" } } do %>
+          <svg class="size-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
+          Approve <%= lr.number_of_days.to_i %> day<%= "s" unless lr.number_of_days.to_i == 1 %>
+        <% end %>
+        <%= form_with url: reject_admin_leave_request_path(lr), method: :patch,
+              data: { turbo_frame: "_top" }, class: "flex items-center gap-2" do |f| %>
+          <%= f.text_field :rejection_reason, placeholder: "Reason (optional)…", class: "input flex-1 text-xs py-2" %>
+          <%= f.submit "Reject", class: "btn btn-danger btn-sm cursor-pointer" %>
+        <% end %>
+      <% else %>
+        <div class="alert alert-info text-xs">
+          This request is approved by the reporting manager, not HR.
+        </div>
+      <% end %>
+    <% end %>
+
+    <% if (lr.pending? || lr.approved?) && policy(lr).cancel? && lr.to_date >= Date.today %>
+      <%= button_to "Cancel this leave", cancel_admin_leave_request_path(lr), method: :patch,
+            class: "btn btn-ghost btn-sm w-full cursor-pointer",
+            form: { data: { turbo_frame: "_top", turbo_confirm: "Cancel this leave request?#{" The balance will be restored." if lr.approved?}" } } %>
+    <% end %>
+  </div>
+<% end %>

@@ -2,10 +2,10 @@
 <div class="space-y-6">
   <div class="flex items-center justify-between">
     <div>
-      <h1 class="text-2xl font-bold text-gray-900">PF Monthly Report</h1>
-      <p class="text-sm text-gray-500 mt-0.5">EPFO Electronic Challan cum Return (ECR)</p>
+      <h1 class="page-title text-2xl">PF Monthly Report</h1>
+      <p class="text-sm text-stone-500 mt-0.5">EPFO Electronic Challan cum Return (ECR)</p>
     </div>
-    <%= link_to "← Back to Reports", admin_reports_path, class: "text-sm text-blue-600 hover:text-blue-800" %>
+    <%= link_to "← Back to Reports", admin_reports_path, class: "text-sm text-kula-700 hover:text-kula-900" %>
   </div>
 
   <%= render "month_selector", url: pf_report_admin_reports_path, selected_month: @month, selected_year: @year %>
@@ -13,27 +13,27 @@
   <% if @report.rows.any? %>
     <%# Summary cards %>
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-      <div class="bg-white rounded-xl border border-gray-200 p-5">
-        <p class="text-xs text-gray-400 uppercase tracking-wide">Employees</p>
-        <p class="text-xl font-bold text-gray-900 mt-0.5"><%= @report.summary[:employee_count] %></p>
+      <div class="card p-5">
+        <p class="text-xs text-stone-400 uppercase tracking-wide">Employees</p>
+        <p class="text-xl font-bold text-stone-900 mt-0.5"><%= @report.summary[:employee_count] %></p>
       </div>
-      <div class="bg-white rounded-xl border border-gray-200 p-5">
-        <p class="text-xs text-gray-400 uppercase tracking-wide">Total EPF (EE)</p>
-        <p class="text-xl font-bold text-gray-900 mt-0.5">₹<%= number_with_delimiter(@report.summary[:total_epf_ee].round(0)) %></p>
+      <div class="card p-5">
+        <p class="text-xs text-stone-400 uppercase tracking-wide">Total EPF (EE)</p>
+        <p class="text-xl font-bold text-stone-900 mt-0.5">₹<%= number_with_delimiter(@report.summary[:total_epf_ee].round(0)) %></p>
       </div>
-      <div class="bg-white rounded-xl border border-gray-200 p-5">
-        <p class="text-xs text-gray-400 uppercase tracking-wide">Total EPS (ER)</p>
-        <p class="text-xl font-bold text-gray-900 mt-0.5">₹<%= number_with_delimiter(@report.summary[:total_eps_er].round(0)) %></p>
+      <div class="card p-5">
+        <p class="text-xs text-stone-400 uppercase tracking-wide">Total EPS (ER)</p>
+        <p class="text-xl font-bold text-stone-900 mt-0.5">₹<%= number_with_delimiter(@report.summary[:total_eps_er].round(0)) %></p>
       </div>
-      <div class="bg-white rounded-xl border border-gray-200 p-5">
-        <p class="text-xs text-gray-400 uppercase tracking-wide">EPF ER Diff</p>
-        <p class="text-xl font-bold text-gray-900 mt-0.5">₹<%= number_with_delimiter(@report.summary[:total_epf_er_diff].round(0)) %></p>
+      <div class="card p-5">
+        <p class="text-xs text-stone-400 uppercase tracking-wide">EPF ER Diff</p>
+        <p class="text-xl font-bold text-stone-900 mt-0.5">₹<%= number_with_delimiter(@report.summary[:total_epf_er_diff].round(0)) %></p>
       </div>
     </div>
 
     <div class="flex justify-end">
       <%= link_to download_pf_ecr_admin_reports_path(month: @month, year: @year),
-          class: "inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700" do %>
+          class: "inline-flex items-center gap-2 btn btn-primary" do %>
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3M3 17V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
         </svg>
@@ -41,39 +41,39 @@
       <% end %>
     </div>
 
-    <div class="bg-white rounded-xl border border-gray-200 overflow-x-auto">
+    <div class="card overflow-x-auto">
       <table class="w-full text-sm">
-        <thead class="bg-gray-50 border-b border-gray-200">
+        <thead class="bg-stone-50 border-b border-stone-200">
           <tr>
-            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">UAN</th>
-            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Gross Wages</th>
-            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">EPF Wages</th>
-            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">EPF (EE)</th>
-            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">EPS (ER)</th>
-            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">EPF ER Diff</th>
-            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">NCP Days</th>
+            <th class="px-4 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">UAN</th>
+            <th class="px-4 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">Name</th>
+            <th class="px-4 py-3 text-right text-xs font-medium text-stone-500 uppercase tracking-wider">Gross Wages</th>
+            <th class="px-4 py-3 text-right text-xs font-medium text-stone-500 uppercase tracking-wider">EPF Wages</th>
+            <th class="px-4 py-3 text-right text-xs font-medium text-stone-500 uppercase tracking-wider">EPF (EE)</th>
+            <th class="px-4 py-3 text-right text-xs font-medium text-stone-500 uppercase tracking-wider">EPS (ER)</th>
+            <th class="px-4 py-3 text-right text-xs font-medium text-stone-500 uppercase tracking-wider">EPF ER Diff</th>
+            <th class="px-4 py-3 text-right text-xs font-medium text-stone-500 uppercase tracking-wider">NCP Days</th>
           </tr>
         </thead>
-        <tbody class="divide-y divide-gray-100">
+        <tbody class="divide-y divide-stone-100">
           <% @report.rows.each do |row| %>
-            <tr class="hover:bg-gray-50">
-              <td class="px-4 py-3 font-mono text-xs text-gray-600"><%= row.uan %></td>
-              <td class="px-4 py-3 font-medium text-gray-900"><%= row.name %></td>
-              <td class="px-4 py-3 text-right text-gray-600">₹<%= number_with_delimiter(row.gross_wages.to_i) %></td>
-              <td class="px-4 py-3 text-right text-gray-600">₹<%= number_with_delimiter(row.epf_wages.to_i) %></td>
-              <td class="px-4 py-3 text-right text-gray-600">₹<%= number_with_delimiter(row.epf_ee.to_i) %></td>
-              <td class="px-4 py-3 text-right text-gray-600">₹<%= number_with_delimiter(row.eps_er.to_i) %></td>
-              <td class="px-4 py-3 text-right text-gray-600">₹<%= number_with_delimiter(row.epf_er_diff.to_i) %></td>
-              <td class="px-4 py-3 text-right text-gray-600"><%= row.ncp_days %></td>
+            <tr class="hover:bg-stone-50">
+              <td class="px-4 py-3 font-mono text-xs text-stone-600"><%= row.uan %></td>
+              <td class="px-4 py-3 font-medium text-stone-900"><%= row.name %></td>
+              <td class="px-4 py-3 text-right text-stone-600">₹<%= number_with_delimiter(row.gross_wages.to_i) %></td>
+              <td class="px-4 py-3 text-right text-stone-600">₹<%= number_with_delimiter(row.epf_wages.to_i) %></td>
+              <td class="px-4 py-3 text-right text-stone-600">₹<%= number_with_delimiter(row.epf_ee.to_i) %></td>
+              <td class="px-4 py-3 text-right text-stone-600">₹<%= number_with_delimiter(row.eps_er.to_i) %></td>
+              <td class="px-4 py-3 text-right text-stone-600">₹<%= number_with_delimiter(row.epf_er_diff.to_i) %></td>
+              <td class="px-4 py-3 text-right text-stone-600"><%= row.ncp_days %></td>
             </tr>
           <% end %>
         </tbody>
       </table>
     </div>
   <% else %>
-    <div class="bg-white rounded-xl border border-gray-200 text-center py-16 text-gray-400">
-      <svg class="mx-auto w-10 h-10 mb-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <div class="card text-center py-16 text-stone-400">
+      <svg class="mx-auto w-10 h-10 mb-3 text-stone-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
       </svg>
       <p class="font-medium">No PF data for <%= Date::MONTHNAMES[@month] %> <%= @year %></p>

@@ -44,19 +44,19 @@
   <nav class="flex items-center justify-between p-6 lg:px-8" aria-label="Global">
     <div class="flex lg:flex-1">
       <a href="<%= root_path %>" class="-m-1.5 p-1.5 flex items-center gap-2">
-        <div class="h-8 w-8 rounded-lg bg-indigo-600 flex items-center justify-center text-white font-bold text-lg">K</div>
-        <span class="font-bold text-xl tracking-tight text-gray-900"><%= t('app_name') %></span>
+        <div class="h-8 w-8 rounded-lg bg-kula-600 flex items-center justify-center text-white font-bold text-lg">K</div>
+        <span class="font-bold text-xl tracking-tight text-stone-900"><%= t('app_name') %></span>
       </a>
     </div>
     <div class="hidden lg:flex lg:gap-x-10">
-      <a href="<%= root_path %>#features"     class="nav-link text-sm font-semibold leading-6 text-gray-700 hover:text-indigo-600 transition">Features</a>
-      <a href="<%= root_path %>#how-it-works" class="nav-link text-sm font-semibold leading-6 text-gray-700 hover:text-indigo-600 transition">How it works</a>
-      <a href="<%= root_path %>#pricing"      class="nav-link text-sm font-semibold leading-6 text-gray-700 hover:text-indigo-600 transition">Pricing</a>
-      <a href="<%= contact_path %>"           class="nav-link text-sm font-semibold leading-6 text-indigo-600 transition">Contact</a>
+      <a href="<%= root_path %>#features"     class="nav-link text-sm font-semibold leading-6 text-stone-700 hover:text-kula-600 transition">Features</a>
+      <a href="<%= root_path %>#how-it-works" class="nav-link text-sm font-semibold leading-6 text-stone-700 hover:text-kula-600 transition">How it works</a>
+      <a href="<%= root_path %>#pricing"      class="nav-link text-sm font-semibold leading-6 text-stone-700 hover:text-kula-600 transition">Pricing</a>
+      <a href="<%= contact_path %>"           class="nav-link text-sm font-semibold leading-6 text-kula-600 transition">Contact</a>
     </div>
     <div class="hidden lg:flex lg:flex-1 lg:justify-end gap-x-4 items-center">
-      <a href="<%= root_path %>#login-prompt" class="nav-link text-sm font-semibold leading-6 text-gray-700 hover:text-indigo-600 transition py-2">Log in</a>
-      <a href="<%= signup_path %>" class="btn-cta rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 transition">
+      <a href="<%= root_path %>#login-prompt" class="nav-link text-sm font-semibold leading-6 text-stone-700 hover:text-kula-600 transition py-2">Log in</a>
+      <a href="<%= signup_path %>" class="btn-cta rounded-lg bg-kula-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-kula-500 transition">
         Start free trial
       </a>
     </div>
@@ -75,51 +75,51 @@
     <%# Header %>
     <div class="reveal rv-1 text-center mb-12">
       <div class="mb-4 flex justify-center">
-        <span class="inline-flex items-center gap-2 rounded-full bg-indigo-50 px-4 py-1.5 text-sm font-medium text-indigo-700 ring-1 ring-inset ring-indigo-700/20">
+        <span class="inline-flex items-center gap-2 rounded-full bg-kula-50 px-4 py-1.5 text-sm font-medium text-kula-700 ring-1 ring-inset ring-kula-700/20">
           Get in touch
         </span>
       </div>
-      <h1 class="text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl">Contact us</h1>
-      <p class="mt-4 text-lg text-gray-500">Have a question or want to know more about Kula HR? Send us a message and we'll get back to you.</p>
+      <h1 class="text-4xl font-bold tracking-tight text-stone-900 sm:text-5xl">Contact us</h1>
+      <p class="mt-4 text-lg text-stone-500">Have a question or want to know more about Kula HR? Send us a message and we'll get back to you.</p>
     </div>
 
     <%# Contact form card %>
-    <div class="reveal rv-2 bg-white rounded-2xl shadow-sm border border-gray-100 p-8 sm:p-10">
+    <div class="reveal rv-2 bg-white rounded-2xl shadow-sm border border-stone-100 p-8 sm:p-10">
       <%= form_with url: contact_path, method: :post, local: true do |f| %>
         <div class="space-y-6">
           <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
             <div>
-              <%= f.label :name, "Your name", class: "block text-sm font-semibold text-gray-700 mb-1.5" %>
+              <%= f.label :name, "Your name", class: "block text-sm font-semibold text-stone-700 mb-1.5" %>
               <%= f.text_field :name,
                     value: @name,
                     placeholder: "Amit Sharma",
-                    class: "form-field w-full rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-900 placeholder-gray-400",
+                    class: "form-field w-full rounded-lg border border-stone-200 bg-stone-50 px-4 py-3 text-sm text-stone-900 placeholder-stone-400",
                     required: true %>
             </div>
             <div>
-              <%= f.label :email, "Email address", class: "block text-sm font-semibold text-gray-700 mb-1.5" %>
+              <%= f.label :email, "Email address", class: "block text-sm font-semibold text-stone-700 mb-1.5" %>
               <%= f.email_field :email,
                     value: @email,
                     placeholder: "amit@acmecorp.in",
-                    class: "form-field w-full rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-900 placeholder-gray-400",
+                    class: "form-field w-full rounded-lg border border-stone-200 bg-stone-50 px-4 py-3 text-sm text-stone-900 placeholder-stone-400",
                     required: true %>
             </div>
           </div>
 
           <div>
-            <%= f.label :message, "Message", class: "block text-sm font-semibold text-gray-700 mb-1.5" %>
+            <%= f.label :message, "Message", class: "block text-sm font-semibold text-stone-700 mb-1.5" %>
             <%= f.text_area :message,
                   rows: 6,
                   placeholder: "Tell us about your company, team size, or any questions you have...",
-                  class: "form-field w-full rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-900 placeholder-gray-400 resize-none",
+                  class: "form-field w-full rounded-lg border border-stone-200 bg-stone-50 px-4 py-3 text-sm text-stone-900 placeholder-stone-400 resize-none",
                   required: true do %>
 <%= @message %><% end %>
           </div>
 
           <div class="flex items-center justify-between gap-4 flex-wrap">
-            <p class="text-xs text-gray-400">We usually respond within 1 business day.</p>
+            <p class="text-xs text-stone-400">We usually respond within 1 business day.</p>
             <%= f.submit "Send message →",
-                  class: "btn-cta cursor-pointer rounded-lg bg-indigo-600 px-6 py-3 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 transition hover:shadow-md" %>
+                  class: "btn-cta cursor-pointer rounded-lg bg-kula-600 px-6 py-3 text-sm font-semibold text-white shadow-sm hover:bg-kula-500 transition hover:shadow-md" %>
           </div>
         </div>
       <% end %>
@@ -127,30 +127,30 @@
 
     <%# Alternative contact + social links %>
     <div class="reveal rv-3 mt-10 text-center space-y-4">
-      <p class="text-sm text-gray-500">
+      <p class="text-sm text-stone-500">
         Prefer email? Reach us at
-        <a href="mailto:hello@kulahr.com" class="text-indigo-600 hover:text-indigo-500 font-medium transition">hello@kulahr.com</a>
+        <a href="mailto:hello@kulahr.com" class="text-kula-600 hover:text-kula-500 font-medium transition">hello@kulahr.com</a>
       </p>
       <div class="flex items-center justify-center gap-3">
-        <span class="text-sm text-gray-400">Connect with us:</span>
+        <span class="text-sm text-stone-400">Connect with us:</span>
         <a href="https://www.linkedin.com/in/diwanshu-tyagi" target="_blank" rel="noopener noreferrer"
-           class="text-gray-400 hover:text-indigo-600 transition flex items-center gap-1.5 text-sm font-medium">
+           class="text-stone-400 hover:text-kula-600 transition flex items-center gap-1.5 text-sm font-medium">
           <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
             <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
           </svg>
           LinkedIn
         </a>
-        <span class="text-gray-300">·</span>
+        <span class="text-stone-300">·</span>
         <a href="https://www.github.com/dwstyagi" target="_blank" rel="noopener noreferrer"
-           class="text-gray-400 hover:text-gray-900 transition flex items-center gap-1.5 text-sm font-medium">
+           class="text-stone-400 hover:text-stone-900 transition flex items-center gap-1.5 text-sm font-medium">
           <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
             <path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.942.359.31.678.921.678 1.856 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd"/>
           </svg>
           GitHub
         </a>
       </div>
-      <p class="text-sm text-gray-400">
-        ← <a href="<%= root_path %>" class="text-indigo-600 hover:text-indigo-500 transition">Back to home</a>
+      <p class="text-sm text-stone-400">
+        ← <a href="<%= root_path %>" class="text-kula-600 hover:text-kula-500 transition">Back to home</a>
       </p>
     </div>
   </div>

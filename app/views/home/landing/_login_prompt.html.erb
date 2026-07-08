@@ -1,14 +1,14 @@
 <%# ── Login prompt ── %>
-<div id="login-prompt" class="bg-white py-16 border-t border-gray-100">
+<div id="login-prompt" class="bg-white py-16 border-t border-stone-100">
   <div class="sr mx-auto max-w-xl px-6 text-center">
-    <h2 class="text-xl font-bold text-gray-900 mb-2">Already have an account?</h2>
-    <p class="text-sm text-gray-500 mb-6">Log in using your company's subdomain — e.g. <code class="bg-gray-100 px-1.5 py-0.5 rounded text-gray-700">acme.<%= @app_domain %>/admin</code></p>
+    <h2 class="text-xl font-bold text-stone-900 mb-2">Already have an account?</h2>
+    <p class="text-sm text-stone-500 mb-6">Log in using your company's subdomain — e.g. <code class="bg-stone-100 px-1.5 py-0.5 rounded text-stone-700">acme.<%= @app_domain %>/admin</code></p>
     <div class="flex gap-3 max-w-sm mx-auto">
-      <div class="flex flex-1 items-center rounded-lg ring-1 ring-gray-300 overflow-hidden bg-white focus-within:ring-2 focus-within:ring-indigo-600" id="subdomain-wrapper">
-        <input id="subdomain-input" type="text" placeholder="yourcompany" class="flex-1 px-4 py-3 text-sm outline-none text-gray-900 min-w-0" />
-        <span class="text-sm text-gray-400 pr-3 whitespace-nowrap">.<%= @app_domain %></span>
+      <div class="flex flex-1 items-center rounded-lg ring-1 ring-stone-300 overflow-hidden bg-white focus-within:ring-2 focus-within:ring-kula-600" id="subdomain-wrapper">
+        <input id="subdomain-input" type="text" placeholder="yourcompany" class="flex-1 px-4 py-3 text-sm outline-none text-stone-900 min-w-0" />
+        <span class="text-sm text-stone-400 pr-3 whitespace-nowrap">.<%= @app_domain %></span>
       </div>
-      <button onclick="goToLogin()" id="login-btn" class="btn-cta rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-500 transition whitespace-nowrap">
+      <button onclick="goToLogin()" id="login-btn" class="btn-cta rounded-lg bg-kula-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-kula-500 transition whitespace-nowrap">
         Log in
       </button>
     </div>
