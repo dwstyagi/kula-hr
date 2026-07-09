@@ -9,32 +9,38 @@
     <% end %>
   </div>
 
-  <nav class="flex-1 overflow-y-auto px-3 pb-4 space-y-0.5">
+  <nav class="flex-1 overflow-y-auto px-3 pb-4">
     <%= nav_link "Dashboard", admin_root_path, icon: :dashboard, exact: true %>
-    <%= nav_link "Employees", admin_employees_path, icon: :users %>
-    <%= nav_link "Departments", admin_departments_path, icon: :building %>
-    <%= nav_link "Designations", admin_designations_path, icon: :briefcase %>
-    <%= nav_link "Announcements", admin_announcements_path, icon: :megaphone %>
 
-    <div class="pt-5 pb-1"><p class="nav-label">Leave &amp; Attendance</p></div>
-    <%= nav_link "Leave Requests", admin_leave_requests_path, icon: :clipboard_check, count: @pending_leave_count %>
-    <%= nav_link "Leave Calendar", admin_leave_calendar_path, icon: :calendar_days %>
-    <%= nav_link "Leave Types", admin_leave_types_path, icon: :layers %>
-    <%= nav_link "Holidays", admin_holidays_path, icon: :calendar %>
-    <%= nav_link "Attendance", admin_attendance_summaries_path, icon: :chart %>
-    <%= nav_link "Work Locations", admin_work_locations_path, icon: :map_pin %>
+    <%= nav_group "Main", key: "main" do %>
+      <%= nav_link "Employees", admin_employees_path, icon: :users %>
+      <%= nav_link "Departments", admin_departments_path, icon: :building %>
+      <%= nav_link "Designations", admin_designations_path, icon: :briefcase %>
+      <%= nav_link "Announcements", admin_announcements_path, icon: :megaphone %>
+    <% end %>
 
-    <div class="pt-5 pb-1"><p class="nav-label">Payroll</p></div>
-    <%= nav_link "Payroll Runs", admin_payroll_runs_path, icon: :banknote %>
-    <%= nav_link "Salary Structures", admin_salary_structures_path, icon: :calculator %>
-    <%= nav_link "Salary Components", admin_salary_components_path, icon: :receipt %>
-    <%= nav_link "Reports", admin_reports_path, icon: :document %>
-    <%= nav_link "Payroll Settings", admin_payroll_setting_path, icon: :cog %>
+    <%= nav_group "Leave & Attendance", key: "leave", count: @pending_leave_count do %>
+      <%= nav_link "Leave Requests", admin_leave_requests_path, icon: :clipboard_check, count: @pending_leave_count %>
+      <%= nav_link "Leave Calendar", admin_leave_calendar_path, icon: :calendar_days %>
+      <%= nav_link "Leave Types", admin_leave_types_path, icon: :layers %>
+      <%= nav_link "Holidays", admin_holidays_path, icon: :calendar %>
+      <%= nav_link "Attendance", admin_attendance_summaries_path, icon: :chart %>
+      <%= nav_link "Work Locations", admin_work_locations_path, icon: :map_pin %>
+    <% end %>
+
+    <%= nav_group "Payroll", key: "payroll" do %>
+      <%= nav_link "Payroll Runs", admin_payroll_runs_path, icon: :banknote %>
+      <%= nav_link "Salary Structures", admin_salary_structures_path, icon: :calculator %>
+      <%= nav_link "Salary Components", admin_salary_components_path, icon: :receipt %>
+      <%= nav_link "Reports", admin_reports_path, icon: :document %>
+      <%= nav_link "Payroll Settings", admin_payroll_setting_path, icon: :cog %>
+    <% end %>
 
     <% if current_user&.has_role?(:super_admin) %>
-      <div class="pt-5 pb-1"><p class="nav-label">Settings</p></div>
-      <%= nav_link "Company Profile", admin_company_profile_path, icon: :identification %>
-      <%= nav_link "Admin Users", admin_admin_users_path, icon: :shield %>
+      <%= nav_group "Settings", key: "settings" do %>
+        <%= nav_link "Company Profile", admin_company_profile_path, icon: :identification %>
+        <%= nav_link "Admin Users", admin_admin_users_path, icon: :shield %>
+      <% end %>
     <% end %>
   </nav>
 

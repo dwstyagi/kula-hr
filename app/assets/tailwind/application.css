@@ -146,6 +146,21 @@
     @apply absolute left-0 top-1/2 -translate-y-1/2 h-5 w-0.5 rounded-full bg-marigold-400;
   }
 
+  /* Collapsible sidebar groups (nav_group helper + nav-group controller) ------*/
+  .nav-group-content {
+    display: grid;
+    grid-template-rows: 1fr;
+    transition: grid-template-rows 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  [data-state="closed"] > .nav-group-content { grid-template-rows: 0fr; }
+  .nav-group-chevron { @apply size-3.5 shrink-0 text-kula-300/50 transition-transform duration-300; }
+  [data-state="closed"] .nav-group-chevron { transform: rotate(-90deg); }
+  .nav-group-pill {
+    @apply hidden items-center text-[10px] font-bold rounded-full bg-marigold-400 text-kula-950 px-1.5 py-px;
+    font-variant-numeric: tabular-nums;
+  }
+  [data-state="closed"] .nav-group-pill { display: inline-flex; }
+
   /* Alerts / flash -------------------------------------------------------------*/
   .alert         { @apply flex items-start gap-3 rounded-xl px-4 py-3 text-sm ring-1 ring-inset ring-stone-300 bg-white text-stone-700; }
   .alert-success { @apply bg-emerald-50 text-emerald-800 ring-emerald-600/20; }

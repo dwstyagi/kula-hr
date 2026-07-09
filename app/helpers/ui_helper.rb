@@ -18,6 +18,45 @@ module UiHelper
       class: "inline-flex items-center justify-center min-w-5 px-1.5 py-0.5 rounded-full text-[11px] font-bold bg-marigold-400 text-kula-950"
   end
 
+  # Collapsible sidebar section: a toggle header plus an animated container
+  # around the given nav links. State (data-state open/closed) is handled by
+  # the nav-group Stimulus controller; `count` bubbles onto the header while
+  # the group is collapsed so pending work stays visible.
+  def nav_group(label, key:, count: nil, &block)
+    content_tag :div, class: "pt-4",
+      data: { controller: "nav-group", nav_group_key_value: key, state: "open" } do
+      header = content_tag(:button, type: "button",
+        class: "w-full flex items-center justify-between pr-3 pb-1.5 cursor-pointer",
+        aria: { expanded: "true" },
+        data: { action: "nav-group#toggle", nav_group_target: "button" }) do
+        safe_join([
+          content_tag(:span, label, class: "nav-label mb-0"),
+          content_tag(:span, class: "flex items-center gap-1.5") do
+            safe_join([
+              (content_tag(:span, count, class: "nav-group-pill") if count.to_i.positive?),
+              nav_group_chevron
+            ].compact)
+          end
+        ])
+      end
+
+      content = content_tag(:div, class: "nav-group-content",
+        data: { nav_group_target: "content" }) do
+        content_tag(:div, capture(&block), class: "space-y-0.5 min-h-0 overflow-hidden")
+      end
+
+      header + content
+    end
+  end
+
+  def nav_group_chevron
+    <<~SVG.html_safe
+      <svg class="nav-group-chevron" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/>
+      </svg>
+    SVG
+  end
+
   # Maps any AASM/enum status across the app (payroll runs, leave requests,
   # payslips, tenants, tax declarations) to a badge variant.
   STATUS_BADGES = {
