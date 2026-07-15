@@ -49,6 +49,26 @@ module Admin
         notice: "#{@holiday.name} #{@holiday.is_active? ? 'activated' : 'deactivated'}."
     end
 
+    # POST /admin/holidays/add_standard_presets?year=2026
+    # Bulk-creates the standard Indian gazetted holidays for a year as
+    # company-wide holidays, skipping any date that already has one.
+    def add_standard_presets
+      authorize Holiday, :create?
+
+      year = params[:year].presence&.to_i || Date.today.year
+      candidates = Holidays::StandardPresets.for_year(year)
+      existing_dates = Holiday.company_wide.where(date: candidates.map { |c| c[:date] }).pluck(:date).to_set
+
+      created = candidates.reject { |c| existing_dates.include?(c[:date]) }
+      created.each { |c| Holiday.create!(name: c[:name], date: c[:date], is_active: true) }
+
+      if created.any?
+        redirect_to admin_holidays_path, notice: "Added #{created.size} standard holiday#{'s' unless created.size == 1} for #{year}."
+      else
+        redirect_to admin_holidays_path, notice: "Standard holidays for #{year} are already on the calendar."
+      end
+    end
+
     private
 
     def set_holiday

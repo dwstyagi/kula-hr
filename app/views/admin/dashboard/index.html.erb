@@ -1,6 +1,50 @@
 <% content_for(:page_title, "Dashboard") %>
 <div class="space-y-6">
 
+  <%# ── Setup checklist — shown until the tenant's first payroll run is approved/paid ── %>
+  <% unless @first_payroll_done %>
+    <% setup_steps = [
+         { label: "Company account created", done: true },
+         { label: "Admin account set up", done: true },
+         { label: "Add your employees", done: @employees_added, cta: "Add employees", path: admin_employees_path },
+         { label: "Assign salary structures", done: @salary_started, cta: "Assign salary", path: admin_employees_path },
+         { label: "Lock attendance for the month", done: @attendance_locked_any, cta: "Attendance", path: admin_attendance_summaries_path },
+         { label: "Run your first payroll", done: @first_payroll_done, cta: "Run payroll", path: new_admin_payroll_run_path }
+       ] %>
+    <% done_count = setup_steps.count { |s| s[:done] } %>
+    <div class="card card-pad animate-fade-up">
+      <div class="flex items-center justify-between mb-4 gap-4">
+        <div>
+          <h3 class="card-title">Get set up</h3>
+          <p class="text-xs text-stone-500 mt-0.5">Finish these steps to run your first payroll.</p>
+        </div>
+        <span class="text-sm font-semibold text-kula-700 amount whitespace-nowrap"><%= done_count %> / <%= setup_steps.size %></span>
+      </div>
+      <div class="h-1.5 rounded-full bg-stone-100 overflow-hidden mb-5">
+        <div class="h-full rounded-full bg-kula-600 transition-all" style="width: <%= (done_count.to_f / setup_steps.size * 100).round %>%"></div>
+      </div>
+      <ul class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3" data-controller="reveal" data-reveal-delay-value="40">
+        <% setup_steps.each_with_index do |step, i| %>
+          <li class="flex items-center gap-3 px-4 py-3 rounded-lg <%= step[:done] ? "bg-emerald-50/60" : "bg-stone-50" %>">
+            <% if step[:done] %>
+              <span class="flex size-6 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
+                <svg class="size-3.5" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+              </span>
+            <% else %>
+              <span class="flex size-6 shrink-0 items-center justify-center rounded-full bg-white ring-1 ring-stone-300 text-[11px] font-semibold text-stone-400 amount"><%= i + 1 %></span>
+            <% end %>
+            <div class="min-w-0 flex-1">
+              <p class="text-sm truncate <%= step[:done] ? "text-stone-500 line-through decoration-stone-300" : "text-stone-800 font-medium" %>"><%= step[:label] %></p>
+            </div>
+            <% if !step[:done] && step[:path] %>
+              <%= link_to step[:cta], step[:path], class: "text-xs font-medium text-kula-700 hover:underline whitespace-nowrap" %>
+            <% end %>
+          </li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
   <%# ── Row 1: pay-date hero + needs-attention queue ─────────────────────── %>
   <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
@@ -56,9 +100,11 @@
     </div>
 
     <%# Needs attention — the to-do queue %>
+    <% oldest_days = @payroll_data.oldest_pending_leave_days.to_i %>
     <% attention_items = [
       { count: @payroll_data.pending_leave_count,
-        text: "leave #{"request".pluralize(@payroll_data.pending_leave_count)} waiting for approval",
+        text: "leave #{"request".pluralize(@payroll_data.pending_leave_count)} waiting" +
+              (oldest_days.positive? ? " — oldest #{oldest_days} day#{"s" unless oldest_days == 1}" : ""),
         path: admin_leave_requests_path(status: "pending") },
       { count: @missing_bank_count,
         text: "#{"employee".pluralize(@missing_bank_count)} missing bank details",

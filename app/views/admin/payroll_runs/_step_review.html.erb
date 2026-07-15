@@ -1,8 +1,9 @@
 <%# Step 1 — Review employees before processing. `readiness` is a
     Payroll::ReadinessCheck::Result; exceptions sort to the top so HR fixes
     problems instead of scanning 50 healthy rows. %>
-<% issues = readiness ? readiness.will_skip : [] %>
-<% ready  = readiness ? readiness.ready : [] %>
+<% issues   = readiness ? readiness.will_skip : [] %>
+<% ready    = readiness ? readiness.ready : [] %>
+<% variance = readiness ? readiness.variance_flags : [] %>
 
 <div class="card overflow-hidden animate-fade-up">
   <div class="card-header">
@@ -10,7 +11,7 @@
       <h2 class="card-title">Review employees</h2>
       <p class="text-xs text-stone-500 mt-0.5">
         <%= readiness&.eligible_count.to_i %> eligible this period —
-        <%= ready.size %> ready<%= ", #{issues.size} with issues" if issues.any? %>
+        <%= ready.size %> ready<%= ", #{issues.size} with issues" if issues.any? %><%= ", #{variance.size} salary #{"change".pluralize(variance.size)}" if variance.any? %>
       </p>
     </div>
     <% if issues.any? %>
@@ -44,6 +45,31 @@
               <%= link_to "Attendance →", admin_attendance_summaries_path(month: payroll_run.month, year: payroll_run.year), class: "btn btn-secondary btn-sm" %>
             <% end %>
           </div>
+        </li>
+      <% end %>
+    </ul>
+  <% end %>
+
+  <% if variance.any? %>
+    <div class="px-5 sm:px-6 py-3 bg-kula-50/70 border-b border-kula-200/60">
+      <p class="text-[13px] text-kula-800">
+        These employees have a <strong>new or changed salary</strong> since the last run — worth a quick check before processing.
+      </p>
+    </div>
+    <ul data-controller="reveal" data-reveal-delay-value="40">
+      <% variance.each do |status| %>
+        <li class="flex flex-wrap items-center gap-3 px-5 sm:px-6 py-3.5 border-b border-stone-100 bg-kula-50/30">
+          <svg class="size-5 shrink-0 text-kula-600" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+          </svg>
+          <div class="min-w-0 flex-1">
+            <p class="text-sm font-medium text-stone-900 truncate"><%= status.employee.full_name %></p>
+            <p class="text-xs text-kula-800">
+              CTC ₹<%= ActiveSupport::NumberHelper.number_to_delimited(status.current_salary.annual_ctc.to_i) %>/yr ·
+              effective <%= status.current_salary.effective_from.strftime("%d %b %Y") %>
+            </p>
+          </div>
+          <%= link_to "View salary →", assign_salary_admin_employee_path(status.employee), class: "btn btn-secondary btn-sm" %>
         </li>
       <% end %>
     </ul>

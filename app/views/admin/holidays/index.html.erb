@@ -4,14 +4,24 @@
       <h1 class="page-title text-2xl">Public Holidays</h1>
       <p class="text-sm text-stone-500 mt-1">Define company holidays. These are excluded from leave day calculations.</p>
     </div>
-    <%= link_to new_admin_holiday_path,
-        class: "btn btn-primary",
-        data: { turbo_frame: "holiday_form" } do %>
-      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-      </svg>
-      Add Holiday
-    <% end %>
+    <div class="flex items-center gap-2">
+      <%= button_to add_standard_presets_admin_holidays_path(year: Date.today.year),
+          method: :post,
+          class: "btn btn-secondary cursor-pointer" do %>
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+        Add standard <%= Date.today.year %> holidays
+      <% end %>
+      <%= link_to new_admin_holiday_path,
+          class: "btn btn-primary",
+          data: { turbo_frame: "holiday_form" } do %>
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+        </svg>
+        Add Holiday
+      <% end %>
+    </div>
   </div>
 
   <%= turbo_frame_tag "holiday_form" %>

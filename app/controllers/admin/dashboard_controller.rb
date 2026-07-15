@@ -32,6 +32,15 @@ module Admin
 
       @payroll_data = Dashboard::AdminDashboardService.new(tenant: ActsAsTenant.current_tenant).call
 
+      # ── Setup checklist ──────────────────────────────────────────────────
+      # Guides a brand-new tenant to their first payroll run. Retired for good
+      # once that happens — ongoing gaps (missing salary, unlocked attendance)
+      # are already covered by the "needs attention" queue above.
+      @first_payroll_done   = PayrollRun.where(status: [ :approved, :paid ]).exists?
+      @employees_added      = @total_employees.positive?
+      @salary_started       = @active_employees.positive? && @active_employees > @missing_salary_count
+      @attendance_locked_any = locked.positive?
+
       # ── People moments ───────────────────────────────────────────────────
       @recent_hires = Employee.active.order(joining_date: :desc).limit(5)
       @upcoming_birthdays     = upcoming_by_date(:date_of_birth)

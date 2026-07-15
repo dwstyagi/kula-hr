@@ -3,7 +3,7 @@ module Dashboard
     Result = Struct.new(
       :current_run, :current_run_status, :current_run_net, :current_run_ctc,
       :current_run_employees, :payroll_trend, :deduction_breakdown, :recent_activity,
-      :pending_leave_count, :pending_leave_requests,
+      :pending_leave_count, :pending_leave_requests, :oldest_pending_leave_days,
       keyword_init: true
     )
 
@@ -23,7 +23,8 @@ module Dashboard
         deduction_breakdown: deduction_breakdown(current),
         recent_activity: recent_activity,
         pending_leave_count: pending_leaves.count,
-        pending_leave_requests: pending_leaves.limit(5)
+        pending_leave_requests: pending_leaves.limit(5),
+        oldest_pending_leave_days: oldest_pending_leave_days
       )
     end
 
@@ -63,6 +64,15 @@ module Dashboard
       LeaveRequest.where(status: :pending)
                   .includes(:employee, :leave_type)
                   .order(created_at: :desc)
+    end
+
+    # How long the longest-waiting pending request has sat unactioned — the
+    # aging signal that makes "3 requests waiting" concrete instead of neutral.
+    def oldest_pending_leave_days
+      oldest = pending_leaves.minimum(:created_at)
+      return 0 unless oldest
+
+      (Date.current - oldest.to_date).to_i
     end
 
     def recent_activity

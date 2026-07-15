@@ -34,10 +34,13 @@
         <div class="rounded-lg bg-red-50 border border-red-200 p-3 text-sm">
           <p class="font-medium text-red-800 mb-1">⛔ Cannot create until attendance is locked:</p>
           <ul class="list-disc list-inside text-red-700 space-y-0.5">
-            <% readiness.blocking.each do |s| %>
+            <% readiness.blocking.first(10).each do |s| %>
               <li><%= s.employee.full_name %></li>
             <% end %>
           </ul>
+          <% if readiness.blocking.size > 10 %>
+            <p class="text-xs text-red-600 mt-1">+ <%= readiness.blocking.size - 10 %> more</p>
+          <% end %>
         </div>
       <% end %>
 
@@ -46,10 +49,13 @@
         <div class="rounded-lg bg-amber-50 border border-amber-200 p-3 text-sm">
           <p class="font-medium text-amber-800 mb-1">⚠️ These employees will be excluded (not paid):</p>
           <ul class="list-disc list-inside text-amber-700 space-y-0.5">
-            <% readiness.will_skip.each do |s| %>
+            <% readiness.will_skip.first(10).each do |s| %>
               <li><%= s.employee.full_name %> — <%= s.reasons.join(", ") %></li>
             <% end %>
           </ul>
+          <% if readiness.will_skip.size > 10 %>
+            <p class="text-xs text-amber-600 mt-1">+ <%= readiness.will_skip.size - 10 %> more</p>
+          <% end %>
         </div>
       <% end %>
 

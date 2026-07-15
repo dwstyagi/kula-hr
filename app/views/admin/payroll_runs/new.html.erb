@@ -3,7 +3,6 @@
     <h1 class="page-title text-2xl">Run Payroll</h1>
     <p class="text-sm text-stone-500 mt-0.5">Select the month and year to process payroll for</p>
   </div>
-
   <%= form_with model: [:admin, @payroll_run], class: "space-y-6" do |f| %>
     <% if @payroll_run.errors.any? %>
       <div class="rounded-lg bg-red-50 border border-red-200 p-4 text-sm text-red-700">
@@ -15,7 +14,6 @@
         </ul>
       </div>
     <% end %>
-
     <%# Row 1: Period + Notes %>
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
       <div class="card card-pad space-y-4">
@@ -26,7 +24,7 @@
             <%= f.select :month,
                   (1..12).map { |m| [Date::MONTHNAMES[m], m] },
                   { selected: @payroll_run.month || Date.today.month },
-                  class: "w-full border border-stone-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-kula-600 focus:border-kula-600",
+                  class: "select",
                   data: { action: "change->readiness#refresh" } %>
           </div>
           <div>
@@ -34,26 +32,23 @@
             <%= f.number_field :year,
                   value: @payroll_run.year || Date.today.year,
                   min: 2020, max: 2099,
-                  class: "w-full border border-stone-300 rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-kula-600 focus:border-kula-600",
+                  class: "input",
                   data: { action: "change->readiness#refresh" } %>
           </div>
         </div>
       </div>
-
       <div class="card card-pad space-y-4">
         <h2 class="text-base font-semibold text-stone-900 border-b border-stone-100 pb-3">Notes</h2>
         <%= f.text_area :notes, rows: 3,
               placeholder: "Any notes for this payroll run…",
-              class: "w-full border border-stone-300 rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-kula-600 focus:border-kula-600" %>
+              class: "textarea" %>
       </div>
     </div>
-
     <%# Row 2: Prerequisites + Actions %>
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
       <div class="card card-pad">
         <%= render "readiness", readiness: @readiness, payroll_run: @payroll_run %>
       </div>
-
       <div class="card card-pad space-y-4">
         <h2 class="text-base font-semibold text-stone-900 border-b border-stone-100 pb-3">Actions</h2>
         <p class="text-sm text-stone-500">Review the details and click below to create the payroll run.</p>

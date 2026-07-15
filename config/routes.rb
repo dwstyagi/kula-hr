@@ -86,6 +86,9 @@ Rails.application.routes.draw do
         end
       end
       resources :holidays do
+        collection do
+          post :add_standard_presets
+        end
         member do
           patch :toggle_active
         end

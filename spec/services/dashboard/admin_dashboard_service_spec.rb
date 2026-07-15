@@ -72,10 +72,13 @@ RSpec.describe Dashboard::AdminDashboardService do
           )
           leave_request.save(validate: false)
 
+          leave_request.update_column(:created_at, 6.days.ago)
+
           result = described_class.new(tenant: tenant).call
 
           expect(result.pending_leave_count).to eq(1)
           expect(result.pending_leave_requests.first).to eq(leave_request)
+          expect(result.oldest_pending_leave_days).to eq(6)
         end
 
         it "returns zero pending count when no pending leaves" do
@@ -83,6 +86,7 @@ RSpec.describe Dashboard::AdminDashboardService do
 
           expect(result.pending_leave_count).to eq(0)
           expect(result.pending_leave_requests).to be_empty
+          expect(result.oldest_pending_leave_days).to eq(0)
         end
       end
 

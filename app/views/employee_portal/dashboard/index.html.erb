@@ -28,7 +28,8 @@
       <% notifications << { color: "blue", icon: "document", message: "Payslip for #{Date.today.strftime('%B %Y')} is available" } %>
     <% end %>
     <% if @payroll_data&.tax_declaration&.status_draft? %>
-      <% notifications << { color: "amber", icon: "warning", message: "Tax declaration is still in draft" } %>
+      <% fy_end = Date.new(@payroll_data.tax_declaration.financial_year[0, 4].to_i + 1, 3, 31) %>
+      <% notifications << { color: "amber", icon: "warning", message: "Tax declaration still in draft — submit before #{fy_end.strftime('%d %b %Y')} so HR can verify your deductions" } %>
     <% end %>
     <% if current_employee.bank_account_number.blank? %>
       <% notifications << { color: "amber", icon: "warning", message: "Bank account details missing" } %>
@@ -438,6 +439,15 @@
       </div>
       <% if @payroll_data&.tax_declaration %>
         <% td = @payroll_data.tax_declaration %>
+        <% td_pct = td.completeness_percent %>
+        <div class="flex items-center justify-between mb-1.5">
+          <span class="text-xs text-stone-500">Declaration completeness</span>
+          <span class="text-xs font-medium <%= td_pct == 100 ? "text-green-600" : "text-amber-600" %>"><%= td_pct %>% complete</span>
+        </div>
+        <div class="w-full bg-stone-100 rounded-full h-2 mb-4">
+          <div class="h-2 rounded-full transition-all <%= td_pct == 100 ? "bg-green-500" : td_pct >= 50 ? "bg-kula-600" : "bg-amber-500" %>"
+               style="width: <%= td_pct %>%"></div>
+        </div>
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div>
             <p class="text-xs text-stone-500">Regime</p>
@@ -456,6 +466,11 @@
             <p class="text-sm font-medium text-stone-900">₹<%= number_with_delimiter(@payroll_data.total_declared_investments.round(0)) %></p>
           </div>
         </div>
+        <% if td_pct < 100 %>
+          <p class="text-xs text-amber-700 mt-3">
+            <%= link_to "Finish your declaration →", employee_portal_tax_declaration_path, class: "font-medium hover:underline" %>
+          </p>
+        <% end %>
       <% else %>
         <p class="text-sm text-stone-400">No tax declaration filed yet.</p>
       <% end %>

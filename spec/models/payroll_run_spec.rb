@@ -86,6 +86,23 @@ RSpec.describe PayrollRun, type: :model do
         expect(run.errors[:base]).not_to be_empty
       end
     end
+
+    context "when many employees are missing locked attendance" do
+      it "caps the named list at 10 with a '+N more' summary instead of naming everyone" do
+        create_list(:employee, 12, tenant: tenant, employment_status: "active")
+
+        run = PayrollRun.new(tenant: tenant, initiated_by: hr_user, month: 1, year: 2026)
+        run.validate
+
+        message = run.errors[:base].first
+        prefix = "Attendance not locked for 12 employee(s) for January 2026: "
+        expect(message).to start_with(prefix)
+
+        segments = message.delete_prefix(prefix).delete_suffix(".").split(", ")
+        expect(segments.size).to eq(11) # 10 named employees + the "and 2 more" summary
+        expect(segments.last).to eq("and 2 more")
+      end
+    end
   end
 
   # ── AASM State Machine ────────────────────────────────────────────────────

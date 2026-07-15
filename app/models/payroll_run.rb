@@ -78,6 +78,17 @@ class PayrollRun < ApplicationRecord
 
   # ── Helpers ──────────────────────────────────────────────────────────────────
 
+  # Smart default for the "new payroll run" form: the month right after the
+  # tenant's most recent run, not the calendar's current month (HR usually
+  # runs payroll for the *previous* month a few days into the next one).
+  def self.next_unprocessed_period
+    last = recent.first
+    return [ Date.today.month, Date.today.year ] unless last
+
+    next_period = Date.new(last.year, last.month, 1).next_month
+    [ next_period.month, next_period.year ]
+  end
+
   def month_name
     Date::MONTHNAMES[month]
   end
@@ -127,8 +138,10 @@ class PayrollRun < ApplicationRecord
     return if readiness.can_create?
 
     blocked = readiness.blocking.map { |s| s.employee.full_name }.sort
+    names = blocked.first(10).join(", ")
+    names += ", and #{blocked.size - 10} more" if blocked.size > 10
     errors.add(:base,
-      "Attendance not locked for #{blocked.size} employee(s) for #{month_name} #{year}: #{blocked.join(', ')}.")
+      "Attendance not locked for #{blocked.size} employee(s) for #{month_name} #{year}: #{names}.")
   end
 
   # Callback: wipe all payslips and reset totals when reprocessing

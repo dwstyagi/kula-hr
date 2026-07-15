@@ -16,15 +16,21 @@ module Admin
       runs   = runs.where(year: @year) if @year
 
       @payroll_runs = PayrollRunPresenter.wrap(runs)
+
+      # Anchor card: the tenant's actual latest run, independent of the ?year filter above.
+      latest = policy_scope(PayrollRun).recent.first
+      @current_run = latest && PayrollRunPresenter.new(latest)
+      @next_period_month, @next_period_year = PayrollRun.next_unprocessed_period
     end
 
     # GET /admin/payroll_runs/new
     # Supports ?month=&year= so the readiness panel can refresh as HR picks a period.
     def new
       authorize PayrollRun
+      default_month, default_year = PayrollRun.next_unprocessed_period
       @payroll_run = PayrollRun.new(
-        month: params[:month].presence || Date.today.month,
-        year:  params[:year].presence  || Date.today.year
+        month: params[:month].presence || default_month,
+        year:  params[:year].presence  || default_year
       )
       @readiness = readiness_for(@payroll_run)
     end

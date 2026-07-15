@@ -53,8 +53,9 @@ RSpec.describe "Admin::PayrollRuns", type: :request do
 
       it "filters by year" do
         get admin_payroll_runs_path(year: 2025), headers: headers
-        expect(response.body).to include("December 2025")
-        expect(response.body).not_to include("January 2026")
+        table_html = Nokogiri::HTML(response.body).at_css("table.tbl").to_s
+        expect(table_html).to include("December 2025")
+        expect(table_html).not_to include("January 2026")
       end
 
       it "shows all runs when year param is bogus" do
@@ -62,6 +63,40 @@ RSpec.describe "Admin::PayrollRuns", type: :request do
         expect(response.body).to include("December 2025")
         expect(response.body).to include("January 2026")
       end
+
+      it "keeps showing the tenant's actual latest run in the anchor card regardless of the year filter" do
+        get admin_payroll_runs_path(year: 2025), headers: headers
+        expect(response.body).to include("Current period")
+        expect(response.body).to include("January 2026")
+      end
+    end
+  end
+
+  # ── Anchor card ───────────────────────────────────────────────────────────
+
+  describe "current-period anchor card" do
+    before { sign_in(hr_user) }
+
+    it "invites HR to start their first run when none exist" do
+      get admin_payroll_runs_path, headers: headers
+      expect(response.body).to include("No payroll runs yet")
+      expect(response.body).to include("Start")
+    end
+
+    it "offers to continue an in-progress run" do
+      ActsAsTenant.with_tenant(tenant) do
+        create(:payroll_run, :processed, tenant: tenant, initiated_by: hr_user, month: 3, year: 2026)
+      end
+      get admin_payroll_runs_path, headers: headers
+      expect(response.body).to include("Continue run")
+    end
+
+    it "offers to start the next period once the latest run is paid" do
+      ActsAsTenant.with_tenant(tenant) do
+        create(:payroll_run, :paid, tenant: tenant, initiated_by: hr_user, month: 3, year: 2026)
+      end
+      get admin_payroll_runs_path, headers: headers
+      expect(response.body).to include("Start April 2026 run")
     end
   end
 
@@ -73,6 +108,15 @@ RSpec.describe "Admin::PayrollRuns", type: :request do
     it "returns 200" do
       get new_admin_payroll_run_path, headers: headers
       expect(response).to have_http_status(:ok)
+    end
+
+    it "caps the readiness panel's blocking list at 10 with a '+N more' indicator" do
+      ActsAsTenant.with_tenant(tenant) { create_list(:employee, 12, tenant: tenant) } # no attendance -> all blocking
+
+      get new_admin_payroll_run_path(month: Date.today.month, year: Date.today.year), headers: headers
+
+      expect(response.body.scan(/<li>[^<]+<\/li>/).size).to eq(10)
+      expect(response.body).to include("+ 2 more")
     end
   end
 

@@ -107,6 +107,35 @@ RSpec.describe "Admin::Holidays", type: :request do
     end
   end
 
+  describe "POST /admin/holidays/add_standard_presets" do
+    it "bulk-creates the standard holidays for the given year" do
+      expect {
+        post add_standard_presets_admin_holidays_path(year: 2026), headers: { "Host" => host }
+      }.to change { Holiday.count }.by(Holidays::StandardPresets.for_year(2026).size)
+
+      expect(response).to redirect_to(admin_holidays_path)
+      expect(flash[:notice]).to include("Added")
+    end
+
+    it "skips dates that already have a holiday" do
+      ActsAsTenant.with_tenant(tenant) { create(:holiday, tenant: tenant, name: "Republic Day", date: Date.new(2026, 1, 26)) }
+
+      expect {
+        post add_standard_presets_admin_holidays_path(year: 2026), headers: { "Host" => host }
+      }.to change { Holiday.count }.by(Holidays::StandardPresets.for_year(2026).size - 1)
+    end
+
+    it "is idempotent when run twice" do
+      post add_standard_presets_admin_holidays_path(year: 2026), headers: { "Host" => host }
+
+      expect {
+        post add_standard_presets_admin_holidays_path(year: 2026), headers: { "Host" => host }
+      }.not_to change { Holiday.count }
+
+      expect(flash[:notice]).to include("already on the calendar")
+    end
+  end
+
   describe "PATCH /admin/holidays/:id/toggle_active" do
     it "toggles active status on and off" do
       holiday = ActsAsTenant.with_tenant(tenant) { create(:holiday, tenant: tenant, is_active: true) }

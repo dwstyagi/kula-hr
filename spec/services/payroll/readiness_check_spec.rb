@@ -87,6 +87,34 @@ RSpec.describe Payroll::ReadinessCheck do
     end
   end
 
+  describe "#variance_flags" do
+    it "flags a ready employee whose salary became effective since the previous period" do
+      emp = create(:employee, tenant: tenant)
+      lock_attendance(emp)
+      create(:employee_salary, tenant: tenant, employee: emp, salary_structure: structure,
+             effective_from: Date.new(year, month, 1)) # this month — brand new/changed
+
+      expect(result.variance_flags.map(&:employee)).to eq([ emp ])
+    end
+
+    it "does not flag an employee whose salary has been stable for months" do
+      emp = create(:employee, tenant: tenant)
+      lock_attendance(emp)
+      create(:employee_salary, tenant: tenant, employee: emp, salary_structure: structure,
+             effective_from: Date.new(year, month, 1) - 6.months)
+
+      expect(result.variance_flags).to be_empty
+    end
+
+    it "does not flag employees who are not ready (missing attendance or salary)" do
+      emp = create(:employee, tenant: tenant) # no attendance locked at all
+      create(:employee_salary, tenant: tenant, employee: emp, salary_structure: structure,
+             effective_from: Date.new(year, month, 1))
+
+      expect(result.variance_flags).to be_empty
+    end
+  end
+
   describe "#can_create?" do
     it "is false while any active/probation employee lacks locked attendance" do
       ready = create(:employee, tenant: tenant)

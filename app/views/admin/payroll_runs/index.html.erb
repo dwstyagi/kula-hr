@@ -26,6 +26,46 @@
     </div>
   </div>
 
+  <%# Anchor card — current period at a glance, with one CTA to resume or start %>
+  <div class="card card-pad flex flex-wrap items-center justify-between gap-4 border-kula-200 bg-kula-50/40 animate-fade-up">
+    <% if @current_run %>
+      <div class="flex flex-wrap items-center gap-4">
+        <div>
+          <p class="text-[11px] font-semibold uppercase tracking-widest text-kula-700">Current period</p>
+          <p class="text-lg font-bold text-stone-900 mt-0.5"><%= @current_run.period_label %></p>
+        </div>
+        <span class="badge <%= @current_run.status_badge_classes %>"><%= @current_run.status_badge_label %></span>
+        <% unless @current_run.draft? %>
+          <div class="hidden sm:flex items-center gap-6 pl-4 border-l border-kula-200">
+            <div>
+              <p class="text-[11px] text-stone-500 uppercase tracking-wide">Employees</p>
+              <p class="text-sm font-semibold text-stone-900 amount"><%= @current_run.processed_employees %></p>
+            </div>
+            <div>
+              <p class="text-[11px] text-stone-500 uppercase tracking-wide">Net pay</p>
+              <p class="text-sm font-semibold text-stone-900 amount"><%= @current_run.formatted_total_net_pay %></p>
+            </div>
+          </div>
+        <% end %>
+      </div>
+      <% if @current_run.paid? %>
+        <%= link_to new_admin_payroll_run_path(month: @next_period_month, year: @next_period_year), class: "btn btn-primary" do %>
+          Start <%= Date::MONTHNAMES[@next_period_month] %> <%= @next_period_year %> run →
+        <% end %>
+      <% else %>
+        <%= link_to "Continue run →", admin_payroll_run_path(@current_run), class: "btn btn-primary" %>
+      <% end %>
+    <% else %>
+      <div>
+        <p class="text-[11px] font-semibold uppercase tracking-widest text-kula-700">Get started</p>
+        <p class="text-lg font-bold text-stone-900 mt-0.5">No payroll runs yet</p>
+      </div>
+      <%= link_to new_admin_payroll_run_path(month: @next_period_month, year: @next_period_year), class: "btn btn-primary" do %>
+        Start <%= Date::MONTHNAMES[@next_period_month] %> <%= @next_period_year %> run →
+      <% end %>
+    <% end %>
+  </div>
+
   <%# Table %>
   <div class="card overflow-hidden">
     <% if @payroll_runs.any? %>

@@ -25,6 +25,18 @@ class TaxDeclaration < ApplicationRecord
   validate :landlord_pan_required_for_high_rent
   validate :hra_fields_only_for_old_regime
 
+  # Completeness meter for the employee portal dashboard. A submitted/verified
+  # declaration is done; a draft only earns partial credit once the employee
+  # has actually entered something — no fabricated progress on a blank draft.
+  def completeness_percent
+    return 100 if status_submitted? || status_verified?
+    return 50 if claiming_hra? || monthly_rent.to_f.positive? ||
+                 home_loan_interest.to_f.positive? || home_loan_principal.to_f.positive? ||
+                 investment_declarations.exists?
+
+    0
+  end
+
   private
 
   def landlord_pan_required_for_high_rent
