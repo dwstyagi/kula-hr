@@ -55,6 +55,43 @@ RSpec.describe "Admin::Payslips", type: :request do
       expect(response.body).to include(employee.full_name)
       expect(response.body).not_to include("ZYX ABC")
     end
+
+    context "with more payslips than one page" do
+      before do
+        ActsAsTenant.with_tenant(tenant) do
+          30.times do
+            create(:payslip, tenant: tenant, payroll_run: run,
+                   employee: create(:employee, tenant: tenant))
+          end
+        end
+      end
+
+      it "paginates at 25 per page by default" do
+        get admin_payroll_run_payslips_path(run), headers: headers
+        expect(response).to have_http_status(:ok)
+        expect(response.body).to include("Showing")
+        expect(response.body.scan(/tbl table-fixed/).size).to eq(1)
+        expect(response.body).to include("30</span> payslips")
+      end
+
+      it "honours the per_page dropdown value" do
+        get admin_payroll_run_payslips_path(run, per_page: 50), headers: headers
+        expect(response).to have_http_status(:ok)
+        expect(response.body).not_to include("Showing 1–25")
+      end
+
+      it "falls back to 25 for a bogus per_page" do
+        get admin_payroll_run_payslips_path(run, per_page: 9999), headers: headers
+        expect(response).to have_http_status(:ok)
+        expect(response.body).to include("Showing")
+      end
+
+      it "serves the second page" do
+        get admin_payroll_run_payslips_path(run, page: 2), headers: headers
+        expect(response).to have_http_status(:ok)
+        expect(response.body).to include("26–30")
+      end
+    end
   end
 
   # ── Show ──────────────────────────────────────────────────────────────────

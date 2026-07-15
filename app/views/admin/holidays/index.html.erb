@@ -32,8 +32,7 @@
           </thead>
           <tbody>
             <% @holidays.each do |holiday| %>
-              <%= turbo_frame_tag holiday do %>
-                <tr class="hover:bg-stone-50 <%= 'opacity-50' unless holiday.is_active? %>">
+              <tr class="hover:bg-stone-50 <%= 'opacity-50' unless holiday.is_active? %>">
                   <td class="text-sm font-medium text-stone-900"><%= holiday.name %></td>
                   <td class="text-sm text-stone-700"><%= holiday.date.strftime("%d %b %Y") %></td>
                   <td class="text-sm text-stone-500"><%= holiday.date.strftime("%A") %></td>
@@ -66,7 +65,7 @@
                       <%= link_to edit_admin_holiday_path(holiday),
                           title: "Edit",
                           class: "p-1.5 rounded-md text-kula-700 hover:bg-kula-100 transition-colors cursor-pointer",
-                          data: { turbo_frame: dom_id(holiday) } do %>
+                          data: { turbo_frame: "holiday_form" } do %>
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                         </svg>
@@ -83,8 +82,7 @@
                       <% end %>
                     </div>
                   </td>
-                </tr>
-              <% end %>
+              </tr>
             <% end %>
           </tbody>
         </table>

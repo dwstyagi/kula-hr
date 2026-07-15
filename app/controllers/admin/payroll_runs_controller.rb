@@ -8,7 +8,14 @@ module Admin
     # GET /admin/payroll_runs
     def index
       authorize PayrollRun
-      @payroll_runs = PayrollRunPresenter.wrap(policy_scope(PayrollRun).recent.includes(:initiated_by))
+      runs = policy_scope(PayrollRun).recent.includes(:initiated_by)
+
+      @years = policy_scope(PayrollRun).distinct.order(year: :desc).pluck(:year)
+      @year  = params[:year].to_i
+      @year  = nil unless @years.include?(@year)
+      runs   = runs.where(year: @year) if @year
+
+      @payroll_runs = PayrollRunPresenter.wrap(runs)
     end
 
     # GET /admin/payroll_runs/new

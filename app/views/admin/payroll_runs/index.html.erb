@@ -5,13 +5,25 @@
       <h1 class="page-title text-2xl">Payroll Runs</h1>
       <p class="text-sm text-stone-500 mt-0.5">Manage monthly payroll processing</p>
     </div>
-    <%= link_to new_admin_payroll_run_path,
-          class: "btn btn-primary" do %>
-      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-      </svg>
-      Run Payroll
-    <% end %>
+    <div class="flex items-center gap-3">
+      <% if @years.any? %>
+        <%= form_with url: admin_payroll_runs_path, method: :get do |f| %>
+          <%= f.select :year,
+                options_for_select([ [ "All years", "" ] ] + @years.map { |y| [ y, y ] }, @year),
+                {},
+                class: "select w-36",
+                aria: { label: "Filter by year" },
+                onchange: "this.form.requestSubmit()" %>
+        <% end %>
+      <% end %>
+      <%= link_to new_admin_payroll_run_path,
+            class: "btn btn-primary" do %>
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+        </svg>
+        Run Payroll
+      <% end %>
+    </div>
   </div>
 
   <%# Table %>
@@ -33,7 +45,10 @@
         <tbody>
           <% @payroll_runs.each do |run| %>
             <tr>
-              <td class="font-medium text-stone-900"><%= run.period_label %></td>
+              <td>
+                <%= link_to run.period_label, admin_payroll_run_path(run),
+                      class: "font-medium text-stone-900 hover:text-kula-700 hover:underline underline-offset-2" %>
+              </td>
               <td><%= render "status_badge", payroll_run: run %></td>
               <td class="num text-stone-600">
                 <% if run.processing? %>
@@ -74,8 +89,13 @@
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
                 d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 11h.01M12 11h.01M15 11h.01M4 19h16a2 2 0 002-2V7a2 2 0 00-2-2H4a2 2 0 00-2 2v10a2 2 0 002 2z"/>
         </svg>
-        <p class="font-medium">No payroll runs yet</p>
-        <p class="text-sm mt-1">Click "Run Payroll" to start your first payroll run.</p>
+        <% if @year %>
+          <p class="font-medium">No payroll runs in <%= @year %></p>
+          <p class="text-sm mt-1"><%= link_to "Show all years", admin_payroll_runs_path, class: "text-kula-700 hover:underline" %></p>
+        <% else %>
+          <p class="font-medium">No payroll runs yet</p>
+          <p class="text-sm mt-1">Click "Run Payroll" to start your first payroll run.</p>
+        <% end %>
       </div>
     <% end %>
   </div>

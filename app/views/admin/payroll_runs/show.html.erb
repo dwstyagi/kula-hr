@@ -26,6 +26,10 @@
     <%= render "step_review", payroll_run: @payroll_run, readiness: @readiness %>
 
   <% elsif @payroll_run.processing? %>
+    <%# Subscribe OUTSIDE #payroll_progress: broadcasts replace that div, and a
+        stream source inside it would be torn down (dropping messages) on every
+        update. %>
+    <%= turbo_stream_from "payroll_run_#{@payroll_run.id}" %>
     <%= render "progress", payroll_run: @payroll_run %>
 
   <% else %>

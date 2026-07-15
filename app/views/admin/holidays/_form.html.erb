@@ -1,4 +1,7 @@
-<%= form_with model: holiday, url: url, method: local_assigns.fetch(:method, :post), class: "space-y-4" do |f| %>
+<%# Submits target _top: success redirects re-render the whole page so the
+    table below stays fresh (a redirect inside the frame would leave it stale). %>
+<%= form_with model: holiday, url: url, method: local_assigns.fetch(:method, :post),
+    data: { turbo_frame: "_top" }, class: "space-y-4" do |f| %>
   <% if holiday.errors.any? %>
     <div class="rounded-lg bg-red-50 p-4">
       <ul class="text-sm text-red-700 list-disc list-inside space-y-1">

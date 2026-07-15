@@ -37,6 +37,12 @@
         <%= link_to "Clear", admin_payroll_run_payslips_path(@payroll_run),
               class: "text-sm text-stone-500 hover:text-stone-700" %>
       <% end %>
+      <%= f.select :per_page,
+            options_for_select(Admin::PayslipsController::PER_PAGE_OPTIONS.map { |n| [ "#{n} / page", n ] }, @per_page),
+            {},
+            class: "select w-32",
+            aria: { label: "Payslips per page" },
+            onchange: "this.form.requestSubmit()" %>
     <% end %>
   </div>
 
@@ -131,6 +137,15 @@
         </tbody>
       </table>
       </div>
+      <% if @pagy.pages > 1 %>
+        <div class="px-6 py-3 border-t border-stone-200 flex items-center justify-between gap-4">
+          <p class="text-xs text-stone-500">
+            Showing <span class="amount"><%= @pagy.from %>–<%= @pagy.to %></span>
+            of <span class="amount"><%= @pagy.count %></span> payslips
+          </p>
+          <%= render "shared/pagy_nav", pagy: @pagy %>
+        </div>
+      <% end %>
     <% else %>
       <div class="text-center py-16 text-stone-400">
         <p class="font-medium">No payslips found</p>

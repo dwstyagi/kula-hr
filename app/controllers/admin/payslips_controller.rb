@@ -1,5 +1,7 @@
 module Admin
   class PayslipsController < BaseController
+    PER_PAGE_OPTIONS = [ 25, 50, 100 ].freeze
+
     before_action :set_payroll_run, only: [ :index ]
     before_action :set_payslip,     only: [ :show, :edit, :update, :download ]
 
@@ -19,6 +21,10 @@ module Admin
           q, q
         )
       end
+
+      @per_page = params[:per_page].to_i
+      @per_page = PER_PAGE_OPTIONS.first unless PER_PAGE_OPTIONS.include?(@per_page)
+      @pagy, @payslips = pagy(:offset, @payslips, limit: @per_page)
     end
 
     # GET /admin/payslips/:id

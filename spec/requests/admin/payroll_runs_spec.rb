@@ -34,6 +34,35 @@ RSpec.describe "Admin::PayrollRuns", type: :request do
       get admin_payroll_runs_path, headers: headers
       expect(response.body).to include("January 2026")
     end
+
+    it "links the period to the payroll run page" do
+      run = ActsAsTenant.with_tenant(tenant) do
+        create(:payroll_run, :processed, tenant: tenant, initiated_by: hr_user, month: 1, year: 2026)
+      end
+      get admin_payroll_runs_path, headers: headers
+      expect(response.body).to include(admin_payroll_run_path(run))
+    end
+
+    context "with runs across years" do
+      before do
+        ActsAsTenant.with_tenant(tenant) do
+          create(:payroll_run, :processed, tenant: tenant, initiated_by: hr_user, month: 12, year: 2025)
+          create(:payroll_run, :processed, tenant: tenant, initiated_by: hr_user, month: 1, year: 2026)
+        end
+      end
+
+      it "filters by year" do
+        get admin_payroll_runs_path(year: 2025), headers: headers
+        expect(response.body).to include("December 2025")
+        expect(response.body).not_to include("January 2026")
+      end
+
+      it "shows all runs when year param is bogus" do
+        get admin_payroll_runs_path(year: "bogus"), headers: headers
+        expect(response.body).to include("December 2025")
+        expect(response.body).to include("January 2026")
+      end
+    end
   end
 
   # ── New ───────────────────────────────────────────────────────────────────

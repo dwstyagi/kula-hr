@@ -91,8 +91,8 @@
         </div>
 
         <% if @pagy.pages > 1 %>
-          <div class="px-6 py-4 border-t border-stone-100">
-            <%== pagy_nav(@pagy) %>
+          <div class="px-6 py-3 border-t border-stone-200 flex justify-center">
+            <%= render "shared/pagy_nav", pagy: @pagy %>
           </div>
         <% end %>
       <% else %>

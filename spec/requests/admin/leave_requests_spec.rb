@@ -27,6 +27,21 @@ RSpec.describe "Admin::LeaveRequests", type: :request do
       get admin_leave_requests_path, headers: { "Host" => subdomain_host }
       expect(response).to have_http_status(:ok)
     end
+
+    it "renders pagination when requests exceed one page" do
+      ActsAsTenant.with_tenant(tenant) do
+        25.times do |i|
+          emp = create(:employee, tenant: tenant)
+          lr = build(:leave_request, tenant: tenant, employee: emp, leave_type: leave_type,
+                     from_date: Date.today + i, to_date: Date.today + i)
+          lr.save(validate: false)
+        end
+      end
+
+      get admin_leave_requests_path, headers: { "Host" => subdomain_host }
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include("Pagination")
+    end
   end
 
   let(:future_monday) { Date.today.next_occurring(:monday) + 14 }

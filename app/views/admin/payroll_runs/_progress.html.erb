@@ -1,8 +1,8 @@
 <%# Step 2 — live processing region. PayrollProcessor broadcasts replacements
-    of #payroll_progress over "payroll_run_<id>"; keep the id and stream name. %>
+    of #payroll_progress over "payroll_run_<id>"; keep the id and stream name.
+    The turbo_stream_from subscription lives in show.html.erb — it must stay
+    outside this div, which gets replaced by every broadcast. %>
 <div id="payroll_progress">
-  <%= turbo_stream_from "payroll_run_#{payroll_run.id}" if payroll_run.processing? %>
-
   <% if payroll_run.processing? %>
     <div class="card card-pad space-y-5 animate-fade-up">
       <div class="flex items-center gap-3">
