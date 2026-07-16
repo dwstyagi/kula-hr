@@ -20,6 +20,44 @@ RSpec.describe "Admin::Holidays", type: :request do
       expect(response).to have_http_status(:ok)
       expect(response.body).to include("Republic Day")
     end
+
+    it "lists holidays with the latest year/date first" do
+      ActsAsTenant.with_tenant(tenant) do
+        create(:holiday, tenant: tenant, name: "Older Holiday", date: Date.new(2026, 1, 26))
+        create(:holiday, tenant: tenant, name: "Newer Holiday", date: Date.new(2027, 12, 25))
+      end
+
+      get admin_holidays_path, headers: { "Host" => host }
+      expect(response.body.index("Newer Holiday")).to be < response.body.index("Older Holiday")
+    end
+
+    context "pagination" do
+      before do
+        ActsAsTenant.with_tenant(tenant) do
+          15.times { |i| create(:holiday, tenant: tenant, name: "PagTestHoliday#{i}", date: Date.new(2027, 1, 1) + i) }
+        end
+      end
+
+      def name_cell_count
+        response.body.scan(/<td class="text-sm font-medium text-stone-900">PagTestHoliday/).size
+      end
+
+      it "defaults to 10 per page" do
+        get admin_holidays_path, headers: { "Host" => host }
+        expect(name_cell_count).to eq(10)
+        expect(response.body).to include("Showing")
+      end
+
+      it "honors a valid per_page param" do
+        get admin_holidays_path(per_page: 25), headers: { "Host" => host }
+        expect(name_cell_count).to eq(15)
+      end
+
+      it "falls back to the default for an invalid per_page value" do
+        get admin_holidays_path(per_page: 999), headers: { "Host" => host }
+        expect(name_cell_count).to eq(10)
+      end
+    end
   end
 
   describe "GET /admin/holidays/new" do

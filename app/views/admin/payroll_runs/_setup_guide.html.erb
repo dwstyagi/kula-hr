@@ -1,0 +1,327 @@
+<%# Animated payroll setup walkthrough — opened via payroll-guide Stimulus controller %>
+<div data-payroll-guide-target="dialog"
+     class="hidden fixed inset-0 z-50 bg-stone-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+  <div class="card w-full max-w-3xl max-h-[92vh] overflow-y-auto relative animate-scale-in">
+
+    <%# Progress bar %>
+    <div class="sticky top-0 z-10 h-1 bg-stone-100">
+      <div data-payroll-guide-target="progress"
+           class="h-full bg-kula-600 transition-all duration-500 ease-out" style="width: 12.5%"></div>
+    </div>
+
+    <%# Header %>
+    <div class="flex items-center justify-between px-6 pt-4">
+      <p class="text-[11px] font-semibold uppercase tracking-widest text-kula-700">
+        Payroll setup guide <span class="text-stone-400 font-normal normal-case tracking-normal ml-2" data-payroll-guide-target="counter">1 / 8</span>
+      </p>
+      <button type="button" data-action="payroll-guide#close" aria-label="Close guide"
+              class="p-1.5 rounded-lg text-stone-400 hover:text-stone-600 hover:bg-stone-100 transition-colors">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
+    </div>
+
+    <%# ---------- Slide 1: The journey ---------- %>
+    <div data-payroll-guide-target="slide" class="px-6 py-6">
+      <h2 class="text-xl font-bold text-stone-900 animate-fade-up">From setup to first payslip</h2>
+      <p class="text-sm text-stone-500 mt-1 animate-fade-up" style="animation-delay: 80ms">
+        Five phases take you from a fresh account to salaries in bank accounts.
+        Phases 1–3 are one-time setup; 4–5 repeat every month.
+      </p>
+
+      <div class="mt-8 mb-4">
+        <div class="flex items-start justify-between relative">
+          <div class="absolute top-5 left-8 right-8 h-0.5 bg-kula-100 animate-grow-x" style="animation-delay: 150ms"></div>
+          <% [
+            [ "1", "Company", "Profile & payroll settings" ],
+            [ "2", "Salary", "Structure & components" ],
+            [ "3", "Employees", "Add & assign salaries" ],
+            [ "4", "Attendance", "Generate & lock monthly" ],
+            [ "5", "Payroll", "Process, approve, pay" ]
+          ].each_with_index do |(num, label, sub), i| %>
+            <div class="relative flex flex-col items-center text-center w-1/5 animate-fade-up" style="animation-delay: <%= 200 + i * 120 %>ms">
+              <div class="size-10 rounded-full <%= i < 3 ? "bg-kula-700" : "bg-marigold-400" %> text-white flex items-center justify-center font-bold text-sm shadow-sm">
+                <%= num %>
+              </div>
+              <p class="mt-2 text-sm font-semibold text-stone-900"><%= label %></p>
+              <p class="text-[11px] text-stone-500 leading-tight mt-0.5 px-1"><%= sub %></p>
+            </div>
+          <% end %>
+        </div>
+        <div class="flex justify-between mt-4 px-2 animate-fade-in" style="animation-delay: 900ms">
+          <span class="badge bg-kula-50 text-kula-700 border border-kula-200">One-time setup</span>
+          <span class="badge bg-marigold-50 text-marigold-800 border border-marigold-200">Every month</span>
+        </div>
+      </div>
+    </div>
+
+    <%# ---------- Slide 2: Company configuration ---------- %>
+    <div data-payroll-guide-target="slide" class="hidden px-6 py-6">
+      <p class="text-[11px] font-semibold uppercase tracking-widest text-kula-600 animate-fade-up">Phase 1 · One-time</p>
+      <h2 class="text-xl font-bold text-stone-900 mt-1 animate-fade-up" style="animation-delay: 60ms">Configure your company</h2>
+      <p class="text-sm text-stone-500 mt-1 animate-fade-up" style="animation-delay: 120ms">
+        Fill statutory identifiers in <span class="font-medium text-stone-700">Settings → Company Profile</span>
+        (PAN, TAN, GSTIN, PF & ESI codes), then review defaults in
+        <span class="font-medium text-stone-700">Settings → Payroll</span>.
+      </p>
+
+      <div class="grid grid-cols-2 gap-3 mt-6">
+        <% [
+          [ "PF", "12% employee · 12% employer", "₹15,000 wage ceiling", 0 ],
+          [ "ESI", "0.75% employee · 3.25% employer", "Only if gross ≤ ₹21,000", 1 ],
+          [ "Professional Tax", "State-specific slabs", "Auto-seeded for 7 states", 2 ],
+          [ "TDS", "Old & new regime supported", "₹75k standard deduction · 4% cess", 3 ]
+        ].each do |name, line1, line2, i| %>
+          <div class="card card-pad flex items-start gap-3 animate-fade-up" style="animation-delay: <%= 200 + i * 110 %>ms">
+            <div class="mt-0.5 w-8 h-4.5 rounded-full bg-kula-600 relative shrink-0">
+              <div class="absolute right-0.5 top-0.5 size-3.5 rounded-full bg-white"></div>
+            </div>
+            <div>
+              <p class="text-sm font-semibold text-stone-900"><%= name %> <span class="text-[10px] font-medium text-kula-700 ml-1">enabled by default</span></p>
+              <p class="text-xs text-stone-600 mt-0.5"><%= line1 %></p>
+              <p class="text-[11px] text-stone-400"><%= line2 %></p>
+            </div>
+          </div>
+        <% end %>
+      </div>
+
+      <p class="text-xs text-stone-500 mt-4 animate-fade-in" style="animation-delay: 700ms">
+        These defaults are seeded at signup — adjust only if your company differs.
+      </p>
+    </div>
+
+    <%# ---------- Slide 3: Salary structure ---------- %>
+    <div data-payroll-guide-target="slide" class="hidden px-6 py-6">
+      <p class="text-[11px] font-semibold uppercase tracking-widest text-kula-600 animate-fade-up">Phase 2 · One-time</p>
+      <h2 class="text-xl font-bold text-stone-900 mt-1 animate-fade-up" style="animation-delay: 60ms">Create a salary structure</h2>
+      <p class="text-sm text-stone-500 mt-1 animate-fade-up" style="animation-delay: 120ms">
+        Under <span class="font-medium text-stone-700">Salary → Structures</span>, name a structure
+        (e.g. “Standard”) and assign components as a % of annual CTC or a flat monthly amount.
+      </p>
+
+      <div class="mt-6 animate-fade-up" style="animation-delay: 220ms">
+        <p class="text-xs font-medium text-stone-600 mb-2">How ₹12,00,000 annual CTC breaks up:</p>
+        <div class="flex h-10 rounded-lg overflow-hidden text-[10px] font-semibold text-white">
+          <div class="bg-kula-800 flex items-center justify-center animate-grow-x" style="width: 40%; animation-delay: 300ms">Basic 40%</div>
+          <div class="bg-kula-600 flex items-center justify-center animate-grow-x" style="width: 20%; animation-delay: 420ms">HRA 20%</div>
+          <div class="bg-kula-400 flex items-center justify-center animate-grow-x" style="width: 15%; animation-delay: 540ms">Allowances</div>
+          <div class="bg-marigold-400 text-kula-950 flex items-center justify-center animate-grow-x" style="width: 25%; animation-delay: 660ms">Special (auto)</div>
+        </div>
+      </div>
+
+      <ul class="mt-5 space-y-2 text-sm text-stone-600">
+        <li class="flex gap-2 animate-fade-up" style="animation-delay: 800ms">
+          <span class="text-kula-600 font-bold">✓</span>
+          Percentages don’t need to total 100% — the remainder is auto-assigned to Special Allowance.
+        </li>
+        <li class="flex gap-2 animate-fade-up" style="animation-delay: 900ms">
+          <span class="text-marigold-500 font-bold">!</span>
+          At least one <span class="font-medium text-stone-800">active</span> structure must exist before any employee can be assigned a salary.
+        </li>
+      </ul>
+    </div>
+
+    <%# ---------- Slide 4: Employees ---------- %>
+    <div data-payroll-guide-target="slide" class="hidden px-6 py-6">
+      <p class="text-[11px] font-semibold uppercase tracking-widest text-kula-600 animate-fade-up">Phase 3 · One-time</p>
+      <h2 class="text-xl font-bold text-stone-900 mt-1 animate-fade-up" style="animation-delay: 60ms">Add employees & assign salaries</h2>
+      <p class="text-sm text-stone-500 mt-1 animate-fade-up" style="animation-delay: 120ms">
+        Add employees one by one or bulk-import via CSV, then open each employee’s
+        <span class="font-medium text-stone-700">Salary tab → Assign Salary</span>.
+      </p>
+
+      <div class="mt-6 space-y-2">
+        <% [
+          [ "Priya Sharma", "Engineering", true, 0 ],
+          [ "Rahul Verma", "Sales", true, 1 ],
+          [ "Anita Desai", "Design", false, 2 ]
+        ].each do |name, dept, assigned, i| %>
+          <div class="flex items-center justify-between rounded-lg border <%= assigned ? "border-stone-200" : "border-red-200 bg-red-50/50" %> px-4 py-2.5 animate-fade-up" style="animation-delay: <%= 250 + i * 130 %>ms">
+            <div class="flex items-center gap-3">
+              <div class="size-8 rounded-full bg-kula-100 text-kula-700 flex items-center justify-center text-xs font-bold"><%= name.split.map(&:first).join %></div>
+              <div>
+                <p class="text-sm font-medium text-stone-900"><%= name %></p>
+                <p class="text-[11px] text-stone-500"><%= dept %></p>
+              </div>
+            </div>
+            <% if assigned %>
+              <span class="badge bg-kula-50 text-kula-700 border border-kula-200">Salary assigned ✓</span>
+            <% else %>
+              <span class="badge bg-red-50 text-red-700 border border-red-200">No salary — will be skipped!</span>
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+
+      <ul class="mt-5 space-y-2 text-sm text-stone-600">
+        <li class="flex gap-2 animate-fade-up" style="animation-delay: 700ms">
+          <span class="text-marigold-500 font-bold">!</span>
+          Employees without a salary assignment are silently skipped at processing — assign everyone (min CTC ₹1,00,000).
+        </li>
+        <li class="flex gap-2 animate-fade-up" style="animation-delay: 800ms">
+          <span class="text-kula-600 font-bold">✓</span>
+          Optionally invite employees to the portal so they can pick a tax regime and declare investments — otherwise TDS defaults to new regime with no exemptions.
+        </li>
+      </ul>
+    </div>
+
+    <%# ---------- Slide 5: Attendance ---------- %>
+    <div data-payroll-guide-target="slide" class="hidden px-6 py-6">
+      <p class="text-[11px] font-semibold uppercase tracking-widest text-marigold-600 animate-fade-up">Phase 4 · Every month</p>
+      <h2 class="text-xl font-bold text-stone-900 mt-1 animate-fade-up" style="animation-delay: 60ms">Generate, enter & lock attendance</h2>
+
+      <div class="mt-6 flex items-center gap-3">
+        <% [
+          [ "Generate", "One summary per active employee for the month", 0 ],
+          [ "Enter days", "Edit rows manually, or download the CSV template, fill & re-upload", 1 ],
+          [ "Lock month", "Freezes every summary — the gate to payroll", 2 ]
+        ].each do |title, sub, i| %>
+          <% unless i.zero? %>
+            <svg class="w-5 h-5 text-stone-300 shrink-0 animate-fade-in" style="animation-delay: <%= 300 + i * 200 %>ms" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
+            </svg>
+          <% end %>
+          <div class="card card-pad flex-1 animate-fade-up" style="animation-delay: <%= 200 + i * 200 %>ms">
+            <div class="flex items-center gap-2">
+              <% if i == 2 %>
+                <svg class="w-4 h-4 text-marigold-500" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M10 1a4.5 4.5 0 00-4.5 4.5V9H5a2 2 0 00-2 2v6a2 2 0 002 2h10a2 2 0 002-2v-6a2 2 0 00-2-2h-.5V5.5A4.5 4.5 0 0010 1zm3 8V5.5a3 3 0 10-6 0V9h6z" clip-rule="evenodd"/>
+                </svg>
+              <% end %>
+              <p class="text-sm font-semibold text-stone-900"><%= title %></p>
+            </div>
+            <p class="text-[11px] text-stone-500 mt-1 leading-snug"><%= sub %></p>
+          </div>
+        <% end %>
+      </div>
+
+      <div class="mt-6 rounded-lg border border-marigold-200 bg-marigold-50/60 px-4 py-3 animate-fade-up" style="animation-delay: 850ms">
+        <p class="text-sm text-stone-700">
+          <span class="font-semibold">Hard blocker:</span> a payroll run cannot be created until
+          <span class="font-semibold">100%</span> of active & probation employees have a locked
+          attendance summary for the month. Loss-of-pay days here drive salary proration.
+        </p>
+      </div>
+    </div>
+
+    <%# ---------- Slide 6: Processing ---------- %>
+    <div data-payroll-guide-target="slide" class="hidden px-6 py-6">
+      <p class="text-[11px] font-semibold uppercase tracking-widest text-marigold-600 animate-fade-up">Phase 5 · Every month</p>
+      <h2 class="text-xl font-bold text-stone-900 mt-1 animate-fade-up" style="animation-delay: 60ms">Create the run & process payroll</h2>
+      <p class="text-sm text-stone-500 mt-1 animate-fade-up" style="animation-delay: 120ms">
+        <span class="font-medium text-stone-700">Payroll → Run Payroll</span>, pick the month, then hit
+        <span class="font-medium text-stone-700">Process Payroll</span>. A background job runs this pipeline per employee:
+      </p>
+
+      <div class="mt-6 space-y-1.5">
+        <% [
+          [ "Fetch locked attendance", "LOP days → proration factor", 0 ],
+          [ "Break down annual CTC", "Monthly components via the salary structure", 1 ],
+          [ "Prorate earnings", "Applied only when LOP days exist", 2 ],
+          [ "Calculate deductions", "PF · ESI · PT · TDS (annualised, YTD-aware)", 3 ],
+          [ "Generate payslip", "Line items created; live progress bar updates", 4 ]
+        ].each do |title, sub, i| %>
+          <div class="flex items-center gap-3 animate-fade-up" style="animation-delay: <%= 250 + i * 130 %>ms">
+            <div class="size-6 rounded-full bg-kula-700 text-white text-[11px] font-bold flex items-center justify-center shrink-0"><%= i + 1 %></div>
+            <div class="flex-1 rounded-lg border border-stone-200 px-3 py-2 flex items-baseline justify-between gap-2">
+              <p class="text-sm font-medium text-stone-900"><%= title %></p>
+              <p class="text-[11px] text-stone-500 text-right"><%= sub %></p>
+            </div>
+          </div>
+        <% end %>
+      </div>
+
+      <p class="text-xs text-stone-500 mt-4 animate-fade-in" style="animation-delay: 950ms">
+        You’ll get an email when processing finishes, listing any skipped employees and why.
+      </p>
+    </div>
+
+    <%# ---------- Slide 7: Review & approval ---------- %>
+    <div data-payroll-guide-target="slide" class="hidden px-6 py-6">
+      <p class="text-[11px] font-semibold uppercase tracking-widest text-marigold-600 animate-fade-up">Phase 5 · Every month</p>
+      <h2 class="text-xl font-bold text-stone-900 mt-1 animate-fade-up" style="animation-delay: 60ms">Review, approve, pay</h2>
+      <p class="text-sm text-stone-500 mt-1 animate-fade-up" style="animation-delay: 120ms">
+        Every run moves through a fixed lifecycle. Approval locks payslips permanently.
+      </p>
+
+      <div class="mt-7 flex items-center justify-center flex-wrap gap-y-4">
+        <% [
+          [ "Draft", "bg-stone-100 text-stone-700" ],
+          [ "Processing", "bg-blue-50 text-blue-700" ],
+          [ "Processed", "bg-indigo-50 text-indigo-700" ],
+          [ "Under review", "bg-marigold-50 text-marigold-800" ],
+          [ "Approved", "bg-kula-50 text-kula-700" ],
+          [ "Paid", "bg-kula-700 text-white" ]
+        ].each_with_index do |(label, classes), i| %>
+          <% unless i.zero? %>
+            <svg class="w-4 h-4 mx-1 text-stone-300 animate-fade-in" style="animation-delay: <%= 250 + i * 150 %>ms" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
+            </svg>
+          <% end %>
+          <span class="badge <%= classes %> animate-fade-up" style="animation-delay: <%= 200 + i * 150 %>ms"><%= label %></span>
+        <% end %>
+      </div>
+
+      <ul class="mt-7 space-y-2 text-sm text-stone-600">
+        <li class="flex gap-2 animate-fade-up" style="animation-delay: 1100ms">
+          <span class="text-kula-600 font-bold">✓</span>
+          Wrong data before approval? Fix attendance or salary, then <span class="font-medium text-stone-800">Reprocess</span> — wipes payslips and resets to draft.
+        </li>
+        <li class="flex gap-2 animate-fade-up" style="animation-delay: 1200ms">
+          <span class="text-kula-600 font-bold">✓</span>
+          Only <span class="font-medium text-stone-800">super admins</span> approve or reject. On rejection, HR fixes payslips inline and resubmits — no reprocessing needed.
+        </li>
+      </ul>
+    </div>
+
+    <%# ---------- Slide 8: Pay out & finish ---------- %>
+    <div data-payroll-guide-target="slide" class="hidden px-6 py-6">
+      <p class="text-[11px] font-semibold uppercase tracking-widest text-marigold-600 animate-fade-up">Phase 5 · Final step</p>
+      <h2 class="text-xl font-bold text-stone-900 mt-1 animate-fade-up" style="animation-delay: 60ms">Transfer salaries & close the month</h2>
+
+      <div class="mt-6 grid grid-cols-3 gap-3">
+        <div class="card card-pad animate-fade-up" style="animation-delay: 200ms">
+          <p class="text-sm font-semibold text-stone-900">1 · Bank file</p>
+          <p class="text-xs text-stone-500 mt-1">Download in your bank’s format and upload to the bank portal.</p>
+          <div class="flex flex-wrap gap-1 mt-2">
+            <% %w[HDFC ICICI SBI CSV].each do |fmt| %>
+              <span class="badge bg-stone-100 text-stone-600 text-[10px]"><%= fmt %></span>
+            <% end %>
+          </div>
+        </div>
+        <div class="card card-pad animate-fade-up" style="animation-delay: 330ms">
+          <p class="text-sm font-semibold text-stone-900">2 · Mark as Paid</p>
+          <p class="text-xs text-stone-500 mt-1">Once transfers complete, close the run. Status moves to <span class="font-medium text-kula-700">Paid</span>.</p>
+        </div>
+        <div class="card card-pad animate-fade-up" style="animation-delay: 460ms">
+          <p class="text-sm font-semibold text-stone-900">3 · Payslips</p>
+          <p class="text-xs text-stone-500 mt-1">Download all PDFs as a ZIP; employees see theirs in the portal automatically.</p>
+        </div>
+      </div>
+
+      <div class="mt-6 rounded-lg border border-kula-200 bg-kula-50/50 px-4 py-3 animate-fade-up" style="animation-delay: 620ms">
+        <p class="text-sm font-semibold text-stone-800 mb-1.5">If something blocks you, it’s almost always one of these:</p>
+        <ul class="text-xs text-stone-600 space-y-1">
+          <li>· No active salary structure → create one under Salary → Structures</li>
+          <li>· Employee skipped → salary not assigned on their Salary tab</li>
+          <li>· Can’t create a run → attendance for the month isn’t fully locked</li>
+        </ul>
+      </div>
+    </div>
+
+    <%# Footer nav %>
+    <div class="sticky bottom-0 bg-white border-t border-stone-100 px-6 py-3 flex items-center justify-between">
+      <button type="button" data-payroll-guide-target="prevBtn" data-action="payroll-guide#prev"
+              class="btn btn-secondary invisible">← Back</button>
+      <div class="flex items-center gap-1.5">
+        <% 8.times do |i| %>
+          <button type="button" data-payroll-guide-target="dot" data-index="<%= i %>" data-action="payroll-guide#goTo" aria-label="Go to step <%= i + 1 %>"
+                  class="h-2 rounded-full cursor-pointer transition-all duration-300 ease-out <%= i.zero? ? "w-6 bg-kula-700" : "w-2 bg-stone-300" %> hover:scale-150 hover:bg-kula-500"></button>
+        <% end %>
+      </div>
+      <button type="button" data-payroll-guide-target="nextBtn" data-action="payroll-guide#next"
+              class="btn btn-primary">Next →</button>
+    </div>
+  </div>
+</div>

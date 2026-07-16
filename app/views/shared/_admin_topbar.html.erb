@@ -1,4 +1,7 @@
 <header class="bg-white border-b border-stone-200 px-4 md:px-8 h-14 flex items-center justify-between gap-4">
   <h1 class="text-[15px] font-semibold text-stone-900 tracking-tight truncate"><%= content_for(:page_title).presence || controller.controller_name.titleize %></h1>
+  <% if content_for?(:topbar_actions) %>
+    <div class="flex-1 flex justify-center min-w-0"><%= yield :topbar_actions %></div>
+  <% end %>
   <time class="code hidden sm:block" datetime="<%= Date.current.iso8601 %>"><%= Date.current.strftime("%d %b %Y") %></time>
 </header>

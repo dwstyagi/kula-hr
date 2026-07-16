@@ -1,9 +1,15 @@
 module Admin
   class HolidaysController < BaseController
+    PER_PAGE_OPTIONS = [ 10, 25, 50 ].freeze
+
     before_action :set_holiday, only: [ :edit, :update, :destroy, :toggle_active ]
 
     def index
-      @holidays = policy_scope(Holiday).includes(:work_location).order(:date)
+      holidays = policy_scope(Holiday).includes(:work_location).order(date: :desc)
+
+      @per_page = params[:per_page].to_i
+      @per_page = PER_PAGE_OPTIONS.first unless PER_PAGE_OPTIONS.include?(@per_page)
+      @pagy, @holidays = pagy(:offset, holidays, limit: @per_page)
     end
 
     def new
