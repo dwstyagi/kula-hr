@@ -67,7 +67,9 @@ module Admin
     private
 
     def set_admin_user
-      @admin_user = User.find(params[:id])
+      # Scoped through the tenant: User is not tenant-scoped, so a raw
+      # User.find would let an admin revoke access for a user in another tenant.
+      @admin_user = ActsAsTenant.current_tenant.users.find(params[:id])
     end
   end
 end

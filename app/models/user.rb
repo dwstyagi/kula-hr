@@ -16,6 +16,15 @@ class User < ApplicationRecord
     "#{first_name} #{last_name}"
   end
 
+  # Membership is deliberately checked against tenant_users rather than through
+  # any tenant-scoped scope: this is the check that establishes the boundary, so
+  # it must not depend on the boundary already being set correctly.
+  def member_of?(tenant)
+    return false if tenant.nil?
+
+    tenant_users.exists?(tenant_id: tenant.id)
+  end
+
   def active_for_authentication?
     super && account_active?
   end
