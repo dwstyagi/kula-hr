@@ -1,9 +1,11 @@
 <%= turbo_frame_tag @leave_type do %>
   <tr>
-    <td colspan="7" class="px-6 py-4">
-      <h3 class="text-sm font-semibold text-stone-900 mb-3">Edit Leave Type</h3>
-      <%= render "form", leave_type: @leave_type,
-          url: admin_leave_type_path(@leave_type), method: :patch %>
+    <td colspan="7" class="p-0">
+      <div class="bg-stone-50 border-y border-stone-200 px-6 sm:px-8 py-6">
+        <h3 class="text-sm font-semibold text-stone-900 mb-5">Edit Leave Type</h3>
+        <%= render "form", leave_type: @leave_type,
+            url: admin_leave_type_path(@leave_type), method: :patch %>
+      </div>
     </td>
   </tr>
 <% end %>
