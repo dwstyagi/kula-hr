@@ -5,6 +5,7 @@ class AttendanceSummaryPolicy < ApplicationPolicy
   def update?            = admin_or_hr? && record.draft?   # save changes
   def generate?          = admin_or_hr?
   def lock_month?        = admin_or_hr?
+  def unlock_month?      = super_admin?                    # safety valve for an early lock
   def download_template? = admin_or_hr?
   def upload_template?   = admin_or_hr?
 

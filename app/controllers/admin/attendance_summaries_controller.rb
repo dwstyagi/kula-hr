@@ -1,7 +1,8 @@
 module Admin
   class AttendanceSummariesController < BaseController
     before_action :set_month_year
-    before_action :check_future_month, only: [ :index, :generate, :lock_month, :download_template, :upload_template ]
+    before_action :check_month_open, only: [ :index, :generate, :lock_month, :unlock_month,
+                                             :download_template, :upload_template ]
     before_action :set_summary, only: [ :show, :edit, :update ]
 
     def index
@@ -77,6 +78,27 @@ module Admin
         notice: "#{count} attendance #{"record".pluralize(count)} locked for #{Date::MONTHNAMES[@month]} #{@year}."
     end
 
+    # Safety valve for a month locked too early. Super admin only, and refused
+    # once payroll has moved past draft for that month — those payslips were
+    # calculated from the locked attendance and would silently desync.
+    def unlock_month
+      authorize AttendanceSummary, :unlock_month?
+
+      if (blocking = PayrollRun.for_month(@month, @year).where.not(status: "draft").first)
+        redirect_to admin_attendance_summaries_path(month: @month, year: @year),
+          alert: "Can't unlock #{Date::MONTHNAMES[@month]} #{@year} — its payroll run is already #{blocking.status.humanize.downcase}. Reprocess the run back to draft first."
+        return
+      end
+
+      count = policy_scope(AttendanceSummary)
+        .for_month(@month, @year)
+        .where(status: :locked)
+        .update_all(status: :draft)
+
+      redirect_to admin_attendance_summaries_path(month: @month, year: @year),
+        notice: "#{count} attendance #{"record".pluralize(count)} unlocked for #{Date::MONTHNAMES[@month]} #{@year}."
+    end
+
     def download_template
       authorize AttendanceSummary, :download_template?
 
@@ -113,23 +135,31 @@ module Admin
     private
 
     def set_month_year
-      default = Date.today.prev_month
-      @month  = (params[:month] || default.month).to_i
-      @year   = (params[:year]  || default.year).to_i
+      default = Attendance::MonthWindow.latest_open
+      @month  = (params[:month] || default.month).to_i.clamp(1, 12)
+      @year   = (params[:year]  || default.year).to_i.clamp(2000, 2099)
     end
 
-    def check_future_month
-      redirect_to_latest_allowed_month if future_month?
-    end
+    def check_month_open
+      return if Attendance::MonthWindow.open?(@month, @year)
 
-    def future_month?
-      Date.new(@year, @month, 1) > Date.today.prev_month.beginning_of_month
-    end
-
-    def redirect_to_latest_allowed_month
-      latest = Date.today.prev_month
+      latest = Attendance::MonthWindow.latest_open
       redirect_to admin_attendance_summaries_path(month: latest.month, year: latest.year),
-        alert: "Cannot process attendance for #{Date::MONTHNAMES[@month]} #{@year}. Attendance can only be managed up to the previous month (#{Date::MONTHNAMES[latest.month]} #{latest.year})."
+        alert: month_closed_message(latest)
+    end
+
+    # Two distinct reasons a month can be closed: it is still running (opens in
+    # its final week), or it hasn't happened yet.
+    def month_closed_message(latest)
+      period = "#{Date::MONTHNAMES[@month]} #{@year}"
+      showing = "Showing #{latest.strftime("%B %Y")}."
+
+      if Date.new(@year, @month, 1) == Date.current.beginning_of_month
+        opens = Attendance::MonthWindow.opens_on
+        "Attendance for #{period} opens on #{opens.strftime("%d %b")}, once the month is nearly over. #{showing}"
+      else
+        "Cannot manage attendance for #{period} — that month hasn't happened yet. #{showing}"
+      end
     end
 
     def set_summary

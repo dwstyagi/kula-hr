@@ -106,6 +106,105 @@ RSpec.describe "Admin::AttendanceSummaries", type: :request do
       expect(response).to redirect_to(admin_attendance_summaries_path(month: 1, year: 2025))
       expect(AttendanceSummary.where(month: 1, year: 2025).all?(&:locked?)).to be true
     end
+
+    it "locks the current month once it is inside its final week" do
+      travel_to Date.new(2026, 7, 25) do
+        ActsAsTenant.with_tenant(tenant) do
+          create(:attendance_summary, tenant: tenant, employee: employee, month: 7, year: 2026)
+        end
+
+        patch lock_month_admin_attendance_summaries_path(month: 7, year: 2026),
+              headers: { "Host" => subdomain_host }
+
+        expect(response).to redirect_to(admin_attendance_summaries_path(month: 7, year: 2026))
+        expect(AttendanceSummary.where(month: 7, year: 2026).all?(&:locked?)).to be true
+      end
+    end
+
+    it "refuses the current month before its window opens" do
+      travel_to Date.new(2026, 7, 24) do
+        ActsAsTenant.with_tenant(tenant) do
+          create(:attendance_summary, tenant: tenant, employee: employee, month: 7, year: 2026)
+        end
+
+        patch lock_month_admin_attendance_summaries_path(month: 7, year: 2026),
+              headers: { "Host" => subdomain_host }
+
+        expect(response).to redirect_to(admin_attendance_summaries_path(month: 6, year: 2026))
+        expect(flash[:alert]).to include("opens on 25 Jul")
+        expect(AttendanceSummary.where(month: 7, year: 2026).none?(&:locked?)).to be true
+      end
+    end
+
+    it "refuses a future month" do
+      travel_to Date.new(2026, 7, 25) do
+        patch lock_month_admin_attendance_summaries_path(month: 8, year: 2026),
+              headers: { "Host" => subdomain_host }
+
+        expect(response).to redirect_to(admin_attendance_summaries_path(month: 7, year: 2026))
+        expect(flash[:alert]).to include("hasn't happened yet")
+      end
+    end
+  end
+
+  describe "PATCH /admin/attendance_summaries/unlock_month" do
+    let!(:summary) do
+      ActsAsTenant.with_tenant(tenant) do
+        create(:attendance_summary, tenant: tenant, employee: employee,
+                                    month: 1, year: 2025, status: :locked)
+      end
+    end
+
+    it "returns locked summaries to draft for a super admin" do
+      patch unlock_month_admin_attendance_summaries_path(month: 1, year: 2025),
+            headers: { "Host" => subdomain_host }
+
+      expect(response).to redirect_to(admin_attendance_summaries_path(month: 1, year: 2025))
+      expect(summary.reload).to be_draft
+    end
+
+    it "refuses once the month's payroll run has moved past draft" do
+      ActsAsTenant.with_tenant(tenant) do
+        create(:payroll_run, :processed, tenant: tenant, month: 1, year: 2025, initiated_by: user)
+      end
+
+      patch unlock_month_admin_attendance_summaries_path(month: 1, year: 2025),
+            headers: { "Host" => subdomain_host }
+
+      expect(flash[:alert]).to include("Can't unlock")
+      expect(summary.reload).to be_locked
+    end
+
+    it "still allows unlocking while the run is only a draft" do
+      ActsAsTenant.with_tenant(tenant) do
+        create(:payroll_run, tenant: tenant, month: 1, year: 2025, initiated_by: user)
+      end
+
+      patch unlock_month_admin_attendance_summaries_path(month: 1, year: 2025),
+            headers: { "Host" => subdomain_host }
+
+      expect(summary.reload).to be_draft
+    end
+
+    context "as an HR admin" do
+      let(:hr_user) { create(:user, :hr_admin) }
+
+      before do
+        ActsAsTenant.with_tenant(tenant) { create(:tenant_user, tenant: tenant, user: hr_user) }
+        # Devise ignores a second sign-in while a session is live, so the outer
+        # super-admin session has to go first or this context is a no-op.
+        delete destroy_user_session_path, headers: { "Host" => subdomain_host }
+        sign_in_as(hr_user)
+      end
+
+      it "is not permitted" do
+        patch unlock_month_admin_attendance_summaries_path(month: 1, year: 2025),
+              headers: { "Host" => subdomain_host }
+
+        expect(response).to be_redirect
+        expect(summary.reload).to be_locked
+      end
+    end
   end
 
   describe "GET /admin/attendance_summaries/download_template" do

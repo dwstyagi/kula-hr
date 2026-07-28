@@ -19,7 +19,8 @@
          { label: "Admin account set up", done: true },
          { label: "Add your employees", done: @employees_added, cta: "Add employees", path: admin_employees_path },
          { label: "Assign salary structures", done: @salary_started, cta: "Assign salary", path: admin_employees_path },
-         { label: "Lock attendance for the month", done: @attendance_locked_any, cta: "Attendance", path: admin_attendance_summaries_path },
+         { label: "Lock attendance for #{@attendance_month.strftime('%B')}", done: @attendance_locked_any, cta: "Attendance",
+           path: admin_attendance_summaries_path(month: @attendance_month.month, year: @attendance_month.year) },
          { label: "Run your first payroll", done: @first_payroll_done, cta: "Run payroll", path: new_admin_payroll_run_path }
        ] %>
     <% done_count = setup_steps.count { |s| s[:done] } %>
@@ -124,8 +125,8 @@
         text: "#{"employee".pluralize(@missing_salary_count)} with no salary assigned",
         path: admin_employees_path },
       { count: @unlocked_attendance_count,
-        text: "attendance #{"record".pluralize(@unlocked_attendance_count)} not locked for #{Date.current.strftime('%B')}",
-        path: admin_attendance_summaries_path }
+        text: "attendance #{"record".pluralize(@unlocked_attendance_count)} not locked for #{@attendance_month.strftime('%B')}",
+        path: admin_attendance_summaries_path(month: @attendance_month.month, year: @attendance_month.year) }
     ].select { |i| i[:count].positive? } %>
 
     <div class="card overflow-hidden animate-fade-up flex flex-col" style="animation-delay: 80ms">

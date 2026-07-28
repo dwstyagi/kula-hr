@@ -126,6 +126,7 @@ Rails.application.routes.draw do
         collection do
           post :generate
           patch :lock_month
+          patch :unlock_month
           get  :download_template
           post :upload_template
         end

@@ -24,6 +24,7 @@ RSpec.describe AttendanceSummaryPolicy, type: :policy do
     it { is_expected.to be_update }
     it { is_expected.to be_generate }
     it { is_expected.to be_lock_month }
+    it { is_expected.to be_unlock_month }
     it { is_expected.to be_download_template }
     it { is_expected.to be_upload_template }
   end
@@ -40,6 +41,8 @@ RSpec.describe AttendanceSummaryPolicy, type: :policy do
 
     it { is_expected.to be_index }
     it { is_expected.to be_update }
+    it { is_expected.to be_lock_month }
+    it { is_expected.not_to be_unlock_month }   # unlocking is super_admin only
   end
 
   describe "for an hr_admin on a locked summary" do
