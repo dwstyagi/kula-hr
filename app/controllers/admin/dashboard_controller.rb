@@ -26,7 +26,13 @@ module Admin
         .where.not(id: EmployeeSalary.where(effective_to: nil).select(:employee_id))
         .count
 
-      locked = AttendanceSummary.where(month: today.month, year: today.year, status: :locked)
+      # Prompt about the newest month HR can actually act on, not the calendar
+      # month — the current month only opens in its final week, so nagging
+      # about it before then would be an unactionable to-do.
+      @attendance_month = Attendance::MonthWindow.latest_open(today: today)
+      locked = AttendanceSummary.where(month: @attendance_month.month,
+                                       year:  @attendance_month.year,
+                                       status: :locked)
                                 .distinct.count(:employee_id)
       @unlocked_attendance_count = [ @active_employees - locked, 0 ].max
 

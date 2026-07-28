@@ -177,6 +177,11 @@
     <div data-payroll-guide-target="slide" class="hidden my-auto w-full shrink-0 px-6 py-6">
       <p class="text-[11px] font-semibold uppercase tracking-widest text-marigold-600 animate-fade-up">Phase 4 · Every month</p>
       <h2 class="text-xl font-bold text-stone-900 mt-1 animate-fade-up" style="animation-delay: 60ms">Generate, enter & lock attendance</h2>
+      <p class="text-sm text-stone-500 mt-1 animate-fade-up" style="animation-delay: 120ms">
+        <% opens = (31 - (Attendance::MonthWindow::FINAL_WINDOW_DAYS - 1)).ordinalize %>
+        A month opens for attendance in its <span class="font-medium text-stone-700">final <%= Attendance::MonthWindow::FINAL_WINDOW_DAYS %> days</span>
+        — the <%= opens %> of a 31-day month — so you can lock and pay on the last day. Past months stay open.
+      </p>
 
       <div class="mt-6 flex items-center gap-3">
         <% [

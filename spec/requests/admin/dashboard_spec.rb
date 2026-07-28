@@ -22,10 +22,16 @@ RSpec.describe "Admin::Dashboard", type: :request do
     end
 
     it "advances as employees, salaries, and locked attendance are added" do
+      # The checklist tracks the month HR can actually act on, which is only the
+      # calendar month during its final week — pin it rather than lean on the
+      # factory's current-month default.
+      window = Attendance::MonthWindow.latest_open
+
       ActsAsTenant.with_tenant(tenant) do
         employee = create(:employee, tenant: tenant)
         create(:employee_salary, tenant: tenant, employee: employee)
-        create(:attendance_summary, :locked, tenant: tenant, employee: employee)
+        create(:attendance_summary, :locked, tenant: tenant, employee: employee,
+                                             month: window.month, year: window.year)
       end
 
       get admin_root_path, headers: { "Host" => host }

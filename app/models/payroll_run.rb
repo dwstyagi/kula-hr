@@ -83,7 +83,13 @@ class PayrollRun < ApplicationRecord
   # runs payroll for the *previous* month a few days into the next one).
   def self.next_unprocessed_period
     last = recent.first
-    return [ Date.today.month, Date.today.year ] unless last
+    unless last
+      # No history yet: start from the newest month whose attendance can
+      # actually be locked, otherwise the form opens on a period that
+      # attendance_must_be_locked is guaranteed to reject.
+      opening = Attendance::MonthWindow.latest_open
+      return [ opening.month, opening.year ]
+    end
 
     next_period = Date.new(last.year, last.month, 1).next_month
     [ next_period.month, next_period.year ]
