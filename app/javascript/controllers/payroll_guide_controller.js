@@ -5,7 +5,7 @@ import { Controller } from "@hotwired/stimulus"
 // a launcher button (data-action="payroll-guide#open") and the
 // dialog with slide/dot/progress targets.
 export default class extends Controller {
-  static targets = ["dialog", "slide", "dot", "progress", "prevBtn", "nextBtn", "counter"]
+  static targets = ["dialog", "body", "slide", "dot", "progress", "prevBtn", "nextBtn", "counter"]
 
   connect() {
     this.index = 0
@@ -18,6 +18,11 @@ export default class extends Controller {
     document.body.classList.add("overflow-hidden")
     document.addEventListener("keydown", this.boundKeydown)
     this.render()
+  }
+
+  // Only the backdrop itself dismisses — clicks inside the card bubble up here too.
+  closeOnBackdrop(event) {
+    if (event.target === this.dialogTarget) this.close()
   }
 
   close() {
@@ -54,6 +59,9 @@ export default class extends Controller {
   }
 
   render() {
+    // Every slide starts at the top of the viewport, never mid-scroll.
+    if (this.hasBodyTarget) this.bodyTarget.scrollTop = 0
+
     this.slideTargets.forEach((slide, i) => {
       slide.classList.toggle("hidden", i !== this.index)
       if (i === this.index) this.replayAnimations(slide)

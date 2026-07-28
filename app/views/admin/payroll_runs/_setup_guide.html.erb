@@ -1,16 +1,19 @@
 <%# Animated payroll setup walkthrough — opened via payroll-guide Stimulus controller %>
 <div data-payroll-guide-target="dialog"
+     data-action="click->payroll-guide#closeOnBackdrop"
      class="hidden fixed inset-0 z-50 bg-stone-900/60 backdrop-blur-sm flex items-center justify-center p-4">
-  <div class="card w-full max-w-3xl max-h-[92vh] overflow-y-auto relative animate-scale-in">
+  <%# Fixed frame: the card keeps one height across all slides so the dialog
+      never resizes or re-centers as you step through it. %>
+  <div class="card w-full max-w-3xl h-[38rem] max-h-full flex flex-col overflow-hidden relative animate-scale-in">
 
     <%# Progress bar %>
-    <div class="sticky top-0 z-10 h-1 bg-stone-100">
+    <div class="h-1 shrink-0 bg-stone-100">
       <div data-payroll-guide-target="progress"
            class="h-full bg-kula-600 transition-all duration-500 ease-out" style="width: 12.5%"></div>
     </div>
 
     <%# Header %>
-    <div class="flex items-center justify-between px-6 pt-4">
+    <div class="shrink-0 flex items-center justify-between px-6 pt-4">
       <p class="text-[11px] font-semibold uppercase tracking-widest text-kula-700">
         Payroll setup guide <span class="text-stone-400 font-normal normal-case tracking-normal ml-2" data-payroll-guide-target="counter">1 / 8</span>
       </p>
@@ -22,8 +25,12 @@
       </button>
     </div>
 
+    <%# Slide viewport — scrolls only if a slide outgrows the frame.
+        `my-auto` on each slide centres short ones without clipping tall ones. %>
+    <div data-payroll-guide-target="body" class="flex-1 min-h-0 overflow-y-auto flex flex-col">
+
     <%# ---------- Slide 1: The journey ---------- %>
-    <div data-payroll-guide-target="slide" class="px-6 py-6">
+    <div data-payroll-guide-target="slide" class="my-auto w-full shrink-0 px-6 py-6">
       <h2 class="text-xl font-bold text-stone-900 animate-fade-up">From setup to first payslip</h2>
       <p class="text-sm text-stone-500 mt-1 animate-fade-up" style="animation-delay: 80ms">
         Five phases take you from a fresh account to salaries in bank accounts.
@@ -57,7 +64,7 @@
     </div>
 
     <%# ---------- Slide 2: Company configuration ---------- %>
-    <div data-payroll-guide-target="slide" class="hidden px-6 py-6">
+    <div data-payroll-guide-target="slide" class="hidden my-auto w-full shrink-0 px-6 py-6">
       <p class="text-[11px] font-semibold uppercase tracking-widest text-kula-600 animate-fade-up">Phase 1 · One-time</p>
       <h2 class="text-xl font-bold text-stone-900 mt-1 animate-fade-up" style="animation-delay: 60ms">Configure your company</h2>
       <p class="text-sm text-stone-500 mt-1 animate-fade-up" style="animation-delay: 120ms">
@@ -92,7 +99,7 @@
     </div>
 
     <%# ---------- Slide 3: Salary structure ---------- %>
-    <div data-payroll-guide-target="slide" class="hidden px-6 py-6">
+    <div data-payroll-guide-target="slide" class="hidden my-auto w-full shrink-0 px-6 py-6">
       <p class="text-[11px] font-semibold uppercase tracking-widest text-kula-600 animate-fade-up">Phase 2 · One-time</p>
       <h2 class="text-xl font-bold text-stone-900 mt-1 animate-fade-up" style="animation-delay: 60ms">Create a salary structure</h2>
       <p class="text-sm text-stone-500 mt-1 animate-fade-up" style="animation-delay: 120ms">
@@ -123,7 +130,7 @@
     </div>
 
     <%# ---------- Slide 4: Employees ---------- %>
-    <div data-payroll-guide-target="slide" class="hidden px-6 py-6">
+    <div data-payroll-guide-target="slide" class="hidden my-auto w-full shrink-0 px-6 py-6">
       <p class="text-[11px] font-semibold uppercase tracking-widest text-kula-600 animate-fade-up">Phase 3 · One-time</p>
       <h2 class="text-xl font-bold text-stone-900 mt-1 animate-fade-up" style="animation-delay: 60ms">Add employees & assign salaries</h2>
       <p class="text-sm text-stone-500 mt-1 animate-fade-up" style="animation-delay: 120ms">
@@ -167,7 +174,7 @@
     </div>
 
     <%# ---------- Slide 5: Attendance ---------- %>
-    <div data-payroll-guide-target="slide" class="hidden px-6 py-6">
+    <div data-payroll-guide-target="slide" class="hidden my-auto w-full shrink-0 px-6 py-6">
       <p class="text-[11px] font-semibold uppercase tracking-widest text-marigold-600 animate-fade-up">Phase 4 · Every month</p>
       <h2 class="text-xl font-bold text-stone-900 mt-1 animate-fade-up" style="animation-delay: 60ms">Generate, enter & lock attendance</h2>
 
@@ -206,7 +213,7 @@
     </div>
 
     <%# ---------- Slide 6: Processing ---------- %>
-    <div data-payroll-guide-target="slide" class="hidden px-6 py-6">
+    <div data-payroll-guide-target="slide" class="hidden my-auto w-full shrink-0 px-6 py-6">
       <p class="text-[11px] font-semibold uppercase tracking-widest text-marigold-600 animate-fade-up">Phase 5 · Every month</p>
       <h2 class="text-xl font-bold text-stone-900 mt-1 animate-fade-up" style="animation-delay: 60ms">Create the run & process payroll</h2>
       <p class="text-sm text-stone-500 mt-1 animate-fade-up" style="animation-delay: 120ms">
@@ -238,7 +245,7 @@
     </div>
 
     <%# ---------- Slide 7: Review & approval ---------- %>
-    <div data-payroll-guide-target="slide" class="hidden px-6 py-6">
+    <div data-payroll-guide-target="slide" class="hidden my-auto w-full shrink-0 px-6 py-6">
       <p class="text-[11px] font-semibold uppercase tracking-widest text-marigold-600 animate-fade-up">Phase 5 · Every month</p>
       <h2 class="text-xl font-bold text-stone-900 mt-1 animate-fade-up" style="animation-delay: 60ms">Review, approve, pay</h2>
       <p class="text-sm text-stone-500 mt-1 animate-fade-up" style="animation-delay: 120ms">
@@ -276,7 +283,7 @@
     </div>
 
     <%# ---------- Slide 8: Pay out & finish ---------- %>
-    <div data-payroll-guide-target="slide" class="hidden px-6 py-6">
+    <div data-payroll-guide-target="slide" class="hidden my-auto w-full shrink-0 px-6 py-6">
       <p class="text-[11px] font-semibold uppercase tracking-widest text-marigold-600 animate-fade-up">Phase 5 · Final step</p>
       <h2 class="text-xl font-bold text-stone-900 mt-1 animate-fade-up" style="animation-delay: 60ms">Transfer salaries & close the month</h2>
 
@@ -310,14 +317,17 @@
       </div>
     </div>
 
+    </div><%# /slide viewport %>
+
     <%# Footer nav %>
-    <div class="sticky bottom-0 bg-white border-t border-stone-100 px-6 py-3 flex items-center justify-between">
+    <div class="shrink-0 bg-white border-t border-stone-100 px-6 py-3 flex items-center justify-between">
       <button type="button" data-payroll-guide-target="prevBtn" data-action="payroll-guide#prev"
               class="btn btn-secondary invisible">← Back</button>
       <div class="flex items-center gap-1.5">
         <% 8.times do |i| %>
+          <%# after:* expands the hit area to ~24px tall without changing how the dot looks %>
           <button type="button" data-payroll-guide-target="dot" data-index="<%= i %>" data-action="payroll-guide#goTo" aria-label="Go to step <%= i + 1 %>"
-                  class="h-2 rounded-full cursor-pointer transition-all duration-300 ease-out <%= i.zero? ? "w-6 bg-kula-700" : "w-2 bg-stone-300" %> hover:scale-150 hover:bg-kula-500"></button>
+                  class="relative h-2 rounded-full transition-all duration-300 ease-out after:absolute after:content-[''] after:-inset-y-2 after:-inset-x-1 <%= i.zero? ? "w-6 bg-kula-700" : "w-2 bg-stone-300" %> hover:bg-kula-500 hover:scale-125"></button>
         <% end %>
       </div>
       <button type="button" data-payroll-guide-target="nextBtn" data-action="payroll-guide#next"

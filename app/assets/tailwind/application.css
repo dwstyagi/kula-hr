@@ -36,6 +36,21 @@
 }
 
 /* ---------------------------------------------------------------------------
+   Base layer — restore the pointer cursor on buttons.
+   Tailwind v3's Preflight set `cursor: pointer` on buttons; v4 dropped it in
+   favour of the browser default (an arrow), so every <button> in the app read
+   as non-interactive on hover while <a> tags still felt clickable.
+--------------------------------------------------------------------------- */
+@layer base {
+  button:not(:disabled),
+  [role="button"]:not(:disabled),
+  summary,
+  label[for] {
+    cursor: pointer;
+  }
+}
+
+/* ---------------------------------------------------------------------------
    Component layer — the shared vocabulary every screen uses.
    Variants are additive: use them with their base class in markup,
    e.g. class="btn btn-primary", class="badge badge-success".
