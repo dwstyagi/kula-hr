@@ -7,11 +7,13 @@ class PayrollRun < ApplicationRecord
   belongs_to :approved_by,  class_name: "User", optional: true
   has_many   :payslips, dependent: :destroy
   has_many   :off_cycle_payroll_entries, dependent: :destroy
+  has_one    :full_and_final_settlement, dependent: :destroy
 
-  RUN_TYPES = %w[regular bonus additional].freeze
+  RUN_TYPES = %w[regular bonus additional full_and_final].freeze
 
   accepts_nested_attributes_for :off_cycle_payroll_entries,
     reject_if: ->(attrs) { attrs["gross_amount"].blank? || attrs["gross_amount"].to_d <= 0 }
+  accepts_nested_attributes_for :full_and_final_settlement
 
   # ── Validations ──────────────────────────────────────────────────────────────
 
@@ -119,9 +121,15 @@ class PayrollRun < ApplicationRecord
 
   def regular? = run_type == "regular"
   def off_cycle? = !regular?
+  def full_and_final? = run_type == "full_and_final"
 
   def run_type_label
-    run_type == "bonus" ? "Bonus" : (run_type == "additional" ? "Additional Payment" : "Regular Payroll")
+    {
+      "regular" => "Regular Payroll",
+      "bonus" => "Bonus",
+      "additional" => "Additional Payment",
+      "full_and_final" => "Full & Final"
+    }.fetch(run_type, run_type.to_s.humanize)
   end
 
   def progress_percentage
@@ -176,6 +184,7 @@ class PayrollRun < ApplicationRecord
 
   def off_cycle_must_have_entries
     return unless off_cycle?
+    return if full_and_final? && full_and_final_settlement.present?
     return if off_cycle_payroll_entries.any?
 
     errors.add(:base, "Add at least one employee with an amount")

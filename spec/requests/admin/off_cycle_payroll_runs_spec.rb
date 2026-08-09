@@ -1,7 +1,7 @@
 require "rails_helper"
 
 RSpec.describe "Admin::OffCyclePayrollRuns", type: :request do
-  let(:tenant) { create(:tenant, :active, off_cycle_payroll_enabled: true) }
+  let(:tenant) { create(:tenant, :active) }
   let(:hr_user) { create(:user, :hr_admin) }
   let(:admin) { create(:user, :super_admin) }
   let(:employee) { create(:employee, tenant: tenant) }
@@ -52,13 +52,6 @@ RSpec.describe "Admin::OffCyclePayrollRuns", type: :request do
     get edit_admin_off_cycle_payroll_run_path(run), headers: headers
     expect(response).to have_http_status(:ok)
     expect(response.body).to include("Edit off-cycle inputs")
-  end
-
-  it "is hidden when the feature is disabled" do
-    tenant.update!(off_cycle_payroll_enabled: false)
-    sign_in_as(hr_user)
-    get admin_off_cycle_payroll_runs_path, headers: headers
-    expect(response).to redirect_to(admin_payroll_runs_path)
   end
 
   it "creates a bonus run without locked attendance" do

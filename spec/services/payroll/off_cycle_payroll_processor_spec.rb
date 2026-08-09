@@ -46,6 +46,6 @@ RSpec.describe Payroll::OffCyclePayrollProcessor do
   it "refuses to process a regular payroll run" do
     regular = create(:payroll_run, tenant: tenant, initiated_by: hr_user)
     expect { described_class.new(payroll_run: regular).call }
-      .to raise_error(ArgumentError, /regular payroll/)
+      .to raise_error(ArgumentError, /only bonus and additional-payment/)
   end
 end

@@ -1,5 +1,15 @@
 <% content_for :page_title, "Edit #{@payroll_run.title}" %>
 
+<% if @payroll_run.full_and_final? %>
+  <div class="space-y-6 max-w-6xl">
+    <div><h1 class="page-title text-2xl">Edit Full & Final settlement</h1><p class="page-sub">Review and correct amounts before calculation.</p></div>
+    <%= render "full_and_final_form",
+          payroll_run: @payroll_run,
+          form_url: admin_off_cycle_payroll_run_path(@payroll_run),
+          submit_label: "Save changes",
+          cancel_path: admin_off_cycle_payroll_run_path(@payroll_run) %>
+  </div>
+<% else %>
 <div class="space-y-6 max-w-5xl">
   <div>
     <h1 class="page-title text-2xl">Edit off-cycle inputs</h1>
@@ -56,3 +66,4 @@
     </div>
   <% end %>
 </div>
+<% end %>

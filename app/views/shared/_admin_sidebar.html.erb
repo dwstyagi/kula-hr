@@ -30,9 +30,7 @@
 
     <%= nav_group "Payroll", key: "payroll" do %>
       <%= nav_link "Payroll Runs", admin_payroll_runs_path, icon: :banknote %>
-      <% if ActsAsTenant.current_tenant&.off_cycle_payroll_enabled? %>
-        <%= nav_link "Off-cycle Payroll", admin_off_cycle_payroll_runs_path, icon: :receipt %>
-      <% end %>
+      <%= nav_link "Off-cycle Payroll", admin_off_cycle_payroll_runs_path, icon: :receipt %>
       <%= nav_link "Salary Structures", admin_salary_structures_path, icon: :calculator %>
       <%= nav_link "Salary Components", admin_salary_components_path, icon: :receipt %>
       <%= nav_link "Reports", admin_reports_path, icon: :document %>

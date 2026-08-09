@@ -1,7 +1,5 @@
 class AddOffCyclePayroll < ActiveRecord::Migration[8.1]
-  def change
-    add_column :tenants, :off_cycle_payroll_enabled, :boolean, null: false, default: false
-
+  def up
     add_column :payroll_runs, :run_type, :string, null: false, default: "regular"
     add_column :payroll_runs, :title, :string
     add_column :payroll_runs, :payment_date, :date
@@ -27,5 +25,22 @@ class AddOffCyclePayroll < ActiveRecord::Migration[8.1]
     add_index :off_cycle_payroll_entries, [ :payroll_run_id, :employee_id ],
               unique: true,
               name: "idx_off_cycle_entries_run_employee"
+  end
+
+  def down
+    drop_table :off_cycle_payroll_entries
+
+    remove_index :payroll_runs, name: "idx_payroll_runs_tenant_type_payment"
+    remove_index :payroll_runs, name: "idx_regular_payroll_run_tenant_period"
+    remove_column :payroll_runs, :payment_date
+    remove_column :payroll_runs, :title
+    remove_column :payroll_runs, :run_type
+
+    # Cleans up installations that ran the pre-release version of this
+    # migration while the feature was temporarily tenant-gated.
+    remove_column :tenants, :off_cycle_payroll_enabled if column_exists?(:tenants, :off_cycle_payroll_enabled)
+
+    add_index :payroll_runs, [ :tenant_id, :month, :year ],
+              name: "idx_payroll_run_tenant_month_year"
   end
 end

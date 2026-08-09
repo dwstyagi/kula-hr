@@ -17,7 +17,10 @@
   <% end %>
 
   <% if @payroll_run.draft? || @payroll_run.processing? %>
-    <div class="card overflow-hidden">
+    <% if @payroll_run.full_and_final? %>
+      <%= render "full_and_final_summary", payroll_run: @payroll_run %>
+    <% else %>
+      <div class="card overflow-hidden">
       <div class="card-header">
         <div><h2 class="card-title">Payment inputs</h2><p class="text-xs text-stone-500 mt-0.5"><%= @payroll_run.off_cycle_payroll_entries.count %> employees selected</p></div>
       </div>
@@ -36,13 +39,14 @@
           </tbody>
         </table>
       </div>
-    </div>
+      </div>
+    <% end %>
 
     <% if @payroll_run.draft? %>
       <div class="flex items-center gap-3">
         <%= button_to "Calculate payments", process_payroll_admin_off_cycle_payroll_run_path(@payroll_run),
               method: :post, class: "btn btn-primary cursor-pointer",
-              form: { data: { turbo_confirm: "Create off-cycle payslips from these approved inputs?" } } %>
+              form: { data: { turbo_confirm: @payroll_run.full_and_final? ? "Create the settlement statement from these inputs?" : "Create off-cycle payslips from these approved inputs?" } } %>
         <%= link_to "Edit inputs", edit_admin_off_cycle_payroll_run_path(@payroll_run), class: "btn btn-secondary" %>
       </div>
     <% else %>
@@ -51,16 +55,20 @@
   <% else %>
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
       <div class="stat-card"><p class="stat-label">Gross</p><p class="stat-value"><%= @payroll_run.formatted_total_gross %></p></div>
-      <div class="stat-card"><p class="stat-label">TDS</p><p class="stat-value">− <%= @payroll_run.formatted_total_deductions %></p></div>
+      <div class="stat-card"><p class="stat-label">Deductions</p><p class="stat-value">− <%= @payroll_run.formatted_total_deductions %></p></div>
       <div class="stat-card"><p class="stat-label">Net payment</p><p class="stat-value text-kula-700"><%= @payroll_run.formatted_total_net_pay %></p></div>
     </div>
 
+    <% if @payroll_run.full_and_final? && @payroll_run.full_and_final_settlement.recoverable_amount.positive? %>
+      <div class="alert alert-warning"><div><p class="font-semibold">Recovery remains after settlement</p><p>₹<%= number_with_delimiter(@payroll_run.full_and_final_settlement.recoverable_amount) %> must be collected outside the bank payout and tracked by HR/Finance.</p></div></div>
+    <% end %>
+
     <div class="grid md:grid-cols-2 gap-4">
       <%= link_to admin_payroll_run_payslips_path(@payroll_run), class: "card card-pad hover:border-kula-300" do %>
-        <p class="font-semibold text-stone-900">Off-cycle payslips</p>
+        <p class="font-semibold text-stone-900"><%= @payroll_run.full_and_final? ? "Full & Final statement" : "Off-cycle payslips" %></p>
         <p class="text-sm text-stone-500"><%= @payroll_run.payslips.count %> generated · Review details →</p>
       <% end %>
-      <% if @payroll_run.approved? || @payroll_run.paid? %>
+      <% if (@payroll_run.approved? || @payroll_run.paid?) && @payroll_run.total_net_pay.positive? %>
         <%= link_to bank_file_admin_off_cycle_payroll_run_path(@payroll_run), class: "card card-pad hover:border-kula-300" do %>
           <p class="font-semibold text-stone-900">Bank transfer file</p>
           <p class="text-sm text-stone-500">Generate payment instructions →</p>
@@ -80,7 +88,7 @@
         <%= button_to "Resubmit", resubmit_for_review_admin_off_cycle_payroll_run_path(@payroll_run), method: :patch, class: "btn btn-primary cursor-pointer" %>
         <%= button_to "Recalculate", reprocess_admin_off_cycle_payroll_run_path(@payroll_run), method: :patch, class: "btn btn-secondary cursor-pointer" %>
       <% elsif @payroll_run.approved? %>
-        <%= button_to "Mark as paid", mark_paid_admin_off_cycle_payroll_run_path(@payroll_run), method: :patch, class: "btn btn-primary cursor-pointer", form: { data: { turbo_confirm: "Confirm the bank transfer completed?" } } %>
+        <%= button_to (@payroll_run.full_and_final? ? "Close settlement" : "Mark as paid"), mark_paid_admin_off_cycle_payroll_run_path(@payroll_run), method: :patch, class: "btn btn-primary cursor-pointer", form: { data: { turbo_confirm: @payroll_run.full_and_final? ? "Confirm this settlement is complete, including any recovery follow-up?" : "Confirm the bank transfer completed?" } } %>
       <% elsif @payroll_run.paid? %>
         <span class="badge badge-success">Payment completed</span>
       <% end %>

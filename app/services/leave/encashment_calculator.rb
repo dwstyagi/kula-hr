@@ -4,9 +4,10 @@ module Leave
   class EncashmentCalculator
     class NoSalaryError < StandardError; end
 
-    def initialize(employee:, number_of_days:)
+    def initialize(employee:, number_of_days:, as_of: Date.current)
       @employee       = employee
       @number_of_days = number_of_days.to_d
+      @as_of          = as_of
     end
 
     def call
@@ -17,7 +18,11 @@ module Leave
     private
 
     def fetch_basic_monthly
-      salary = @employee.current_salary
+      salary = @employee.employee_salaries
+        .where("effective_from <= ?", @as_of)
+        .where("effective_to IS NULL OR effective_to >= ?", @as_of)
+        .order(effective_from: :desc)
+        .first
       raise NoSalaryError, "No salary assigned for #{@employee.full_name}" unless salary
 
       structure   = salary.salary_structure

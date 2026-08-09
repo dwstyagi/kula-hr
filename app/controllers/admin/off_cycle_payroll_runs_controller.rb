@@ -1,6 +1,5 @@
 module Admin
   class OffCyclePayrollRunsController < BaseController
-    before_action :require_feature!
     before_action :set_payroll_run, only: [ :show, :edit, :update, :process_payroll, :submit_for_review,
                                             :approve, :reject, :resubmit_for_review,
                                             :reprocess, :mark_paid, :bank_file,
@@ -147,12 +146,6 @@ module Admin
 
     private
 
-    def require_feature!
-      return if ActsAsTenant.current_tenant&.off_cycle_payroll_enabled?
-
-      redirect_to admin_payroll_runs_path, alert: "Off-cycle payroll is not enabled for this company."
-    end
-
     def set_payroll_run
       @payroll_run = policy_scope(PayrollRun).off_cycle.find(params[:id])
     end
@@ -160,9 +153,21 @@ module Admin
     def payroll_run_params
       params.require(:payroll_run).permit(
         :run_type, :title, :payment_date, :notes,
-        off_cycle_payroll_entries_attributes: [ :id, :employee_id, :gross_amount, :tds_amount, :notes ]
+        off_cycle_payroll_entries_attributes: [ :id, :employee_id, :gross_amount, :tds_amount, :notes ],
+        full_and_final_settlement_attributes: [
+          :id, :employee_id, :last_working_date, :salary_days, :leave_encashment_days,
+          :earned_salary, :leave_encashment, :bonus, :notice_pay, :gratuity, :other_earnings,
+          :notice_recovery, :loan_recovery, :asset_recovery, :other_deductions,
+          :pf_amount, :esi_amount, :professional_tax_amount, :tds_amount, :notes
+        ]
       ).tap do |permitted|
-        permitted[:run_type] = "bonus" unless permitted[:run_type].in?(%w[bonus additional])
+        permitted[:run_type] = if @payroll_run&.full_and_final?
+          "full_and_final"
+        elsif permitted[:run_type].in?(%w[bonus additional])
+          permitted[:run_type]
+        else
+          "bonus"
+        end
       end
     end
 
@@ -179,6 +184,8 @@ module Admin
     end
 
     def prepare_entries
+      return if @payroll_run.full_and_final?
+
       existing_employee_ids = @payroll_run.off_cycle_payroll_entries.map(&:employee_id)
       eligible_employees.each do |employee|
         next if existing_employee_ids.include?(employee.id)

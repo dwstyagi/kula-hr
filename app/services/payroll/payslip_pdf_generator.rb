@@ -40,7 +40,7 @@ class Payroll::PayslipPdfGenerator
       render_attendance(pdf) unless @payslip.off_cycle?
       render_ledger(pdf)
       render_net_pay(pdf)
-      render_trio(pdf)
+      render_trio(pdf) unless @payslip.full_and_final?
       render_footer(pdf)
     end
 
@@ -115,7 +115,7 @@ class Payroll::PayslipPdfGenerator
 
     pdf.fill_color TEAL
     pdf.font("PlexCond", style: :bold) do
-      slip_title = @payslip.off_cycle? ? "OFF-CYCLE PAYSLIP" : "SALARY SLIP"
+      slip_title = @payslip.document_title.upcase
       pdf.text_box slip_title, at: [ pdf.bounds.width - 220, top - 1 ], width: 220, align: :right, size: 14, character_spacing: 1.5
     end
     pdf.fill_color INK
@@ -145,15 +145,27 @@ class Payroll::PayslipPdfGenerator
       [ "PAN",             @employee.pan_number.presence || "—",  :mono ],
       [ "UAN",             @employee.uan_number.presence || "—",  :mono ]
     ]
-    period_rows = [
-      [ "Month",    "#{@payslip.month_name} #{@payslip.year}",     :sans ],
-      [ "Period",   period_range,                                  :mono ],
-      [ "Pay Date", pay_date,                                      :mono ],
-      [ "Mode",     "Bank Transfer",                               :sans ],
-      [ "Bank",     @employee.bank_name.presence || "—",           :sans ],
-      [ "Account",  mask_account(@employee.bank_account_number),   :mono ],
-      [ "IFSC",     @employee.ifsc_code.presence || "—",           :mono ]
-    ]
+    period_rows = if @payslip.full_and_final?
+      [
+        [ "Last Day", fmt_date(@payslip.full_and_final_settlement&.last_working_date), :mono ],
+        [ "Settlement", period_range, :sans ],
+        [ "Pay Date", pay_date, :mono ],
+        [ "Mode", "Bank Transfer", :sans ],
+        [ "Bank", @employee.bank_name.presence || "—", :sans ],
+        [ "Account", mask_account(@employee.bank_account_number), :mono ],
+        [ "IFSC", @employee.ifsc_code.presence || "—", :mono ]
+      ]
+    else
+      [
+        [ "Month", "#{@payslip.month_name} #{@payslip.year}", :sans ],
+        [ "Period", period_range, :mono ],
+        [ "Pay Date", pay_date, :mono ],
+        [ "Mode", "Bank Transfer", :sans ],
+        [ "Bank", @employee.bank_name.presence || "—", :sans ],
+        [ "Account", mask_account(@employee.bank_account_number), :mono ],
+        [ "IFSC", @employee.ifsc_code.presence || "—", :mono ]
+      ]
+    end
 
     eyebrow(pdf, "Employee", 0, top)
     eyebrow(pdf, "Pay Period", col_w + 30, top)
@@ -293,7 +305,9 @@ class Payroll::PayslipPdfGenerator
     top = pdf.cursor
     w   = pdf.bounds.width
     h   = 64
-    net = @payslip.net_pay.round(0).to_i
+    recovery = @payslip.recoverable_amount.round(0).to_i
+    amount = recovery.positive? ? recovery : @payslip.net_pay.round(0).to_i
+    label = recovery.positive? ? "AMOUNT RECOVERABLE" : "NET PAY"
 
     pdf.stroke_color TEAL
     pdf.line_width 1.5
@@ -301,13 +315,13 @@ class Payroll::PayslipPdfGenerator
     pdf.line_width 1
 
     pdf.fill_color TEAL_SOFT
-    pdf.font("PlexCond", style: :bold) { pdf.text_box "NET PAY", at: [ 20, top - 14 ], width: 200, size: 11, character_spacing: 1.6 }
+    pdf.font("PlexCond", style: :bold) { pdf.text_box label, at: [ 20, top - 14 ], width: 200, size: 11, character_spacing: 1.6 }
     pdf.fill_color MUTED
-    pdf.font("PlexSans") { pdf.text_box "Rupees #{amount_in_words(net)} Only", at: [ 20, top - 32 ], width: 320, size: 10, leading: 1 }
+    pdf.font("PlexSans") { pdf.text_box "Rupees #{amount_in_words(amount)} Only", at: [ 20, top - 32 ], width: 320, size: 10, leading: 1 }
 
     pdf.font("PlexMono", style: :bold) do
       pdf.formatted_text_box(
-        [ { text: "₹", color: TEAL, size: 26 }, { text: indian(net), color: INK, size: 32 } ],
+        [ { text: "₹", color: TEAL, size: 26 }, { text: indian(amount), color: INK, size: 32 } ],
         at: [ w - 250, top - 16 ], width: 250, align: :right
       )
     end
@@ -394,7 +408,7 @@ class Payroll::PayslipPdfGenerator
     rule(pdf, HAIR, 8)
     pdf.fill_color FAINT
     pdf.font("PlexSans") do
-      document_name = @payslip.off_cycle? ? "off-cycle payslip" : "salary slip"
+      document_name = @payslip.document_title.downcase
       pdf.text_box "This is a computer-generated #{document_name} and does not require a signature.",
         at: [ 0, pdf.cursor ], width: pdf.bounds.width, align: :center, size: 9
       contact = @tenant.try(:email).presence

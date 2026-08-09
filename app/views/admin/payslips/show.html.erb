@@ -12,7 +12,7 @@
         <span class="text-stone-900"><%= @payslip.employee.full_name %></span>
       </div>
       <h1 class="page-title text-2xl">
-        <%= @payslip.off_cycle? ? "Off-cycle Payslip" : "Payslip" %> — <%= @payslip.employee.full_name %>
+        <%= @payslip.document_title %> — <%= @payslip.employee.full_name %>
       </h1>
       <p class="text-sm text-stone-500 mt-0.5">
         <%= @payslip.period_label %> &middot; <%= @payslip.employee.employee_code %>
@@ -182,4 +182,8 @@
     </div>
     <% end %>
   </div>
+
+  <% if @payslip.recoverable_amount.positive? %>
+    <div class="alert alert-warning"><div><p class="font-semibold">Amount recoverable from employee</p><p>₹<%= number_with_delimiter(@payslip.recoverable_amount.round(0)) %> remains after applying all settlement earnings.</p></div></div>
+  <% end %>
 </div>

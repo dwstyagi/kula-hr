@@ -62,7 +62,7 @@
             <tr class="hover:bg-stone-50">
               <td class="px-5 py-3.5 font-medium text-stone-900">
                 <%= payslip.period_label %>
-                <% if payslip.off_cycle? %><span class="block text-[10px] uppercase tracking-wide text-kula-600 mt-0.5">Off-cycle</span><% end %>
+                <% if payslip.off_cycle? %><span class="block text-[10px] uppercase tracking-wide text-kula-600 mt-0.5"><%= payslip.full_and_final? ? "Full & Final" : "Off-cycle" %></span><% end %>
               </td>
               <td class="px-5 py-3.5 text-stone-600">₹<%= number_with_delimiter(payslip.gross_pay.round(0)) %></td>
               <td class="px-5 py-3.5 text-stone-600">₹<%= number_with_delimiter(payslip.total_deductions.round(0)) %></td>

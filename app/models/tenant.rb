@@ -15,6 +15,7 @@ class Tenant < ApplicationRecord
   has_one :payroll_setting, dependent: :destroy
   has_many :payroll_runs, dependent: :destroy
   has_many :off_cycle_payroll_entries, dependent: :destroy
+  has_many :full_and_final_settlements, dependent: :destroy
 
   RESERVED_SUBDOMAINS = %w[www admin api app mail ftp smtp pop imap blog support help
                            status assets cdn static media platform dashboard].freeze

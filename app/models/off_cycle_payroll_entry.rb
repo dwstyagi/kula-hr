@@ -33,6 +33,8 @@ class OffCyclePayrollEntry < ApplicationRecord
   end
 
   def run_must_be_off_cycle
-    errors.add(:payroll_run, "must be an off-cycle run") if payroll_run&.regular?
+    unless payroll_run && payroll_run.off_cycle? && !payroll_run.full_and_final?
+      errors.add(:payroll_run, "must be a bonus or additional-payment run")
+    end
   end
 end

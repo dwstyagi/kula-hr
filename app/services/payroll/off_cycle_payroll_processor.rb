@@ -11,7 +11,9 @@ module Payroll
     end
 
     def call
-      raise ArgumentError, "regular payroll requires PayrollProcessor" if @run.regular?
+      unless @run.run_type.in?(%w[bonus additional])
+        raise ArgumentError, "only bonus and additional-payment runs are supported"
+      end
 
       @run.start_processing! if @run.may_start_processing?
       return unless @run.processing?

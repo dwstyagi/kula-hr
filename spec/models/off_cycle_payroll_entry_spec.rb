@@ -40,6 +40,6 @@ RSpec.describe OffCyclePayrollEntry, type: :model do
       gross_amount: 10_000, tds_amount: 0
     )
     expect(entry).not_to be_valid
-    expect(entry.errors[:payroll_run]).to include("must be an off-cycle run")
+    expect(entry.errors[:payroll_run]).to include("must be a bonus or additional-payment run")
   end
 end

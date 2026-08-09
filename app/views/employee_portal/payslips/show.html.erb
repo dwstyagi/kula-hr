@@ -8,7 +8,7 @@
         <span>/</span>
         <span class="text-stone-900"><%= @payslip.period_label %></span>
       </div>
-      <h1 class="page-title text-2xl"><%= @payslip.off_cycle? ? "Off-cycle Payslip" : "Salary Slip" %> — <%= @payslip.period_label %></h1>
+      <h1 class="page-title text-2xl"><%= @payslip.document_title %> — <%= @payslip.period_label %></h1>
       <p class="text-sm text-stone-500 mt-0.5">
         <%= current_employee.full_name %> &middot; <%= current_employee.employee_code %>
       </p>
@@ -162,5 +162,9 @@
     </div>
     <% end %>
   </div>
+
+  <% if @payslip.recoverable_amount.positive? %>
+    <div class="alert alert-warning"><div><p class="font-semibold">Amount recoverable</p><p>₹<%= number_with_delimiter(@payslip.recoverable_amount.round(0)) %> remains due after this settlement. Contact HR for recovery details.</p></div></div>
+  <% end %>
 
 </div>

@@ -4,9 +4,12 @@
   <div class="flex flex-wrap items-center justify-between gap-4">
     <div>
       <h1 class="page-title text-2xl">Off-cycle Payroll</h1>
-      <p class="page-sub">Bonus and additional payments outside regular monthly payroll</p>
+      <p class="page-sub">Bonus, additional payments, and employee settlements outside regular payroll</p>
     </div>
-    <%= link_to "New off-cycle run", new_admin_off_cycle_payroll_run_path, class: "btn btn-primary" %>
+    <div class="flex gap-2">
+      <%= link_to "New F&F", new_admin_full_and_final_payroll_run_path, class: "btn btn-secondary" %>
+      <%= link_to "New bonus/payment", new_admin_off_cycle_payroll_run_path, class: "btn btn-primary" %>
+    </div>
   </div>
 
   <div class="card overflow-hidden">
@@ -35,7 +38,7 @@
                 <td><span class="badge badge-neutral"><%= run.run_type_label %></span></td>
                 <td class="text-stone-600"><%= run.payment_date.strftime("%d %b %Y") %></td>
                 <td><%= render "admin/payroll_runs/status_badge", payroll_run: run %></td>
-                <td class="num"><%= run.payslips.count.positive? ? run.payslips.count : run.off_cycle_payroll_entries.count %></td>
+                <td class="num"><%= run.payslips.count.positive? ? run.payslips.count : (run.full_and_final? ? 1 : run.off_cycle_payroll_entries.count) %></td>
                 <td class="num font-semibold"><%= run.total_net_pay.positive? ? run.formatted_total_net_pay : "—" %></td>
                 <td class="text-right"><%= link_to "Open →", admin_off_cycle_payroll_run_path(run), class: "text-sm text-kula-700" %></td>
               </tr>
@@ -46,7 +49,7 @@
     <% else %>
       <div class="empty-state py-16">
         <p class="font-medium text-stone-700">No off-cycle runs yet</p>
-        <p class="text-sm text-stone-400 mt-1">Create one when you need to pay a bonus or additional amount.</p>
+        <p class="text-sm text-stone-400 mt-1">Create one for a bonus, additional payment, or employee settlement.</p>
       </div>
     <% end %>
   </div>
