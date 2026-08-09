@@ -85,7 +85,9 @@
               <td class="num text-stone-600">₹<%= number_with_delimiter(payslip.total_deductions.round(0)) %></td>
               <td class="num font-semibold text-stone-900">₹<%= number_with_delimiter(payslip.net_pay.round(0)) %></td>
               <td class="text-center amount">
-                <% if payslip.lop_days > 0 %>
+                <% if payslip.off_cycle? %>
+                  <span class="text-stone-300">—</span>
+                <% elsif payslip.lop_days > 0 %>
                   <span class="text-red-600 font-medium"><%= payslip.lop_days %></span>
                 <% else %>
                   <span class="text-stone-300">—</span>

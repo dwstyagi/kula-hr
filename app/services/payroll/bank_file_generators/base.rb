@@ -38,6 +38,8 @@ module Payroll
       end
 
       def narration
+        return "OFFCYCLE-#{@payroll_run.id}" if @payroll_run.off_cycle?
+
         "SAL-#{@payroll_run.month_name[0..2].upcase}-#{@payroll_run.year}"
       end
 

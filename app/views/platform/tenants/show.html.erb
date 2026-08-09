@@ -49,6 +49,10 @@
         <dt class="text-sm font-medium text-stone-500">Created</dt>
         <dd class="mt-1 text-sm text-stone-900"><%= @tenant.created_at.strftime("%b %d, %Y at %I:%M %p") %></dd>
       </div>
+      <div>
+        <dt class="text-sm font-medium text-stone-500">Off-cycle payroll</dt>
+        <dd class="mt-1 text-sm text-stone-900"><%= @tenant.off_cycle_payroll_enabled? ? "Enabled" : "Disabled" %></dd>
+      </div>
     </dl>
   </div>
 

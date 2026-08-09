@@ -72,7 +72,8 @@ module Platform
     def tenant_params
       params.require(:tenant).permit(:name, :status, :gstin, :pan, :tan,
                                      :pf_establishment_code, :esi_code,
-                                     :address, :city, :state, :pincode)
+                                     :address, :city, :state, :pincode,
+                                     :off_cycle_payroll_enabled)
     end
   end
 end

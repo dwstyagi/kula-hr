@@ -6,18 +6,30 @@ class PayrollRun < ApplicationRecord
   belongs_to :initiated_by, class_name: "User"
   belongs_to :approved_by,  class_name: "User", optional: true
   has_many   :payslips, dependent: :destroy
+  has_many   :off_cycle_payroll_entries, dependent: :destroy
+
+  RUN_TYPES = %w[regular bonus additional].freeze
+
+  accepts_nested_attributes_for :off_cycle_payroll_entries,
+    reject_if: ->(attrs) { attrs["gross_amount"].blank? || attrs["gross_amount"].to_d <= 0 }
 
   # ── Validations ──────────────────────────────────────────────────────────────
 
   validates :month, presence: true, inclusion: { in: 1..12 }
   validates :year,  presence: true
+  validates :run_type, presence: true, inclusion: { in: RUN_TYPES }
+  validates :title, presence: true, length: { maximum: 100 }, if: :off_cycle?
+  validates :payment_date, presence: true, if: :off_cycle?
   validate  :no_existing_run_for_period, on: :create
   validate  :attendance_must_be_locked, on: :create
+  validate  :off_cycle_must_have_entries, on: :create
 
   # ── Scopes ───────────────────────────────────────────────────────────────────
 
   scope :recent, -> { order(year: :desc, month: :desc) }
   scope :for_month, ->(month, year) { where(month: month, year: year) }
+  scope :regular_runs, -> { where(run_type: "regular") }
+  scope :off_cycle, -> { where.not(run_type: "regular") }
 
   # ── AASM State Machine ───────────────────────────────────────────────────────
 
@@ -82,7 +94,7 @@ class PayrollRun < ApplicationRecord
   # tenant's most recent run, not the calendar's current month (HR usually
   # runs payroll for the *previous* month a few days into the next one).
   def self.next_unprocessed_period
-    last = recent.first
+    last = regular_runs.recent.first
     unless last
       # No history yet: start from the newest month whose attendance can
       # actually be locked, otherwise the form opens on a period that
@@ -100,7 +112,16 @@ class PayrollRun < ApplicationRecord
   end
 
   def period_label
+    return "#{title} · #{month_name} #{year}" if off_cycle?
+
     "#{month_name} #{year}"
+  end
+
+  def regular? = run_type == "regular"
+  def off_cycle? = !regular?
+
+  def run_type_label
+    run_type == "bonus" ? "Bonus" : (run_type == "additional" ? "Additional Payment" : "Regular Payroll")
   end
 
   def progress_percentage
@@ -114,9 +135,10 @@ class PayrollRun < ApplicationRecord
   # "already exists" message, name who initiated it and its current state so
   # HR understands why a new run is blocked.
   def no_existing_run_for_period
+    return unless regular?
     return if month.blank? || year.blank?
 
-    existing = PayrollRun
+    existing = PayrollRun.regular_runs
       .where(tenant_id: tenant_id || ActsAsTenant.current_tenant&.id, month: month, year: year)
       .where.not(id: id)
       .first
@@ -138,6 +160,8 @@ class PayrollRun < ApplicationRecord
   # before a run can be created. Delegates to Payroll::ReadinessCheck so the
   # creation error, the new-page panel, and the processor never disagree.
   def attendance_must_be_locked
+    return unless regular?
+
     readiness = Payroll::ReadinessCheck.new(
       month: month, year: year, tenant: tenant || ActsAsTenant.current_tenant
     ).call
@@ -148,6 +172,13 @@ class PayrollRun < ApplicationRecord
     names += ", and #{blocked.size - 10} more" if blocked.size > 10
     errors.add(:base,
       "Attendance not locked for #{blocked.size} employee(s) for #{month_name} #{year}: #{names}.")
+  end
+
+  def off_cycle_must_have_entries
+    return unless off_cycle?
+    return if off_cycle_payroll_entries.any?
+
+    errors.add(:base, "Add at least one employee with an amount")
   end
 
   # Callback: wipe all payslips and reset totals when reprocessing

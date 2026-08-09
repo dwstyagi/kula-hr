@@ -1,0 +1,24 @@
+<% content_for :page_title, "Bank File · #{@payroll_run.title}" %>
+
+<div class="space-y-6 max-w-3xl">
+  <div>
+    <%= link_to "← #{@payroll_run.title}", admin_off_cycle_payroll_run_path(@payroll_run), class: "text-sm text-stone-500" %>
+    <h1 class="page-title text-2xl mt-2">Generate bank file</h1>
+    <p class="page-sub"><%= @payroll_run.formatted_total_net_pay %> across <%= @payroll_run.payslips.count %> payments</p>
+  </div>
+
+  <% if @missing.any? %>
+    <div class="alert alert-warning"><p><strong><%= @missing.size %> employee(s)</strong> have missing account or IFSC details and will be excluded.</p></div>
+  <% end %>
+
+  <div class="card card-pad">
+    <h2 class="card-title mb-4">Choose bank format</h2>
+    <div class="grid sm:grid-cols-2 gap-3">
+      <% [ [ "Generic CSV", "generic_csv" ], [ "HDFC", "hdfc" ], [ "ICICI", "icici" ], [ "SBI", "sbi" ] ].each do |label, bank| %>
+        <%= link_to download_bank_file_admin_off_cycle_payroll_run_path(@payroll_run, bank: bank), class: "btn btn-secondary justify-between" do %>
+          <%= label %><span>Download ↓</span>
+        <% end %>
+      <% end %>
+    </div>
+  </div>
+</div>

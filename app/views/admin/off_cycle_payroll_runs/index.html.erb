@@ -1,0 +1,53 @@
+<% content_for :page_title, "Off-cycle Payroll" %>
+
+<div class="space-y-6">
+  <div class="flex flex-wrap items-center justify-between gap-4">
+    <div>
+      <h1 class="page-title text-2xl">Off-cycle Payroll</h1>
+      <p class="page-sub">Bonus and additional payments outside regular monthly payroll</p>
+    </div>
+    <%= link_to "New off-cycle run", new_admin_off_cycle_payroll_run_path, class: "btn btn-primary" %>
+  </div>
+
+  <div class="card overflow-hidden">
+    <% if @payroll_runs.any? %>
+      <div class="overflow-x-auto">
+        <table class="tbl">
+          <thead>
+            <tr>
+              <th>Run</th>
+              <th>Type</th>
+              <th>Payment date</th>
+              <th>Status</th>
+              <th class="text-right">Employees</th>
+              <th class="text-right">Net pay</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @payroll_runs.each do |run| %>
+              <tr>
+                <td>
+                  <%= link_to run.title, admin_off_cycle_payroll_run_path(run),
+                        class: "font-medium text-stone-900 hover:text-kula-700" %>
+                  <p class="text-xs text-stone-400 mt-0.5"><%= run.month_name %> <%= run.year %></p>
+                </td>
+                <td><span class="badge badge-neutral"><%= run.run_type_label %></span></td>
+                <td class="text-stone-600"><%= run.payment_date.strftime("%d %b %Y") %></td>
+                <td><%= render "admin/payroll_runs/status_badge", payroll_run: run %></td>
+                <td class="num"><%= run.payslips.count.positive? ? run.payslips.count : run.off_cycle_payroll_entries.count %></td>
+                <td class="num font-semibold"><%= run.total_net_pay.positive? ? run.formatted_total_net_pay : "—" %></td>
+                <td class="text-right"><%= link_to "Open →", admin_off_cycle_payroll_run_path(run), class: "text-sm text-kula-700" %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    <% else %>
+      <div class="empty-state py-16">
+        <p class="font-medium text-stone-700">No off-cycle runs yet</p>
+        <p class="text-sm text-stone-400 mt-1">Create one when you need to pay a bonus or additional amount.</p>
+      </div>
+    <% end %>
+  </div>
+</div>

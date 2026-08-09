@@ -60,7 +60,10 @@
         <tbody class="divide-y divide-stone-100">
           <% @payslips.each do |payslip| %>
             <tr class="hover:bg-stone-50">
-              <td class="px-5 py-3.5 font-medium text-stone-900"><%= payslip.period_label %></td>
+              <td class="px-5 py-3.5 font-medium text-stone-900">
+                <%= payslip.period_label %>
+                <% if payslip.off_cycle? %><span class="block text-[10px] uppercase tracking-wide text-kula-600 mt-0.5">Off-cycle</span><% end %>
+              </td>
               <td class="px-5 py-3.5 text-stone-600">₹<%= number_with_delimiter(payslip.gross_pay.round(0)) %></td>
               <td class="px-5 py-3.5 text-stone-600">₹<%= number_with_delimiter(payslip.total_deductions.round(0)) %></td>
               <td class="px-5 py-3.5 font-semibold text-stone-900">₹<%= number_with_delimiter(payslip.net_pay.round(0)) %></td>

@@ -51,7 +51,13 @@ class Payslip < ApplicationRecord
     Date::MONTHNAMES[month]
   end
 
+  def off_cycle?
+    payroll_run&.off_cycle? || false
+  end
+
   def period_label
+    return payroll_run.period_label if payroll_run&.off_cycle?
+
     "#{month_name} #{year}"
   end
 

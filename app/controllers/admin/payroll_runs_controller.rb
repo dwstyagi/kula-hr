@@ -8,7 +8,7 @@ module Admin
     # GET /admin/payroll_runs
     def index
       authorize PayrollRun
-      runs = policy_scope(PayrollRun).recent.includes(:initiated_by)
+      runs = policy_scope(PayrollRun).regular_runs.recent.includes(:initiated_by)
 
       @years = policy_scope(PayrollRun).distinct.order(year: :desc).pluck(:year)
       @year  = params[:year].to_i
@@ -18,7 +18,7 @@ module Admin
       @payroll_runs = PayrollRunPresenter.wrap(runs)
 
       # Anchor card: the tenant's actual latest run, independent of the ?year filter above.
-      latest = policy_scope(PayrollRun).recent.first
+      latest = policy_scope(PayrollRun).regular_runs.recent.first
       @current_run = latest && PayrollRunPresenter.new(latest)
       @next_period_month, @next_period_year = PayrollRun.next_unprocessed_period
     end
@@ -59,6 +59,9 @@ module Admin
 
     # GET /admin/payroll_runs/:id
     def show
+      if @payroll_run.off_cycle?
+        return redirect_to admin_off_cycle_payroll_run_path(@payroll_run)
+      end
       authorize @payroll_run
       # Compute readiness while still in draft so the page can warn about
       # employees who will be skipped before HR clicks "Process".

@@ -37,7 +37,7 @@ class Payroll::PayslipPdfGenerator
       rule(pdf, HAIR_STRONG, 18)
       render_details(pdf)
       rule(pdf, HAIR, 16)
-      render_attendance(pdf)
+      render_attendance(pdf) unless @payslip.off_cycle?
       render_ledger(pdf)
       render_net_pay(pdf)
       render_trio(pdf)
@@ -115,7 +115,8 @@ class Payroll::PayslipPdfGenerator
 
     pdf.fill_color TEAL
     pdf.font("PlexCond", style: :bold) do
-      pdf.text_box "SALARY SLIP", at: [ pdf.bounds.width - 220, top - 1 ], width: 220, align: :right, size: 14, character_spacing: 1.5
+      slip_title = @payslip.off_cycle? ? "OFF-CYCLE PAYSLIP" : "SALARY SLIP"
+      pdf.text_box slip_title, at: [ pdf.bounds.width - 220, top - 1 ], width: 220, align: :right, size: 14, character_spacing: 1.5
     end
     pdf.fill_color INK
     pdf.font("PlexSans", style: :bold) do
@@ -393,7 +394,8 @@ class Payroll::PayslipPdfGenerator
     rule(pdf, HAIR, 8)
     pdf.fill_color FAINT
     pdf.font("PlexSans") do
-      pdf.text_box "This is a computer-generated salary slip and does not require a signature.",
+      document_name = @payslip.off_cycle? ? "off-cycle payslip" : "salary slip"
+      pdf.text_box "This is a computer-generated #{document_name} and does not require a signature.",
         at: [ 0, pdf.cursor ], width: pdf.bounds.width, align: :center, size: 9
       contact = @tenant.try(:email).presence
       if contact
@@ -481,11 +483,13 @@ class Payroll::PayslipPdfGenerator
   end
 
   def pay_date
-    d = @payslip.payroll_run&.approved_at&.to_date || Date.new(@payslip.year, @payslip.month, 1).end_of_month
+    d = @payslip.payroll_run&.payment_date || @payslip.payroll_run&.approved_at&.to_date || Date.new(@payslip.year, @payslip.month, 1).end_of_month
     d.strftime("%d %b %Y")
   end
 
   def period_range
+    return @payslip.payroll_run.title if @payslip.off_cycle?
+
     s = Date.new(@payslip.year, @payslip.month, 1)
     "#{s.strftime('%d %b')} – #{s.end_of_month.strftime('%d %b %Y')}"
   end

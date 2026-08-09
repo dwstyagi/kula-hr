@@ -13,8 +13,8 @@ class PayrollRunPolicy < ApplicationPolicy
   def download_bank_file? = admin_or_hr?
 
   # Only Super Admin can approve or reject
-  def approve? = super_admin?
-  def reject?  = super_admin?
+  def approve? = super_admin? && (!record.off_cycle? || record.initiated_by_id != user.id)
+  def reject?  = approve?
 
   class Scope < ApplicationPolicy::Scope
     def resolve
