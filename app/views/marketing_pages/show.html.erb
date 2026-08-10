@@ -1,0 +1,168 @@
+<% page_url = "https://kula-hr.com/#{@page[:slug]}" %>
+<% content_for :title, @page[:title] %>
+<% content_for :description, @page[:description] %>
+<% content_for :canonical_url, page_url %>
+<% content_for :html_lang, "en-IN" %>
+<% content_for :social_image, "https://kula-hr.com/icon.png" %>
+<% content_for :structured_data do %>
+  <%= render "marketing_pages/structured_data", page: @page, page_url: page_url %>
+<% end %>
+
+<%= render "home/landing/styles" %>
+<%= render "marketing_pages/styles" %>
+<%= render "home/landing/nav" %>
+
+<main class="marketing-page">
+  <section class="ledger-grid relative overflow-hidden bg-stone-50 pt-32 pb-20 sm:pt-40 sm:pb-28">
+    <div class="absolute inset-x-0 top-0 h-px bg-stone-200"></div>
+    <div class="mx-auto grid max-w-7xl items-center gap-14 px-6 lg:grid-cols-[1.08fr_.92fr] lg:px-8">
+      <div class="hero-reveal d0">
+        <nav aria-label="Breadcrumb" class="mb-8 flex items-center gap-2 text-xs font-medium text-stone-500">
+          <a href="<%= root_path %>" class="hover:text-kula-700">Kula HR</a>
+          <span aria-hidden="true">/</span>
+          <span class="text-stone-700"><%= @page[:eyebrow] %></span>
+        </nav>
+        <p class="font-mono text-xs font-semibold uppercase tracking-[0.18em] text-kula-700"><%= @page[:eyebrow] %></p>
+        <h1 class="mt-5 max-w-3xl text-4xl font-bold tracking-[-0.035em] text-stone-950 sm:text-6xl sm:leading-[1.04]">
+          <%= @page[:headline] %>
+        </h1>
+        <p class="mt-7 max-w-2xl text-lg leading-8 text-stone-600"><%= @page[:lede] %></p>
+        <div class="mt-9 flex flex-wrap items-center gap-4">
+          <a href="<%= signup_path %>" class="btn-cta rounded-xl bg-kula-700 px-6 py-3 text-sm font-semibold text-white shadow-sm hover:bg-kula-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-kula-700">
+            Start free payroll run
+          </a>
+          <a href="<%= contact_path %>" class="rounded-xl bg-white px-6 py-3 text-sm font-semibold text-stone-700 ring-1 ring-inset ring-stone-300 hover:bg-stone-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-kula-700">
+            Ask a question
+          </a>
+        </div>
+        <p class="mt-5 text-sm text-stone-500"><%= @page[:badge] %></p>
+      </div>
+
+      <div class="hero-reveal d2 relative">
+        <div class="absolute -inset-6 -z-10 rounded-[2.25rem] bg-kula-100/70 blur-2xl"></div>
+        <div class="ledger-paper overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-[0_28px_80px_-32px_rgba(23,57,45,.34)]">
+          <div class="flex items-center justify-between border-b border-stone-200 bg-stone-50 px-5 py-4">
+            <div>
+              <p class="font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-stone-400">Kula HR ledger</p>
+              <p class="mt-1 text-sm font-semibold text-stone-800"><%= @page[:ledger_label] %></p>
+            </div>
+            <span class="inline-flex items-center gap-1.5 rounded-full bg-kula-50 px-2.5 py-1 text-xs font-medium text-kula-800 ring-1 ring-inset ring-kula-600/20">
+              <span class="size-1.5 rounded-full bg-kula-600"></span> Live
+            </span>
+          </div>
+          <dl class="divide-y divide-stone-100">
+            <% @page[:ledger_rows].each do |label, value, status| %>
+              <div class="grid grid-cols-[1fr_auto] items-center gap-6 px-5 py-4">
+                <div>
+                  <dt class="text-xs font-medium text-stone-500"><%= label %></dt>
+                  <dd class="amount mt-1 text-lg font-bold tracking-tight text-stone-900"><%= value %></dd>
+                </div>
+                <span class="font-mono text-[10px] font-semibold uppercase tracking-wider text-kula-700"><%= status %></span>
+              </div>
+            <% end %>
+          </dl>
+          <div class="border-t border-stone-200 bg-kula-950 px-5 py-4 font-mono text-xs text-kula-100">
+            <span class="text-marigold-300">✓</span> Inputs connected · outputs traceable
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="bg-white py-20 sm:py-28">
+    <div class="mx-auto max-w-7xl px-6 lg:px-8">
+      <div class="sr max-w-3xl">
+        <p class="font-mono text-xs font-semibold uppercase tracking-[0.18em] text-kula-700">Why it matters</p>
+        <h2 class="mt-4 text-3xl font-bold tracking-tight text-stone-950 sm:text-4xl"><%= @page[:problem_heading] %></h2>
+        <p class="mt-6 text-lg leading-8 text-stone-600"><%= @page[:problem_body] %></p>
+      </div>
+      <div class="sr-stagger mt-14 grid gap-5 lg:grid-cols-3">
+        <% @page[:outcomes].each do |title, body| %>
+          <article class="sr-c rounded-2xl border border-stone-200 bg-stone-50 p-7">
+            <div class="mb-6 h-1 w-10 rounded-full bg-marigold-400"></div>
+            <h3 class="text-lg font-bold tracking-tight text-stone-900"><%= title %></h3>
+            <p class="mt-3 text-sm leading-6 text-stone-600"><%= body %></p>
+          </article>
+        <% end %>
+      </div>
+    </div>
+  </section>
+
+  <section class="border-y border-stone-200 bg-stone-50 py-20 sm:py-28">
+    <div class="mx-auto max-w-7xl space-y-16 px-6 lg:px-8">
+      <% @page[:sections].each_with_index do |section, index| %>
+        <article id="<%= section[:kicker].parameterize %>" class="sr scroll-mt-28 grid items-start gap-10 lg:grid-cols-[.72fr_1.28fr] lg:gap-20">
+          <div class="lg:sticky lg:top-28">
+            <p class="font-mono text-xs font-semibold uppercase tracking-[0.18em] text-kula-700"><%= section[:kicker] %></p>
+            <p class="mt-5 font-mono text-6xl font-medium tracking-[-0.08em] text-stone-200">0<%= index + 1 %></p>
+          </div>
+          <div class="border-t-2 border-kula-700 pt-7">
+            <h2 class="text-2xl font-bold tracking-tight text-stone-950 sm:text-3xl"><%= section[:title] %></h2>
+            <p class="mt-5 text-base leading-7 text-stone-600"><%= section[:body] %></p>
+            <ul class="mt-7 grid gap-3 sm:grid-cols-3">
+              <% section[:bullets].each do |bullet| %>
+                <li class="rounded-xl border border-stone-200 bg-white p-4 text-sm font-medium leading-6 text-stone-700">
+                  <span class="mr-2 text-kula-700" aria-hidden="true">✓</span><%= bullet %>
+                </li>
+              <% end %>
+            </ul>
+          </div>
+        </article>
+      <% end %>
+    </div>
+  </section>
+
+  <section class="bg-kula-950 py-20 text-white sm:py-28">
+    <div class="mx-auto max-w-7xl px-6 lg:px-8">
+      <div class="sr max-w-2xl">
+        <p class="font-mono text-xs font-semibold uppercase tracking-[0.18em] text-marigold-300">How it works</p>
+        <h2 class="mt-4 text-3xl font-bold tracking-tight sm:text-4xl">A clear route from setup to monthly routine</h2>
+      </div>
+      <ol class="sr-stagger mt-14 grid gap-px overflow-hidden rounded-2xl bg-white/10 ring-1 ring-white/10 lg:grid-cols-4">
+        <% @page[:steps].each_with_index do |(title, body), index| %>
+          <li class="sr-c bg-kula-950 p-7">
+            <span class="font-mono text-xs text-marigold-300">0<%= index + 1 %></span>
+            <h3 class="mt-8 text-lg font-bold"><%= title %></h3>
+            <p class="mt-3 text-sm leading-6 text-kula-100/70"><%= body %></p>
+          </li>
+        <% end %>
+      </ol>
+    </div>
+  </section>
+
+  <section class="bg-white py-20 sm:py-28">
+    <div class="mx-auto grid max-w-7xl gap-12 px-6 lg:grid-cols-[.72fr_1.28fr] lg:px-8">
+      <div class="sr">
+        <p class="font-mono text-xs font-semibold uppercase tracking-[0.18em] text-kula-700">Questions</p>
+        <h2 class="mt-4 text-3xl font-bold tracking-tight text-stone-950">Useful answers before you start</h2>
+      </div>
+      <div class="sr divide-y divide-stone-200 border-y border-stone-200">
+        <% @page[:faqs].each do |question, answer| %>
+          <details class="group py-5">
+            <summary class="flex list-none items-start justify-between gap-6 text-base font-semibold text-stone-900 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-kula-700">
+              <%= question %>
+              <span class="text-kula-700 transition-transform group-open:rotate-45" aria-hidden="true">+</span>
+            </summary>
+            <p class="max-w-2xl pt-4 text-sm leading-7 text-stone-600"><%= answer %></p>
+          </details>
+        <% end %>
+      </div>
+    </div>
+  </section>
+
+  <section class="bg-marigold-100 py-16 sm:py-20">
+    <div class="mx-auto flex max-w-7xl flex-col items-start justify-between gap-8 px-6 lg:flex-row lg:items-center lg:px-8">
+      <div>
+        <p class="font-mono text-xs font-semibold uppercase tracking-[0.18em] text-marigold-800">Start with real data</p>
+        <h2 class="mt-3 text-3xl font-bold tracking-tight text-stone-950">Run your first payroll before choosing a plan.</h2>
+        <p class="mt-3 text-sm text-stone-700">Up to 25 employees · one complete run · no credit card</p>
+      </div>
+      <a href="<%= signup_path %>" class="btn-cta shrink-0 rounded-xl bg-kula-950 px-6 py-3 text-sm font-semibold text-white hover:bg-kula-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-kula-950">
+        Create your free account
+      </a>
+    </div>
+  </section>
+</main>
+
+<%= render "home/landing/footer" %>
+<%= render "marketing_pages/scripts" %>

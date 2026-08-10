@@ -6,7 +6,7 @@ class BetaGuideController < ApplicationController
   layout false
 
   def show
-    @app_domain = Rails.env.development? ? "lvh.me:3000" : ENV.fetch("APP_DOMAIN", "kulahr.com")
+    @app_domain = canonical_app_domain
     @platform_url = "#{request.protocol}#{@app_domain}"
     @tenant_url   = "#{request.protocol}[subdomain].#{@app_domain}"
   end

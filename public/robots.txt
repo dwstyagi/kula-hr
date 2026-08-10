@@ -1,1 +1,6 @@
-# See https://www.robotstxt.org/robotstxt.html for documentation on how to use the robots.txt file
+User-agent: *
+Allow: /
+
+# Private and application pages remain crawlable so search engines can see
+# their X-Robots-Tag: noindex response header and remove existing results.
+Sitemap: https://kula-hr.com/sitemap.xml

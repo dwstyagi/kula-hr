@@ -1,0 +1,48 @@
+<%
+structured_data = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "#{homepage_url}#organization",
+      name: "Kula HR",
+      url: homepage_url,
+      logo: "#{homepage_url}icon.png"
+    },
+    {
+      "@type": "WebSite",
+      "@id": "#{homepage_url}#website",
+      name: "Kula HR",
+      url: homepage_url,
+      inLanguage: "en-IN",
+      publisher: { "@id": "#{homepage_url}#organization" }
+    },
+    {
+      "@type": "SoftwareApplication",
+      "@id": "#{homepage_url}#software",
+      name: "Kula HR",
+      url: homepage_url,
+      description: homepage_description,
+      applicationCategory: "BusinessApplication",
+      applicationSubCategory: "Human Resources Software",
+      operatingSystem: "Web",
+      inLanguage: "en-IN",
+      featureList: [
+        "Indian payroll processing",
+        "PF, ESI, Professional Tax and TDS calculations",
+        "Leave and attendance management",
+        "Employee self-service portal",
+        "Payslips, bank files and statutory reports"
+      ],
+      offers: {
+        "@type": "Offer",
+        price: "99",
+        priceCurrency: "INR",
+        description: "Per employee per month after one free payroll run"
+      },
+      publisher: { "@id": "#{homepage_url}#organization" }
+    }
+  ]
+}
+%>
+<script type="application/ld+json"><%= raw(json_escape(structured_data.to_json)) %></script>

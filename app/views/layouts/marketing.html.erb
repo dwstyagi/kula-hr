@@ -1,8 +1,40 @@
+<% page_title = content_for(:title).presence || "Kula HR" %>
+<% page_description = content_for(:description).presence %>
+<% canonical_url = content_for(:canonical_url).presence %>
+<% social_image = content_for(:social_image).presence %>
 <!DOCTYPE html>
-<html>
+<html lang="<%= content_for(:html_lang).presence || "en" %>">
   <head>
-    <title><%= content_for(:title) || "Kula HR" %></title>
+    <title><%= page_title %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
+    <% if page_description %>
+      <meta name="description" content="<%= page_description %>">
+    <% end %>
+    <% if canonical_url %>
+      <link rel="canonical" href="<%= canonical_url %>">
+    <% end %>
+
+    <% if page_description && canonical_url %>
+      <meta property="og:type" content="website">
+      <meta property="og:site_name" content="Kula HR">
+      <meta property="og:locale" content="en_IN">
+      <meta property="og:title" content="<%= page_title %>">
+      <meta property="og:description" content="<%= page_description %>">
+      <meta property="og:url" content="<%= canonical_url %>">
+      <meta name="twitter:card" content="summary">
+      <meta name="twitter:title" content="<%= page_title %>">
+      <meta name="twitter:description" content="<%= page_description %>">
+      <% if social_image %>
+        <meta property="og:image" content="<%= social_image %>">
+        <meta property="og:image:width" content="512">
+        <meta property="og:image:height" content="512">
+        <meta property="og:image:alt" content="Kula HR logo">
+        <meta name="twitter:image" content="<%= social_image %>">
+        <meta name="twitter:image:alt" content="Kula HR logo">
+      <% end %>
+    <% end %>
+
+    <%= yield :structured_data %>
     <%= csrf_meta_tags %>
     <meta name="view-transition" content="same-origin">    <%= csp_meta_tag %>
     <link rel="icon" href="/favicon.ico" sizes="any">

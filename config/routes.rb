@@ -8,6 +8,15 @@ Rails.application.routes.draw do
   # Health check
   get "up" => "rails/health#show", as: :rails_health_check
 
+  # Keep the apex domain as the single canonical host. Without this constraint,
+  # Rails treats `www` as a tenant subdomain and routes visitors to tenant auth.
+  constraints subdomain: "www" do
+    match "(*path)", to: redirect(status: 301) { |_params, request|
+      canonical_host = request.host_with_port.sub(/\Awww\./, "")
+      "#{request.protocol}#{canonical_host}#{request.fullpath}"
+    }, via: :all
+  end
+
   # Action Cable WebSocket
   mount ActionCable.server => "/cable"
 
@@ -219,6 +228,28 @@ Rails.application.routes.draw do
 
   # === Root domain routes (no subdomain) ===
   root "home#index"
+  get "sitemap.xml", to: "sitemaps#show", defaults: { format: :xml }, as: :sitemap
+  get "payroll-software-india", to: "marketing_pages#show",
+      defaults: { page: "payroll" }, as: :payroll_software_india
+  get "hrms-software-for-small-business", to: "marketing_pages#show",
+      defaults: { page: "hrms" }, as: :hrms_software_small_business
+  get "leave-management-software", to: "marketing_pages#show",
+      defaults: { page: "leave" }, as: :leave_management_software
+  get "attendance-management-software", to: "marketing_pages#show",
+      defaults: { page: "attendance" }, as: :attendance_management_software
+  get "pf-esi-payroll-compliance", to: "marketing_pages#show",
+      defaults: { page: "compliance" }, as: :payroll_compliance
+  get "employee-self-service-portal", to: "marketing_pages#show",
+      defaults: { page: "employee_portal" }, as: :employee_self_service_portal
+  get "pricing", to: "marketing_pages#show",
+      defaults: { page: "pricing" }, as: :pricing
+  get "about", to: "company_pages#about", as: :about
+  get "security", to: "company_pages#security", as: :security
+  get "resources", to: "resources#index", as: :resources
+  get "resources/payroll-calculators", to: "resources#calculators", as: :payroll_calculators
+  get "resources/payroll-compliance-calendar", to: "resources#compliance_calendar", as: :payroll_compliance_calendar
+  get "resources/payroll-checklist", to: "resources#payroll_checklist", as: :payroll_checklist
+  get "resources/professional-tax-guide", to: "resources#professional_tax", as: :professional_tax_guide
   get "privacy-policy", to: "home#privacy_policy", as: :privacy_policy
   get "terms-of-service", to: "home#terms_of_service", as: :terms_of_service
   get "signup", to: "signups#new"

@@ -150,9 +150,9 @@
               <div class="min-w-0 flex-1">
                 <p class="text-sm font-medium text-stone-900 truncate"><%= tenant[:name] %></p>
                 <p class="text-xs text-stone-400 truncate">
-                  <% tenant_url = root_url(subdomain: tenant[:subdomain], host: ENV.fetch("APP_DOMAIN", "lvh.me")) %>
+                  <% tenant_url = root_url(subdomain: tenant[:subdomain], host: ENV.fetch("APP_DOMAIN", "kula-hr.com")) %>
                   <%= link_to tenant_url, target: "_blank", class: "text-kula-600 hover:underline font-mono" do %>
-                    <%= tenant[:subdomain] %>.<%= ENV.fetch("APP_DOMAIN", "lvh.me") %>
+                    <%= tenant[:subdomain] %>.<%= ENV.fetch("APP_DOMAIN", "kula-hr.com") %>
                   <% end %>
                   &middot; <%= tenant[:employee_count] %> emp
                 </p>
@@ -259,7 +259,7 @@
             <% @stats.churn_risk_tenants.each do |tenant| %>
               <p class="text-xs text-amber-700">
                 <%= tenant[:name] %>
-                <% churn_tenant_url = root_url(subdomain: tenant[:subdomain], host: ENV.fetch("APP_DOMAIN", "lvh.me")) %>
+                <% churn_tenant_url = root_url(subdomain: tenant[:subdomain], host: ENV.fetch("APP_DOMAIN", "kula-hr.com")) %>
                 <%= link_to churn_tenant_url.sub(/\Ahttps?:\/\//, "").chomp("/"), churn_tenant_url, target: "_blank", class: "text-amber-500 hover:underline font-mono" %>
                 &middot; Last payroll: <%= tenant[:last_payroll] %>
               </p>
@@ -276,7 +276,7 @@
             <% @stats.inactive_tenants.each do |tenant| %>
               <p class="text-xs text-stone-600">
                 <%= tenant[:name] %>
-                <% inactive_tenant_url = root_url(subdomain: tenant[:subdomain], host: ENV.fetch("APP_DOMAIN", "lvh.me")) %>
+                <% inactive_tenant_url = root_url(subdomain: tenant[:subdomain], host: ENV.fetch("APP_DOMAIN", "kula-hr.com")) %>
                 <%= link_to inactive_tenant_url.sub(/\Ahttps?:\/\//, "").chomp("/"), inactive_tenant_url, target: "_blank", class: "text-stone-400 hover:underline font-mono" %>
               </p>
             <% end %>

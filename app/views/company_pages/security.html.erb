@@ -1,0 +1,68 @@
+<%= render "shared/public_page_meta",
+      title: "Security & Data Handling | Kula HR",
+      description: "Learn how Kula HR approaches tenant isolation, access control, authentication, data handling and responsible security disclosure.",
+      canonical_path: security_path %>
+
+<%= render "home/landing/styles" %>
+<%= render "resources/styles" %>
+<%= render "home/landing/nav" %>
+
+<main class="resource-page">
+  <%= render "resources/hero",
+        eyebrow: "Security & data handling",
+        headline: "Clear controls. Clear boundaries. No borrowed badges.",
+        lede: "Kula HR handles sensitive employee and payroll information. This page describes the controls present in the product and the claims we do—and do not—make.",
+        stamp: "Public security summary · No certification claims · Updated as controls change" %>
+
+  <section class="bg-white py-20 sm:py-28">
+    <div class="mx-auto max-w-7xl px-6 lg:px-8">
+      <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <% [
+          ["Tenant isolation", "Company data is scoped to its tenant. Requests also verify that the signed-in user belongs to the company subdomain being accessed."],
+          ["Role-based access", "Administrative and employee surfaces use role and policy checks so a signed-in user only reaches permitted records and actions."],
+          ["Authentication", "Passwords are stored as one-way hashes. Sessions use the application's authenticated account flow rather than exposing credentials to company admins."],
+          ["Secure public scheme", "Public production requests are served over HTTPS at the web edge, and the application treats forwarded production requests as secure when generating links and cookies."],
+          ["Controlled payroll states", "Attendance locks and payroll approval states reduce accidental changes after inputs have been reviewed."],
+          ["Search privacy", "Sign-in, signup, admin, employee portal and platform administration responses are explicitly marked noindex and nofollow."]
+        ].each do |title, body| %>
+          <article class="resource-paper rounded-2xl border border-stone-200 bg-stone-50 p-7">
+            <p class="font-mono text-[10px] font-semibold uppercase tracking-[.18em] text-kula-700">Control</p>
+            <h2 class="mt-5 text-xl font-bold tracking-tight text-stone-950"><%= title %></h2>
+            <p class="mt-4 text-sm leading-7 text-stone-600"><%= body %></p>
+          </article>
+        <% end %>
+      </div>
+    </div>
+  </section>
+
+  <section class="border-y border-stone-200 bg-stone-50 py-20 sm:py-24">
+    <div class="mx-auto grid max-w-7xl gap-10 px-6 lg:grid-cols-2 lg:px-8">
+      <article class="rounded-2xl border-2 border-kula-800 bg-kula-950 p-8 text-white">
+        <p class="font-mono text-xs font-semibold uppercase tracking-[.18em] text-marigold-300">Current position</p>
+        <h2 class="mt-5 text-2xl font-bold">What we do not claim</h2>
+        <p class="mt-5 text-sm leading-7 text-kula-100/75">Kula HR does not currently claim SOC 2 or ISO 27001 certification. This page is a product-control summary, not an independent audit report. If a control or certification is important to your procurement process, ask us directly before relying on it.</p>
+      </article>
+      <article class="rounded-2xl border border-stone-200 bg-white p-8">
+        <p class="font-mono text-xs font-semibold uppercase tracking-[.18em] text-kula-700">Report a concern</p>
+        <h2 class="mt-5 text-2xl font-bold text-stone-950">Responsible disclosure</h2>
+        <p class="mt-5 text-sm leading-7 text-stone-600">If you believe you have found a security issue, send the affected URL, impact and reproducible steps to <a href="mailto:security@kula-hr.com" class="font-semibold text-kula-700 underline decoration-kula-300 underline-offset-4">security@kula-hr.com</a>. Please avoid accessing or changing data that is not yours.</p>
+        <p class="mt-4 text-xs text-stone-500">For privacy and general product questions, use hello@kula-hr.com.</p>
+      </article>
+    </div>
+  </section>
+
+  <section class="bg-white py-16 sm:py-20">
+    <div class="mx-auto max-w-7xl px-6 lg:px-8">
+      <div class="flex flex-col justify-between gap-7 rounded-2xl border border-stone-200 bg-marigold-50 p-8 lg:flex-row lg:items-center">
+        <div>
+          <h2 class="text-2xl font-bold tracking-tight text-stone-950">Review the legal data terms too.</h2>
+          <p class="mt-2 text-sm leading-6 text-stone-600">The privacy policy describes collected data, its use and your choices.</p>
+        </div>
+        <a href="<%= privacy_policy_path %>" class="shrink-0 rounded-xl bg-kula-800 px-5 py-3 text-center text-sm font-semibold text-white hover:bg-kula-900">Read privacy policy</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<%= render "home/landing/footer" %>
+<%= render "marketing_pages/scripts" %>

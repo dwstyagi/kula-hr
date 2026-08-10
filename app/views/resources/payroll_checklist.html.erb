@@ -1,0 +1,88 @@
+<%= render "shared/public_page_meta",
+      title: "FY 2026–27 Indian Payroll Checklist | Kula HR",
+      description: "Use this printable Indian payroll checklist for financial-year setup, monthly inputs, statutory review, salary payment, filing and payslips.",
+      canonical_path: payroll_checklist_path %>
+
+<%= render "home/landing/styles" %>
+<%= render "resources/styles" %>
+<%= render "home/landing/nav" %>
+
+<main class="resource-page">
+  <%= render "resources/hero",
+        parent: "Resources",
+        eyebrow: "Payroll checklist",
+        headline: "A repeatable close for every payroll month.",
+        lede: "Print this checklist or work through it on screen. It separates setup, inputs, calculation review, payment and filing so a deadline does not hide a data problem.",
+        stamp: "Tax year 2026–27 · Printable · Browser checkboxes reset on refresh" %>
+
+  <section class="bg-white py-16 sm:py-24">
+    <div class="mx-auto max-w-5xl px-6 lg:px-8">
+      <div class="print-hide mb-10 flex flex-wrap items-center justify-between gap-4">
+        <p class="text-sm text-stone-500">Tip: use your browser’s Print command to save a clean PDF.</p>
+        <button type="button" onclick="window.print()" class="rounded-xl bg-kula-800 px-5 py-3 text-sm font-semibold text-white hover:bg-kula-900">Print checklist</button>
+      </div>
+
+      <% sections = {
+        "01 · Financial-year setup" => [
+          "Confirm payroll year, pay frequency, cut-off dates and approval owners.",
+          "Review salary structures, statutory settings and employee eligibility flags.",
+          "Collect current PAN, UAN, ESIC number, bank details and tax-regime selections.",
+          "Confirm company and work-location states used for Professional Tax and holidays."
+        ],
+        "02 · Before calculation" => [
+          "Reconcile active employees, joiners, exits and unpaid absences for the pay period.",
+          "Approve leave and lock the attendance summary used for paid-day proration.",
+          "Apply effective-dated salary revisions, bonuses, reimbursements and recoveries.",
+          "Resolve missing statutory identifiers and invalid bank details before processing."
+        ],
+        "03 · Payroll review" => [
+          "Compare gross pay and net pay with the previous month; explain material movements.",
+          "Review PF wages, employee/employer PF and EPS allocation for eligible employees.",
+          "Review ESI eligibility and contributions, including employees crossing the wage ceiling mid-period.",
+          "Verify state-specific PT and salary TDS against current official rules and declarations.",
+          "Check negative or zero net pay, unusual LOP, duplicate payments and rounding differences.",
+          "Tie total net pay to the bank-transfer file and total deductions to payroll reports."
+        ],
+        "04 · Approve, pay & publish" => [
+          "Record payroll reviewer and approver sign-off before releasing the bank file.",
+          "Upload the approved salary file and retain the bank acknowledgement or payment reference.",
+          "Publish payslips only after paid values match the approved run.",
+          "Restrict reopen/reprocess actions and document any post-approval correction."
+        ],
+        "05 · Deposit, file & retain" => [
+          "Deposit salary TDS by the applicable date and retain the challan reference.",
+          "Deposit EPF and ESI contributions and verify portal acknowledgements.",
+          "Complete state PT payment/return steps using the relevant state portal.",
+          "Archive payroll register, bank proof, payslips, statutory exports and approval evidence together.",
+          "Update year-to-date earnings and deduction totals for the next payroll run."
+        ]
+      } %>
+
+      <div class="space-y-8">
+        <% sections.each do |heading, items| %>
+          <section class="resource-paper rounded-2xl border border-stone-200 bg-stone-50 p-7 sm:p-9">
+            <h2 class="font-mono text-sm font-semibold uppercase tracking-[.14em] text-kula-800"><%= heading %></h2>
+            <div class="resource-rule mt-5 h-px"></div>
+            <ul class="mt-6 space-y-5">
+              <% items.each do |item| %>
+                <li>
+                  <label class="flex cursor-pointer items-start gap-4 text-sm leading-7 text-stone-700">
+                    <input type="checkbox" class="mt-1.5 size-4 shrink-0 rounded border-stone-300">
+                    <span><%= item %></span>
+                  </label>
+                </li>
+              <% end %>
+            </ul>
+          </section>
+        <% end %>
+      </div>
+
+      <div class="mt-10">
+        <%= render "resources/review_note", reviewed: @last_reviewed, text: "This operational checklist is not legal, tax or accounting advice. Add organisation-specific controls and verify current filing requirements with the relevant authority or adviser." %>
+      </div>
+    </div>
+  </section>
+</main>
+
+<%= render "home/landing/footer" %>
+<%= render "marketing_pages/scripts" %>

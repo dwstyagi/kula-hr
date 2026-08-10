@@ -9,7 +9,7 @@ module ApplicationCable
     private
 
     def find_verified_user
-      if (user = env["warden"].user)
+      if (user = env["warden"].user(scope: :user, run_callbacks: false))
         user
       else
         reject_unauthorized_connection
