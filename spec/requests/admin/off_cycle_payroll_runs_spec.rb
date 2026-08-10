@@ -143,4 +143,16 @@ RSpec.describe "Admin::OffCyclePayrollRuns", type: :request do
     expect(run.reload).to be_approved
     expect(payslip.reload).to be_locked
   end
+
+  it "renders bank formats in a dropdown for approved runs" do
+    run = create_run(status: "approved")
+    sign_in_as(hr_user)
+
+    get bank_file_admin_off_cycle_payroll_run_path(run), headers: headers
+
+    expect(response).to have_http_status(:ok)
+    expect(response.body).to include('name="bank"')
+    expect(response.body).to include("Generic CSV (.csv)", "State Bank of India (.txt)")
+    expect(response.body).not_to include('type="radio"')
+  end
 end

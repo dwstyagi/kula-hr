@@ -378,9 +378,12 @@ RSpec.describe "Admin::PayrollRuns", type: :request do
 
     before { sign_in(hr_user) }
 
-    it "returns 200" do
+    it "renders a bank format dropdown" do
       get bank_file_admin_payroll_run_path(run), headers: headers
       expect(response).to have_http_status(:ok)
+      expect(response.body).to include('name="bank"')
+      expect(response.body).to include("Generic CSV (.csv)", "HDFC Bank (.txt)")
+      expect(response.body).not_to include('type="radio"')
     end
   end
 
