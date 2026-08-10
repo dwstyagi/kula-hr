@@ -60,7 +60,7 @@ Rails.application.configure do
   # Set host to be used by links generated in mailer templates.
   # KulaDeviseMailer overrides this per-tenant, but this is the fallback.
   config.action_mailer.default_url_options = {
-    host: ENV.fetch("APP_DOMAIN", "kulahr.com"),
+    host: ENV.fetch("APP_DOMAIN", "kula-hr.com"),
     protocol: "https"
   }
 
@@ -85,7 +85,7 @@ Rails.application.configure do
   config.active_record.attributes_for_inspect = [ :id ]
 
   # Allow root domain and all tenant subdomains.
-  app_domain = ENV.fetch("APP_DOMAIN", "kulahr.com")
+  app_domain = ENV.fetch("APP_DOMAIN", "kula-hr.com")
   config.hosts << app_domain
   config.hosts << /\A.+\.#{Regexp.escape(app_domain)}\z/
 

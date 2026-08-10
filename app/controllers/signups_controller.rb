@@ -4,6 +4,7 @@ class SignupsController < ApplicationController
   skip_after_action :verify_policy_scoped
 
   layout "marketing"
+  before_action :set_app_domain
 
   def new
     @signup_form = SignupForm.new
@@ -28,6 +29,10 @@ class SignupsController < ApplicationController
   end
 
   private
+
+  def set_app_domain
+    @app_domain = canonical_app_domain
+  end
 
   def signup_params
     params.require(:signup_form).permit(

@@ -39,7 +39,7 @@
 
           <div>
             <label class="block text-sm font-medium text-stone-700">Subdomain <span class="text-red-500">*</span></label>
-            <% app_domain = ENV.fetch("APP_DOMAIN", "lvh.me") %>
+            <% app_domain = ENV.fetch("APP_DOMAIN", "kula-hr.com") %>
             <div class="mt-1 flex rounded-lg border border-stone-300 shadow-sm focus-within:border-kula-500 focus-within:ring-1 focus-within:ring-kula-500 overflow-hidden">
               <%= f.text_field :subdomain, class: "block w-full focus:outline-none px-4 py-3 sm:text-sm", placeholder: "acme" %>
               <span class="inline-flex items-center px-3 bg-stone-50 text-stone-500 text-sm border-l border-stone-300 whitespace-nowrap shrink-0">.<%= app_domain %></span>

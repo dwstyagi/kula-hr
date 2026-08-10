@@ -1,0 +1,35 @@
+<%
+structured_data = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebPage",
+      "@id": "#{page_url}#webpage",
+      url: page_url,
+      name: page[:title],
+      description: page[:description],
+      inLanguage: "en-IN",
+      isPartOf: { "@id": "https://kula-hr.com/#website" },
+      about: { "@id": "https://kula-hr.com/#software" }
+    },
+    {
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        { "@type": "ListItem", position: 1, name: "Kula HR", item: "https://kula-hr.com/" },
+        { "@type": "ListItem", position: 2, name: page[:eyebrow], item: page_url }
+      ]
+    },
+    {
+      "@type": "FAQPage",
+      mainEntity: page[:faqs].map do |question, answer|
+        {
+          "@type": "Question",
+          name: question,
+          acceptedAnswer: { "@type": "Answer", text: answer }
+        }
+      end
+    }
+  ]
+}
+%>
+<script type="application/ld+json"><%= raw(json_escape(structured_data.to_json)) %></script>

@@ -29,7 +29,7 @@
               <div class="text-sm font-medium text-stone-900"><%= tenant.name %></div>
             </td>
             <td class="whitespace-nowrap">
-              <% tenant_url = root_url(subdomain: tenant.subdomain, host: ENV.fetch("APP_DOMAIN", "lvh.me")) %>
+              <% tenant_url = root_url(subdomain: tenant.subdomain, host: ENV.fetch("APP_DOMAIN", "kula-hr.com")) %>
               <%= link_to tenant_url, target: "_blank", class: "text-sm text-kula-700 hover:underline font-mono" do %>
                 <%= tenant_url.sub(/\Ahttps?:\/\//, "") %>
               <% end %>

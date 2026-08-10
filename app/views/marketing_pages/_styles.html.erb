@@ -1,0 +1,28 @@
+<style>
+  .ledger-grid {
+    background-image:
+      linear-gradient(rgba(120, 113, 108, 0.07) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(120, 113, 108, 0.07) 1px, transparent 1px);
+    background-size: 32px 32px;
+  }
+
+  .ledger-paper {
+    transform: rotate(0.6deg);
+    transition: transform 300ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .ledger-paper:hover { transform: rotate(0deg) translateY(-4px); }
+
+  /* Landing-page content stays readable without JavaScript. The homepage uses
+     scroll reveals; these search pages favour progressive rendering. */
+  .marketing-page .sr,
+  .marketing-page .sr-stagger > .sr-c {
+    opacity: 1;
+    transform: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ledger-paper,
+    .ledger-paper:hover { transform: none; transition: none; }
+  }
+</style>

@@ -1,0 +1,38 @@
+<style>
+  .resource-grid {
+    background-color: #fafaf9;
+    background-image:
+      linear-gradient(rgba(120, 113, 108, .08) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(120, 113, 108, .08) 1px, transparent 1px);
+    background-size: 28px 28px;
+  }
+
+  .resource-paper {
+    box-shadow: 0 24px 60px -36px rgba(23, 57, 45, .42);
+  }
+
+  .resource-rule {
+    background-image: repeating-linear-gradient(90deg, #d6d3d1 0, #d6d3d1 4px, transparent 4px, transparent 9px);
+  }
+
+  .resource-page input[type="number"] {
+    font-variant-numeric: tabular-nums;
+  }
+
+  .resource-page input[type="checkbox"] {
+    accent-color: #36775f;
+  }
+
+  .resource-page .sr,
+  .resource-page .sr-stagger > .sr-c {
+    opacity: 1;
+    transform: none;
+  }
+
+  @media print {
+    #site-header, footer, .print-hide { display: none !important; }
+    .resource-page { padding-top: 0 !important; }
+    .resource-grid { background: #fff !important; }
+    .resource-paper { box-shadow: none !important; break-inside: avoid; }
+  }
+</style>

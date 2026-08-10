@@ -6,7 +6,7 @@ class HomeController < ApplicationController
   layout "marketing"
 
   def index
-    @app_domain = Rails.env.development? ? "lvh.me:3000" : ENV.fetch("APP_DOMAIN", "kulahr.com")
+    @app_domain = canonical_app_domain
   end
 
   def privacy_policy

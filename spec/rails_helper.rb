@@ -29,6 +29,12 @@ RSpec.configure do |config|
   # FactoryBot
   config.include FactoryBot::Syntax::Methods
 
+  # Request specs should use the same apex host configured for test URLs.
+  # Rails defaults to www.example.com, which is intentionally canonicalized.
+  config.before(:each, type: :request) do
+    host! "lvh.me"
+  end
+
   # DatabaseCleaner
   config.before(:suite) do
     DatabaseCleaner.strategy = :transaction

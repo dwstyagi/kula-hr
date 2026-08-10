@@ -1,0 +1,89 @@
+<%= render "shared/public_page_meta",
+      title: "Indian Payroll Compliance Calendar 2026–27 | Kula HR",
+      description: "Plan recurring salary TDS, EPF and ESI deposit dates for tax year 2026–27 with links to official government guidance.",
+      canonical_path: payroll_compliance_calendar_path %>
+
+<%= render "home/landing/styles" %>
+<%= render "resources/styles" %>
+<%= render "home/landing/nav" %>
+
+<main class="resource-page">
+  <%= render "resources/hero",
+        parent: "Resources",
+        eyebrow: "Compliance calendar 2026–27",
+        headline: "Three recurring dates. Twelve months of evidence.",
+        lede: "Use this planning calendar for routine salary TDS, EPF and ESI deposits. Add your state Professional Tax, quarterly TDS returns and organisation-specific obligations separately.",
+        stamp: "Tax year 1 April 2026–31 March 2027 · Dates shown in IST" %>
+
+  <section class="bg-white py-16 sm:py-24">
+    <div class="mx-auto max-w-6xl px-6 lg:px-8">
+      <div class="grid gap-5 sm:grid-cols-3">
+        <% [
+          ["07", "Salary TDS", "Generally the 7th after month-end; March is generally due 30 April for non-government deductors."],
+          ["15", "EPF contribution", "Generally within 15 days after the close of the month."],
+          ["15", "ESI contribution", "Generally within 15 days after the end of the wage month."]
+        ].each do |day, label, note| %>
+          <article class="resource-paper rounded-2xl border border-stone-200 bg-stone-50 p-6">
+            <p class="font-mono text-4xl font-semibold tracking-[-.06em] text-kula-900"><%= day %></p>
+            <h2 class="mt-5 text-lg font-bold text-stone-950"><%= label %></h2>
+            <p class="mt-3 text-xs leading-6 text-stone-600"><%= note %></p>
+          </article>
+        <% end %>
+      </div>
+
+      <% periods = 12.times.map { |offset| Date.new(2026, 4, 1) >> offset } %>
+      <div class="resource-paper mt-10 overflow-hidden rounded-2xl border border-stone-200 bg-white">
+        <div class="overflow-x-auto">
+          <table class="min-w-full border-collapse text-left">
+            <thead class="bg-kula-950 text-white">
+              <tr>
+                <th class="px-5 py-4 font-mono text-xs uppercase tracking-[.14em]">Payroll month</th>
+                <th class="px-5 py-4 font-mono text-xs uppercase tracking-[.14em]">Salary TDS</th>
+                <th class="px-5 py-4 font-mono text-xs uppercase tracking-[.14em]">EPF</th>
+                <th class="px-5 py-4 font-mono text-xs uppercase tracking-[.14em]">ESI</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-stone-200">
+              <% periods.each do |period| %>
+                <% following_month = period.next_month %>
+                <% tds_due = period.month == 3 ? Date.new(following_month.year, 4, 30) : Date.new(following_month.year, following_month.month, 7) %>
+                <% contribution_due = Date.new(following_month.year, following_month.month, 15) %>
+                <tr class="odd:bg-white even:bg-stone-50">
+                  <th scope="row" class="whitespace-nowrap px-5 py-4 text-sm font-semibold text-stone-900"><%= period.strftime("%B %Y") %></th>
+                  <td class="whitespace-nowrap px-5 py-4 font-mono text-sm text-stone-700"><%= tds_due.strftime("%-d %b %Y") %></td>
+                  <td class="whitespace-nowrap px-5 py-4 font-mono text-sm text-stone-700"><%= contribution_due.strftime("%-d %b %Y") %></td>
+                  <td class="whitespace-nowrap px-5 py-4 font-mono text-sm text-stone-700"><%= contribution_due.strftime("%-d %b %Y") %></td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="mt-10 grid gap-6 lg:grid-cols-[1.2fr_.8fr]">
+        <%= render "resources/review_note", reviewed: @last_reviewed, text: "This is a planning aid, not legal or tax advice. Government notifications, holidays and taxpayer type can change an applicable date. Confirm each obligation before payment." %>
+        <aside class="rounded-2xl border border-stone-200 bg-stone-50 p-6">
+          <p class="font-mono text-xs font-semibold uppercase tracking-[.16em] text-kula-700">Source desk</p>
+          <ul class="mt-4 space-y-3 text-sm">
+            <% @official_sources.each_value do |source| %>
+              <li><a href="<%= source[:url] %>" target="_blank" rel="noopener noreferrer" class="font-semibold text-kula-800 underline decoration-kula-300 underline-offset-4"><%= source[:label] %></a></li>
+            <% end %>
+          </ul>
+        </aside>
+      </div>
+
+      <section class="mt-14 rounded-2xl border border-stone-200 bg-stone-50 p-7 sm:p-9">
+        <p class="font-mono text-xs font-semibold uppercase tracking-[.16em] text-kula-700">Add to your internal calendar</p>
+        <h2 class="mt-4 text-2xl font-bold text-stone-950">Dates this table intentionally does not guess.</h2>
+        <div class="mt-7 grid gap-4 sm:grid-cols-2">
+          <% ["Quarterly TDS statements and Form 16 milestones", "State-specific Professional Tax payment and return dates", "Labour welfare fund and state establishment filings", "Organisation-specific payroll cut-off, review and bank dates"].each do |item| %>
+            <p class="rounded-xl border border-stone-200 bg-white p-4 text-sm leading-6 text-stone-700"><span class="mr-2 text-marigold-600">＋</span><%= item %></p>
+          <% end %>
+        </div>
+      </section>
+    </div>
+  </section>
+</main>
+
+<%= render "home/landing/footer" %>
+<%= render "marketing_pages/scripts" %>

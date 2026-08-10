@@ -1,0 +1,22 @@
+<% page_url = "https://kula-hr.com#{canonical_path}" %>
+<% content_for :title, title %>
+<% content_for :description, description %>
+<% content_for :canonical_url, page_url %>
+<% content_for :html_lang, "en-IN" %>
+<% content_for :social_image, "https://kula-hr.com/icon.png" %>
+<% content_for :structured_data do %>
+  <script type="application/ld+json">
+    <%= raw json_escape({
+      "@context": "https://schema.org",
+      "@type": local_assigns.fetch(:schema_type, "WebPage"),
+      name: title,
+      description: description,
+      url: page_url,
+      isPartOf: {
+        "@type": "WebSite",
+        name: "Kula HR",
+        url: "https://kula-hr.com/"
+      }
+    }.to_json) %>
+  </script>
+<% end %>

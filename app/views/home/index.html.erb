@@ -1,6 +1,17 @@
 <%# ── Kula HR — Landing Page ──
      Each section lives in its own partial under app/views/home/landing/.
      This file just assembles them in order. %>
+<% homepage_url = "https://kula-hr.com/" %>
+<% homepage_description = "Run payroll, attendance, leave, PF, ESI, Professional Tax and TDS from one HRMS built for growing Indian companies. Start with one free payroll run." %>
+<% content_for :title, "Payroll & HRMS Software for Indian Companies | Kula HR" %>
+<% content_for :description, homepage_description %>
+<% content_for :canonical_url, homepage_url %>
+<% content_for :html_lang, "en-IN" %>
+<% content_for :social_image, "#{homepage_url}icon.png" %>
+<% content_for :structured_data do %>
+  <%= render "home/structured_data", homepage_url: homepage_url, homepage_description: homepage_description %>
+<% end %>
+
 <%= render "home/landing/styles" %>
 <%= render "home/landing/nav" %>
 <main>
