@@ -1,0 +1,50 @@
+<%# Cover art for a post. Uses hero_image from frontmatter when a real image
+    exists; otherwise draws a branded panel so the card never looks unfinished.
+    The motif is derived from the slug, so each post gets a stable variation. %>
+<% seed = post.slug.sum %>
+<% tall = local_assigns.fetch(:tall, false) %>
+<%# A post can appear more than once on a page (featured and in the full list),
+    so gradient/pattern ids need a per-render token: SVG url(#id) references
+    resolve to the first match in the document. %>
+<% uid = "#{post.slug}-#{SecureRandom.hex(3)}" %>
+
+<% if post.hero_image.present? %>
+  <img src="<%= post.hero_image %>" alt="" loading="lazy"
+       class="h-full w-full rounded-xl object-cover" width="1200" height="675">
+<% else %>
+  <svg viewBox="0 0 <%= tall ? "640 340" : "640 220" %>" role="img"
+       aria-label="<%= post.category %>" preserveAspectRatio="xMidYMid slice"
+       class="h-full w-full rounded-xl">
+    <defs>
+      <linearGradient id="cov-<%= uid %>" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color="#17392d"/>
+        <stop offset="100%" stop-color="<%= seed.even? ? "#2f6a55" : "#36775f" %>"/>
+      </linearGradient>
+      <pattern id="grid-<%= uid %>" width="26" height="26" patternUnits="userSpaceOnUse">
+        <path d="M 26 0 L 0 0 0 26" fill="none" stroke="rgba(255,255,255,.09)" stroke-width="1"/>
+      </pattern>
+    </defs>
+
+    <rect width="100%" height="100%" fill="url(#cov-<%= uid %>)"/>
+    <rect width="100%" height="100%" fill="url(#grid-<%= uid %>)"/>
+
+    <%# Ledger motif: stacked rules suggesting a payslip or statement %>
+    <g transform="translate(<%= tall ? 56 : 40 %>, <%= tall ? 96 : 56 %>)" opacity=".85">
+      <% 5.times do |row| %>
+        <% width = [ 250, 190, 220, 160, 205 ][(seed + row) % 5] %>
+        <rect x="0" y="<%= row * 26 %>" width="<%= width %>" height="7" rx="3.5"
+              fill="rgba(255,255,255,<%= row.zero? ? ".55" : ".22" %>)"/>
+        <rect x="<%= tall ? 400 : 330 %>" y="<%= row * 26 %>" width="<%= 46 + ((seed + row) % 4) * 14 %>" height="7" rx="3.5"
+              fill="rgba(232,168,35,<%= row.zero? ? ".95" : ".4" %>)"/>
+      <% end %>
+      <rect x="0" y="140" width="<%= tall ? 486 : 416 %>" height="2" rx="1" fill="rgba(255,255,255,.3)"/>
+    </g>
+
+    <text x="<%= tall ? 56 : 40 %>" y="<%= tall ? 300 : 190 %>"
+          font-family="ui-monospace, SFMono-Regular, monospace"
+          font-size="<%= tall ? 17 : 15 %>" font-weight="600"
+          letter-spacing="2.4" fill="rgba(255,255,255,.72)">
+      <%= post.category.upcase %>
+    </text>
+  </svg>
+<% end %>

@@ -22,15 +22,19 @@ class SitemapsController < ApplicationController
       pricing_url(**url_options),
       about_url(**url_options),
       security_url(**url_options),
+      blog_url(**url_options),
       resources_url(**url_options),
       payroll_calculators_url(**url_options),
+      pf_calculator_url(**url_options),
+      esi_calculator_url(**url_options),
+      ctc_calculator_url(**url_options),
       payroll_compliance_calendar_url(**url_options),
       payroll_checklist_url(**url_options),
       professional_tax_guide_url(**url_options),
       contact_url(**url_options),
       privacy_policy_url(**url_options),
       terms_of_service_url(**url_options)
-    ]
+    ] + BlogPost.published.map { |post| blog_post_url(post.slug, **url_options) }
 
     expires_in 12.hours, public: true
   end

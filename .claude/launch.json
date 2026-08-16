@@ -1,0 +1,12 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "hrms",
+      "runtimeExecutable": "bin/dev",
+      "runtimeArgs": [],
+      "port": 3000,
+      "url": "http://lvh.me:3000"
+    }
+  ]
+}

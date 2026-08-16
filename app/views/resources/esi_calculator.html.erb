@@ -1,0 +1,62 @@
+<%= render "shared/public_page_meta",
+      title: "ESI Calculator: Eligibility & Contribution Rates | Kula HR",
+      description: "Free ESI calculator for Indian payroll. Check the ₹21,000 wage ceiling and estimate the 0.75% employee and 3.25% employer ESI contribution on monthly wages.",
+      canonical_path: esi_calculator_path,
+      schema_type: "WebApplication" %>
+
+<%= render "home/landing/styles" %>
+<%= render "resources/styles" %>
+<%= render "blogs/styles" %>
+<%= render "home/landing/nav" %>
+
+<main class="resource-page" data-controller="payroll-calculators" data-action="input->payroll-calculators#calculateAll change->payroll-calculators#calculateAll">
+  <%= render "resources/hero",
+        parent: "Resources",
+        eyebrow: "ESI calculator",
+        headline: "ESI calculator: eligibility and contribution.",
+        lede: "Check whether monthly wages fall within the ESI ceiling, and estimate the employee and employer contribution split.",
+        stamp: "Standard statutory assumptions · Runs in your browser · No values submitted" %>
+
+  <section class="bg-white py-16 sm:py-24">
+    <div class="mx-auto max-w-7xl space-y-10 px-6 lg:px-8">
+      <%= render "resources/esi_calculator" %>
+
+      <div class="mx-auto max-w-3xl">
+        <div class="blog-prose">
+          <h2 id="how-esi-is-calculated">How ESI is calculated</h2>
+
+          <p>Employees' State Insurance is a health-insurance contribution, and unlike PF it is calculated on <strong>gross monthly wages</strong> rather than Basic. It applies only where those wages fall at or below the <strong>₹21,000 per month ceiling</strong>.</p>
+
+          <p>Where it applies, the contribution splits as <strong>0.75% from the employee</strong> and <strong>3.25% from the employer</strong> — a combined 4% of wages. On wages of ₹18,000, that is ₹135 from the employee and ₹585 from the employer.</p>
+
+          <p>ESI amounts are rounded <strong>up</strong> to the next rupee, not to the nearest one. It is a small difference, but it is the reason a hand calculation can disagree with a payslip by a rupee.</p>
+
+          <h3>The eligibility rule that catches people out</h3>
+
+          <p>ESI does not switch off the moment someone crosses ₹21,000. Coverage runs in fixed <strong>contribution periods</strong>, and an employee who is covered at the start of a period generally stays covered until that period ends — even if a mid-period increment pushes their wages above the ceiling.</p>
+
+          <p>So an employee who gets a raise in the middle of a contribution period usually continues to have ESI deducted for the remaining months. Stopping the deduction the same month is a common and consequential error, because it leaves the employee's coverage record inconsistent with what was actually paid.</p>
+
+          <p>The calculator above answers the simpler question — is this wage within the ceiling — and cannot know an individual's coverage history. Verify that history before you stop deducting for anyone.</p>
+
+          <h3>Who ESI covers</h3>
+
+          <p>ESI applicability depends on the establishment as well as the individual. Coverage generally turns on employee headcount and the notified areas the establishment operates in, so a company below the threshold may have no ESI obligation at all regardless of individual wages. Confirm your establishment's coverage before applying the rates to anyone.</p>
+
+          <h2 id="esi-on-the-payslip">ESI on the payslip and after</h2>
+
+          <p>The employee's 0.75% is a payslip deduction. The employer's 3.25% is a company cost that sits in CTC without reducing take-home pay — the same structure as <a href="<%= pf_calculator_path %>">PF</a>, and modelled on both sides by the <a href="<%= ctc_calculator_path %>">CTC to in-hand calculator</a>.</p>
+
+          <p>Contributions withheld become a liability due within 15 days of the close of the wage month. For that deadline alongside PF and TDS, and where ESI sits in the month-end sequence, see the <a href="<%= blog_post_path("payroll-processing-india") %>">complete guide to payroll processing in India</a>.</p>
+        </div>
+      </div>
+
+      <%= render "resources/calculator_footer",
+            current_tool: esi_calculator_path,
+            note: "These are planning estimates, not legal, tax or payroll advice. Confirm establishment coverage, wage definitions, contribution periods and rounding before using any result." %>
+    </div>
+  </section>
+</main>
+
+<%= render "home/landing/footer" %>
+<%= render "marketing_pages/scripts" %>

@@ -1,0 +1,52 @@
+<section id="take-home-calculator" class="resource-paper overflow-hidden rounded-2xl border border-stone-200 bg-stone-50">
+  <div class="grid lg:grid-cols-[.9fr_1.1fr]">
+    <div class="border-b border-stone-200 p-7 sm:p-9 lg:border-r lg:border-b-0">
+      <p class="font-mono text-xs font-semibold uppercase tracking-[.18em] text-kula-700">CTC estimate</p>
+      <h2 class="mt-5 text-2xl font-bold tracking-tight text-stone-950">Enter your annual CTC</h2>
+      <p class="mt-4 text-sm leading-7 text-stone-600">Create an illustrative monthly breakup after employer PF/ESI and employee deductions. Enter PT and TDS because both depend on facts this calculator does not collect.</p>
+      <div class="mt-8 grid gap-5 sm:grid-cols-2">
+        <label class="text-sm font-semibold text-stone-700 sm:col-span-2">Annual CTC
+          <input data-payroll-calculators-target="ctcAnnual" type="number" min="0" step="1000" value="600000" class="mt-2 w-full rounded-xl border border-stone-300 bg-white px-4 py-3 text-stone-950 focus:border-kula-600 focus:outline-none focus:ring-2 focus:ring-kula-100">
+        </label>
+        <label class="text-sm font-semibold text-stone-700">Basic % of monthly CTC
+          <input data-payroll-calculators-target="ctcBasicPercent" type="number" min="0" max="100" step="1" value="40" class="mt-2 w-full rounded-xl border border-stone-300 bg-white px-4 py-3 text-stone-950">
+        </label>
+        <label class="text-sm font-semibold text-stone-700">HRA % of Basic
+          <input data-payroll-calculators-target="ctcHraPercent" type="number" min="0" max="100" step="1" value="50" class="mt-2 w-full rounded-xl border border-stone-300 bg-white px-4 py-3 text-stone-950">
+        </label>
+        <label class="text-sm font-semibold text-stone-700">Monthly PT
+          <input data-payroll-calculators-target="ctcPt" type="number" min="0" step="50" value="200" class="mt-2 w-full rounded-xl border border-stone-300 bg-white px-4 py-3 text-stone-950">
+        </label>
+        <label class="text-sm font-semibold text-stone-700">Monthly TDS
+          <input data-payroll-calculators-target="ctcTds" type="number" min="0" step="100" value="0" class="mt-2 w-full rounded-xl border border-stone-300 bg-white px-4 py-3 text-stone-950">
+        </label>
+      </div>
+      <label class="mt-6 flex items-start gap-3 text-sm leading-6 text-stone-600">
+        <input data-payroll-calculators-target="ctcFullPf" type="checkbox" class="mt-1 size-4 rounded border-stone-300">
+        Calculate employer and employee PF on full Basic instead of a ₹15,000 base.
+      </label>
+    </div>
+    <div class="bg-white p-7 sm:p-9">
+      <div class="flex items-end justify-between gap-6 border-b-2 border-kula-800 pb-6">
+        <div>
+          <p class="font-mono text-xs uppercase tracking-[.16em] text-stone-500">Estimated take-home</p>
+          <p data-payroll-calculators-target="ctcNet" class="mt-2 text-3xl font-bold tracking-tight text-kula-900">₹0</p>
+        </div>
+        <p class="text-xs text-stone-500">per month</p>
+      </div>
+      <dl class="mt-3 divide-y divide-stone-100">
+        <% [
+          ["Monthly CTC", "ctcMonthly"], ["Basic", "ctcBasic"], ["HRA", "ctcHra"], ["Special allowance", "ctcSpecial"],
+          ["Employer PF", "ctcEmployerPf"], ["Employer ESI", "ctcEmployerEsi"], ["Employee PF", "ctcEmployeePf"],
+          ["Employee ESI", "ctcEmployeeEsi"], ["Employee deductions incl. entered PT/TDS", "ctcDeductions"]
+        ].each do |label, target| %>
+          <div class="flex items-center justify-between gap-5 py-3.5">
+            <dt class="text-xs leading-5 text-stone-600"><%= label %></dt>
+            <dd data-payroll-calculators-target="<%= target %>" class="font-mono text-sm font-semibold text-stone-900">₹0</dd>
+          </div>
+        <% end %>
+      </dl>
+      <p class="mt-5 text-xs leading-6 text-stone-500">This simplified model excludes gratuity, bonus, insurance, reimbursements, perquisites and income-tax computation. It is not an offer-letter or payslip calculation.</p>
+    </div>
+  </div>
+</section>

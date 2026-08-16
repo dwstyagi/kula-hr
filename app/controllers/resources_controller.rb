@@ -46,9 +46,23 @@ class ResourcesController < ApplicationController
 
   def index; end
 
+  # Each calculator has its own page so it can carry its own title, heading and
+  # explanatory content; /resources/payroll-calculators is the hub that lists
+  # them. They share the same sources and review date.
   def calculators
-    @official_sources = OFFICIAL_SOURCES
-    @last_reviewed = LAST_REVIEWED
+    calculator_context
+  end
+
+  def pf_calculator
+    calculator_context
+  end
+
+  def esi_calculator
+    calculator_context
+  end
+
+  def ctc_calculator
+    calculator_context
   end
 
   def compliance_calendar
@@ -62,6 +76,13 @@ class ResourcesController < ApplicationController
 
   def professional_tax
     @states = PROFESSIONAL_TAX_STATES
+    @last_reviewed = LAST_REVIEWED
+  end
+
+  private
+
+  def calculator_context
+    @official_sources = OFFICIAL_SOURCES
     @last_reviewed = LAST_REVIEWED
   end
 end

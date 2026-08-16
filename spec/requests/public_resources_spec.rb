@@ -7,7 +7,10 @@ RSpec.describe "Public trust and payroll resources", type: :request do
     "/about" => "About Kula HR | Indian Payroll & HRMS",
     "/security" => "Security & Data Handling | Kula HR",
     "/resources" => "Free Indian Payroll Resources & Calculators | Kula HR",
-    "/resources/payroll-calculators" => "Free PF, ESI & CTC Take-Home Calculators | Kula HR",
+    "/resources/payroll-calculators" => "Free Indian Payroll Calculators — PF, ESI & CTC | Kula HR",
+    "/resources/pf-calculator" => "PF Calculator: Employee & Employer EPF Contribution | Kula HR",
+    "/resources/esi-calculator" => "ESI Calculator: Eligibility & Contribution Rates | Kula HR",
+    "/resources/ctc-to-in-hand-salary-calculator" => "CTC to In-Hand Salary Calculator (India) | Kula HR",
     "/resources/payroll-compliance-calendar" => "Indian Payroll Compliance Calendar 2026–27 | Kula HR",
     "/resources/payroll-checklist" => "FY 2026–27 Indian Payroll Checklist | Kula HR",
     "/resources/professional-tax-guide" => "State-Wise Professional Tax Guide for Payroll | Kula HR"

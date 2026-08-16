@@ -1,0 +1,72 @@
+<%= render "shared/public_page_meta",
+      title: "CTC to In-Hand Salary Calculator (India) | Kula HR",
+      description: "Free CTC to in-hand salary calculator for India. Enter annual CTC to estimate monthly Basic, HRA, PF, ESI and take-home pay, with every assumption shown.",
+      canonical_path: ctc_calculator_path,
+      schema_type: "WebApplication" %>
+
+<%= render "home/landing/styles" %>
+<%= render "resources/styles" %>
+<%= render "blogs/styles" %>
+<%= render "home/landing/nav" %>
+
+<main class="resource-page" data-controller="payroll-calculators" data-action="input->payroll-calculators#calculateAll change->payroll-calculators#calculateAll">
+  <%= render "resources/hero",
+        parent: "Resources",
+        eyebrow: "CTC calculator",
+        headline: "CTC to in-hand salary calculator.",
+        lede: "Work out an illustrative monthly take-home from an annual CTC figure, with the salary breakup and every deduction shown separately.",
+        stamp: "Illustrative breakup · Runs in your browser · No values submitted" %>
+
+  <section class="bg-white py-16 sm:py-24">
+    <div class="mx-auto max-w-7xl space-y-10 px-6 lg:px-8">
+      <%= render "resources/ctc_calculator" %>
+
+      <div class="mx-auto max-w-3xl">
+        <div class="blog-prose">
+          <h2 id="ctc-vs-in-hand">Why in-hand salary is lower than CTC</h2>
+
+          <p>Cost to Company is what your employer spends on you in a year. In-hand salary is what reaches your bank account each month. The gap is typically 15–25%, and most of it is not a deduction from your pay — it is money that was never payable to you directly: employer PF and ESI contributions, and non-cash components such as gratuity provision. Your own deductions account for the rest.</p>
+
+          <p>For the full distinction between all four figures, see <a href="<%= blog_post_path("ctc-vs-gross-vs-net-salary") %>">CTC vs gross vs net vs in-hand salary</a>.</p>
+
+          <h3>How the breakup is built</h3>
+
+          <p>Indian salary structures usually start from Basic and build outward. This calculator uses two assumptions you can change:</p>
+
+          <ul>
+            <li><strong>Basic</strong> — a percentage of monthly CTC, defaulting to 40%. Basic matters beyond its own line because it is the base for PF.</li>
+            <li><strong>HRA</strong> — a percentage of Basic, defaulting to 50%.</li>
+            <li><strong>Special allowance</strong> — whatever remains after Basic and HRA. It is the balancing figure, which is why it moves when you change the other two.</li>
+          </ul>
+
+          <p>The order of operations matters. Employer PF and ESI come out of monthly CTC first to arrive at <strong>gross salary</strong>. Basic and HRA are then computed, and employee deductions come out of gross to give <strong>net pay</strong>.</p>
+
+          <h3>Why PT and TDS are inputs, not outputs</h3>
+
+          <p>Every other figure here can be derived from CTC. These two cannot.</p>
+
+          <p><strong>Professional Tax</strong> is set by the state you work in. Slabs differ, some states have no Professional Tax at all, and a few deduct annually rather than monthly. Without a work location, there is no correct number to show.</p>
+
+          <p><strong>TDS</strong> depends on facts a CTC figure does not contain — your chosen tax regime, declared investments and exemptions, house rent paid, and any income from a previous employer this financial year. It is also a projection of your annual liability spread across the year, not a flat percentage of a month's pay. A calculator that silently invents a TDS number will be wrong for most people, so this one asks you for it.</p>
+
+          <p>If you leave TDS at zero, treat the result as your take-home <em>before</em> income tax.</p>
+
+          <h3>What this excludes</h3>
+
+          <p>Gratuity, bonus, insurance premiums, reimbursements, perquisites and variable pay are all outside this model. This is a planning estimate, not an offer-letter or payslip calculation — your actual structure is set by your employer.</p>
+
+          <h2 id="related-calculations">Going deeper on each deduction</h2>
+
+          <p>To see how the PF figure is built, including the employer's split between EPF and the pension scheme, use the <a href="<%= pf_calculator_path %>">PF calculator</a>. For the ESI ceiling and contribution split, use the <a href="<%= esi_calculator_path %>">ESI calculator</a>. And for how all of this fits into a payroll month from attendance lock to bank transfer, read the <a href="<%= blog_post_path("payroll-processing-india") %>">complete guide to payroll processing in India</a>.</p>
+        </div>
+      </div>
+
+      <%= render "resources/calculator_footer",
+            current_tool: ctc_calculator_path,
+            note: "This is an illustrative planning estimate, not legal, tax or payroll advice. Your actual salary structure, statutory settings and tax liability are set by your employer and your own tax position." %>
+    </div>
+  </section>
+</main>
+
+<%= render "home/landing/footer" %>
+<%= render "marketing_pages/scripts" %>
