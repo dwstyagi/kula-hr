@@ -12,6 +12,7 @@ module Statutory
       :total_deductions,
       :taxable_income,
       :annual_tax,
+      :rebate,
       :cess,
       :total_tax_with_cess,
       :monthly_tds,
@@ -24,37 +25,66 @@ module Statutory
       annual_gross: 0, standard_deduction: 0, section_80c: 0,
       section_80d: 0, section_80ccd1b: 0, hra_exemption: 0,
       home_loan_interest: 0, other_deductions: 0, total_deductions: 0,
-      taxable_income: 0, annual_tax: 0, cess: 0,
+      taxable_income: 0, annual_tax: 0, rebate: 0, cess: 0,
       total_tax_with_cess: 0, monthly_tds: 0, regime: nil, applicable: false
     ).freeze
 
-    # FY 2024-25 / 2025-26 slabs (Finance Act 2024)
-    OLD_REGIME_SLABS = [
-      { from: 0,          to: 250_000,    rate: 0  },
-      { from: 250_000,    to: 500_000,    rate: 5  },
-      { from: 500_000,    to: 1_000_000,  rate: 20 },
-      { from: 1_000_000,  to: nil,        rate: 30 }
-    ].freeze
+    # ── Statutory rates, keyed by financial year ─────────────────────────────
+    #
+    # When a Finance Act changes the rates, ADD a new entry — never edit a past
+    # financial year. A payroll rerun for an earlier year must reproduce the
+    # figures that were applied at the time.
+    #
+    # FY 2025-26 and FY 2026-27 share one rate set: Budget 2025 replaced the
+    # Finance Act 2024 new-regime slabs, and Budget 2026 left the slabs, cess,
+    # rebate and standard deduction unchanged.
+    #
+    # rebate_limit    — 87A: rebate applies when taxable income is at or below this
+    # rebate_cap      — 87A: maximum rebate available
+    # marginal_relief — 87A: cap tax at the income above rebate_limit (new regime only)
+    FY_2025_26_RATES = {
+      old_regime: {
+        slabs: [
+          { from: 0,          to: 250_000,    rate: 0  },
+          { from: 250_000,    to: 500_000,    rate: 5  },
+          { from: 500_000,    to: 1_000_000,  rate: 20 },
+          { from: 1_000_000,  to: nil,        rate: 30 }
+        ].freeze,
+        standard_deduction: 50_000,
+        rebate_limit:       500_000,
+        rebate_cap:         12_500,
+        marginal_relief:    false
+      }.freeze,
 
-    NEW_REGIME_SLABS = [
-      { from: 0,          to: 300_000,    rate: 0  },
-      { from: 300_000,    to: 700_000,    rate: 5  },
-      { from: 700_000,    to: 1_000_000,  rate: 10 },
-      { from: 1_000_000,  to: 1_200_000,  rate: 15 },
-      { from: 1_200_000,  to: 1_500_000,  rate: 20 },
-      { from: 1_500_000,  to: nil,        rate: 30 }
-    ].freeze
+      new_regime: {
+        slabs: [
+          { from: 0,          to: 400_000,    rate: 0  },
+          { from: 400_000,    to: 800_000,    rate: 5  },
+          { from: 800_000,    to: 1_200_000,  rate: 10 },
+          { from: 1_200_000,  to: 1_600_000,  rate: 15 },
+          { from: 1_600_000,  to: 2_000_000,  rate: 20 },
+          { from: 2_000_000,  to: 2_400_000,  rate: 25 },
+          { from: 2_400_000,  to: nil,        rate: 30 }
+        ].freeze,
+        standard_deduction: 75_000,
+        rebate_limit:       1_200_000,
+        rebate_cap:         60_000,
+        marginal_relief:    true
+      }.freeze,
 
-    STANDARD_DEDUCTION      = 75_000
-    CESS_RATE               = 4
-    OLD_REGIME_REBATE_LIMIT = 500_000   # 87A: no tax if taxable ≤ ₹5L (old regime)
-    NEW_REGIME_REBATE_LIMIT = 700_000   # 87A: no tax if taxable ≤ ₹7L (new regime)
+      cess_rate: 4
+    }.freeze
+
+    RATES_BY_FY = {
+      "2025-26" => FY_2025_26_RATES,
+      "2026-27" => FY_2025_26_RATES
+    }.freeze
 
     # employee          — Employee record
     # annual_gross      — projected annual gross salary
     # monthly_basic     — for EPF auto-contribution under 80C + HRA calc
     # monthly_hra       — monthly HRA component received (for HRA exemption)
-    # financial_year    — "2025-26"
+    # financial_year    — "2025-26"; also selects the rate set from RATES_BY_FY
     # month             — current payroll month (1–12)
     # ytd_tds_deducted  — TDS already deducted April through previous month
     def initialize(employee:, annual_gross:, monthly_basic: 0, monthly_hra: 0,
@@ -67,6 +97,7 @@ module Statutory
       @month            = month
       @ytd_tds_deducted = ytd_tds_deducted.to_d
       @declaration      = load_declaration
+      @rates            = rates_for(financial_year)
     end
 
     def call
@@ -76,15 +107,16 @@ module Statutory
       deductions = calculate_deductions(regime)
       taxable    = [ @annual_gross - deductions[:total], 0 ].max.to_i
 
-      annual_tax = calculate_tax(taxable, regime)
-      cess       = (annual_tax * CESS_RATE / 100.0).round(0).to_i
+      # Rebate reduces the tax BEFORE cess; cess is charged on what remains.
+      slab_tax   = calculate_tax(taxable, regime)
+      annual_tax = apply_rebate(slab_tax, taxable, regime)
+      cess       = (annual_tax * @rates[:cess_rate] / 100.0).round(0).to_i
       total_tax  = annual_tax + cess
-      total_tax  = apply_rebate(total_tax, taxable, regime)
       monthly    = calculate_monthly_tds(total_tax)
 
       TdsResult.new(
         annual_gross:        @annual_gross.to_i,
-        standard_deduction:  STANDARD_DEDUCTION,
+        standard_deduction:  deductions[:standard_deduction].to_i,
         section_80c:         deductions[:section_80c].to_i,
         section_80d:         deductions[:section_80d].to_i,
         section_80ccd1b:     deductions[:section_80ccd1b].to_i,
@@ -94,6 +126,7 @@ module Statutory
         total_deductions:    deductions[:total].to_i,
         taxable_income:      taxable,
         annual_tax:          annual_tax,
+        rebate:              slab_tax - annual_tax,
         cess:                cess,
         total_tax_with_cess: total_tax,
         monthly_tds:         monthly,
@@ -103,6 +136,22 @@ module Statutory
     end
 
     private
+
+    # ── Rate lookup ─────────────────────────────────────────────────────────
+
+    # Falls back to the most recent configured year rather than raising: an
+    # unconfigured FY must not block payroll for every tenant on 1 April. The
+    # warning is the signal to add the new Finance Act rates.
+    def rates_for(financial_year)
+      RATES_BY_FY.fetch(financial_year) do
+        latest_fy, latest_rates = RATES_BY_FY.max_by { |fy, _| fy }
+        Rails.logger.warn(
+          "[TdsCalculator] No tax rates configured for FY #{financial_year}; " \
+          "using FY #{latest_fy}. Add the current Finance Act rates to RATES_BY_FY."
+        )
+        latest_rates
+      end
+    end
 
     # ── Tenant-scoped DB access ─────────────────────────────────────────────
 
@@ -140,7 +189,11 @@ module Statutory
         }
       end
 
-      d[:total] = STANDARD_DEDUCTION +
+      # The standard deduction differs by regime — ₹75,000 under the new regime,
+      # ₹50,000 under the old one.
+      d[:standard_deduction] = @rates.fetch(regime)[:standard_deduction]
+
+      d[:total] = d[:standard_deduction] +
                   d[:section_80c] + d[:section_80d] + d[:section_80ccd1b] +
                   d[:hra_exemption] + d[:home_loan_interest] + d[:other]
       d
@@ -215,7 +268,7 @@ module Statutory
     # ── Tax slab calculation ─────────────────────────────────────────────────
 
     def calculate_tax(taxable_income, regime)
-      slabs = regime == :old_regime ? OLD_REGIME_SLABS : NEW_REGIME_SLABS
+      slabs = @rates.fetch(regime)[:slabs]
       tax   = 0.0
 
       slabs.each do |slab|
@@ -232,9 +285,19 @@ module Statutory
       tax.round(0).to_i
     end
 
-    def apply_rebate(total_tax, taxable_income, regime)
-      limit = regime == :old_regime ? OLD_REGIME_REBATE_LIMIT : NEW_REGIME_REBATE_LIMIT
-      taxable_income <= limit ? 0 : total_tax
+    # Section 87A. Returns the tax payable after rebate, before cess.
+    def apply_rebate(slab_tax, taxable_income, regime)
+      rules = @rates.fetch(regime)
+
+      if taxable_income <= rules[:rebate_limit]
+        [ slab_tax - rules[:rebate_cap], 0 ].max
+      elsif rules[:marginal_relief]
+        # Without this, crossing the limit by ₹1 would cost the whole rebate.
+        # Tax is capped at the income earned above the limit.
+        [ slab_tax, taxable_income - rules[:rebate_limit] ].min
+      else
+        slab_tax
+      end
     end
 
     # ── Progressive monthly TDS ──────────────────────────────────────────────
