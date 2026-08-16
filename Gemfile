@@ -77,6 +77,9 @@ gem "caxlsx"
 gem "chartkick"
 gem "groupdate"
 
+# Markdown rendering for the public blog (pure Ruby, no native extension)
+gem "kramdown"
+
 group :development, :test do
   gem "dotenv-rails", require: "dotenv/load"
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem

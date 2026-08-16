@@ -14,8 +14,12 @@ class ApplicationController < ActionController::Base
     /pricing
     /about
     /security
+    /blog
     /resources
     /resources/payroll-calculators
+    /resources/pf-calculator
+    /resources/esi-calculator
+    /resources/ctc-to-in-hand-salary-calculator
     /resources/payroll-compliance-calendar
     /resources/payroll-checklist
     /resources/professional-tax-guide
@@ -56,7 +60,9 @@ class ApplicationController < ActionController::Base
   # layout, including the layout-free beta guide.
   def set_search_indexing_header
     root_domain = request.subdomain.blank?
-    public_page = root_domain && INDEXABLE_PUBLIC_PATHS.include?(request.path)
+    public_page = root_domain &&
+                  (INDEXABLE_PUBLIC_PATHS.include?(request.path) ||
+                   BlogPost.paths.include?(request.path))
 
     response.set_header("X-Robots-Tag", "noindex, nofollow") unless public_page
   end

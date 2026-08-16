@@ -1,0 +1,25 @@
+<section id="esi-calculator" class="resource-paper overflow-hidden rounded-2xl border border-stone-200 bg-stone-50">
+  <div class="grid lg:grid-cols-[.9fr_1.1fr]">
+    <div class="border-b border-stone-200 p-7 sm:p-9 lg:border-r lg:border-b-0">
+      <p class="font-mono text-xs font-semibold uppercase tracking-[.18em] text-kula-700">ESI estimate</p>
+      <h2 class="mt-5 text-2xl font-bold tracking-tight text-stone-950">Enter monthly ESI wages</h2>
+      <p class="mt-4 text-sm leading-7 text-stone-600">The standard estimate applies 0.75% employee and 3.25% employer contributions when monthly wages are within ₹21,000.</p>
+      <label class="mt-8 block text-sm font-semibold text-stone-700">Monthly ESI wages
+        <input data-payroll-calculators-target="esiGross" type="number" min="0" step="100" value="18000" class="mt-2 w-full rounded-xl border border-stone-300 bg-white px-4 py-3 text-stone-950 focus:border-kula-600 focus:outline-none focus:ring-2 focus:ring-kula-100">
+      </label>
+      <p data-payroll-calculators-target="esiStatus" class="mt-2 text-xs font-semibold text-kula-700"></p>
+    </div>
+    <div class="bg-white p-7 sm:p-9">
+      <p class="font-mono text-xs font-semibold uppercase tracking-[.18em] text-stone-500">Monthly estimate</p>
+      <dl class="mt-6 divide-y divide-stone-200 border-y border-stone-200">
+        <% [["Employee contribution", "esiEmployee"], ["Employer contribution", "esiEmployer"], ["Combined contribution", "esiTotal"]].each do |label, target| %>
+          <div class="flex items-center justify-between gap-6 py-5">
+            <dt class="text-sm text-stone-600"><%= label %></dt>
+            <dd data-payroll-calculators-target="<%= target %>" class="font-mono text-base font-semibold text-stone-950">₹0</dd>
+          </div>
+        <% end %>
+      </dl>
+      <p class="mt-5 text-xs leading-6 text-stone-500">An employee already covered at the start of a contribution period may remain covered until that period ends even after wages cross the ceiling. Verify the employee's coverage history.</p>
+    </div>
+  </div>
+</section>

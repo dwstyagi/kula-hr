@@ -13,10 +13,12 @@ export default class extends Controller {
     this.calculateAll()
   }
 
+  // Each calculator now has its own page, so only one of the three is usually
+  // present in the DOM. Skip the ones whose inputs are not on this page.
   calculateAll() {
-    this.calculatePf()
-    this.calculateEsi()
-    this.calculateCtc()
+    if (this.hasPfBasicTarget) this.calculatePf()
+    if (this.hasEsiGrossTarget) this.calculateEsi()
+    if (this.hasCtcAnnualTarget) this.calculateCtc()
   }
 
   calculatePf() {

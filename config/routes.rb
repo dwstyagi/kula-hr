@@ -245,8 +245,13 @@ Rails.application.routes.draw do
       defaults: { page: "pricing" }, as: :pricing
   get "about", to: "company_pages#about", as: :about
   get "security", to: "company_pages#security", as: :security
+  get "blog", to: "blogs#index", as: :blog
+  get "blog/:slug", to: "blogs#show", as: :blog_post
   get "resources", to: "resources#index", as: :resources
   get "resources/payroll-calculators", to: "resources#calculators", as: :payroll_calculators
+  get "resources/pf-calculator", to: "resources#pf_calculator", as: :pf_calculator
+  get "resources/esi-calculator", to: "resources#esi_calculator", as: :esi_calculator
+  get "resources/ctc-to-in-hand-salary-calculator", to: "resources#ctc_calculator", as: :ctc_calculator
   get "resources/payroll-compliance-calendar", to: "resources#compliance_calendar", as: :payroll_compliance_calendar
   get "resources/payroll-checklist", to: "resources#payroll_checklist", as: :payroll_checklist
   get "resources/professional-tax-guide", to: "resources#professional_tax", as: :professional_tax_guide

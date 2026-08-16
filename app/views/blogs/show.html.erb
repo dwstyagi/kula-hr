@@ -1,0 +1,182 @@
+<% content_for :title, "#{@post.title} | Kula HR" %>
+<% content_for :description, @post.description %>
+<% content_for :canonical_url, @post.url %>
+<% content_for :html_lang, "en-IN" %>
+<% content_for :social_image, "https://kula-hr.com/icon.png" %>
+
+<% content_for :structured_data do %>
+  <script type="application/ld+json">
+    <%= raw json_escape({
+      "@context": "https://schema.org",
+      "@type": "Article",
+      headline: @post.title,
+      description: @post.description,
+      url: @post.url,
+      datePublished: @post.published_on.iso8601,
+      dateModified: @post.updated_on.iso8601,
+      articleSection: @post.category,
+      inLanguage: "en-IN",
+      mainEntityOfPage: { "@type": "WebPage", "@id": @post.url },
+      author: { "@type": "Organization", name: "Kula HR", url: "https://kula-hr.com/" },
+      publisher: {
+        "@type": "Organization",
+        name: "Kula HR",
+        url: "https://kula-hr.com/",
+        logo: { "@type": "ImageObject", url: "https://kula-hr.com/icon.png" }
+      }
+    }.to_json) %>
+  </script>
+
+  <% if @post.faqs.any? %>
+    <script type="application/ld+json">
+      <%= raw json_escape({
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        mainEntity: @post.faqs.map { |faq|
+          {
+            "@type": "Question",
+            name: faq["question"],
+            acceptedAnswer: { "@type": "Answer", text: faq["answer"] }
+          }
+        }
+      }.to_json) %>
+    </script>
+  <% end %>
+<% end %>
+
+<%= render "home/landing/styles" %>
+<%= render "resources/styles" %>
+<%= render "blogs/styles" %>
+<%= render "home/landing/nav" %>
+
+<main class="resource-page">
+  <article>
+    <header class="resource-grid border-b border-stone-200 pt-32 pb-14 sm:pt-40 sm:pb-16">
+      <div class="mx-auto max-w-7xl px-6 lg:px-8">
+        <nav aria-label="Breadcrumb" class="mb-8 flex flex-wrap items-center gap-2 text-xs font-medium text-stone-500">
+          <a href="<%= root_path %>" class="hover:text-kula-700">Kula HR</a>
+          <span aria-hidden="true">/</span>
+          <a href="<%= blog_path %>" class="hover:text-kula-700">Blog</a>
+          <span aria-hidden="true">/</span>
+          <span class="text-stone-700"><%= @post.category %></span>
+        </nav>
+
+        <h1 class="max-w-4xl text-4xl font-bold tracking-[-0.035em] text-stone-950 sm:text-5xl sm:leading-[1.08]"><%= @post.title %></h1>
+        <p class="mt-7 max-w-3xl text-lg leading-8 text-stone-600"><%= @post.summary %></p>
+
+        <dl class="mt-10 flex flex-wrap items-center gap-x-10 gap-y-4 border-t border-stone-200 pt-6">
+          <div>
+            <dt class="font-mono text-[.7rem] font-semibold uppercase tracking-[.16em] text-stone-500">Author</dt>
+            <dd class="mt-1 text-sm font-semibold text-stone-800">The Kula HR Team</dd>
+          </div>
+          <div>
+            <dt class="font-mono text-[.7rem] font-semibold uppercase tracking-[.16em] text-stone-500">Read time</dt>
+            <dd class="mt-1 text-sm font-semibold text-stone-800"><%= @post.reading_minutes %> min</dd>
+          </div>
+          <div>
+            <dt class="font-mono text-[.7rem] font-semibold uppercase tracking-[.16em] text-stone-500">Published</dt>
+            <dd class="mt-1 text-sm font-semibold text-stone-800">
+              <time datetime="<%= @post.published_on.iso8601 %>"><%= @post.published_on.strftime("%-d %b %Y") %></time>
+            </dd>
+          </div>
+          <% if @post.updated_on != @post.published_on %>
+            <div>
+              <dt class="font-mono text-[.7rem] font-semibold uppercase tracking-[.16em] text-stone-500">Updated</dt>
+              <dd class="mt-1 text-sm font-semibold text-stone-800">
+                <time datetime="<%= @post.updated_on.iso8601 %>"><%= @post.updated_on.strftime("%-d %b %Y") %></time>
+              </dd>
+            </div>
+          <% end %>
+        </dl>
+      </div>
+    </header>
+
+    <div class="bg-white py-14 sm:py-20">
+      <div class="mx-auto grid max-w-7xl gap-12 px-6 lg:grid-cols-[15rem_minmax(0,1fr)_17rem] lg:gap-10 lg:px-8">
+
+        <%# ── Left rail: table of contents ── %>
+        <aside class="blog-rail hidden lg:block">
+          <nav aria-label="On this page" class="border-l border-stone-200 pl-5">
+            <p class="font-mono text-[.7rem] font-semibold uppercase tracking-[.16em] text-stone-500">In this article</p>
+            <ul class="mt-4 space-y-3">
+              <% if @post.takeaways.any? %>
+                <li><a href="#key-takeaways" class="blog-toc-link">Key takeaways</a></li>
+              <% end %>
+              <% @post.sections.each do |section| %>
+                <li><a href="#<%= section[:id] %>" class="blog-toc-link"><%= section[:title] %></a></li>
+              <% end %>
+              <% if @post.faqs.any? %>
+                <li><a href="#faqs" class="blog-toc-link">FAQs</a></li>
+              <% end %>
+            </ul>
+          </nav>
+        </aside>
+
+        <%# ── Centre: article body ── %>
+        <div class="min-w-0">
+          <% if @post.takeaways.any? %>
+            <section id="key-takeaways" class="resource-paper mb-12 rounded-2xl border border-kula-200 bg-kula-50 p-7 sm:p-8">
+              <h2 class="font-mono text-xs font-semibold uppercase tracking-[.18em] text-kula-800">Key takeaways</h2>
+              <ul class="mt-5 space-y-3">
+                <% @post.takeaways.each do |takeaway| %>
+                  <li class="flex gap-3 text-[.95rem] leading-7 text-stone-700">
+                    <span aria-hidden="true" class="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-kula-600"></span>
+                    <span><%= takeaway %></span>
+                  </li>
+                <% end %>
+              </ul>
+            </section>
+          <% end %>
+
+          <div class="blog-prose"><%= @post.html %></div>
+
+          <% if @post.faqs.any? %>
+            <section id="faqs" class="mt-16 border-t border-stone-200 pt-10">
+              <h2 class="text-2xl font-bold tracking-tight text-stone-950">Frequently asked questions</h2>
+              <div class="mt-7 divide-y divide-stone-200 border-y border-stone-200">
+                <% @post.faqs.each do |faq| %>
+                  <details class="group py-5">
+                    <summary class="flex cursor-pointer list-none items-start justify-between gap-6 text-base font-semibold text-stone-900 hover:text-kula-700">
+                      <span><%= faq["question"] %></span>
+                      <span aria-hidden="true" class="mt-1 shrink-0 text-kula-600 transition group-open:rotate-45">+</span>
+                    </summary>
+                    <p class="mt-4 text-[.95rem] leading-7 text-stone-600"><%= faq["answer"] %></p>
+                  </details>
+                <% end %>
+              </div>
+            </section>
+          <% end %>
+
+          <div class="mt-16 border-t border-stone-200 pt-10">
+            <p class="font-mono text-xs font-semibold uppercase tracking-[.18em] text-kula-700">Keep reading</p>
+            <ul class="mt-5 grid gap-3">
+              <% BlogPost.published.reject { |p| p.slug == @post.slug }.first(3).each do |other| %>
+                <li>
+                  <a href="<%= blog_post_path(other.slug) %>" class="text-base font-semibold text-stone-800 underline decoration-stone-300 underline-offset-4 hover:text-kula-700 hover:decoration-kula-500"><%= other.title %></a>
+                </li>
+              <% end %>
+              <li>
+                <a href="<%= resources_path %>" class="text-base font-semibold text-stone-800 underline decoration-stone-300 underline-offset-4 hover:text-kula-700 hover:decoration-kula-500">Free payroll calculators and templates</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <%# ── Right rail: product CTA ── %>
+        <aside class="blog-rail hidden lg:block">
+          <div class="resource-paper rounded-2xl border border-kula-800 bg-kula-950 p-6">
+            <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-kula-600 text-base font-bold text-white">K</div>
+            <p class="mt-5 text-lg font-bold leading-7 text-white">Run Indian payroll without the spreadsheets.</p>
+            <p class="mt-3 text-sm leading-6 text-kula-200">Attendance, salary structures, PF, ESI, PT and TDS in one reviewable payroll run.</p>
+            <a href="<%= signup_path %>" class="mt-6 block rounded-lg bg-white px-4 py-2.5 text-center text-sm font-semibold text-kula-800 transition hover:bg-kula-50">Start free</a>
+            <a href="<%= payroll_software_india_path %>" class="mt-3 block text-center text-xs font-semibold text-kula-300 hover:text-white">See how payroll works →</a>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </article>
+
+  <%= render "home/landing/cta" %>
+</main>
+
+<%= render "home/landing/footer" %>
