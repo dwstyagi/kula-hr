@@ -4,13 +4,14 @@ RSpec.describe Statutory::TdsCalculator do
   let(:tenant)   { create(:tenant) }
   let(:employee) { ActsAsTenant.with_tenant(tenant) { create(:employee, tenant: tenant) } }
 
-  def calc(annual_gross:, month: 2, monthly_basic: 0, monthly_hra: 0, ytd_tds_deducted: 0)
+  def calc(annual_gross:, month: 2, monthly_basic: 0, monthly_hra: 0,
+           ytd_tds_deducted: 0, financial_year: "2025-26")
     described_class.new(
       employee:         employee,
       annual_gross:     annual_gross,
       monthly_basic:    monthly_basic,
       monthly_hra:      monthly_hra,
-      financial_year:   "2025-26",
+      financial_year:   financial_year,
       month:            month,
       ytd_tds_deducted: ytd_tds_deducted
     ).call
@@ -44,7 +45,7 @@ RSpec.describe Statutory::TdsCalculator do
   # ── New Regime (default — no declaration) ───────────────────────────────────
 
   context "New Regime — no declaration submitted (defaults to new regime)" do
-    it "applies only standard deduction" do
+    it "applies only standard deduction, at the new-regime ₹75,000" do
       result = calc(annual_gross: 978_400, month: 4)  # April = 12 months remaining
       expect(result.regime).to eq(:new_regime)
       expect(result.standard_deduction).to eq(75_000)
@@ -52,33 +53,73 @@ RSpec.describe Statutory::TdsCalculator do
       expect(result.taxable_income).to eq(903_400)
     end
 
-    it "calculates correct tax on ₹9,03,400 taxable income" do
+    it "rebates the whole liability — ₹9,03,400 taxable is under the ₹12L limit" do
       result = calc(annual_gross: 978_400, month: 4)
-      # 0-3L: 0, 3L-7L: 20000, 7L-9.034L: 20340 → 40340
-      expect(result.annual_tax).to eq(40_340)
+      # slab tax: 0-4L: 0, 4L-8L: 20000, 8L-9.034L: 10340 → 30340
+      # 87A: taxable ≤ 12L → rebate min(30340, 60000) wipes it out
+      expect(result.rebate).to eq(30_340)
+      expect(result.annual_tax).to eq(0)
+      expect(result.cess).to eq(0)
+      expect(result.monthly_tds).to eq(0)
+      expect(result.applicable).to be false
+    end
+
+    it "calculates tax across every slab above the rebate limit" do
+      result = calc(annual_gross: 2_000_000, month: 4)
+      # taxable = 19,25,000
+      # 4-8L: 20000, 8-12L: 40000, 12-16L: 60000, 16L-19.25L: 65000 → 185000
+      expect(result.taxable_income).to eq(1_925_000)
+      expect(result.rebate).to eq(0)
+      expect(result.annual_tax).to eq(185_000)
     end
 
     it "adds 4% cess" do
-      result = calc(annual_gross: 978_400, month: 4)
-      expect(result.cess).to eq(1_614)         # 40340 × 4% = 1613.6 → 1614
-      expect(result.total_tax_with_cess).to eq(41_954)
+      result = calc(annual_gross: 2_000_000, month: 4)
+      expect(result.cess).to eq(7_400)                  # 185000 × 4%
+      expect(result.total_tax_with_cess).to eq(192_400)
     end
 
     it "calculates monthly TDS by dividing over remaining months" do
-      result = calc(annual_gross: 978_400, month: 4)  # 12 months remaining
-      expect(result.monthly_tds).to eq(3_496)         # 41954 / 12 = 3496.2 → 3496
+      result = calc(annual_gross: 2_000_000, month: 4)  # 12 months remaining
+      expect(result.monthly_tds).to eq(16_033)          # 192400 / 12 = 16033.3
     end
   end
 
-  # ── 87A Rebate: New Regime (taxable ≤ ₹7L → zero tax) ──────────────────────
+  # ── 87A Rebate: New Regime (taxable ≤ ₹12L → zero tax) ─────────────────────
 
-  context "87A rebate — New Regime, taxable ≤ ₹7,00,000" do
-    it "gives full rebate and zero monthly TDS" do
-      # annual_gross = 750_000, taxable = 750k - 75k = 675k ≤ 700k
-      result = calc(annual_gross: 750_000, month: 4)
-      expect(result.taxable_income).to eq(675_000)
+  context "87A rebate — New Regime, taxable ≤ ₹12,00,000" do
+    it "gives full rebate and zero monthly TDS at the ₹12.75L gross boundary" do
+      # gross 12,75,000 − 75,000 standard deduction = 12,00,000 taxable
+      result = calc(annual_gross: 1_275_000, month: 4)
+      expect(result.taxable_income).to eq(1_200_000)
+      expect(result.rebate).to eq(60_000)          # slab tax 60000, fully rebated
       expect(result.total_tax_with_cess).to eq(0)
       expect(result.monthly_tds).to eq(0)
+    end
+  end
+
+  # ── 87A Marginal relief: New Regime, just above ₹12L ────────────────────────
+
+  context "87A marginal relief — New Regime, taxable just above ₹12,00,000" do
+    it "caps tax at the income earned above ₹12L" do
+      # gross 12,85,000 − 75,000 = 12,10,000 taxable
+      # slab tax = 60000 + (10000 × 15%) = 61500
+      # marginal relief caps tax at the ₹10,000 earned above the limit
+      result = calc(annual_gross: 1_285_000, month: 4)
+      expect(result.taxable_income).to eq(1_210_000)
+      expect(result.annual_tax).to eq(10_000)
+      expect(result.rebate).to eq(51_500)
+      expect(result.cess).to eq(400)
+      expect(result.total_tax_with_cess).to eq(10_400)
+    end
+
+    it "stops binding once slab tax falls below the excess" do
+      # gross 13,75,000 − 75,000 = 13,00,000 taxable
+      # slab tax = 60000 + (100000 × 15%) = 75000, excess = 100000 → no relief
+      result = calc(annual_gross: 1_375_000, month: 4)
+      expect(result.annual_tax).to eq(75_000)
+      expect(result.rebate).to eq(0)
+      expect(result.total_tax_with_cess).to eq(78_000)
     end
   end
 
@@ -90,6 +131,23 @@ RSpec.describe Statutory::TdsCalculator do
       # taxable = 300k - 75k = 225k → 0% slab
       expect(result.annual_tax).to eq(0)
       expect(result.monthly_tds).to eq(0)
+    end
+  end
+
+  # ── Rates are keyed by financial year ───────────────────────────────────────
+
+  context "financial-year rate lookup" do
+    it "applies the same rates to FY 2026-27 as FY 2025-26 (Budget 2026 made no change)" do
+      fy_2025 = calc(annual_gross: 2_000_000, month: 4, financial_year: "2025-26")
+      fy_2026 = calc(annual_gross: 2_000_000, month: 4, financial_year: "2026-27")
+      expect(fy_2026.annual_tax).to eq(fy_2025.annual_tax)
+      expect(fy_2026.total_tax_with_cess).to eq(192_400)
+    end
+
+    it "falls back to the latest configured year and warns for an unknown FY" do
+      expect(Rails.logger).to receive(:warn).with(/No tax rates configured for FY 2099-00/)
+      result = calc(annual_gross: 2_000_000, month: 4, financial_year: "2099-00")
+      expect(result.total_tax_with_cess).to eq(192_400)
     end
   end
 
@@ -109,10 +167,16 @@ RSpec.describe Statutory::TdsCalculator do
       expect(result.section_80c).to eq(50_000)
     end
 
+    it "uses the old-regime ₹50,000 standard deduction, not the new regime's ₹75,000" do
+      result = calc(annual_gross: 978_400, month: 4)
+      expect(result.regime).to eq(:old_regime)
+      expect(result.standard_deduction).to eq(50_000)
+    end
+
     it "reduces taxable income by 80C amount" do
       result = calc(annual_gross: 978_400, month: 4)
-      # taxable = 978400 - 75000 (std) - 50000 (80C) = 853400
-      expect(result.taxable_income).to eq(853_400)
+      # taxable = 978400 - 50000 (std) - 50000 (80C) = 878400
+      expect(result.taxable_income).to eq(878_400)
     end
   end
 
@@ -176,12 +240,23 @@ RSpec.describe Statutory::TdsCalculator do
     end
 
     it "gives full rebate when taxable income ≤ ₹5L" do
-      # annual_gross 800000, std 75k, 80C 150k, 80D 35k, 80CCD1B 50k
-      # taxable = 800000 - 310000 = 490000 ≤ 500000 → full 87A rebate
-      result = calc(annual_gross: 800_000, month: 4)
-      expect(result.taxable_income).to be <= 500_000
+      # annual_gross 785000, std 50k, 80C 150k, 80D 35k, 80CCD1B 50k
+      # taxable = 785000 - 285000 = 500000 → slab tax 12500, fully rebated
+      result = calc(annual_gross: 785_000, month: 4)
+      expect(result.taxable_income).to eq(500_000)
+      expect(result.rebate).to eq(12_500)
       expect(result.total_tax_with_cess).to eq(0)
       expect(result.monthly_tds).to eq(0)
+    end
+
+    it "gets no rebate and no marginal relief above ₹5L" do
+      # taxable = 885000 - 285000 = 600000
+      # slab tax = 12500 + (100000 × 20%) = 32500 — old regime has no marginal relief
+      result = calc(annual_gross: 885_000, month: 4)
+      expect(result.taxable_income).to eq(600_000)
+      expect(result.rebate).to eq(0)
+      expect(result.annual_tax).to eq(32_500)
+      expect(result.total_tax_with_cess).to eq(33_800)
     end
   end
 
@@ -224,14 +299,14 @@ RSpec.describe Statutory::TdsCalculator do
   context "YTD progressive adjustment" do
     it "spreads remaining tax over remaining months" do
       # month = 1 (January), 3 months remaining (Jan, Feb, Mar)
-      # annual tax = 41954, ytd deducted = 31464 (9 months × 3496)
-      # remaining = 41954 - 31464 = 10490, monthly = 10490/3 = 3497
-      result = calc(annual_gross: 978_400, month: 1, ytd_tds_deducted: 31_464)
-      expect(result.monthly_tds).to eq(3_497)
+      # annual tax = 192400, ytd deducted = 144297 (9 months × 16033)
+      # remaining = 192400 - 144297 = 48103, monthly = 48103/3 = 16034.3
+      result = calc(annual_gross: 2_000_000, month: 1, ytd_tds_deducted: 144_297)
+      expect(result.monthly_tds).to eq(16_034)
     end
 
     it "returns 0 if YTD already covers the full liability" do
-      result = calc(annual_gross: 978_400, month: 2, ytd_tds_deducted: 50_000)
+      result = calc(annual_gross: 2_000_000, month: 2, ytd_tds_deducted: 200_000)
       expect(result.monthly_tds).to eq(0)
     end
   end
@@ -240,13 +315,13 @@ RSpec.describe Statutory::TdsCalculator do
 
   context "remaining months in FY" do
     it "returns 12 for April (start of FY)" do
-      result = calc(annual_gross: 978_400, month: 4)
-      # 41954 / 12 = 3496
-      expect(result.monthly_tds).to eq(3_496)
+      result = calc(annual_gross: 2_000_000, month: 4)
+      # 192400 / 12 = 16033
+      expect(result.monthly_tds).to eq(16_033)
     end
 
     it "returns 1 for March (last month of FY)" do
-      result = calc(annual_gross: 978_400, month: 3, ytd_tds_deducted: 0)
+      result = calc(annual_gross: 2_000_000, month: 3, ytd_tds_deducted: 0)
       # All tax due in March
       expect(result.monthly_tds).to eq(result.total_tax_with_cess)
     end
