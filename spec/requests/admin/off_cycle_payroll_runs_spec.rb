@@ -135,6 +135,27 @@ RSpec.describe "Admin::OffCyclePayrollRuns", type: :request do
     expect(run.reload).to be_under_review
   end
 
+  it "lets the creator reject their own off-cycle run so it is never stranded" do
+    run = create_run(initiated_by: admin, status: "under_review")
+    sign_in_as(admin)
+
+    patch reject_admin_off_cycle_payroll_run_path(run),
+          params: { rejection_reason: "Raised against the wrong cost centre" }, headers: headers
+
+    expect(run.reload).to be_rejected
+    expect(run.rejection_reason).to eq("Raised against the wrong cost centre")
+  end
+
+  it "refuses to send a run with no payslips for review" do
+    run = create_run(status: "processed")
+    sign_in_as(hr_user)
+
+    patch submit_for_review_admin_off_cycle_payroll_run_path(run), headers: headers
+
+    expect(run.reload).to be_processed
+    expect(flash[:alert]).to match(/no payslips/)
+  end
+
   it "lets a different super admin approve and lock the payslip" do
     run = create_run(status: "under_review")
     payslip = create(:payslip, tenant: tenant, payroll_run: run, employee: employee)
@@ -142,6 +163,23 @@ RSpec.describe "Admin::OffCyclePayrollRuns", type: :request do
     patch approve_admin_off_cycle_payroll_run_path(run), headers: headers
     expect(run.reload).to be_approved
     expect(payslip.reload).to be_locked
+  end
+
+  it "closes the employee out of payroll when a settlement is approved" do
+    run = nil
+    ActsAsTenant.with_tenant(tenant) do
+      settlement = create(:full_and_final_settlement, tenant: tenant, employee: employee)
+      run = settlement.payroll_run
+      run.update_columns(initiated_by_id: hr_user.id, status: "under_review")
+      create(:payslip, tenant: tenant, payroll_run: run, employee: employee)
+    end
+    sign_in_as(admin)
+
+    patch approve_admin_off_cycle_payroll_run_path(run), headers: headers
+
+    expect(run.reload).to be_approved
+    expect(employee.reload.employment_status).to eq("resigned")
+    expect(employee.last_working_date).to eq(Date.new(2026, 8, 15))
   end
 
   it "renders bank formats in a dropdown for approved runs" do

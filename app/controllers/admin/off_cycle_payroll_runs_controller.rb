@@ -81,6 +81,11 @@ module Admin
 
     def submit_for_review
       authorize @payroll_run
+      if @payroll_run.payslips.none?
+        return redirect_to admin_off_cycle_payroll_run_path(@payroll_run),
+                           alert: "This run has no payslips. Recalculate it before sending it for review."
+      end
+
       @payroll_run.submit_for_review!
       PayrollMailer.submitted_for_review(@payroll_run).deliver_later
       redirect_to admin_off_cycle_payroll_run_path(@payroll_run), notice: "Submitted for review."
@@ -92,8 +97,13 @@ module Admin
         @payroll_run.approve!
         @payroll_run.record_approval(current_user)
         @payroll_run.payslips.update_all(status: "locked")
+        @payroll_run.full_and_final_settlement&.close_out_employee!
       end
-      redirect_to admin_off_cycle_payroll_run_path(@payroll_run), notice: "Off-cycle payroll approved."
+      redirect_to admin_off_cycle_payroll_run_path(@payroll_run),
+                  notice: @payroll_run.full_and_final? ? "Settlement approved and the employee is closed out of payroll." : "Off-cycle payroll approved."
+    rescue ActiveRecord::RecordInvalid => e
+      redirect_to admin_off_cycle_payroll_run_path(@payroll_run),
+                  alert: "Could not approve: the employee record must be valid to close them out of payroll (#{e.record.errors.full_messages.to_sentence})."
     end
 
     def reject
@@ -108,6 +118,11 @@ module Admin
 
     def resubmit_for_review
       authorize @payroll_run
+      if @payroll_run.payslips.none?
+        return redirect_to admin_off_cycle_payroll_run_path(@payroll_run),
+                           alert: "This run has no payslips. Recalculate it before sending it for review."
+      end
+
       @payroll_run.resubmit_for_review!
       PayrollMailer.submitted_for_review(@payroll_run).deliver_later
       redirect_to admin_off_cycle_payroll_run_path(@payroll_run), notice: "Resubmitted for review."

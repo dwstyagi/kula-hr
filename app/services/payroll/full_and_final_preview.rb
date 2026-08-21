@@ -86,7 +86,7 @@ module Payroll
     def salary_already_paid?
       Payslip.joins(:payroll_run)
         .where(employee: @employee, month: @last_working_date.month, year: @last_working_date.year)
-        .where(payroll_runs: { run_type: "regular", status: %w[processing processed under_review approved rejected paid] })
+        .where(payroll_runs: { run_type: "regular", status: %w[processing processed under_review approved paid] })
         .exists?
     end
 

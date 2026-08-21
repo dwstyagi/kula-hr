@@ -82,7 +82,11 @@ module Payroll
     end
 
     def finalize
+      # processed_employees doubles as the live progress counter while the run
+      # is processing, so settle it on the true success count here — otherwise a
+      # run whose entries all failed reports 40/40 with zero payslips.
       @run.update!(
+        processed_employees: @processed.size,
         total_gross: @run.payslips.sum(:gross_pay),
         total_deductions: @run.payslips.sum(:total_deductions),
         total_net_pay: @run.payslips.sum(:net_pay),

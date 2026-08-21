@@ -41,4 +41,40 @@ RSpec.describe FullAndFinalSettlement, type: :model do
     expect(duplicate).not_to be_valid
     expect(duplicate.errors[:employee]).to include("already has an open or completed F&F settlement")
   end
+  describe "#close_out_employee!" do
+    let(:employee) { create(:employee, tenant: tenant, joining_date: Date.new(2025, 1, 1)) }
+
+    it "moves an in-service employee to resigned and stamps the last working date" do
+      settlement = create(:full_and_final_settlement, tenant: tenant, employee: employee)
+      employee.update!(employment_status: "active")
+
+      settlement.close_out_employee!
+
+      expect(employee.reload.employment_status).to eq("resigned")
+      expect(employee.last_working_date).to eq(settlement.last_working_date)
+    end
+
+    it "does not relabel a terminated employee as resigned" do
+      employee.update!(employment_status: "terminated")
+      settlement = create(:full_and_final_settlement, tenant: tenant, employee: employee)
+
+      settlement.close_out_employee!
+
+      expect(employee.reload.employment_status).to eq("terminated")
+      expect(employee.last_working_date).to eq(settlement.last_working_date)
+    end
+
+    it "removes the employee from later regular payroll eligibility" do
+      settlement = create(:full_and_final_settlement, tenant: tenant, employee: employee)
+      settlement.close_out_employee!
+      lwd = settlement.last_working_date
+      following = lwd.next_month
+
+      eligible = Payroll::ReadinessCheck.eligible_employees(
+        month: following.month, year: following.year, tenant: tenant
+      )
+
+      expect(eligible).not_to include(employee)
+    end
+  end
 end

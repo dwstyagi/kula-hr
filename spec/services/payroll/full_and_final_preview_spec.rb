@@ -50,4 +50,14 @@ RSpec.describe Payroll::FullAndFinalPreview do
     expect(result.earned_salary).to eq(0)
     expect(result.warnings.join).to include("already includes this employee")
   end
+
+  it "still suggests salary when the only regular run for the month was rejected" do
+    rejected_run = create(:payroll_run, :rejected, tenant: tenant, month: 8, year: 2026)
+    create(:payslip, tenant: tenant, employee: employee, payroll_run: rejected_run, month: 8, year: 2026)
+
+    result = described_class.new(employee: employee, last_working_date: last_working_date).call
+
+    expect(result.earned_salary).to eq(9677.42)
+    expect(result.warnings).to be_empty
+  end
 end

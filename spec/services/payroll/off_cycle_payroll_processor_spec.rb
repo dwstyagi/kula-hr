@@ -43,6 +43,22 @@ RSpec.describe Payroll::OffCyclePayrollProcessor do
     expect(run.total_net_pay).to eq(42_000)
   end
 
+  it "reports zero processed when every entry fails" do
+    allow_any_instance_of(PayrollRun).to receive(:payslips).and_wrap_original do |method, *args|
+      relation = method.call(*args)
+      allow(relation).to receive(:create!).and_raise(ActiveRecord::RecordInvalid.new(Payslip.new))
+      relation
+    end
+
+    result = described_class.new(payroll_run: run).call
+    run.reload
+
+    expect(result.processed).to be_empty
+    expect(result.errors.size).to eq(1)
+    expect(run.processed_employees).to eq(0)
+    expect(run.payslips).to be_empty
+  end
+
   it "refuses to process a regular payroll run" do
     regular = create(:payroll_run, tenant: tenant, initiated_by: hr_user)
     expect { described_class.new(payroll_run: regular).call }

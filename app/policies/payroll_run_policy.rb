@@ -12,9 +12,13 @@ class PayrollRunPolicy < ApplicationPolicy
 
   def download_bank_file? = admin_or_hr?
 
-  # Only Super Admin can approve or reject
+  # Only Super Admin can approve or reject. Off-cycle runs additionally need a
+  # second pair of eyes: the super admin who created the run cannot approve it.
+  # Rejection stays open to any super admin, including the initiator, so a run
+  # they raised themselves can always be withdrawn instead of stranding in
+  # under_review with no legal transition out.
   def approve? = super_admin? && (!record.off_cycle? || record.initiated_by_id != user.id)
-  def reject?  = approve?
+  def reject?  = super_admin?
 
   class Scope < ApplicationPolicy::Scope
     def resolve

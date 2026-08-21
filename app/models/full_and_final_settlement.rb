@@ -38,6 +38,21 @@ class FullAndFinalSettlement < ApplicationRecord
   validate :payment_not_before_last_working_date
   validate :no_other_open_settlement, on: :create
 
+  # Statuses that still make an employee payroll-eligible. Anyone already
+  # resigned or terminated keeps the status HR set, so a dismissal is never
+  # relabelled as a resignation by the settlement.
+  IN_SERVICE_STATUSES = %w[active probation notice_period].freeze
+
+  # Closes the employee out of payroll. Called when the run is approved — the
+  # point where payslips lock and the payout is committed. Until this runs the
+  # employee stays payroll-eligible, so the next regular run would pay full
+  # salary on top of the settlement.
+  def close_out_employee!
+    attrs = { last_working_date: last_working_date }
+    attrs[:employment_status] = "resigned" if IN_SERVICE_STATUSES.include?(employee.employment_status)
+    employee.update!(attrs)
+  end
+
   def earning_items
     component_items(EARNING_COMPONENTS)
   end
