@@ -83,7 +83,7 @@
       <% elsif @payroll_run.under_review? && policy(@payroll_run).approve? %>
         <%= button_to "Approve", approve_admin_off_cycle_payroll_run_path(@payroll_run), method: :patch, class: "btn btn-primary cursor-pointer", form: { data: { turbo_confirm: "Approve and lock these payments?" } } %>
       <% elsif @payroll_run.under_review? %>
-        <span class="badge badge-warning">Awaiting a different super admin</span>
+        <span class="badge badge-warning">Awaiting approval</span>
       <% elsif @payroll_run.rejected? %>
         <%= button_to "Resubmit", resubmit_for_review_admin_off_cycle_payroll_run_path(@payroll_run), method: :patch, class: "btn btn-primary cursor-pointer" %>
         <%= button_to "Recalculate", reprocess_admin_off_cycle_payroll_run_path(@payroll_run), method: :patch, class: "btn btn-secondary cursor-pointer" %>

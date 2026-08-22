@@ -30,29 +30,26 @@ RSpec.describe PayrollRunPolicy, type: :policy do
     it { is_expected.to be_reject }
   end
 
-  # ── Off-cycle maker-checker ───────────────────────────────────────────────
+  # ── Off-cycle runs ────────────────────────────────────────────────────────
 
   describe "for an off-cycle run" do
-    let(:other_admin) { create(:user, :super_admin) }
     let(:off_cycle_run) do
       create(:payroll_run, tenant: tenant, initiated_by: admin,
              run_type: "bonus", title: "Diwali Bonus", payment_date: Date.current)
     end
 
-    it "blocks the super admin who raised it from approving" do
-      expect(described_class.new(admin, off_cycle_run)).not_to be_approve
+    it "lets a super admin approve one they raised themselves" do
+      expect(described_class.new(admin, off_cycle_run)).to be_approve
     end
 
-    it "lets a different super admin approve" do
-      expect(described_class.new(other_admin, off_cycle_run)).to be_approve
-    end
-
-    it "still lets the initiator reject, so the run is never stranded" do
+    it "lets a super admin reject one they raised themselves" do
       expect(described_class.new(admin, off_cycle_run)).to be_reject
     end
 
-    it "keeps rejection off-limits for hr_admin" do
-      expect(described_class.new(hr_user, off_cycle_run)).not_to be_reject
+    it "keeps approval and rejection off-limits for hr_admin" do
+      policy = described_class.new(hr_user, off_cycle_run)
+      expect(policy).not_to be_approve
+      expect(policy).not_to be_reject
     end
   end
 

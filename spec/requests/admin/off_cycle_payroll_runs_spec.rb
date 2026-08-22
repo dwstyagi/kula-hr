@@ -186,14 +186,18 @@ RSpec.describe "Admin::OffCyclePayrollRuns", type: :request do
     expect(response).to redirect_to(admin_off_cycle_payroll_run_path(run))
   end
 
-  it "prevents the creator from approving their own off-cycle run" do
+  it "lets a super admin approve a run they raised themselves" do
     run = create_run(initiated_by: admin, status: "under_review")
+    payslip = create(:payslip, tenant: tenant, payroll_run: run, employee: employee)
     sign_in_as(admin)
+
     patch approve_admin_off_cycle_payroll_run_path(run), headers: headers
-    expect(run.reload).to be_under_review
+
+    expect(run.reload).to be_approved
+    expect(payslip.reload).to be_locked
   end
 
-  it "lets the creator reject their own off-cycle run so it is never stranded" do
+  it "lets a super admin reject a run they raised themselves" do
     run = create_run(initiated_by: admin, status: "under_review")
     sign_in_as(admin)
 
@@ -202,6 +206,15 @@ RSpec.describe "Admin::OffCyclePayrollRuns", type: :request do
 
     expect(run.reload).to be_rejected
     expect(run.rejection_reason).to eq("Raised against the wrong cost centre")
+  end
+
+  it "keeps approval off-limits for hr_admin" do
+    run = create_run(status: "under_review")
+    sign_in_as(hr_user)
+
+    patch approve_admin_off_cycle_payroll_run_path(run), headers: headers
+
+    expect(run.reload).to be_under_review
   end
 
   it "refuses to send a run with no payslips for review" do
@@ -214,7 +227,7 @@ RSpec.describe "Admin::OffCyclePayrollRuns", type: :request do
     expect(flash[:alert]).to match(/no payslips/)
   end
 
-  it "lets a different super admin approve and lock the payslip" do
+  it "lets a super admin approve and lock the payslip" do
     run = create_run(status: "under_review")
     payslip = create(:payslip, tenant: tenant, payroll_run: run, employee: employee)
     sign_in_as(admin)

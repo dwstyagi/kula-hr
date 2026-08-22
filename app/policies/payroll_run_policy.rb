@@ -12,12 +12,13 @@ class PayrollRunPolicy < ApplicationPolicy
 
   def download_bank_file? = admin_or_hr?
 
-  # Only Super Admin can approve or reject. Off-cycle runs additionally need a
-  # second pair of eyes: the super admin who created the run cannot approve it.
-  # Rejection stays open to any super admin, including the initiator, so a run
-  # they raised themselves can always be withdrawn instead of stranding in
-  # under_review with no legal transition out.
-  def approve? = super_admin? && (!record.off_cycle? || record.initiated_by_id != user.id)
+  # Only Super Admin can approve or reject. This is deliberately identical for
+  # regular and off-cycle runs: a super admin can already raise and approve a
+  # regular run, so blocking them on the smaller off-cycle amount would be an
+  # inconsistency that protects nothing. Segregation of duties, if it is ever
+  # needed, belongs in the audit trail (initiated_by / approved_by) rather than
+  # in a hard block that a single-super-admin tenant cannot satisfy.
+  def approve? = super_admin?
   def reject?  = super_admin?
 
   class Scope < ApplicationPolicy::Scope
