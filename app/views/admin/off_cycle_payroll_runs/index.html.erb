@@ -4,7 +4,11 @@
   <div class="flex flex-wrap items-center justify-between gap-4">
     <div>
       <h1 class="page-title text-2xl">Off-cycle Payroll</h1>
-      <p class="page-sub">Bonus, additional payments, and employee settlements outside regular payroll</p>
+      <p class="page-sub">
+        Bonus, additional payments, and employee settlements outside regular payroll &middot;
+        <%= link_to "Back to monthly payroll", admin_payroll_runs_path,
+              class: "text-kula-700 hover:underline" %>
+      </p>
     </div>
     <div class="flex gap-2">
       <%= link_to "New F&F", new_admin_full_and_final_payroll_run_path, class: "btn btn-secondary" %>

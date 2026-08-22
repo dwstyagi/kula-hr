@@ -121,6 +121,17 @@ RSpec.describe "Admin::OffCyclePayrollRuns", type: :request do
     expect(entry.reload.net_amount).to eq(35_000)
   end
 
+  it "cross-links between the regular and off-cycle payroll pages" do
+    sign_in_as(hr_user)
+
+    get admin_payroll_runs_path, headers: headers
+    expect(response.body).to include(admin_off_cycle_payroll_runs_path)
+    expect(response.body).to include("Paying a bonus or settlement?")
+
+    get admin_off_cycle_payroll_runs_path, headers: headers
+    expect(response.body).to include("Back to monthly payroll")
+  end
+
   it "renders filterable rows and a department list on the new form" do
     ActsAsTenant.with_tenant(tenant) do
       department = create(:department, tenant: tenant, name: "Engineering")
