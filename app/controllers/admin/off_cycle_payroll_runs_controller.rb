@@ -3,13 +3,18 @@ module Admin
     before_action :set_payroll_run, only: [ :show, :edit, :update, :process_payroll, :submit_for_review,
                                             :approve, :reject, :resubmit_for_review,
                                             :reprocess, :mark_paid, :bank_file,
-                                            :download_bank_file ]
+                                            :download_bank_file, :destroy ]
+    before_action :set_any_payroll_run, only: [ :restore ]
 
     def index
       authorize PayrollRun
+      @showing_deleted = params[:filter] == "deleted"
+      scope = policy_scope(PayrollRun).off_cycle
+      scope = @showing_deleted ? scope.deleted : scope.kept
+
+      @deleted_count = policy_scope(PayrollRun).off_cycle.deleted.count
       @payroll_runs = PayrollRunPresenter.wrap(
-        policy_scope(PayrollRun).off_cycle.includes(:initiated_by, :approved_by)
-          .order(payment_date: :desc, created_at: :desc)
+        scope.includes(:initiated_by, :approved_by).order(payment_date: :desc, created_at: :desc)
       )
     end
 
@@ -148,6 +153,24 @@ module Admin
       redirect_to admin_off_cycle_payroll_run_path(@payroll_run), notice: "Off-cycle payroll marked as paid."
     end
 
+    def destroy
+      authorize @payroll_run
+      if @payroll_run.soft_delete!
+        redirect_to admin_off_cycle_payroll_runs_path,
+                    notice: "#{@payroll_run.title} deleted. You can restore it from the Deleted tab."
+      else
+        redirect_to admin_off_cycle_payroll_run_path(@payroll_run),
+                    alert: "Only a draft run can be deleted."
+      end
+    end
+
+    def restore
+      authorize @payroll_run
+      @payroll_run.restore!
+      redirect_to admin_off_cycle_payroll_run_path(@payroll_run),
+                  notice: "#{@payroll_run.title} restored."
+    end
+
     def bank_file
       authorize @payroll_run, :show?
       generator = Payroll::BankFileGenerators::Factory.for(nil, payroll_run: @payroll_run)
@@ -170,6 +193,11 @@ module Admin
     private
 
     def set_payroll_run
+      @payroll_run = policy_scope(PayrollRun).off_cycle.kept.find(params[:id])
+    end
+
+    # Restore is the one action that has to reach a deleted run.
+    def set_any_payroll_run
       @payroll_run = policy_scope(PayrollRun).off_cycle.find(params[:id])
     end
 

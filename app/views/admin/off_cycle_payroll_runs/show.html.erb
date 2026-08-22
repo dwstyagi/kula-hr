@@ -43,11 +43,16 @@
     <% end %>
 
     <% if @payroll_run.draft? %>
-      <div class="flex items-center gap-3">
+      <div class="flex flex-wrap items-center gap-3">
         <%= button_to "Calculate payments", process_payroll_admin_off_cycle_payroll_run_path(@payroll_run),
               method: :post, class: "btn btn-primary cursor-pointer",
               form: { data: { turbo_confirm: @payroll_run.full_and_final? ? "Create the settlement statement from these inputs?" : "Create off-cycle payslips from these approved inputs?" } } %>
         <%= link_to "Edit inputs", edit_admin_off_cycle_payroll_run_path(@payroll_run), class: "btn btn-secondary" %>
+        <% if policy(@payroll_run).destroy? %>
+          <%= button_to "Delete run", admin_off_cycle_payroll_run_path(@payroll_run),
+                method: :delete, class: "btn btn-ghost text-red-700 cursor-pointer ml-auto",
+                form: { data: { turbo_confirm: "Delete this draft run? You can restore it from the Deleted tab." } } %>
+        <% end %>
       </div>
     <% else %>
       <div class="alert alert-info"><p>Processing payments… refresh this page in a moment.</p></div>

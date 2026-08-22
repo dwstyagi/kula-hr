@@ -53,6 +53,37 @@ RSpec.describe PayrollRunPolicy, type: :policy do
     end
   end
 
+  # ── Deletion ──────────────────────────────────────────────────────────────
+
+  describe "deletion" do
+    let(:draft_run) do
+      create(:payroll_run, tenant: tenant, initiated_by: hr_user,
+             run_type: "bonus", title: "Diwali Bonus", payment_date: Date.current)
+    end
+
+    it "lets hr_admin delete a draft they raised" do
+      expect(described_class.new(hr_user, draft_run)).to be_destroy
+    end
+
+    it "lets a super admin delete a draft" do
+      expect(described_class.new(admin, draft_run)).to be_destroy
+    end
+
+    it "refuses deletion once the run has been calculated" do
+      draft_run.update_columns(status: "processed")
+      expect(described_class.new(admin, draft_run.reload)).not_to be_destroy
+    end
+
+    it "refuses deletion of an already deleted run" do
+      draft_run.soft_delete!
+      expect(described_class.new(admin, draft_run.reload)).not_to be_destroy
+    end
+
+    it "keeps deletion away from employees" do
+      expect(described_class.new(emp_user, draft_run)).not_to be_destroy
+    end
+  end
+
   # ── HR Admin ──────────────────────────────────────────────────────────────
 
   describe "for an hr_admin" do

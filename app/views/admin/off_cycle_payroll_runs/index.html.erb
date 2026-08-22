@@ -16,6 +16,17 @@
     </div>
   </div>
 
+  <% if @deleted_count.positive? || @showing_deleted %>
+    <div class="flex items-center gap-1 border-b border-stone-200">
+      <%= link_to "Active", admin_off_cycle_payroll_runs_path,
+            class: "px-4 py-2 text-sm font-medium border-b-2 #{@showing_deleted ? 'border-transparent text-stone-500 hover:text-stone-700' : 'border-kula-700 text-kula-700'}" %>
+      <%= link_to admin_off_cycle_payroll_runs_path(filter: "deleted"),
+            class: "px-4 py-2 text-sm font-medium border-b-2 #{@showing_deleted ? 'border-kula-700 text-kula-700' : 'border-transparent text-stone-500 hover:text-stone-700'}" do %>
+        Deleted <span class="text-xs text-stone-400">(<%= @deleted_count %>)</span>
+      <% end %>
+    </div>
+  <% end %>
+
   <div class="card overflow-hidden">
     <% if @payroll_runs.any? %>
       <div class="overflow-x-auto">
@@ -35,16 +46,32 @@
             <% @payroll_runs.each do |run| %>
               <tr>
                 <td>
-                  <%= link_to run.title, admin_off_cycle_payroll_run_path(run),
-                        class: "font-medium text-stone-900 hover:text-kula-700" %>
-                  <p class="text-xs text-stone-400 mt-0.5"><%= run.month_name %> <%= run.year %></p>
+                  <% if @showing_deleted %>
+                    <span class="font-medium text-stone-500"><%= run.title %></span>
+                  <% else %>
+                    <%= link_to run.title, admin_off_cycle_payroll_run_path(run),
+                          class: "font-medium text-stone-900 hover:text-kula-700" %>
+                  <% end %>
+                  <p class="text-xs text-stone-400 mt-0.5">
+                    <%= run.month_name %> <%= run.year %>
+                    <% if @showing_deleted && run.deleted_at %>
+                      &middot; deleted <%= run.deleted_at.strftime("%d %b %Y") %>
+                    <% end %>
+                  </p>
                 </td>
                 <td><span class="badge badge-neutral"><%= run.run_type_label %></span></td>
                 <td class="text-stone-600"><%= run.payment_date.strftime("%d %b %Y") %></td>
                 <td><%= render "admin/payroll_runs/status_badge", payroll_run: run %></td>
                 <td class="num"><%= run.payslips.count.positive? ? run.payslips.count : (run.full_and_final? ? run.full_and_final_settlements.count : run.off_cycle_payroll_entries.count) %></td>
                 <td class="num font-semibold"><%= run.total_net_pay.positive? ? run.formatted_total_net_pay : "—" %></td>
-                <td class="text-right"><%= link_to "Open →", admin_off_cycle_payroll_run_path(run), class: "text-sm text-kula-700" %></td>
+                <td class="text-right">
+                  <% if @showing_deleted %>
+                    <%= button_to "Restore", restore_admin_off_cycle_payroll_run_path(run),
+                          method: :patch, class: "btn btn-secondary btn-sm cursor-pointer" %>
+                  <% else %>
+                    <%= link_to "Open →", admin_off_cycle_payroll_run_path(run), class: "text-sm text-kula-700" %>
+                  <% end %>
+                </td>
               </tr>
             <% end %>
           </tbody>
@@ -52,8 +79,13 @@
       </div>
     <% else %>
       <div class="empty-state py-16">
-        <p class="font-medium text-stone-700">No off-cycle runs yet</p>
-        <p class="text-sm text-stone-400 mt-1">Create one for a bonus, additional payment, or employee settlement.</p>
+        <% if @showing_deleted %>
+          <p class="font-medium text-stone-700">Nothing deleted</p>
+          <p class="text-sm text-stone-400 mt-1">Deleted draft runs appear here and can be restored.</p>
+        <% else %>
+          <p class="font-medium text-stone-700">No off-cycle runs yet</p>
+          <p class="text-sm text-stone-400 mt-1">Create one for a bonus, additional payment, or employee settlement.</p>
+        <% end %>
       </div>
     <% end %>
   </div>

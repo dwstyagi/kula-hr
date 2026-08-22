@@ -41,6 +41,11 @@ class PayrollRun < ApplicationRecord
   scope :for_month, ->(month, year) { where(month: month, year: year) }
   scope :regular_runs, -> { where(run_type: "regular") }
   scope :off_cycle, -> { where.not(run_type: "regular") }
+  # No default_scope on purpose: acts_as_tenant already scopes this model, and a
+  # second invisible filter makes "why is my record missing" much harder to
+  # answer. Callers ask for .kept explicitly.
+  scope :kept, -> { where(deleted_at: nil) }
+  scope :deleted, -> { where.not(deleted_at: nil) }
 
   # ── AASM State Machine ───────────────────────────────────────────────────────
 
@@ -126,6 +131,25 @@ class PayrollRun < ApplicationRecord
     return "#{title} · #{month_name} #{year}" if off_cycle?
 
     "#{month_name} #{year}"
+  end
+
+  def deleted? = deleted_at.present?
+
+  # Only a draft can be removed. Once a run has been calculated it holds
+  # payslips and a place in the audit trail, and a mistake there is corrected
+  # by recalculating or rejecting, not by hiding the run.
+  def deletable? = draft? && !deleted?
+
+  def soft_delete!
+    return false unless deletable?
+
+    update_columns(deleted_at: Time.current)
+  end
+
+  def restore!
+    return false unless deleted?
+
+    update_columns(deleted_at: nil)
   end
 
   def regular? = run_type == "regular"

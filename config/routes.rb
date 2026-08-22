@@ -153,8 +153,9 @@ Rails.application.routes.draw do
           end
         end
       end
-      resources :off_cycle_payroll_runs, only: [ :index, :new, :create, :show, :edit, :update ] do
+      resources :off_cycle_payroll_runs, only: [ :index, :new, :create, :show, :edit, :update, :destroy ] do
         member do
+          patch :restore
           post :process_payroll
           patch :submit_for_review
           patch :approve

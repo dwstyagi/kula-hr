@@ -281,4 +281,84 @@ RSpec.describe "Admin::OffCyclePayrollRuns", type: :request do
     expect(response.body).to include("Generic CSV (.csv)", "State Bank of India (.txt)")
     expect(response.body).not_to include('type="radio"')
   end
+  describe "soft delete" do
+    it "removes a draft run from the list without destroying it" do
+      run = create_run
+      sign_in_as(hr_user)
+
+      expect {
+        delete admin_off_cycle_payroll_run_path(run), headers: headers
+      }.not_to change { PayrollRun.unscoped.count }
+
+      expect(run.reload.deleted_at).to be_present
+      expect(response).to redirect_to(admin_off_cycle_payroll_runs_path)
+
+      # The flash names the run, so assert on the listing itself.
+      get admin_off_cycle_payroll_runs_path, headers: headers
+      expect(response.body).not_to include(admin_off_cycle_payroll_run_path(run))
+    end
+
+    it "keeps the entries so a restore brings the run back whole" do
+      run = create_run
+      sign_in_as(hr_user)
+
+      delete admin_off_cycle_payroll_run_path(run), headers: headers
+
+      expect(run.off_cycle_payroll_entries.count).to eq(1)
+    end
+
+    it "lists deleted runs under the Deleted filter and restores them" do
+      run = create_run
+      sign_in_as(hr_user)
+      delete admin_off_cycle_payroll_run_path(run), headers: headers
+
+      get admin_off_cycle_payroll_runs_path(filter: "deleted"), headers: headers
+      expect(response.body).to include("Annual Bonus")
+
+      patch restore_admin_off_cycle_payroll_run_path(run), headers: headers
+
+      expect(run.reload.deleted_at).to be_nil
+      get admin_off_cycle_payroll_runs_path, headers: headers
+      expect(response.body).to include("Annual Bonus")
+    end
+
+    it "refuses to delete a run that has been calculated" do
+      run = create_run(status: "processed")
+      sign_in_as(hr_user)
+
+      delete admin_off_cycle_payroll_run_path(run), headers: headers
+
+      expect(run.reload.deleted_at).to be_nil
+    end
+
+    it "refuses to delete an approved run" do
+      run = create_run(status: "approved")
+      sign_in_as(admin)
+
+      delete admin_off_cycle_payroll_run_path(run), headers: headers
+
+      expect(run.reload.deleted_at).to be_nil
+    end
+
+    it "hides a deleted run from show and edit" do
+      run = create_run
+      sign_in_as(hr_user)
+      delete admin_off_cycle_payroll_run_path(run), headers: headers
+
+      get admin_off_cycle_payroll_run_path(run), headers: headers
+      expect(response).to have_http_status(:not_found)
+
+      get edit_admin_off_cycle_payroll_run_path(run), headers: headers
+      expect(response).to have_http_status(:not_found)
+    end
+
+    it "does not offer delete on a calculated run" do
+      run = create_run(status: "processed")
+      sign_in_as(hr_user)
+
+      get admin_off_cycle_payroll_run_path(run), headers: headers
+
+      expect(response.body).not_to include("Delete run")
+    end
+  end
 end
