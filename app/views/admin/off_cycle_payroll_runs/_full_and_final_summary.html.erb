@@ -1,32 +1,57 @@
-<% settlement = payroll_run.full_and_final_settlement %>
 <div class="card overflow-hidden">
   <div class="card-header">
-    <div><h2 class="card-title">Settlement inputs</h2><p class="text-xs text-stone-500 mt-0.5"><%= settlement.employee.full_name %> · Last working date <%= settlement.last_working_date.strftime("%d %b %Y") %></p></div>
-  </div>
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-0 md:divide-x divide-stone-200">
-    <div class="p-5">
-      <h3 class="font-semibold mb-3">Earnings</h3>
-      <dl class="space-y-2">
-        <% settlement.earning_items.each do |name, amount| %>
-          <div class="flex justify-between gap-4"><dt class="text-stone-600"><%= name %></dt><dd class="num">₹<%= number_with_delimiter(amount) %></dd></div>
-        <% end %>
-        <div class="flex justify-between border-t pt-2 font-semibold"><dt>Total earnings</dt><dd class="num">₹<%= number_with_delimiter(settlement.total_earnings) %></dd></div>
-      </dl>
-    </div>
-    <div class="p-5">
-      <h3 class="font-semibold mb-3">Deductions and recoveries</h3>
-      <dl class="space-y-2">
-        <% settlement.deduction_items.each do |name, amount| %>
-          <div class="flex justify-between gap-4"><dt class="text-stone-600"><%= name %></dt><dd class="num">₹<%= number_with_delimiter(amount) %></dd></div>
-        <% end %>
-        <div class="flex justify-between border-t pt-2 font-semibold"><dt>Total deductions</dt><dd class="num">₹<%= number_with_delimiter(settlement.total_deductions) %></dd></div>
-      </dl>
+    <div>
+      <h2 class="card-title">Settlement inputs</h2>
+      <p class="text-xs text-stone-500 mt-0.5"><%= pluralize(payroll_run.full_and_final_settlements.size, "employee") %> being settled</p>
     </div>
   </div>
-  <div class="border-t border-stone-200 p-5 flex flex-wrap justify-between gap-6">
-    <div><p class="stat-label">Net payable</p><p class="text-xl font-semibold text-kula-700">₹<%= number_with_delimiter(settlement.net_pay) %></p></div>
-    <% if settlement.recoverable_amount.positive? %>
-      <div><p class="stat-label">Amount recoverable from employee</p><p class="text-xl font-semibold text-red-700">₹<%= number_with_delimiter(settlement.recoverable_amount) %></p></div>
+
+  <% payroll_run.full_and_final_settlements.includes(:employee).each do |settlement| %>
+    <div class="border-t border-stone-200 first:border-t-0">
+      <div class="px-5 pt-4">
+        <p class="font-semibold"><%= settlement.employee.full_name %></p>
+        <p class="text-xs text-stone-500 mt-0.5"><%= settlement.employee.employee_code %> · Last working date <%= settlement.last_working_date.strftime("%d %b %Y") %></p>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-0 md:divide-x divide-stone-200">
+        <div class="p-5">
+          <h3 class="font-semibold mb-3">Earnings</h3>
+          <dl class="space-y-2">
+            <% settlement.earning_items.each do |name, amount| %>
+              <div class="flex justify-between gap-4"><dt class="text-stone-600"><%= name %></dt><dd class="num">₹<%= number_with_delimiter(amount) %></dd></div>
+            <% end %>
+            <div class="flex justify-between border-t pt-2 font-semibold"><dt>Total earnings</dt><dd class="num">₹<%= number_with_delimiter(settlement.total_earnings) %></dd></div>
+          </dl>
+        </div>
+        <div class="p-5">
+          <h3 class="font-semibold mb-3">Deductions and recoveries</h3>
+          <dl class="space-y-2">
+            <% settlement.deduction_items.each do |name, amount| %>
+              <div class="flex justify-between gap-4"><dt class="text-stone-600"><%= name %></dt><dd class="num">₹<%= number_with_delimiter(amount) %></dd></div>
+            <% end %>
+            <div class="flex justify-between border-t pt-2 font-semibold"><dt>Total deductions</dt><dd class="num">₹<%= number_with_delimiter(settlement.total_deductions) %></dd></div>
+          </dl>
+        </div>
+      </div>
+      <div class="px-5 pb-4 flex flex-wrap justify-between gap-6">
+        <div><p class="stat-label">Net payable</p><p class="text-lg font-semibold text-kula-700">₹<%= number_with_delimiter(settlement.net_pay) %></p></div>
+        <% if settlement.recoverable_amount.positive? %>
+          <div><p class="stat-label">Recoverable from employee</p><p class="text-lg font-semibold text-red-700">₹<%= number_with_delimiter(settlement.recoverable_amount) %></p></div>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+
+  <div class="border-t-2 border-stone-300 p-5 flex flex-wrap justify-between gap-6 bg-stone-50">
+    <div>
+      <p class="stat-label">Total net payable</p>
+      <p class="text-xl font-semibold text-kula-700">₹<%= number_with_delimiter(payroll_run.full_and_final_settlements.sum(&:net_pay)) %></p>
+    </div>
+    <% total_recovery = payroll_run.full_and_final_settlements.sum(&:recoverable_amount) %>
+    <% if total_recovery.positive? %>
+      <div>
+        <p class="stat-label">Total recoverable</p>
+        <p class="text-xl font-semibold text-red-700">₹<%= number_with_delimiter(total_recovery) %></p>
+      </div>
     <% end %>
   </div>
 </div>

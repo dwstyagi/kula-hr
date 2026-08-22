@@ -77,4 +77,24 @@ RSpec.describe FullAndFinalSettlement, type: :model do
       expect(eligible).not_to include(employee)
     end
   end
+  describe "multiple settlements in one run" do
+    it "allows several employees in a single settlement run" do
+      first = create(:full_and_final_settlement, tenant: tenant)
+      run = first.payroll_run
+      second = build(:full_and_final_settlement, tenant: tenant, payroll_run: run,
+                     employee: create(:employee, tenant: tenant))
+
+      expect(second).to be_valid
+      expect { second.save! }.to change { run.full_and_final_settlements.count }.by(1)
+    end
+
+    it "refuses the same employee twice in one run" do
+      first = create(:full_and_final_settlement, tenant: tenant)
+      duplicate = build(:full_and_final_settlement, tenant: tenant,
+                        payroll_run: first.payroll_run, employee: first.employee)
+
+      expect(duplicate).not_to be_valid
+      expect(duplicate.errors[:employee_id]).to include("is already being settled in this run")
+    end
+  end
 end

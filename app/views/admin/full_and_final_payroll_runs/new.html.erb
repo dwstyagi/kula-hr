@@ -1,39 +1,41 @@
 <% content_for :page_title, "New Full & Final Settlement" %>
 
-<div class="space-y-6 max-w-6xl">
+<div class="space-y-6 max-w-3xl">
   <div>
-    <h1 class="page-title text-2xl">New Full & Final Settlement</h1>
-    <p class="page-sub">Select the employee and last working date, then review every suggested amount.</p>
+    <h1 class="page-title text-2xl">New Full &amp; Final Settlement</h1>
+    <p class="page-sub">Name the run and set the payment date. You will add the employees you are settling on the next screen.</p>
   </div>
 
-  <div class="card card-pad">
-    <%= form_with url: new_admin_full_and_final_payroll_run_path, method: :get, class: "grid grid-cols-1 md:grid-cols-[1fr_220px_auto] gap-4 items-end" do |f| %>
-      <div>
-        <%= f.label :employee_id, "Employee", class: "label" %>
-        <%= f.select :employee_id,
-              options_from_collection_for_select(@employees, :id, :full_name, @selected_employee&.id),
-              { prompt: "Select employee" }, class: "select", required: true %>
+  <%= form_with model: @payroll_run, url: admin_full_and_final_payroll_runs_path, class: "space-y-6" do |f| %>
+    <% if @payroll_run.errors.any? %>
+      <div class="alert alert-error">
+        <div>
+          <p class="font-semibold">Could not create this run</p>
+          <ul class="list-disc list-inside mt-1">
+            <% @payroll_run.errors.full_messages.each do |message| %><li><%= message %></li><% end %>
+          </ul>
+        </div>
       </div>
-      <div>
-        <%= f.label :last_working_date, "Last working date", class: "label" %>
-        <%= f.date_field :last_working_date, value: @last_working_date, class: "input", required: true %>
-      </div>
-      <%= f.submit "Calculate preview", class: "btn btn-secondary cursor-pointer" %>
     <% end %>
-  </div>
 
-  <% if @payroll_run && @payroll_run.full_and_final_settlement&.employee %>
-    <% if @preview_warnings.present? %>
-      <div class="alert alert-warning">
-        <div><p class="font-semibold">Review required</p><ul class="list-disc list-inside"><% @preview_warnings.each do |warning| %><li><%= warning %></li><% end %></ul></div>
+    <div class="card card-pad grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div>
+        <%= f.label :title, "Statement label", class: "label" %>
+        <%= f.text_field :title, class: "input", required: true, maxlength: 100, placeholder: "Full & Final Settlement" %>
       </div>
-    <% end %>
-    <%= render "admin/off_cycle_payroll_runs/full_and_final_form",
-          payroll_run: @payroll_run,
-          form_url: admin_full_and_final_payroll_runs_path,
-          submit_label: "Create settlement",
-          cancel_path: admin_off_cycle_payroll_runs_path %>
-  <% elsif @payroll_run&.errors&.any? %>
-    <div class="alert alert-error"><ul class="list-disc list-inside"><% @payroll_run.errors.full_messages.each do |message| %><li><%= message %></li><% end %></ul></div>
+      <div>
+        <%= f.label :payment_date, class: "label" %>
+        <%= f.date_field :payment_date, class: "input", required: true %>
+      </div>
+      <div class="md:col-span-2">
+        <%= f.label :notes, "Internal notes", class: "label" %>
+        <%= f.text_area :notes, rows: 2, class: "textarea", placeholder: "Reason or approval reference…" %>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-3">
+      <%= f.submit "Create and add employees", class: "btn btn-primary cursor-pointer" %>
+      <%= link_to "Cancel", admin_off_cycle_payroll_runs_path, class: "btn btn-secondary" %>
+    </div>
   <% end %>
 </div>

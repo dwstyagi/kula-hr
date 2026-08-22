@@ -7,7 +7,7 @@ class PayrollRun < ApplicationRecord
   belongs_to :approved_by,  class_name: "User", optional: true
   has_many   :payslips, dependent: :destroy
   has_many   :off_cycle_payroll_entries, dependent: :destroy
-  has_one    :full_and_final_settlement, dependent: :destroy
+  has_many   :full_and_final_settlements, dependent: :destroy
 
   RUN_TYPES = %w[regular bonus additional full_and_final].freeze
 
@@ -22,7 +22,7 @@ class PayrollRun < ApplicationRecord
 
       attrs["gross_amount"].blank? || attrs["gross_amount"].to_d <= 0
     }
-  accepts_nested_attributes_for :full_and_final_settlement
+  accepts_nested_attributes_for :full_and_final_settlements, allow_destroy: true
 
   # ── Validations ──────────────────────────────────────────────────────────────
 
@@ -196,7 +196,10 @@ class PayrollRun < ApplicationRecord
   # into zero payslips.
   def off_cycle_must_have_entries
     return unless off_cycle?
-    return if full_and_final? && full_and_final_settlement.present?
+    # Settlement runs are deliberately created empty: employees are added one
+    # at a time from the draft, each with their own last working date. That the
+    # run is non-empty is enforced when it is calculated, not when it is made.
+    return if full_and_final?
     return if off_cycle_payroll_entries.reject(&:marked_for_destruction?).any?
 
     errors.add(:base, "Add at least one employee with an amount")

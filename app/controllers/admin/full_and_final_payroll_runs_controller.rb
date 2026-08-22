@@ -1,80 +1,98 @@
 module Admin
   class FullAndFinalPayrollRunsController < BaseController
+    before_action :set_payroll_run, only: [ :add_employee ]
+
+    # A settlement run starts empty: employees are added one at a time from the
+    # run's edit page, because each exit has its own last working date and its
+    # own previewed amounts. See #add_employee.
     def new
       authorize PayrollRun
-      load_employees
-      @selected_employee = @employees.find_by(id: params[:employee_id])
-      @last_working_date = parsed_date(params[:last_working_date])
-      build_preview if @selected_employee && @last_working_date
+      today = Date.current
+      @payroll_run = PayrollRun.new(
+        run_type: "full_and_final",
+        title: "Full & Final Settlement",
+        payment_date: today,
+        month: today.month,
+        year: today.year
+      )
     end
 
     def create
       authorize PayrollRun
-      load_employees
       @payroll_run = PayrollRun.new(payroll_run_params)
       @payroll_run.run_type = "full_and_final"
       @payroll_run.initiated_by = current_user
       assign_period
 
-      settlement = @payroll_run.full_and_final_settlement
-      if settlement
-        settlement.tenant = ActsAsTenant.current_tenant
-        settlement.employee = @employees.find_by(id: settlement.employee_id)
+      if @payroll_run.save
+        redirect_to edit_admin_off_cycle_payroll_run_path(@payroll_run),
+                    notice: "Settlement run created. Add the employees you are settling."
+      else
+        render :new, status: :unprocessable_entity
+      end
+    end
+
+    # Previews one employee against their last working date and appends the
+    # result to the draft as an editable settlement. HR reviews every suggested
+    # amount on the edit page before the run is calculated.
+    def add_employee
+      authorize @payroll_run, :update?
+
+      unless @payroll_run.draft?
+        return redirect_to admin_off_cycle_payroll_run_path(@payroll_run),
+                           alert: "Employees can only be added while the run is in draft."
       end
 
-      if @payroll_run.save
-        redirect_to admin_off_cycle_payroll_run_path(@payroll_run), notice: "Full & Final settlement created."
+      employee = policy_scope(Employee).find_by(id: params[:employee_id])
+      last_working_date = parsed_date(params[:last_working_date])
+
+      if employee.nil? || last_working_date.nil?
+        return redirect_to edit_admin_off_cycle_payroll_run_path(@payroll_run),
+                           alert: "Select an employee and a last working date."
+      end
+
+      settlement = build_settlement(employee, last_working_date)
+
+      if settlement.save
+        redirect_to edit_admin_off_cycle_payroll_run_path(@payroll_run),
+                    notice: notice_for(employee, settlement)
       else
-        @selected_employee = settlement&.employee
-        @last_working_date = settlement&.last_working_date
-        @preview_warnings = []
-        render :new, status: :unprocessable_entity
+        redirect_to edit_admin_off_cycle_payroll_run_path(@payroll_run),
+                    alert: settlement.errors.full_messages.to_sentence
       end
     end
 
     private
 
+    def set_payroll_run
+      @payroll_run = policy_scope(PayrollRun).off_cycle.find(params[:id])
+    end
+
     def payroll_run_params
-      params.require(:payroll_run).permit(
-        :title, :payment_date, :notes,
-        full_and_final_settlement_attributes: [
-          :employee_id, :last_working_date, :salary_days, :leave_encashment_days,
-          :earned_salary, :leave_encashment, :bonus, :notice_pay, :gratuity, :other_earnings,
-          :notice_recovery, :loan_recovery, :asset_recovery, :other_deductions,
-          :pf_amount, :esi_amount, :professional_tax_amount, :tds_amount, :notes
-        ]
-      )
+      params.require(:payroll_run).permit(:title, :payment_date, :notes)
     end
 
-    def load_employees
-      @employees = policy_scope(Employee)
-        .where(employment_status: %w[active probation notice_period resigned terminated])
-        .order(:first_name, :last_name)
-    end
-
-    def build_preview
+    def build_settlement(employee, last_working_date)
       preview = Payroll::FullAndFinalPreview.new(
-        employee: @selected_employee,
-        last_working_date: @last_working_date
+        employee: employee, last_working_date: last_working_date
       ).call
-      payment_date = [ Date.current, @last_working_date ].max
-      @preview_warnings = preview.warnings
-      @payroll_run = PayrollRun.new(
-        run_type: "full_and_final",
-        title: "Full & Final - #{@selected_employee.full_name}",
-        payment_date: payment_date,
-        month: payment_date.month,
-        year: payment_date.year
-      )
-      @payroll_run.build_full_and_final_settlement(
+
+      @payroll_run.full_and_final_settlements.build(
         tenant: ActsAsTenant.current_tenant,
-        employee: @selected_employee,
-        last_working_date: @last_working_date,
+        employee: employee,
+        last_working_date: last_working_date,
         salary_days: preview.salary_days,
         earned_salary: preview.earned_salary,
         leave_encashment_days: preview.leave_encashment_days,
         leave_encashment: preview.leave_encashment
-      )
+      ).tap { |s| @preview_warnings = preview.warnings }
+    end
+
+    def notice_for(employee, settlement)
+      base = "#{employee.full_name} added to the settlement run."
+      return base if @preview_warnings.blank?
+
+      "#{base} Review required: #{@preview_warnings.to_sentence}"
     end
 
     def parsed_date(value)

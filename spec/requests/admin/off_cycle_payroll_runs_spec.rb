@@ -236,11 +236,15 @@ RSpec.describe "Admin::OffCyclePayrollRuns", type: :request do
     expect(payslip.reload).to be_locked
   end
 
-  it "closes the employee out of payroll when a settlement is approved" do
+  it "closes every employee in a batch settlement out of payroll on approval" do
     run = nil
+    other = nil
     ActsAsTenant.with_tenant(tenant) do
       settlement = create(:full_and_final_settlement, tenant: tenant, employee: employee)
       run = settlement.payroll_run
+      other = create(:employee, tenant: tenant)
+      create(:full_and_final_settlement, tenant: tenant, payroll_run: run,
+             employee: other, last_working_date: Date.new(2026, 8, 20))
       run.update_columns(initiated_by_id: hr_user.id, status: "under_review")
       create(:payslip, tenant: tenant, payroll_run: run, employee: employee)
     end
@@ -251,6 +255,8 @@ RSpec.describe "Admin::OffCyclePayrollRuns", type: :request do
     expect(run.reload).to be_approved
     expect(employee.reload.employment_status).to eq("resigned")
     expect(employee.last_working_date).to eq(Date.new(2026, 8, 15))
+    expect(other.reload.employment_status).to eq("resigned")
+    expect(other.last_working_date).to eq(Date.new(2026, 8, 20))
   end
 
   it "renders bank formats in a dropdown for approved runs" do

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_08_09_110003) do
+ActiveRecord::Schema[8.1].define(version: 2026_08_22_090001) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "pg_catalog.plpgsql"
@@ -196,7 +196,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_09_110003) do
     t.bigint "tenant_id", null: false
     t.datetime "updated_at", null: false
     t.index ["employee_id"], name: "index_full_and_final_settlements_on_employee_id"
-    t.index ["payroll_run_id"], name: "idx_faf_settlements_unique_run", unique: true
+    t.index ["payroll_run_id", "employee_id"], name: "idx_faf_settlements_run_employee", unique: true
+    t.index ["payroll_run_id"], name: "idx_faf_settlements_run"
     t.index ["payslip_id"], name: "index_full_and_final_settlements_on_payslip_id"
     t.index ["tenant_id", "employee_id"], name: "idx_faf_settlements_tenant_employee"
     t.index ["tenant_id"], name: "index_full_and_final_settlements_on_tenant_id"

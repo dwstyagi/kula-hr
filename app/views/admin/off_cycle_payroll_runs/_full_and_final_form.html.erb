@@ -1,3 +1,24 @@
+<div class="card card-pad space-y-3">
+  <div>
+    <h2 class="card-title">Add an employee to settle</h2>
+    <p class="text-xs text-stone-500 mt-0.5">Each exit is previewed against its own last working date. Review every suggested amount below before calculating.</p>
+  </div>
+  <%= form_with url: add_employee_admin_full_and_final_payroll_run_path(payroll_run), method: :post,
+        class: "grid grid-cols-1 md:grid-cols-[1fr_220px_auto] gap-3 items-end" do |af| %>
+    <div>
+      <%= af.label :employee_id, "Employee", class: "label" %>
+      <%= af.select :employee_id,
+            options_from_collection_for_select(addable_employees, :id, :full_name),
+            { prompt: "Select employee" }, class: "select", required: true %>
+    </div>
+    <div>
+      <%= af.label :last_working_date, "Last working date", class: "label" %>
+      <%= af.date_field :last_working_date, class: "input", required: true %>
+    </div>
+    <%= af.submit "Add to run", class: "btn btn-secondary cursor-pointer" %>
+  <% end %>
+</div>
+
 <%= form_with model: payroll_run, url: form_url, class: "space-y-6", data: { controller: "full-and-final-form" } do |f| %>
   <% if payroll_run.errors.any? %>
     <div class="alert alert-error"><ul class="list-disc list-inside"><% payroll_run.errors.full_messages.each do |message| %><li><%= message %></li><% end %></ul></div>
@@ -18,51 +39,71 @@
     </div>
   </div>
 
-  <%= f.fields_for :full_and_final_settlement do |s| %>
+  <% if payroll_run.full_and_final_settlements.none? %>
+    <div class="empty-state py-12 card">
+      <p class="font-medium text-stone-700">No employees added yet</p>
+      <p class="text-sm text-stone-400 mt-1">Use the picker above to add each employee you are settling.</p>
+    </div>
+  <% end %>
+
+  <%= f.fields_for :full_and_final_settlements do |s| %>
     <% settlement = s.object %>
-    <%= s.hidden_field :id if settlement.persisted? %>
     <%= s.hidden_field :employee_id %>
-    <div class="card card-pad">
-      <div class="flex flex-wrap justify-between gap-4">
-        <div><p class="text-sm text-stone-500">Employee</p><p class="font-semibold"><%= settlement.employee.full_name %> · <%= settlement.employee.employee_code %></p></div>
-        <div><%= s.label :last_working_date, class: "label" %><%= s.date_field :last_working_date, class: "input", required: true %></div>
-      </div>
-    </div>
-
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <div class="card card-pad space-y-4">
-        <h2 class="card-title">Earnings</h2>
-        <div class="grid grid-cols-2 gap-3">
-          <div><%= s.label :salary_days, "Salary days", class: "label" %><%= s.number_field :salary_days, min: 0, step: 0.5, class: "input" %></div>
-          <div><%= s.label :earned_salary, "Earned salary", class: "label" %><%= s.number_field :earned_salary, min: 0, step: 0.01, class: "input text-right", data: { full_and_final_form_target: "earning", action: "input->full-and-final-form#calculate" } %></div>
-          <div><%= s.label :leave_encashment_days, "Leave days", class: "label" %><%= s.number_field :leave_encashment_days, min: 0, step: 0.5, class: "input" %></div>
-          <div><%= s.label :leave_encashment, class: "label" %><%= s.number_field :leave_encashment, min: 0, step: 0.01, class: "input text-right", data: { full_and_final_form_target: "earning", action: "input->full-and-final-form#calculate" } %></div>
-          <% { bonus: "Bonus / incentive", notice_pay: "Notice pay", gratuity: "Gratuity", other_earnings: "Other earnings" }.each do |field, label| %>
-            <div><%= s.label field, label, class: "label" %><%= s.number_field field, min: 0, step: 0.01, class: "input text-right", data: { full_and_final_form_target: "earning", action: "input->full-and-final-form#calculate" } %></div>
-          <% end %>
+    <div class="card overflow-hidden">
+      <div class="card-header flex-wrap gap-4">
+        <div>
+          <h2 class="card-title"><%= settlement.employee.full_name %></h2>
+          <p class="text-xs text-stone-500 mt-0.5"><%= settlement.employee.employee_code %></p>
+        </div>
+        <div class="flex items-end gap-4">
+          <div>
+            <%= s.label :last_working_date, class: "label" %>
+            <%= s.date_field :last_working_date, class: "input", required: true %>
+          </div>
+          <label class="flex items-center gap-2 text-sm text-stone-600 pb-2">
+            <%= s.check_box :_destroy, class: "h-4 w-4 rounded border-stone-300 text-kula-700 focus:ring-kula-600" %>
+            Remove
+          </label>
         </div>
       </div>
 
-      <div class="card card-pad space-y-4">
-        <h2 class="card-title">Deductions and recoveries</h2>
-        <div class="grid grid-cols-2 gap-3">
-          <% FullAndFinalSettlement::DEDUCTION_COMPONENTS.each do |field, label| %>
-            <div><%= s.label field, label, class: "label" %><%= s.number_field field, min: 0, step: 0.01, class: "input text-right", data: { full_and_final_form_target: "deduction", action: "input->full-and-final-form#calculate" } %></div>
-          <% end %>
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-0 md:divide-x divide-stone-200">
+        <div class="p-5 space-y-4">
+          <h3 class="font-semibold">Earnings</h3>
+          <div class="grid grid-cols-2 gap-3">
+            <div><%= s.label :salary_days, "Salary days", class: "label" %><%= s.number_field :salary_days, min: 0, step: 0.5, class: "input" %></div>
+            <div><%= s.label :earned_salary, "Earned salary", class: "label" %><%= s.number_field :earned_salary, min: 0, step: 0.01, class: "input text-right", data: { full_and_final_form_target: "earning", action: "input->full-and-final-form#calculate" } %></div>
+            <div><%= s.label :leave_encashment_days, "Leave days", class: "label" %><%= s.number_field :leave_encashment_days, min: 0, step: 0.5, class: "input" %></div>
+            <div><%= s.label :leave_encashment, class: "label" %><%= s.number_field :leave_encashment, min: 0, step: 0.01, class: "input text-right", data: { full_and_final_form_target: "earning", action: "input->full-and-final-form#calculate" } %></div>
+            <% { bonus: "Bonus / incentive", notice_pay: "Notice pay", gratuity: "Gratuity", other_earnings: "Other earnings" }.each do |field, label| %>
+              <div><%= s.label field, label, class: "label" %><%= s.number_field field, min: 0, step: 0.01, class: "input text-right", data: { full_and_final_form_target: "earning", action: "input->full-and-final-form#calculate" } %></div>
+            <% end %>
+          </div>
+        </div>
+
+        <div class="p-5 space-y-4">
+          <h3 class="font-semibold">Deductions and recoveries</h3>
+          <div class="grid grid-cols-2 gap-3">
+            <% FullAndFinalSettlement::DEDUCTION_COMPONENTS.each do |field, label| %>
+              <div><%= s.label field, label, class: "label" %><%= s.number_field field, min: 0, step: 0.01, class: "input text-right", data: { full_and_final_form_target: "deduction", action: "input->full-and-final-form#calculate" } %></div>
+            <% end %>
+          </div>
         </div>
       </div>
-    </div>
 
+      <div class="border-t border-stone-200 p-5">
+        <%= s.label :notes, "Settlement notes", class: "label" %>
+        <%= s.text_area :notes, rows: 2, class: "textarea", placeholder: "Explain manual adjustments or recovery terms" %>
+      </div>
+    </div>
+  <% end %>
+
+  <% if payroll_run.full_and_final_settlements.any? %>
     <div class="card card-pad grid grid-cols-2 md:grid-cols-4 gap-4">
       <div><p class="stat-label">Earnings</p><p class="font-semibold" data-full-and-final-form-target="gross"></p></div>
       <div><p class="stat-label">Deductions</p><p class="font-semibold" data-full-and-final-form-target="deductions"></p></div>
       <div><p class="stat-label">Net payable</p><p class="font-semibold text-kula-700" data-full-and-final-form-target="net"></p></div>
       <div><p class="stat-label">Recoverable</p><p class="font-semibold text-red-700" data-full-and-final-form-target="recovery"></p></div>
-    </div>
-
-    <div class="card card-pad">
-      <%= s.label :notes, "Settlement notes", class: "label" %>
-      <%= s.text_area :notes, rows: 3, class: "textarea", placeholder: "Explain manual adjustments or recovery terms" %>
     </div>
   <% end %>
 

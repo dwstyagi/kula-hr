@@ -166,7 +166,11 @@ Rails.application.routes.draw do
           get :download_bank_file
         end
       end
-      resources :full_and_final_payroll_runs, only: [ :new, :create ]
+      resources :full_and_final_payroll_runs, only: [ :new, :create ] do
+        member do
+          post :add_employee
+        end
+      end
       resources :reports, only: [ :index ] do
         collection do
           get :department_breakdown

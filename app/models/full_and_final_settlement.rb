@@ -29,7 +29,8 @@ class FullAndFinalSettlement < ApplicationRecord
   belongs_to :payslip, optional: true
 
   validates :last_working_date, presence: true
-  validates :payroll_run_id, uniqueness: true
+  validates :employee_id, uniqueness: { scope: :payroll_run_id,
+                                        message: "is already being settled in this run" }
   validates :salary_days, :leave_encashment_days, numericality: { greater_than_or_equal_to: 0 }
   validates(*MONEY_FIELDS, numericality: { greater_than_or_equal_to: 0 })
   validate :run_must_be_full_and_final

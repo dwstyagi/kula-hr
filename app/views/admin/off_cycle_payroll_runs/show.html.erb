@@ -59,8 +59,11 @@
       <div class="stat-card"><p class="stat-label">Net payment</p><p class="stat-value text-kula-700"><%= @payroll_run.formatted_total_net_pay %></p></div>
     </div>
 
-    <% if @payroll_run.full_and_final? && @payroll_run.full_and_final_settlement.recoverable_amount.positive? %>
-      <div class="alert alert-warning"><div><p class="font-semibold">Recovery remains after settlement</p><p>₹<%= number_with_delimiter(@payroll_run.full_and_final_settlement.recoverable_amount) %> must be collected outside the bank payout and tracked by HR/Finance.</p></div></div>
+    <% if @payroll_run.full_and_final? %>
+      <% recovery = @payroll_run.full_and_final_settlements.sum(&:recoverable_amount) %>
+      <% if recovery.positive? %>
+        <div class="alert alert-warning"><div><p class="font-semibold">Recovery remains after settlement</p><p>₹<%= number_with_delimiter(recovery) %> must be collected outside the bank payout and tracked by HR/Finance.</p></div></div>
+      <% end %>
     <% end %>
 
     <div class="grid md:grid-cols-2 gap-4">

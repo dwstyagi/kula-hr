@@ -49,7 +49,9 @@ module Admin
 
     def edit
       authorize @payroll_run
-      redirect_unless_draft unless @payroll_run.draft?
+      return redirect_unless_draft unless @payroll_run.draft?
+
+      @addable_employees = addable_employees if @payroll_run.full_and_final?
     end
 
     def update
@@ -61,12 +63,18 @@ module Admin
       if @payroll_run.save
         redirect_to admin_off_cycle_payroll_run_path(@payroll_run), notice: "Payment inputs updated."
       else
+        @addable_employees = addable_employees if @payroll_run.full_and_final?
         render :edit, status: :unprocessable_entity
       end
     end
 
     def process_payroll
       authorize @payroll_run
+      if @payroll_run.full_and_final? && @payroll_run.full_and_final_settlements.none?
+        return redirect_to admin_off_cycle_payroll_run_path(@payroll_run),
+                           alert: "Add at least one employee to settle before calculating this run."
+      end
+
       @payroll_run.with_lock do
         unless @payroll_run.may_start_processing?
           return redirect_to admin_off_cycle_payroll_run_path(@payroll_run),
@@ -97,7 +105,7 @@ module Admin
         @payroll_run.approve!
         @payroll_run.record_approval(current_user)
         @payroll_run.payslips.update_all(status: "locked")
-        @payroll_run.full_and_final_settlement&.close_out_employee!
+        @payroll_run.full_and_final_settlements.each(&:close_out_employee!)
       end
       redirect_to admin_off_cycle_payroll_run_path(@payroll_run),
                   notice: @payroll_run.full_and_final? ? "Settlement approved and the employee is closed out of payroll." : "Off-cycle payroll approved."
@@ -169,11 +177,11 @@ module Admin
       params.require(:payroll_run).permit(
         :run_type, :title, :payment_date, :notes,
         off_cycle_payroll_entries_attributes: [ :id, :employee_id, :gross_amount, :tds_amount, :notes, :_destroy ],
-        full_and_final_settlement_attributes: [
+        full_and_final_settlements_attributes: [
           :id, :employee_id, :last_working_date, :salary_days, :leave_encashment_days,
           :earned_salary, :leave_encashment, :bonus, :notice_pay, :gratuity, :other_earnings,
           :notice_recovery, :loan_recovery, :asset_recovery, :other_deductions,
-          :pf_amount, :esi_amount, :professional_tax_amount, :tds_amount, :notes
+          :pf_amount, :esi_amount, :professional_tax_amount, :tds_amount, :notes, :_destroy
         ]
       ).tap do |permitted|
         permitted[:run_type] = if @payroll_run&.full_and_final?
@@ -191,6 +199,15 @@ module Admin
 
       @payroll_run.month = @payroll_run.payment_date.month
       @payroll_run.year = @payroll_run.payment_date.year
+    end
+
+    # Anyone who can be settled and is not already in this run. Exited staff stay
+    # selectable: a settlement is often raised after the status is updated.
+    def addable_employees
+      policy_scope(Employee)
+        .where(employment_status: %w[active probation notice_period resigned terminated])
+        .where.not(id: @payroll_run.full_and_final_settlements.select(:employee_id))
+        .order(:first_name, :last_name)
     end
 
     def eligible_employees

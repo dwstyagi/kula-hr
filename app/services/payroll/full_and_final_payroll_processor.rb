@@ -5,6 +5,9 @@ module Payroll
     def initialize(payroll_run:)
       @run = payroll_run
       @tenant = payroll_run.tenant
+      @processed = []
+      @skipped = []
+      @errors = []
     end
 
     def call
@@ -13,33 +16,35 @@ module Payroll
       @run.start_processing! if @run.may_start_processing?
       return unless @run.processing?
 
-      settlement = @run.full_and_final_settlement
-      raise ArgumentError, "full-and-final settlement is missing" unless settlement
+      settlements = @run.full_and_final_settlements.includes(:employee).order(:id)
+      raise ArgumentError, "full-and-final settlement is missing" if settlements.empty?
 
-      @run.update!(total_employees: 1)
-      payslip = ActsAsTenant.with_tenant(@tenant) { create_payslip(settlement) }
+      @run.update!(total_employees: settlements.size)
 
-      @run.update!(
-        processed_employees: 1,
-        total_gross: payslip.gross_pay,
-        total_deductions: payslip.total_deductions,
-        total_net_pay: payslip.net_pay,
-        total_employer_cost: 0
-      )
-      @run.finish_processing!
+      ActsAsTenant.with_tenant(@tenant) do
+        settlements.each_with_index do |settlement, index|
+          process_settlement(settlement)
+          @run.update_column(:processed_employees, index + 1)
+        end
+      end
 
-      ProcessingResult.new(
-        payroll_run: @run,
-        processed: [ settlement.employee_id ],
-        skipped: [],
-        errors: []
-      )
+      finalize
     rescue => e
       @run.update!(notes: [ @run.notes, "Processing failed: #{e.message}" ].compact_blank.join("\n"))
       raise
     end
 
     private
+
+    # One settlement failing must not abandon the rest of the batch. The run's
+    # error list reaches HR by mail, and finalize settles the honest counts.
+    def process_settlement(settlement)
+      create_payslip(settlement)
+      @processed << settlement.employee_id
+    rescue => e
+      @skipped << settlement.employee_id
+      @errors << { employee_id: settlement.employee_id, name: settlement.employee.full_name, error: e.message }
+    end
 
     def create_payslip(settlement)
       ActiveRecord::Base.transaction do
@@ -89,6 +94,24 @@ module Payroll
           category: statutory_names.include?(name) ? "statutory" : "variable"
         )
       end
+    end
+
+    def finalize
+      @run.update!(
+        processed_employees: @processed.size,
+        total_gross: @run.payslips.sum(:gross_pay),
+        total_deductions: @run.payslips.sum(:total_deductions),
+        total_net_pay: @run.payslips.sum(:net_pay),
+        total_employer_cost: 0
+      )
+      @run.finish_processing!
+
+      ProcessingResult.new(
+        payroll_run: @run,
+        processed: @processed,
+        skipped: @skipped,
+        errors: @errors
+      )
     end
   end
 end
