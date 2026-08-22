@@ -121,6 +121,64 @@ RSpec.describe "Admin::OffCyclePayrollRuns", type: :request do
     expect(entry.reload.net_amount).to eq(35_000)
   end
 
+  it "renders filterable rows and a department list on the new form" do
+    ActsAsTenant.with_tenant(tenant) do
+      department = create(:department, tenant: tenant, name: "Engineering")
+      employee.update!(department: department)
+    end
+    sign_in_as(hr_user)
+
+    get new_admin_off_cycle_payroll_run_path, headers: headers
+
+    expect(response).to have_http_status(:ok)
+    expect(response.body).to include('data-off-cycle-form-target="row"')
+    expect(response.body).to include('data-department="Engineering"')
+    expect(response.body).to include(employee.employee_code.downcase)
+    expect(response.body).to include('data-action="submit-&gt;off-cycle-form#pruneBlankRows"')
+  end
+
+  it "removes an employee from a draft when the row is flagged for removal" do
+    run = create_run
+    kept = nil
+    ActsAsTenant.with_tenant(tenant) do
+      other = create(:employee, tenant: tenant)
+      kept = run.off_cycle_payroll_entries.create!(tenant: tenant, employee: other, gross_amount: 10_000)
+    end
+    dropped = run.off_cycle_payroll_entries.find_by(employee_id: employee.id)
+    sign_in_as(hr_user)
+
+    patch admin_off_cycle_payroll_run_path(run), headers: headers, params: {
+      payroll_run: {
+        run_type: "bonus", title: "Annual Bonus", payment_date: "2026-08-15",
+        off_cycle_payroll_entries_attributes: {
+          "0" => { id: dropped.id, employee_id: employee.id, gross_amount: "", _destroy: "1" },
+          "1" => { id: kept.id, employee_id: kept.employee_id, gross_amount: "10000" }
+        }
+      }
+    }
+
+    expect(response).to redirect_to(admin_off_cycle_payroll_run_path(run))
+    expect(run.reload.off_cycle_payroll_entries.pluck(:id)).to contain_exactly(kept.id)
+  end
+
+  it "refuses to empty a draft run of every employee" do
+    run = create_run
+    entry = run.off_cycle_payroll_entries.first
+    sign_in_as(hr_user)
+
+    patch admin_off_cycle_payroll_run_path(run), headers: headers, params: {
+      payroll_run: {
+        run_type: "bonus", title: "Annual Bonus", payment_date: "2026-08-15",
+        off_cycle_payroll_entries_attributes: {
+          "0" => { id: entry.id, employee_id: employee.id, gross_amount: "25000", _destroy: "1" }
+        }
+      }
+    }
+
+    expect(response).to have_http_status(:unprocessable_entity)
+    expect(run.reload.off_cycle_payroll_entries.count).to eq(1)
+  end
+
   it "does not allow input edits after processing" do
     run = create_run(status: "processed")
     sign_in_as(hr_user)

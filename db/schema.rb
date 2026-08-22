@@ -329,7 +329,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_09_110003) do
     t.text "notes"
     t.date "payment_date"
     t.integer "processed_employees", default: 0
-    t.integer "regular_period_sequence", default: 0, null: false
     t.text "rejection_reason"
     t.string "run_type", default: "regular", null: false
     t.string "status", default: "draft", null: false
@@ -344,7 +343,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_09_110003) do
     t.integer "year", null: false
     t.index ["approved_by_id"], name: "index_payroll_runs_on_approved_by_id"
     t.index ["initiated_by_id"], name: "index_payroll_runs_on_initiated_by_id"
-    t.index ["tenant_id", "month", "year", "regular_period_sequence"], name: "idx_unique_regular_payroll_period", unique: true, where: "((run_type)::text = 'regular'::text)"
+    t.index ["tenant_id", "month", "year"], name: "idx_regular_payroll_run_tenant_period", unique: true, where: "((run_type)::text = 'regular'::text)"
     t.index ["tenant_id", "run_type", "payment_date"], name: "idx_payroll_runs_tenant_type_payment"
     t.index ["tenant_id", "status"], name: "idx_payroll_runs_tenant_status"
     t.index ["tenant_id"], name: "index_payroll_runs_on_tenant_id"

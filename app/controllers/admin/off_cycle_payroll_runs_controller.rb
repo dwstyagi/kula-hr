@@ -168,7 +168,7 @@ module Admin
     def payroll_run_params
       params.require(:payroll_run).permit(
         :run_type, :title, :payment_date, :notes,
-        off_cycle_payroll_entries_attributes: [ :id, :employee_id, :gross_amount, :tds_amount, :notes ],
+        off_cycle_payroll_entries_attributes: [ :id, :employee_id, :gross_amount, :tds_amount, :notes, :_destroy ],
         full_and_final_settlement_attributes: [
           :id, :employee_id, :last_working_date, :salary_days, :leave_encashment_days,
           :earned_salary, :leave_encashment, :bonus, :notice_pay, :gratuity, :other_earnings,
@@ -194,7 +194,9 @@ module Admin
     end
 
     def eligible_employees
-      Employee.where(employment_status: %w[active probation notice_period])
+      policy_scope(Employee)
+        .where(employment_status: %w[active probation notice_period])
+        .includes(:department)
         .order(:first_name, :last_name)
     end
 
@@ -207,6 +209,11 @@ module Admin
 
         @payroll_run.off_cycle_payroll_entries.build(employee: employee, tenant: ActsAsTenant.current_tenant)
       end
+
+      @entry_departments = @payroll_run.off_cycle_payroll_entries
+        .filter_map { |entry| entry.employee&.department&.name }
+        .uniq
+        .sort
     end
 
 

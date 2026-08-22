@@ -4,8 +4,12 @@ class AddOffCyclePayroll < ActiveRecord::Migration[8.1]
     add_column :payroll_runs, :title, :string
     add_column :payroll_runs, :payment_date, :date
 
+    # One regular run per tenant per period, same guarantee as before. The index
+    # becomes partial so off-cycle runs, which are deliberately unconstrained in
+    # number, can share a period with the regular run and with each other.
     remove_index :payroll_runs, name: "idx_payroll_run_tenant_month_year"
     add_index :payroll_runs, [ :tenant_id, :month, :year ],
+              unique: true,
               where: "run_type = 'regular'",
               name: "idx_regular_payroll_run_tenant_period"
     add_index :payroll_runs, [ :tenant_id, :run_type, :payment_date ],
@@ -36,11 +40,8 @@ class AddOffCyclePayroll < ActiveRecord::Migration[8.1]
     remove_column :payroll_runs, :title
     remove_column :payroll_runs, :run_type
 
-    # Cleans up installations that ran the pre-release version of this
-    # migration while the feature was temporarily tenant-gated.
-    remove_column :tenants, :off_cycle_payroll_enabled if column_exists?(:tenants, :off_cycle_payroll_enabled)
-
     add_index :payroll_runs, [ :tenant_id, :month, :year ],
+              unique: true,
               name: "idx_payroll_run_tenant_month_year"
   end
 end

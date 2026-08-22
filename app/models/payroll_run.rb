@@ -11,8 +11,17 @@ class PayrollRun < ApplicationRecord
 
   RUN_TYPES = %w[regular bonus additional full_and_final].freeze
 
+  # A blank or zero amount means "this employee is not part of the run", so the
+  # row is dropped rather than failing validation. A row flagged for removal is
+  # never rejected, otherwise clearing the amount and ticking Remove in the same
+  # submit would silently keep the entry at its old value.
   accepts_nested_attributes_for :off_cycle_payroll_entries,
-    reject_if: ->(attrs) { attrs["gross_amount"].blank? || attrs["gross_amount"].to_d <= 0 }
+    allow_destroy: true,
+    reject_if: ->(attrs) {
+      next false if ActiveRecord::Type::Boolean.new.cast(attrs["_destroy"])
+
+      attrs["gross_amount"].blank? || attrs["gross_amount"].to_d <= 0
+    }
   accepts_nested_attributes_for :full_and_final_settlement
 
   # ── Validations ──────────────────────────────────────────────────────────────
@@ -24,7 +33,7 @@ class PayrollRun < ApplicationRecord
   validates :payment_date, presence: true, if: :off_cycle?
   validate  :no_existing_run_for_period, on: :create
   validate  :attendance_must_be_locked, on: :create
-  validate  :off_cycle_must_have_entries, on: :create
+  validate  :off_cycle_must_have_entries
 
   # ── Scopes ───────────────────────────────────────────────────────────────────
 
@@ -182,10 +191,13 @@ class PayrollRun < ApplicationRecord
       "Attendance not locked for #{blocked.size} employee(s) for #{month_name} #{year}: #{names}.")
   end
 
+  # Also runs on update: entries can now be removed from a draft, and emptying
+  # the run that way must fail here rather than producing a run that processes
+  # into zero payslips.
   def off_cycle_must_have_entries
     return unless off_cycle?
     return if full_and_final? && full_and_final_settlement.present?
-    return if off_cycle_payroll_entries.any?
+    return if off_cycle_payroll_entries.reject(&:marked_for_destruction?).any?
 
     errors.add(:base, "Add at least one employee with an amount")
   end
