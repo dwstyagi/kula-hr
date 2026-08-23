@@ -1,0 +1,71 @@
+<% content_for :page_title, "Edit #{@payroll_run.title}" %>
+
+<% if @payroll_run.full_and_final? %>
+  <div class="space-y-6 max-w-6xl">
+    <div><h1 class="page-title text-2xl">Edit Full & Final settlement</h1><p class="page-sub">Review and correct amounts before calculation.</p></div>
+    <%= render "full_and_final_form",
+          payroll_run: @payroll_run,
+          addable_employees: @addable_employees,
+          form_url: admin_off_cycle_payroll_run_path(@payroll_run),
+          submit_label: "Save changes",
+          cancel_path: admin_off_cycle_payroll_run_path(@payroll_run) %>
+  </div>
+<% else %>
+<div class="space-y-6 max-w-5xl">
+  <div>
+    <h1 class="page-title text-2xl">Edit off-cycle inputs</h1>
+    <p class="page-sub">Changes remain editable until payments are calculated.</p>
+  </div>
+
+  <%= form_with model: @payroll_run, url: admin_off_cycle_payroll_run_path(@payroll_run), class: "space-y-6" do |f| %>
+    <% if @payroll_run.errors.any? %>
+      <div class="alert alert-error"><ul class="list-disc list-inside"><% @payroll_run.errors.full_messages.each do |message| %><li><%= message %></li><% end %></ul></div>
+    <% end %>
+
+    <div class="card card-pad grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div>
+        <%= f.label :run_type, "Payment type", class: "label" %>
+        <%= f.select :run_type, [ [ "Bonus", "bonus" ], [ "Additional payment", "additional" ] ], {}, class: "select" %>
+      </div>
+      <div>
+        <%= f.label :title, "Payslip label", class: "label" %>
+        <%= f.text_field :title, class: "input", required: true %>
+      </div>
+      <div>
+        <%= f.label :payment_date, class: "label" %>
+        <%= f.date_field :payment_date, class: "input", required: true %>
+      </div>
+      <div class="md:col-span-3">
+        <%= f.label :notes, "Internal notes", class: "label" %>
+        <%= f.text_area :notes, rows: 2, class: "textarea" %>
+      </div>
+    </div>
+
+    <div class="card overflow-hidden">
+      <div class="card-header"><h2 class="card-title">Selected employees</h2></div>
+      <div class="overflow-x-auto">
+        <table class="tbl">
+          <thead><tr><th>Employee</th><th>Gross amount</th><th>TDS</th><th>Note</th><th class="text-center">Remove</th></tr></thead>
+          <tbody>
+            <%= f.fields_for :off_cycle_payroll_entries do |entry_fields| %>
+              <% entry = entry_fields.object %>
+              <tr>
+                <td><p class="font-medium"><%= entry.employee.full_name %></p><p class="text-xs text-stone-400"><%= entry.employee.employee_code %></p><%= entry_fields.hidden_field :employee_id %></td>
+                <td><%= entry_fields.number_field :gross_amount, min: 0.01, step: 0.01, required: true, class: "input text-right" %></td>
+                <td><%= entry_fields.number_field :tds_amount, min: 0, step: 0.01, required: true, class: "input text-right" %></td>
+                <td><%= entry_fields.text_field :notes, class: "input" %></td>
+                <td class="text-center"><%= entry_fields.check_box :_destroy, class: "h-4 w-4 rounded border-stone-300 text-kula-700 focus:ring-kula-600", title: "Drop this employee from the run" %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-3">
+      <%= f.submit "Save changes", class: "btn btn-primary cursor-pointer" %>
+      <%= link_to "Cancel", admin_off_cycle_payroll_run_path(@payroll_run), class: "btn btn-secondary" %>
+    </div>
+  <% end %>
+</div>
+<% end %>

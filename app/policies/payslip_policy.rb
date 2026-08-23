@@ -1,8 +1,8 @@
 class PayslipPolicy < ApplicationPolicy
   def index?  = admin_or_hr? || own_payslip?
   def show?   = admin_or_hr? || own_payslip?
-  def edit?   = admin_or_hr? && !record.locked?
-  def update? = admin_or_hr? && !record.locked?
+  def edit?   = admin_or_hr? && !record.locked? && !record.full_and_final?
+  def update? = edit?
 
   class Scope < ApplicationPolicy::Scope
     def resolve

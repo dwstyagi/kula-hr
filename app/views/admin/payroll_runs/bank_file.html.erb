@@ -51,56 +51,9 @@
     </div>
   <% end %>
 
-  <%# Format selector %>
-  <div class="card overflow-hidden">
-    <div class="px-5 py-4 border-b border-stone-100">
-      <h2 class="text-sm font-semibold text-stone-900">Select Bank Format</h2>
-      <p class="text-xs text-stone-500 mt-0.5">Choose the format required by your company's bank</p>
-    </div>
-
-    <div class="divide-y divide-stone-100" id="bank-options">
-      <% [
-        { key: "hdfc",        label: "HDFC Bank",   desc: "NEFT/RTGS tilde-delimited text file for HDFC Corporate Internet Banking", ext: ".txt" },
-        { key: "icici",       label: "ICICI Bank",  desc: "Pipe-delimited format for ICICI Corporate Internet Banking", ext: ".txt" },
-        { key: "sbi",         label: "SBI",         desc: "CMP (Corporate Multi-Payment) format for State Bank of India", ext: ".txt" },
-        { key: "generic_csv", label: "Generic CSV", desc: "Universal CSV format — works with any bank or payment processor", ext: ".csv" }
-      ].each_with_index do |bank, i| %>
-        <label class="flex items-center gap-4 px-5 py-4 cursor-pointer hover:bg-stone-50 transition-colors">
-          <input type="radio" name="bank_format" value="<%= bank[:key] %>"
-                 <%= i == 3 ? 'checked' : '' %>
-                 class="w-4 h-4 text-kula-700 border-stone-300 focus:ring-kula-600"
-                 onchange="updateDownloadLink(this.value)">
-          <div class="flex-1">
-            <div class="flex items-center gap-2">
-              <span class="text-sm font-medium text-stone-900"><%= bank[:label] %></span>
-              <span class="text-xs font-mono bg-stone-100 text-stone-500 px-1.5 py-0.5 rounded"><%= bank[:ext] %></span>
-            </div>
-            <p class="text-xs text-stone-500 mt-0.5"><%= bank[:desc] %></p>
-          </div>
-        </label>
-      <% end %>
-    </div>
-
-    <div class="px-5 py-4 bg-stone-50 border-t border-stone-100">
-      <%= link_to download_bank_file_admin_payroll_run_path(@payroll_run, bank: "generic_csv"),
-            id: "download-link",
-            class: "inline-flex items-center gap-2 px-5 py-2.5 bg-kula-700 text-white text-sm font-medium rounded-lg hover:bg-kula-800 transition-colors" do %>
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3M3 17V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
-        </svg>
-        Generate & Download
-      <% end %>
-    </div>
-  </div>
+  <%= render "bank_format_form",
+        download_path: download_bank_file_admin_payroll_run_path(@payroll_run) %>
 
   <%= link_to "← Back to Payroll Run", admin_payroll_run_path(@payroll_run),
         class: "text-sm text-stone-500 hover:text-stone-700" %>
 </div>
-
-<script>
-  function updateDownloadLink(bank) {
-    const link = document.getElementById('download-link');
-    const base = "<%= download_bank_file_admin_payroll_run_path(@payroll_run) %>";
-    link.href = base + "?bank=" + bank;
-  }
-</script>

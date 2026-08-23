@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_07_02_100002) do
+ActiveRecord::Schema[8.1].define(version: 2026_08_22_093000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "pg_catalog.plpgsql"
@@ -170,6 +170,39 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_02_100002) do
     t.index ["work_location_id"], name: "index_employees_on_work_location_id"
   end
 
+  create_table "full_and_final_settlements", force: :cascade do |t|
+    t.decimal "asset_recovery", precision: 12, scale: 2, default: "0.0", null: false
+    t.decimal "bonus", precision: 12, scale: 2, default: "0.0", null: false
+    t.datetime "created_at", null: false
+    t.decimal "earned_salary", precision: 12, scale: 2, default: "0.0", null: false
+    t.bigint "employee_id", null: false
+    t.decimal "esi_amount", precision: 12, scale: 2, default: "0.0", null: false
+    t.decimal "gratuity", precision: 12, scale: 2, default: "0.0", null: false
+    t.date "last_working_date", null: false
+    t.decimal "leave_encashment", precision: 12, scale: 2, default: "0.0", null: false
+    t.decimal "leave_encashment_days", precision: 6, scale: 2, default: "0.0", null: false
+    t.decimal "loan_recovery", precision: 12, scale: 2, default: "0.0", null: false
+    t.text "notes"
+    t.decimal "notice_pay", precision: 12, scale: 2, default: "0.0", null: false
+    t.decimal "notice_recovery", precision: 12, scale: 2, default: "0.0", null: false
+    t.decimal "other_deductions", precision: 12, scale: 2, default: "0.0", null: false
+    t.decimal "other_earnings", precision: 12, scale: 2, default: "0.0", null: false
+    t.bigint "payroll_run_id", null: false
+    t.bigint "payslip_id"
+    t.decimal "pf_amount", precision: 12, scale: 2, default: "0.0", null: false
+    t.decimal "professional_tax_amount", precision: 12, scale: 2, default: "0.0", null: false
+    t.decimal "salary_days", precision: 6, scale: 2, default: "0.0", null: false
+    t.decimal "tds_amount", precision: 12, scale: 2, default: "0.0", null: false
+    t.bigint "tenant_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["employee_id"], name: "index_full_and_final_settlements_on_employee_id"
+    t.index ["payroll_run_id", "employee_id"], name: "idx_faf_settlements_run_employee", unique: true
+    t.index ["payroll_run_id"], name: "idx_faf_settlements_run"
+    t.index ["payslip_id"], name: "index_full_and_final_settlements_on_payslip_id"
+    t.index ["tenant_id", "employee_id"], name: "idx_faf_settlements_tenant_employee"
+    t.index ["tenant_id"], name: "index_full_and_final_settlements_on_tenant_id"
+  end
+
   create_table "holidays", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.date "date", null: false
@@ -273,17 +306,36 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_02_100002) do
     t.index ["tenant_id"], name: "index_leave_types_on_tenant_id"
   end
 
+  create_table "off_cycle_payroll_entries", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.bigint "employee_id", null: false
+    t.decimal "gross_amount", precision: 12, scale: 2, null: false
+    t.text "notes"
+    t.bigint "payroll_run_id", null: false
+    t.decimal "tds_amount", precision: 12, scale: 2, default: "0.0", null: false
+    t.bigint "tenant_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["employee_id"], name: "index_off_cycle_payroll_entries_on_employee_id"
+    t.index ["payroll_run_id", "employee_id"], name: "idx_off_cycle_entries_run_employee", unique: true
+    t.index ["payroll_run_id"], name: "index_off_cycle_payroll_entries_on_payroll_run_id"
+    t.index ["tenant_id"], name: "index_off_cycle_payroll_entries_on_tenant_id"
+  end
+
   create_table "payroll_runs", force: :cascade do |t|
     t.datetime "approved_at"
     t.bigint "approved_by_id"
     t.datetime "created_at", null: false
+    t.datetime "deleted_at"
     t.bigint "initiated_by_id", null: false
     t.integer "month", null: false
     t.text "notes"
+    t.date "payment_date"
     t.integer "processed_employees", default: 0
     t.text "rejection_reason"
+    t.string "run_type", default: "regular", null: false
     t.string "status", default: "draft", null: false
     t.bigint "tenant_id", null: false
+    t.string "title"
     t.decimal "total_deductions", precision: 12, scale: 2, default: "0.0"
     t.integer "total_employees", default: 0
     t.decimal "total_employer_cost", precision: 12, scale: 2, default: "0.0"
@@ -293,7 +345,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_02_100002) do
     t.integer "year", null: false
     t.index ["approved_by_id"], name: "index_payroll_runs_on_approved_by_id"
     t.index ["initiated_by_id"], name: "index_payroll_runs_on_initiated_by_id"
-    t.index ["tenant_id", "month", "year"], name: "idx_payroll_run_tenant_month_year", unique: true
+    t.index ["tenant_id", "deleted_at"], name: "idx_payroll_runs_tenant_deleted", where: "(deleted_at IS NOT NULL)"
+    t.index ["tenant_id", "month", "year"], name: "idx_regular_payroll_run_tenant_period", unique: true, where: "((run_type)::text = 'regular'::text)"
+    t.index ["tenant_id", "run_type", "payment_date"], name: "idx_payroll_runs_tenant_type_payment"
     t.index ["tenant_id", "status"], name: "idx_payroll_runs_tenant_status"
     t.index ["tenant_id"], name: "index_payroll_runs_on_tenant_id"
   end
@@ -570,6 +624,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_02_100002) do
   add_foreign_key "employees", "tenants"
   add_foreign_key "employees", "users"
   add_foreign_key "employees", "work_locations"
+  add_foreign_key "full_and_final_settlements", "employees"
+  add_foreign_key "full_and_final_settlements", "payroll_runs"
+  add_foreign_key "full_and_final_settlements", "payslips"
+  add_foreign_key "full_and_final_settlements", "tenants"
   add_foreign_key "holidays", "tenants"
   add_foreign_key "holidays", "work_locations"
   add_foreign_key "investment_declarations", "tax_declarations"
@@ -587,6 +645,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_02_100002) do
   add_foreign_key "leave_requests", "tenants"
   add_foreign_key "leave_requests", "users", column: "approved_by_id"
   add_foreign_key "leave_types", "tenants"
+  add_foreign_key "off_cycle_payroll_entries", "employees"
+  add_foreign_key "off_cycle_payroll_entries", "payroll_runs"
+  add_foreign_key "off_cycle_payroll_entries", "tenants"
   add_foreign_key "payroll_runs", "tenants"
   add_foreign_key "payroll_runs", "users", column: "approved_by_id"
   add_foreign_key "payroll_runs", "users", column: "initiated_by_id"

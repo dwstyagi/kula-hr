@@ -3,7 +3,11 @@
   <div class="flex items-center justify-between">
     <div>
       <h1 class="page-title text-2xl">Payroll Runs</h1>
-      <p class="text-sm text-stone-500 mt-0.5">Manage monthly payroll processing</p>
+      <p class="text-sm text-stone-500 mt-0.5">
+        Manage monthly payroll processing &middot;
+        <%= link_to "Paying a bonus or settlement?", admin_off_cycle_payroll_runs_path,
+              class: "text-kula-700 hover:underline" %>
+      </p>
     </div>
     <div class="flex items-center gap-3">
       <% if @years.any? %>

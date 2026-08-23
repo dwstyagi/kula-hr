@@ -1,0 +1,123 @@
+<% content_for :page_title, "New Off-cycle Payroll" %>
+
+<div class="space-y-6" data-controller="off-cycle-form">
+  <div>
+    <h1 class="page-title text-2xl">New off-cycle payroll</h1>
+    <p class="page-sub">Enter an amount only for employees who should be included.</p>
+  </div>
+
+  <%= form_with model: @payroll_run, url: admin_off_cycle_payroll_runs_path, class: "space-y-6",
+        data: { action: "submit->off-cycle-form#pruneBlankRows" } do |f| %>
+    <% if @payroll_run.errors.any? %>
+      <div class="alert alert-error">
+        <div>
+          <p class="font-semibold">Could not create this run</p>
+          <ul class="list-disc list-inside mt-1">
+            <% @payroll_run.errors.full_messages.each do |message| %><li><%= message %></li><% end %>
+          </ul>
+        </div>
+      </div>
+    <% end %>
+
+    <div class="card card-pad space-y-5">
+      <h2 class="card-title">Run details</h2>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div>
+          <%= f.label :run_type, "Payment type", class: "label" %>
+          <%= f.select :run_type, [ [ "Bonus", "bonus" ], [ "Additional payment", "additional" ] ], {}, class: "select" %>
+        </div>
+        <div>
+          <%= f.label :title, "Payslip label", class: "label" %>
+          <%= f.text_field :title, class: "input", required: true, maxlength: 100, placeholder: "Performance Bonus" %>
+        </div>
+        <div>
+          <%= f.label :payment_date, class: "label" %>
+          <%= f.date_field :payment_date, class: "input", required: true %>
+        </div>
+      </div>
+      <div>
+        <%= f.label :notes, "Internal notes", class: "label" %>
+        <%= f.text_area :notes, rows: 2, class: "textarea", placeholder: "Reason or approval reference…" %>
+      </div>
+    </div>
+
+    <div class="card overflow-hidden">
+      <div class="card-header flex-wrap gap-3">
+        <div>
+          <h2 class="card-title">Employees and amounts</h2>
+          <p class="text-xs text-stone-500 mt-0.5">TDS is the amount payroll has decided to withhold for this payment.</p>
+        </div>
+        <div class="flex flex-wrap items-end gap-2">
+          <div>
+            <label class="label">Search</label>
+            <input type="search" class="input w-48" placeholder="Name or code"
+                   data-off-cycle-form-target="search"
+                   data-action="input->off-cycle-form#filter">
+          </div>
+          <div>
+            <label class="label">Department</label>
+            <select class="select w-44" data-off-cycle-form-target="department"
+                    data-action="change->off-cycle-form#filter">
+              <option value="">All departments</option>
+              <% @entry_departments.each do |name| %>
+                <option value="<%= name %>"><%= name %></option>
+              <% end %>
+            </select>
+          </div>
+          <div>
+            <label class="label">Same gross amount</label>
+            <input type="number" min="0" step="0.01" class="input w-40" data-off-cycle-form-target="bulkAmount" placeholder="0.00">
+          </div>
+          <button type="button" class="btn btn-secondary" data-action="off-cycle-form#applyAmount">Apply to visible</button>
+          <button type="button" class="btn btn-ghost" data-action="off-cycle-form#clearAmounts">Clear</button>
+        </div>
+      </div>
+
+      <div class="px-5 pb-2 text-xs text-stone-500">
+        <span data-off-cycle-form-target="count"></span> · only employees with an amount are included
+      </div>
+
+      <div class="overflow-x-auto max-h-[34rem]">
+        <table class="tbl">
+          <thead class="sticky top-0 z-10">
+            <tr>
+              <th>Employee</th>
+              <th class="w-48">Gross amount</th>
+              <th class="w-48">TDS</th>
+              <th>Note</th>
+            </tr>
+          </thead>
+          <tbody>
+            <%= f.fields_for :off_cycle_payroll_entries do |entry_fields| %>
+              <% entry = entry_fields.object %>
+              <% department_name = entry.employee.department&.name %>
+              <tr data-off-cycle-form-target="row"
+                  data-department="<%= department_name %>"
+                  data-search-text="<%= "#{entry.employee.full_name} #{entry.employee.employee_code}".downcase %>">
+                <td>
+                  <p class="font-medium text-stone-900"><%= entry.employee.full_name %></p>
+                  <p class="text-xs text-stone-400"><%= entry.employee.employee_code %> · <%= department_name || "No department" %></p>
+                  <%= entry_fields.hidden_field :employee_id %>
+                </td>
+                <td>
+                  <%= entry_fields.number_field :gross_amount, min: 0, step: 0.01,
+                        class: "input text-right", data: { off_cycle_form_target: "amount" }, placeholder: "0.00" %>
+                </td>
+                <td>
+                  <%= entry_fields.number_field :tds_amount, min: 0, step: 0.01,
+                        class: "input text-right", placeholder: "0.00" %>
+                </td>
+                <td><%= entry_fields.text_field :notes, class: "input", placeholder: "Optional" %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-3">
+      <%= f.submit "Create off-cycle run", class: "btn btn-primary cursor-pointer" %>
+      <%= link_to "Cancel", admin_off_cycle_payroll_runs_path, class: "btn btn-secondary" %>
+    </div>
+  <% end %>
+</div>

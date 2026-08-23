@@ -11,7 +11,14 @@ class PayrollProcessingJob < ApplicationJob
 
     # Scope all queries to the correct tenant for this run
     ActsAsTenant.with_tenant(payroll_run.tenant) do
-      result = Payroll::PayrollProcessor.new(payroll_run: payroll_run).call
+      processor = if payroll_run.full_and_final?
+        Payroll::FullAndFinalPayrollProcessor
+      elsif payroll_run.off_cycle?
+        Payroll::OffCyclePayrollProcessor
+      else
+        Payroll::PayrollProcessor
+      end
+      result = processor.new(payroll_run: payroll_run).call
 
       if result.errors.any?
         PayrollMailer.processing_complete_with_errors(payroll_run, result.errors).deliver_later

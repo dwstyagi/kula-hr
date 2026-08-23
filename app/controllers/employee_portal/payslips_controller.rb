@@ -14,7 +14,7 @@ module EmployeePortal
       @ytd_payslips = @payslips.select { |p| Date.new(p.year, p.month, 1) >= fy_start }
       # Month-over-month changes
       @mom_changes = {}
-      sorted = @payslips.to_a
+      sorted = @payslips.reject(&:off_cycle?)
       sorted.each_with_index do |payslip, i|
         prev = sorted[i + 1]
         if prev && prev.net_pay > 0

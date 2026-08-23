@@ -12,7 +12,17 @@ class PayrollRunPolicy < ApplicationPolicy
 
   def download_bank_file? = admin_or_hr?
 
-  # Only Super Admin can approve or reject
+  # Whoever can raise a run can clear away their own mistake, but only while it
+  # is still a draft. PayrollRun#deletable? is the single source of truth.
+  def destroy? = admin_or_hr? && record.deletable?
+  def restore? = admin_or_hr?
+
+  # Only Super Admin can approve or reject. This is deliberately identical for
+  # regular and off-cycle runs: a super admin can already raise and approve a
+  # regular run, so blocking them on the smaller off-cycle amount would be an
+  # inconsistency that protects nothing. Segregation of duties, if it is ever
+  # needed, belongs in the audit trail (initiated_by / approved_by) rather than
+  # in a hard block that a single-super-admin tenant cannot satisfy.
   def approve? = super_admin?
   def reject?  = super_admin?
 
