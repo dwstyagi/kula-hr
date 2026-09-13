@@ -1,0 +1,9 @@
+[Unit]
+Description=Recover HRMS job dispatches independently of Redis scheduling
+After=postgresql.service redis.service
+[Service]
+Type=oneshot
+User=ubuntu
+WorkingDirectory=/var/www/kulahr
+EnvironmentFile=/etc/kulahr.env
+ExecStart=/home/ubuntu/.rbenv/shims/bundle exec rails runner JobDispatch.recover

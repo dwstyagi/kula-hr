@@ -1,3 +1,10 @@
+<% if @payroll_run.resetting? %>
+  <div class="alert alert-info">
+    Payroll reset is in progress.
+    <% task = BackgroundTask.where(kind: "payroll_reset", task_key: @payroll_run.id.to_s).order(id: :desc).first %>
+    <%= link_to "View reset status", admin_background_task_path(task), class: "link" if task %>
+  </div>
+<% else %>
 <% content_for :page_title, @payroll_run.title %>
 
 <div class="space-y-6">
@@ -112,3 +119,5 @@
     <% end %>
   <% end %>
 </div>
+
+<% end %>

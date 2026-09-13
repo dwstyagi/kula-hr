@@ -44,11 +44,7 @@ RSpec.describe Payroll::OffCyclePayrollProcessor do
   end
 
   it "reports zero processed when every entry fails" do
-    allow_any_instance_of(PayrollRun).to receive(:payslips).and_wrap_original do |method, *args|
-      relation = method.call(*args)
-      allow(relation).to receive(:create!).and_raise(ActiveRecord::RecordInvalid.new(Payslip.new))
-      relation
-    end
+    allow(Payslip).to receive(:create!).and_raise(ActiveRecord::RecordInvalid.new(Payslip.new))
 
     result = described_class.new(payroll_run: run).call
     run.reload

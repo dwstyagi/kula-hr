@@ -42,6 +42,14 @@ class ApplicationController < ActionController::Base
 
   rescue_from Pundit::NotAuthorizedError, with: :user_not_authorized
 
+  def stream_download(body, filename:, type:)
+    response.headers["Content-Type"] = type
+    response.headers["Content-Disposition"] = ActionDispatch::Http::ContentDisposition.format(disposition: "attachment", filename: filename)
+    response.headers["Cache-Control"] = "no-store"
+    response.headers["Last-Modified"] = Time.current.httpdate
+    self.response_body = body
+  end
+
   private
 
   # Keep production-facing links on the public canonical domain even if an old

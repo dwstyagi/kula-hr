@@ -6,7 +6,16 @@ module Payroll
       private
 
       def generate
-        CSV.generate(force_quotes: true) do |csv|
+        if block_given?
+          sink = Object.new
+          sink.define_singleton_method(:<<) { |row| yield CSV.generate_line(row, force_quotes: true) }
+          write_rows(sink)
+        else
+          CSV.generate(force_quotes: true) { |csv| write_rows(csv) }
+        end
+      end
+
+      def write_rows(csv)
           csv << [ "Sr No", "Employee Code", "Employee Name", "Bank Name",
                    "Account Number", "IFSC Code", "Net Pay", "Narration" ]
 
@@ -23,7 +32,6 @@ module Payroll
               @payroll_run.off_cycle? ? @payroll_run.title : "Salary #{@payroll_run.period_label}"
             ]
           end
-        end
       end
     end
   end

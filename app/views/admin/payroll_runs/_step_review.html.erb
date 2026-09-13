@@ -8,7 +8,7 @@
 <div class="card overflow-hidden animate-fade-up">
   <div class="card-header">
     <div>
-      <h2 class="card-title">Review employees</h2>
+      <h2 class="card-title">Review employees</h2><p class="text-xs text-stone-500">Up to 50 details per group. Counts include every eligible employee.</p>
       <p class="text-xs text-stone-500 mt-0.5">
         <%= readiness&.eligible_count.to_i %> eligible this period —
         <%= ready.size %> ready<%= ", #{issues.size} with issues" if issues.any? %><%= ", #{variance.size} salary #{"change".pluralize(variance.size)}" if variance.any? %>

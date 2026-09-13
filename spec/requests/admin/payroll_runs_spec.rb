@@ -204,7 +204,7 @@ RSpec.describe "Admin::PayrollRuns", type: :request do
     before { sign_in(hr_user) }
 
     it "enqueues a PayrollProcessingJob and redirects" do
-      expect(PayrollProcessingJob).to receive(:perform_later).with(run.id)
+      expect(PayrollProcessingJob).to receive(:perform_later).with(run.id, hash_including(:dispatch_id))
       post process_payroll_admin_payroll_run_path(run), headers: headers
       expect(response).to redirect_to(admin_payroll_run_path(run))
     end
@@ -337,13 +337,19 @@ RSpec.describe "Admin::PayrollRuns", type: :request do
 
     before { sign_in(hr_user) }
 
-    it "resets to draft and destroys payslips" do
+    it "queues a reset and destroys payslips in the worker" do
       emp = ActsAsTenant.with_tenant(tenant) { create(:employee, tenant: tenant) }
       ActsAsTenant.with_tenant(tenant) do
         create(:payslip, tenant: tenant, payroll_run: run, employee: emp)
       end
 
       patch reprocess_admin_payroll_run_path(run), headers: headers
+      expect(run.reload.status).to eq("resetting")
+      expect(run.payslips.count).to eq(1)
+      task = BackgroundTask.last
+      expect(response).to redirect_to(admin_background_task_path(task))
+      BackgroundTaskJob.perform_now(task.id)
+      expect(task.reload.status).to eq("completed")
       expect(run.reload.status).to eq("draft")
       expect(run.payslips.count).to eq(0)
     end

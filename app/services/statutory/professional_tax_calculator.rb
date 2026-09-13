@@ -8,7 +8,8 @@ module Statutory
     # setting  — PayrollSetting record (provides pt_state, pt_enabled, tenant)
     # employee — Employee record (provides pt_applicable flag)
     # month    — integer month number 1–12
-    def initialize(gross:, setting:, employee:, month:)
+    def initialize(gross:, setting:, employee:, month:, slabs: nil)
+      @slabs    = slabs
       @gross    = gross.to_d
       @setting  = setting
       @employee = employee
@@ -33,6 +34,11 @@ module Statutory
     private
 
     def find_slab
+      if @slabs
+        matches = @slabs.select { |slab| slab.state == @setting.pt_state && slab.salary_from <= @gross && slab.salary_to >= @gross }
+        return matches.find { |slab| slab.month == "february" } || matches.find { |slab| slab.month.nil? } if @month == 2
+        return matches.find { |slab| slab.month.nil? }
+      end
       ActsAsTenant.with_tenant(@setting.tenant) do
         # In February, prefer a February-specific row first (Maharashtra special)
         if @month == 2

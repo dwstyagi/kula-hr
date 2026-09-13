@@ -1,6 +1,8 @@
 class Tenant < ApplicationRecord
   has_paper_trail
 
+  has_many :leave_accruals, dependent: :delete_all
+  has_many :background_tasks, dependent: :delete_all
   has_many :tenant_users, dependent: :destroy
   has_many :users, through: :tenant_users
   has_many :departments, dependent: :destroy

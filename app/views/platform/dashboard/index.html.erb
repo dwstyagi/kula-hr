@@ -67,7 +67,9 @@
     <div class="card card-pad">
       <h3 class="card-title mb-4">Tenant Status Distribution</h3>
       <% if @stats.status_distribution.values.sum > 0 %>
-        <%= pie_chart @stats.status_distribution, height: "300px", donut: true, legend: "bottom" %>
+        <%= tag.div style: "height: 300px", data: { controller: "chart", chart_type_value: "pie",
+          chart_data_value: @stats.status_distribution.to_a.to_json,
+          chart_options_value: { donut: true, legend: "bottom" }.to_json } %>
       <% else %>
         <div class="flex items-center justify-center h-[300px] text-stone-400 text-sm">No tenants yet</div>
       <% end %>

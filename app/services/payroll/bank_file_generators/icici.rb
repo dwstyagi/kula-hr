@@ -10,11 +10,20 @@ module Payroll
         date = Date.today.strftime("%d/%m/%Y")
 
         lines = []
-        lines << "PAYMENT_DATE|BENE_ACCOUNT_NUMBER|BENE_NAME|BENE_BANK_IFSC|AMOUNT|PAYMENT_TYPE|REMARKS"
+        first = true
+        emit = lambda do |line|
+          if block_given?
+            yield((first ? "" : "\r\n") + line)
+            first = false
+          else
+            lines << line
+          end
+        end
+        emit.call("PAYMENT_DATE|BENE_ACCOUNT_NUMBER|BENE_NAME|BENE_BANK_IFSC|AMOUNT|PAYMENT_TYPE|REMARKS")
 
         @eligible_payslips.each do |payslip|
           emp = payslip.employee
-          lines << [
+          emit.call([
             date,
             emp.bank_account_number,
             emp.full_name.upcase.first(50),
@@ -22,7 +31,7 @@ module Payroll
             format("%.2f", payslip.net_pay),
             "NEFT",
             narration
-          ].join("|")
+          ].join("|"))
         end
 
         lines.join("\r\n")

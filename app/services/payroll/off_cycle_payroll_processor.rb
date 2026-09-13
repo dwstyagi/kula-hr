@@ -22,9 +22,11 @@ module Payroll
       @run.update!(total_employees: entries.size)
 
       ActsAsTenant.with_tenant(@tenant) do
-        entries.each_with_index do |entry, index|
+        index = @run.payslips.count
+        entries.where.not(employee_id: @run.payslips.select(:employee_id)).find_each(batch_size: 100) do |entry|
+          index += 1
           process_entry(entry)
-          @run.update_column(:processed_employees, index + 1)
+          @run.update_column(:processed_employees, index)
         end
       end
 
@@ -38,7 +40,7 @@ module Payroll
 
     def process_entry(entry)
       ActiveRecord::Base.transaction do
-        payslip = @run.payslips.create!(
+        payslip = Payslip.create!(payroll_run: @run,
           tenant: @tenant,
           employee: entry.employee,
           month: @run.month,
@@ -86,7 +88,7 @@ module Payroll
       # is processing, so settle it on the true success count here — otherwise a
       # run whose entries all failed reports 40/40 with zero payslips.
       @run.update!(
-        processed_employees: @processed.size,
+        processed_employees: @run.payslips.count,
         total_gross: @run.payslips.sum(:gross_pay),
         total_deductions: @run.payslips.sum(:total_deductions),
         total_net_pay: @run.payslips.sum(:net_pay),

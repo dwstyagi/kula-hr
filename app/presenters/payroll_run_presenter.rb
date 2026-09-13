@@ -5,6 +5,7 @@
 class PayrollRunPresenter < SimpleDelegator
   STATUS_BADGE = {
     "draft"        => { label: "Draft",        classes: "badge-neutral" },
+    "resetting"    => { label: "Resetting…", classes: "badge-processing" },
     "processing"   => { label: "Processing…",  classes: "badge-processing" },
     "processed"    => { label: "Processed",    classes: "badge-info" },
     "under_review" => { label: "Under Review", classes: "badge-warning" },

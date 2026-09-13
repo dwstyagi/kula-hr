@@ -5,101 +5,98 @@ module Reports
     Row = Struct.new(:employee_code, :name, :department, :months_count,
                      :total_gross, :total_deductions, :total_net,
                      :component_totals, keyword_init: true)
-
     attr_reader :rows, :summary, :component_names
 
-    def initialize(financial_year:)
-      @financial_year = financial_year
-      parts = financial_year.split("-")
-      start_year = parts[0].to_i
-      @fy_start_month = 4
-      @fy_start_year = start_year
-      @fy_end_month = 3
-      @fy_end_year = start_year + 1
+    def initialize(financial_year:, employees: nil)
+      @financial_year, @employees = financial_year, employees
+      @tenant = ActsAsTenant.current_tenant
+      @start_year = financial_year.split("-").first.to_i
+    end
+
+    def employee_scope
+      Employee.where(id: payslips.select(:employee_id)).order(:id)
     end
 
     def call
-      @rows = []
-      @component_names = Set.new
-      @summary = { total_gross: 0, total_deductions: 0, total_net: 0, employee_count: 0 }
-
-      approved_runs = PayrollRun.where(status: %w[approved paid])
-                                .where(fy_condition)
-
-      return self if approved_runs.empty?
-
-      payslips = Payslip.where(payroll_run: approved_runs)
-                        .includes(:employee, :line_items, employee: :department)
-
-      grouped = payslips.group_by(&:employee_id)
-
-      grouped.each do |_emp_id, emp_payslips|
-        emp = emp_payslips.first.employee
-        next unless emp
-
-        component_totals = {}
-        emp_payslips.each do |ps|
-          ps.line_items.each do |li|
-            key = "#{li.component_type}:#{li.component_name}"
-            @component_names << key
-            component_totals[key] = (component_totals[key] || 0) + li.amount.to_f
-          end
-        end
-
-        total_gross = emp_payslips.sum { |p| p.gross_pay.to_f }
-        total_ded = emp_payslips.sum { |p| p.total_deductions.to_f }
-        total_net = emp_payslips.sum { |p| p.net_pay.to_f }
-
-        row = Row.new(
-          employee_code: emp.employee_code,
-          name: emp.full_name,
-          department: emp.department&.name || "N/A",
-          months_count: emp_payslips.size,
-          total_gross: total_gross.round(0),
-          total_deductions: total_ded.round(0),
-          total_net: total_net.round(0),
-          component_totals: component_totals
-        )
-        @rows << row
-
-        @summary[:total_gross] += total_gross
-        @summary[:total_deductions] += total_ded
-        @summary[:total_net] += total_net
-        @summary[:employee_count] += 1
-      end
-
-      @component_names = @component_names.sort
+      gross, deductions, net, count = payslips.pick(
+        Arel.sql("COALESCE(SUM(gross_pay), 0)"), Arel.sql("COALESCE(SUM(total_deductions), 0)"),
+        Arel.sql("COALESCE(SUM(net_pay), 0)"), Arel.sql("COUNT(DISTINCT employee_id)"))
+      @summary = { total_gross: gross, total_deductions: deductions, total_net: net, employee_count: count }
+      load_component_names
+      @rows = rows_for(@employees || employee_scope)
       self
     end
 
     def to_csv
-      headers = [ "Employee Code", "Name", "Department", "Months" ]
-      earning_names = component_names.select { |c| c.start_with?("earning:") }.map { |c| c.sub("earning:", "") }
-      deduction_names = component_names.select { |c| c.start_with?("deduction:") }.map { |c| c.sub("deduction:", "") }
-      headers += earning_names
-      headers += [ "Total Gross" ]
-      headers += deduction_names
-      headers += [ "Total Deductions", "Net Pay" ]
-
       CSV.generate do |csv|
-        csv << headers
-        rows.each do |row|
-          line = [ row.employee_code, row.name, row.department, row.months_count ]
-          earning_names.each { |n| line << (row.component_totals["earning:#{n}"] || 0).round(0) }
-          line << row.total_gross
-          deduction_names.each { |n| line << (row.component_totals["deduction:#{n}"] || 0).round(0) }
-          line += [ row.total_deductions, row.total_net ]
-          csv << line
+        csv << csv_headers
+        rows.each { |row| csv << csv_row(row) }
+      end
+    end
+
+    # Rack consumes this after the controller returns, so restore tenant context
+    # inside enumeration and keep allocations bounded independently of history.
+    def csv_stream
+      Enumerator.new do |output|
+        ActsAsTenant.with_tenant(@tenant) do
+          load_component_names
+          output << CSV.generate_line(csv_headers)
+          employee_scope.find_in_batches(batch_size: 100) do |employees|
+            rows_for(employees).each { |row| output << CSV.generate_line(csv_row(row)) }
+          end
         end
       end
     end
 
     private
 
-    def fy_condition
-      # April of start_year to March of end_year
-      "(payroll_runs.year = #{@fy_start_year} AND payroll_runs.month >= #{@fy_start_month}) OR " \
-      "(payroll_runs.year = #{@fy_end_year} AND payroll_runs.month <= #{@fy_end_month})"
+    def payslips
+      runs = PayrollRun.where(status: %w[approved paid]).where(
+        "(year = :first AND month >= 4) OR (year = :last AND month <= 3)", first: @start_year, last: @start_year + 1)
+      Payslip.where(payroll_run_id: runs.select(:id))
+    end
+
+    def load_component_names
+      @component_names = PayslipLineItem.where(payslip_id: payslips.select(:id))
+        .distinct.pluck(:component_type, :component_name).map { |type, name| "#{type}:#{name}" }.sort
+    end
+
+    def rows_for(employees)
+      employees = employees.to_a
+      return [] if employees.empty?
+      ActiveRecord::Associations::Preloader.new(records: employees, associations: :department).call
+      selected = payslips.where(employee_id: employees.map(&:id))
+      # Aggregate headlines separately from components to avoid join fan-out.
+      totals = selected.group(:employee_id).pluck(:employee_id, Arel.sql("COUNT(*)"),
+        Arel.sql("SUM(gross_pay)"), Arel.sql("SUM(total_deductions)"), Arel.sql("SUM(net_pay)"))
+        .index_by(&:first)
+      components = Hash.new { |h, k| h[k] = {} }
+      PayslipLineItem.joins(:payslip).where(payslip_id: selected.select(:id))
+        .group("payslips.employee_id", :component_type, :component_name).sum(:amount)
+        .each { |(id, type, name), amount| components[id]["#{type}:#{name}"] = amount }
+      employees.filter_map do |employee|
+        total = totals[employee.id]
+        next unless total
+        _, count, gross, deductions, net = total
+        Row.new(employee_code: employee.employee_code, name: employee.full_name,
+          department: employee.department&.name || "N/A", months_count: count,
+          total_gross: gross.round(0), total_deductions: deductions.round(0), total_net: net.round(0),
+          component_totals: components[employee.id])
+      end
+    end
+
+    def earning_names = component_names.grep(/^earning:/)
+    def deduction_names = component_names.grep(/^deduction:/)
+
+    def csv_headers
+      [ "Employee Code", "Name", "Department", "Months" ] + earning_names.map { |s| s.delete_prefix("earning:") } +
+        [ "Total Gross" ] + deduction_names.map { |s| s.delete_prefix("deduction:") } + [ "Total Deductions", "Net Pay" ]
+    end
+
+    def csv_row(row)
+      [ row.employee_code, row.name, row.department, row.months_count ] +
+        earning_names.map { |key| (row.component_totals[key] || 0).round(0) } + [ row.total_gross ] +
+        deduction_names.map { |key| (row.component_totals[key] || 0).round(0) } + [ row.total_deductions, row.total_net ]
     end
   end
 end

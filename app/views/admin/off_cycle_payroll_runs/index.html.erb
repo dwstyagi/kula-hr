@@ -62,7 +62,7 @@
                 <td><span class="badge badge-neutral"><%= run.run_type_label %></span></td>
                 <td class="text-stone-600"><%= run.payment_date.strftime("%d %b %Y") %></td>
                 <td><%= render "admin/payroll_runs/status_badge", payroll_run: run %></td>
-                <td class="num"><%= run.payslips.count.positive? ? run.payslips.count : (run.full_and_final? ? run.full_and_final_settlements.count : run.off_cycle_payroll_entries.count) %></td>
+                <td class="num"><%= @payslip_counts.fetch(run.id, 0).positive? ? @payslip_counts[run.id] : (run.full_and_final? ? @settlement_counts.fetch(run.id, 0) : @entry_counts.fetch(run.id, 0)) %></td>
                 <td class="num font-semibold"><%= run.total_net_pay.positive? ? run.formatted_total_net_pay : "—" %></td>
                 <td class="text-right">
                   <% if @showing_deleted %>
@@ -90,3 +90,5 @@
     <% end %>
   </div>
 </div>
+
+<%= render "shared/page_navigation", pagy: @pagy %>

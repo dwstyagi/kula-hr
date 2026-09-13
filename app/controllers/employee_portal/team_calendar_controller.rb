@@ -8,7 +8,7 @@ module EmployeePortal
       @month = @date.month
       @year  = @date.year
 
-      @employees = team_members
+      @pagy, @employees = pagy(:offset, team_members, limit: 50)
       @calendar  = Leave::TeamCalendar.new(
         employees: @employees, month: @month, year: @year, tenant: ActsAsTenant.current_tenant
       )

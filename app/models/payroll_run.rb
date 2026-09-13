@@ -51,6 +51,7 @@ class PayrollRun < ApplicationRecord
 
   aasm column: :status do
     state :draft,        initial: true
+    state :resetting
     state :processing
     state :processed
     state :under_review
@@ -89,13 +90,27 @@ class PayrollRun < ApplicationRecord
     end
 
     # rejected or processed → draft (HR reprocesses — wipes all payslips)
+    event :queue_reset do
+      transitions from: [ :rejected, :processed ], to: :resetting
+    end
+
     event :reprocess do
-      transitions from: [ :rejected, :processed ], to: :draft, after: :clear_payslips
+      transitions from: [ :rejected, :processed, :resetting ], to: :draft, after: :clear_payslips
     end
 
     # approved → paid (after bank transfer is done)
     event :mark_paid do
       transitions from: :approved, to: :paid
+    end
+  end
+
+  def enqueue_reset!(user:)
+    with_lock do
+      task = BackgroundTask.active.find_by(kind: "payroll_reset", task_key: id.to_s)
+      return task if resetting? && task
+      queue_reset!
+      BackgroundTask.enqueue!(tenant: tenant, user: user, kind: "payroll_reset", task_key: id.to_s,
+        payload: { payroll_run_id: id })
     end
   end
 
@@ -208,8 +223,8 @@ class PayrollRun < ApplicationRecord
     ).call
     return if readiness.can_create?
 
-    blocked = readiness.blocking.map { |s| s.employee.full_name }.sort
-    names = blocked.first(10).join(", ")
+    blocked = readiness.blocking
+    names = blocked.first(10).map { |s| s.employee.full_name }.sort.join(", ")
     names += ", and #{blocked.size - 10} more" if blocked.size > 10
     errors.add(:base,
       "Attendance not locked for #{blocked.size} employee(s) for #{month_name} #{year}: #{names}.")
@@ -224,14 +239,23 @@ class PayrollRun < ApplicationRecord
     # at a time from the draft, each with their own last working date. That the
     # run is non-empty is enforced when it is calculated, not when it is made.
     return if full_and_final?
-    return if off_cycle_payroll_entries.reject(&:marked_for_destruction?).any?
+    entries = association(:off_cycle_payroll_entries).target
+    return if entries.any? { |entry| !entry.marked_for_destruction? }
+    removed = entries.filter_map { |entry| entry.id if entry.marked_for_destruction? }
+    return if off_cycle_payroll_entries.where.not(id: removed).exists?
 
     errors.add(:base, "Add at least one employee with an amount")
   end
 
   # Callback: wipe all payslips and reset totals when reprocessing
   def clear_payslips
-    payslips.destroy_all
+    # Preserve dependent nullification, without instantiating every child record.
+    ids = payslips.select(:id)
+    LeaveEncashmentRequest.where(payslip_id: ids).update_all(payslip_id: nil, status: LeaveEncashmentRequest.statuses[:approved])
+    FullAndFinalSettlement.where(payslip_id: ids).update_all(payslip_id: nil)
+    PayslipLineItem.where(payslip_id: ids).delete_all
+    payslips.delete_all
+    payslips.reset
     update_columns(
       processed_employees: 0,
       total_gross: 0,

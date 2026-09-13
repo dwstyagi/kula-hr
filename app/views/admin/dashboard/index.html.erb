@@ -188,11 +188,12 @@
         <%= link_to "All reports →", admin_reports_path, class: "link text-sm" %>
       </div>
       <% if @payroll_data.payroll_trend.any? %>
-        <%= line_chart [
-              { name: "Gross", data: @payroll_data.payroll_trend.map { |t| [t[:label], t[:gross]] } },
-              { name: "Net", data: @payroll_data.payroll_trend.map { |t| [t[:label], t[:net]] } }
-            ], height: "260px", prefix: "₹", thousands: ",",
-            colors: ["#276b50", "#e8a823"], library: { tension: 0.4 } %>
+        <%= tag.div style: "height: 260px", data: { controller: "chart", chart_type_value: "line",
+          chart_data_value: [
+            { name: "Gross", data: @payroll_data.payroll_trend.map { |t| [t[:label], t[:gross]] } },
+            { name: "Net", data: @payroll_data.payroll_trend.map { |t| [t[:label], t[:net]] } }
+          ].to_json,
+          chart_options_value: { discrete: true, prefix: "₹", thousands: ",", colors: ["#276b50", "#e8a823"], library: { tension: 0.4 } }.to_json } %>
       <% else %>
         <div class="empty-state">
           <p class="text-sm text-stone-500">No approved payroll runs yet.</p>

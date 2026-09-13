@@ -93,12 +93,19 @@ RSpec.describe "Admin::Imports", type: :request do
              headers: { "Host" => subdomain_host }
       end
 
-      it "imports employees and redirects to employees list" do
+      it "queues the import and creates employees in the worker" do
         expect {
           post confirm_admin_imports_path, headers: { "Host" => subdomain_host }
-        }.to change { Employee.unscoped.where(tenant_id: tenant.id).count }.by_at_least(1)
-
-        expect(response).to redirect_to(admin_employees_path)
+        }.to change { BackgroundTask.count }.by(1)
+        task = BackgroundTask.last
+        expect(response).to redirect_to(admin_background_task_path(task))
+        expect {
+          BackgroundTaskJob.perform_now(task.id)
+        }.to change { Employee.unscoped.where(tenant_id: tenant.id).count }.by(1)
+        expect(task.reload.status).to eq("completed")
+        post confirm_admin_imports_path, headers: { "Host" => subdomain_host }
+        expect(response).to redirect_to(admin_background_task_path(task))
+        expect(BackgroundTask.count).to eq(1)
       end
     end
   end

@@ -11,10 +11,22 @@ module Reports
     def initialize(month:, year:)
       @month = month
       @year = year
+      @tenant = ActsAsTenant.current_tenant
     end
 
-    def call
-      run = PayrollRun.where(status: %w[approved paid]).for_month(@month, @year).first
+    def source_scope
+      run = (@run ||= PayrollRun.where(status: %w[approved paid]).for_month(@month, @year).first)
+      return Payslip.none unless run
+      Payslip.where(payroll_run: run)
+                        .preload(:employee, :line_items)
+                        .joins(:line_items)
+                        .where(payslip_line_items: { component_name: "ESI", component_type: "deduction" })
+                        .distinct
+    end
+
+    def call(limit: 50, offset: 0)
+      index = 0
+      run = (@run ||= PayrollRun.where(status: %w[approved paid]).for_month(@month, @year).first)
       @rows = []
       @summary = { total_ee: 0, total_er: 0, total_gross: 0, employee_count: 0 }
 
@@ -26,15 +38,11 @@ module Reports
       esi_ee_rate = (setting.esi_employee_rate || 0.75).to_f / 100
       esi_er_rate = (setting.esi_employer_rate || 3.25).to_f / 100
 
-      payslips = Payslip.where(payroll_run: run)
-                        .includes(:employee, :line_items)
-                        .joins(:line_items)
-                        .where(payslip_line_items: { component_name: "ESI", component_type: "deduction" })
-                        .distinct
+      payslips = source_scope
 
-      payslips.each do |payslip|
+      payslips.find_each(batch_size: 100) do |payslip|
         emp = payslip.employee
-        esi_deduction = payslip.line_items.find_by(component_name: "ESI", component_type: "deduction")&.amount.to_f
+        esi_deduction = payslip.line_items.find { |item| item.component_name == "ESI" && item.component_type == "deduction" }&.amount.to_f
         employer_esi = payslip.employer_esi.to_f
 
         row = Row.new(
@@ -46,7 +54,12 @@ module Reports
           total_contribution: (esi_deduction + employer_esi).round(0),
           ip_number: ""
         )
-        @rows << row
+        if block_given?
+          yield row
+        elsif index >= offset && @rows.size < limit
+          @rows << row
+        end
+        index += 1
 
         @summary[:total_ee] += esi_deduction
         @summary[:total_er] += employer_esi
@@ -55,6 +68,17 @@ module Reports
       end
 
       self
+    end
+
+    def stream
+      Enumerator.new do |out|
+        ActsAsTenant.with_tenant(@tenant) do
+          out << CSV.generate_line([ "Employee Code", "Name", "Gross Wages", "Employee Contribution", "Employer Contribution", "Total Contribution", "IP Number" ])
+          call do |r|
+            out << CSV.generate_line([ r.employee_code, r.name, r.gross_wages.to_i, r.employee_contribution.to_i, r.employer_contribution.to_i, r.total_contribution.to_i, r.ip_number ])
+          end
+        end
+      end
     end
 
     def to_csv

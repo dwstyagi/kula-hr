@@ -18,7 +18,8 @@ module Payroll
     # Raised when we cannot compute salary for an employee (skipped by PayrollProcessor)
     class CalculationError < StandardError; end
 
-    def initialize(employee:, payroll_run:, payroll_setting:)
+    def initialize(employee:, payroll_run:, payroll_setting:, inputs: nil)
+      @inputs      = inputs
       @employee    = employee
       @run         = payroll_run
       @setting     = payroll_setting
@@ -71,7 +72,7 @@ module Payroll
     # ── Step 1: Attendance ─────────────────────────────────────────────────────
 
     def fetch_attendance
-      summary = AttendanceSummary.find_by(
+      summary = @inputs ? @inputs.attendance[@employee.id] : AttendanceSummary.find_by(
         employee: @employee, month: @month, year: @year
       )
 
@@ -158,7 +159,8 @@ module Payroll
         gross:    gross,
         setting:  @setting,
         employee: @employee,
-        month:    @month
+        month:    @month,
+        slabs:    @inputs&.pt_slabs
       ).call
     end
 
@@ -170,7 +172,8 @@ module Payroll
         monthly_hra:      prorated_earnings["HRA"] || 0,
         financial_year:   current_fy,
         month:            @month,
-        ytd_tds_deducted: ytd_tds_deducted
+        declaration: @inputs ? @inputs.declarations[@employee.id] : :load,
+        ytd_tds_deducted: @inputs ? @inputs.ytd_tds.fetch(@employee.id, 0) : ytd_tds_deducted
       ).call
     end
 

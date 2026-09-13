@@ -22,6 +22,9 @@ module Attendance
     end
 
     def call
+      stream.to_a.join
+    end
+    def stream
       require "csv"
 
       summaries = AttendanceSummary
@@ -29,12 +32,12 @@ module Attendance
         .includes(employee: :department)
         .order("employees.last_name, employees.first_name")
 
-      CSV.generate(headers: true) do |csv|
-        csv << HEADERS
-
-        summaries.each do |s|
+      Enumerator.new do |output|
+        ActsAsTenant.with_tenant(@tenant) do
+        output << CSV.generate_line(HEADERS)
+        summaries.reorder(:id).find_each(batch_size: 100) do |s|
           emp = s.employee
-          csv << [
+          output << CSV.generate_line([
             emp.employee_code,
             emp.full_name,
             emp.department&.name || "",
@@ -43,7 +46,8 @@ module Attendance
             s.half_days.to_f,
             s.approved_leaves.to_f,
             s.lop_leaves.to_f
-          ]
+          ])
+        end
         end
       end
     end

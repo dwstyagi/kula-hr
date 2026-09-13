@@ -12,21 +12,21 @@
       <p class="text-xs text-stone-500 mt-1">Total Rows</p>
     </div>
     <div class="bg-green-50 rounded-lg border border-green-200 p-4 text-center">
-      <p class="text-2xl font-bold text-green-700"><%= @valid_rows.size %></p>
+      <p class="text-2xl font-bold text-green-700"><%= @valid_count %></p>
       <p class="text-xs text-green-600 mt-1">Ready to Import</p>
     </div>
     <div class="bg-red-50 rounded-lg border border-red-200 p-4 text-center">
-      <p class="text-2xl font-bold text-red-700"><%= @invalid_rows.size %></p>
+      <p class="text-2xl font-bold text-red-700"><%= @invalid_count %></p>
       <p class="text-xs text-red-600 mt-1">Have Errors</p>
     </div>
   </div>
 
   <%# Error rows warning %>
-  <% if @invalid_rows.any? %>
+  <% if @invalid_count.positive? %>
     <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
       <p class="text-sm text-yellow-800">
-        <strong><%= @invalid_rows.size %> rows have errors</strong> and will be skipped during import.
-        After importing, an Excel file with the skipped rows and error details will download automatically.
+        <strong><%= @invalid_count %> rows have errors</strong> and will be skipped during import.
+        After importing, you can download an Excel file with skipped rows and error details from the status page.
       </p>
     </div>
   <% end %>
@@ -135,9 +135,9 @@
 
   <%# Actions %>
   <div class="flex items-center gap-3">
-    <% if @valid_rows.size.positive? %>
+    <% if @valid_count.positive? %>
       <%= form_with url: confirm_admin_imports_path, method: :post, data: { turbo: false } do |f| %>
-        <%= f.submit "Import #{@valid_rows.size} #{'Employee'.pluralize(@valid_rows.size)}#{@invalid_rows.any? ? ' & Download Error Report' : ''}",
+        <%= f.submit "Import #{@valid_count} #{'Employee'.pluralize(@valid_count)}#{@invalid_count.positive? ? ' & Review Errors' : ''}",
               class: "btn btn-primary cursor-pointer" %>
       <% end %>
     <% end %>

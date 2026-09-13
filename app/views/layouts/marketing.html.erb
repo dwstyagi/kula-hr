@@ -45,7 +45,7 @@
     <%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
   </head>
-  <body class="bg-white antialiased">
+  <body class="bg-white antialiased" data-controller="public-page">
     <%= render "shared/flash" %>
     <%= yield %>
   </body>

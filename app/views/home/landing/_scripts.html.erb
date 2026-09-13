@@ -51,45 +51,4 @@
     document.getElementById('subdomain-wrapper').classList.remove('ring-2', 'ring-red-400');
   });
 
-  /* ── Navbar: glassmorphism on scroll ── */
-  (function() {
-    var header = document.getElementById('site-header');
-    if (!header) return;
-    window.addEventListener('scroll', function() {
-      header.classList.toggle('scrolled', window.scrollY > 24);
-    }, { passive: true });
-  })();
-
-  /* ── Scroll reveal: IntersectionObserver ── */
-  (function() {
-    if (!window.IntersectionObserver) return;
-
-    var observer = new IntersectionObserver(function(entries) {
-      entries.forEach(function(entry) {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('in');
-          observer.unobserve(entry.target);
-        }
-      });
-    }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
-
-    document.querySelectorAll('.sr, .sr-stagger').forEach(function(el) {
-      observer.observe(el);
-    });
-
-    /* Step connector line */
-    var stepLine = document.getElementById('step-line');
-    var stepsGrid = document.getElementById('steps-grid');
-    if (stepLine && stepsGrid) {
-      var lineObs = new IntersectionObserver(function(entries) {
-        entries.forEach(function(entry) {
-          if (entry.isIntersecting) {
-            stepLine.classList.add('in');
-            lineObs.unobserve(entry.target);
-          }
-        });
-      }, { threshold: 0.25 });
-      lineObs.observe(stepsGrid);
-    }
-  })();
 </script>

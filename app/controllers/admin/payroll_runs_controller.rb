@@ -80,7 +80,7 @@ module Admin
                              alert: "Payroll run cannot be processed in its current state."
         end
         @payroll_run.start_processing!
-        PayrollProcessingJob.perform_later(@payroll_run.id)
+        JobDispatch.enqueue!(PayrollProcessingJob, @payroll_run.id)
       end
 
       redirect_to admin_payroll_run_path(@payroll_run),
@@ -145,10 +145,8 @@ module Admin
     def reprocess
       authorize @payroll_run
 
-      @payroll_run.reprocess!
-
-      redirect_to admin_payroll_run_path(@payroll_run),
-                  notice: "Payroll reset to draft. You can now process it again."
+      task = @payroll_run.enqueue_reset!(user: current_user)
+      redirect_to admin_background_task_path(task), notice: "Payroll reset queued."
     end
 
     # PATCH /admin/payroll_runs/:id/mark_paid
@@ -175,11 +173,11 @@ module Admin
 
       bank      = params[:bank].presence || "generic_csv"
       generator = Payroll::BankFileGenerators::Factory.for(bank, payroll_run: @payroll_run)
-      content   = generator.call
+      content   = generator.stream
 
       ext, mime = Payroll::BankFileGenerators::Factory.file_meta(bank)
       filename  = "salary_#{@payroll_run.period_label.gsub(' ', '_')}_#{bank}.#{ext}"
-      send_data content, filename: filename, type: mime, disposition: "attachment"
+      stream_download content, filename: filename, type: mime
     rescue Payroll::BankFileGenerators::BankFileError => e
       redirect_to bank_file_admin_payroll_run_path(@payroll_run), alert: e.message
     end
@@ -187,12 +185,13 @@ module Admin
     # GET /admin/payroll_runs/:id/download_payslips
     def download_payslips
       authorize @payroll_run, :show?
-      zip_path = Rails.root.join("tmp", "payslips_#{@payroll_run.id}_#{@payroll_run.month}_#{@payroll_run.year}.zip")
-      if File.exist?(zip_path)
-        filename = "payslips_#{@payroll_run.period_label.gsub(' ', '_')}.zip"
-        send_file zip_path, filename: filename, type: "application/zip", disposition: "attachment"
+      version = Payroll::PayslipArchive.version(@payroll_run)
+      path = Payroll::PayslipArchive.path(@payroll_run, version)
+      if Payroll::PayslipArchive.ready?(path)
+        send_file path, filename: "payslips_#{@payroll_run.month}_#{@payroll_run.year}.zip", type: "application/zip", disposition: "attachment"
       else
-        redirect_to admin_payroll_run_path(@payroll_run), alert: "Payslip ZIP is not ready yet. Please try again shortly."
+        JobDispatch.enqueue!(BulkPayslipPdfJob, @payroll_run.id, version)
+        redirect_to admin_payroll_run_path(@payroll_run), notice: "Payslip ZIP generation queued. Use Download all payslips again shortly."
       end
     end
 

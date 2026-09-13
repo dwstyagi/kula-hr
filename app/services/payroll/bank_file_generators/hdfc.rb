@@ -12,11 +12,20 @@ module Payroll
         batch = "BATCH#{@payroll_run.month.to_s.rjust(2, '0')}#{@payroll_run.year}"
 
         lines = []
-        lines << "H~CORP001~NEFT~#{batch}~#{total_net_pay.to_i}~#{date}"
+        first = true
+        emit = lambda do |line|
+          if block_given?
+            yield((first ? "" : "\r\n") + line)
+            first = false
+          else
+            lines << line
+          end
+        end
+        emit.call("H~CORP001~NEFT~#{batch}~#{total_net_pay.to_i}~#{date}")
 
         @eligible_payslips.each do |payslip|
           emp = payslip.employee
-          lines << [
+          emit.call([
             "D",
             "DEBIT_ACCOUNT",                     # company debit account (configure per tenant)
             emp.full_name.upcase.first(40),       # beneficiary name (HDFC max 40 chars)
@@ -24,7 +33,7 @@ module Payroll
             emp.ifsc_code,
             payslip.net_pay.to_i,
             narration
-          ].join("~")
+          ].join("~"))
         end
 
         lines.join("\r\n")

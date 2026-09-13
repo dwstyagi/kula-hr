@@ -1,6 +1,6 @@
 <% content_for :page_title, "New Off-cycle Payroll" %>
 
-<div class="space-y-6" data-controller="off-cycle-form">
+<div class="space-y-6" data-controller="off-cycle-form" data-off-cycle-form-url-value="<%= admin_off_cycle_employee_options_path %>">
   <div>
     <h1 class="page-title text-2xl">New off-cycle payroll</h1>
     <p class="page-sub">Enter an amount only for employees who should be included.</p>
@@ -52,12 +52,12 @@
             <label class="label">Search</label>
             <input type="search" class="input w-48" placeholder="Name or code"
                    data-off-cycle-form-target="search"
-                   data-action="input->off-cycle-form#filter">
+                   data-action="input->off-cycle-form#search">
           </div>
           <div>
             <label class="label">Department</label>
             <select class="select w-44" data-off-cycle-form-target="department"
-                    data-action="change->off-cycle-form#filter">
+                    data-action="change->off-cycle-form#search">
               <option value="">All departments</option>
               <% @entry_departments.each do |name| %>
                 <option value="<%= name %>"><%= name %></option>
@@ -74,7 +74,7 @@
       </div>
 
       <div class="px-5 pb-2 text-xs text-stone-500">
-        <span data-off-cycle-form-target="count"></span> · only employees with an amount are included
+        <span data-off-cycle-form-target="count"></span> · showing up to 50 matches; entered amounts stay selected when you search
       </div>
 
       <div class="overflow-x-auto max-h-[34rem]">

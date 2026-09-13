@@ -35,7 +35,7 @@ module Admin
     # GET /admin/payslips/:id/download
     def download
       authorize @payslip, :show?
-      pdf = Payroll::PayslipPdfGenerator.new(payslip: @payslip).call
+      pdf = Payroll::PayslipPdfDocument.call(payslip: @payslip)
       filename = "payslip_#{@payslip.employee.employee_code}_#{@payslip.period_label.gsub(' ', '_')}.pdf"
       send_data pdf, filename: filename, type: "application/pdf", disposition: "attachment"
     end
@@ -49,7 +49,9 @@ module Admin
     def update
       authorize @payslip
 
-      Payslip.transaction do
+      @payroll_run.with_lock do
+        @payslip.reload
+        authorize @payslip
         # Update existing line items
         if params[:line_items].present?
           params[:line_items].each do |id, attrs|

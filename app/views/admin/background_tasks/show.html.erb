@@ -1,0 +1,30 @@
+<div class="card card-pad max-w-2xl space-y-4" <%= 'data-controller=task-status' if @task.pending? %>>
+  <h1 class="page-title"><%= @task.title %></h1>
+  <% if @task.pending? %>
+    <p class="text-stone-600">Your request is queued or running. You can leave this page and return later.</p>
+    <%= link_to "Refresh status", admin_background_task_path(@task), class: "btn btn-ghost" %>
+  <% elsif @task.status == "failed" %>
+    <p class="text-stone-600">The operation could not finish. No partial changes were saved. You can retry it.</p>
+    <%= button_to "Retry", retry_task_admin_background_task_path(@task), method: :post, class: "btn btn-primary" %>
+  <% else %>
+    <p class="text-stone-600">Completed successfully.</p>
+    <% if @task.kind == "attendance_import" %>
+      <p><%= @task.result.fetch("imported_count", 0) %> attendance records imported.</p>
+      <% @task.result.fetch("errors", []).each do |error| %><p class="text-amber-700"><%= error %></p><% end %>
+    <% end %>
+    <% if @task.kind == "employee_import" %>
+      <p><%= @task.result.fetch("imported_count", 0) %> employees imported.</p>
+      <% if @task.result.fetch("invalid_rows", []).any? %>
+        <%= link_to "Download skipped rows", download_errors_admin_background_task_path(@task), class: "btn btn-ghost" %>
+      <% end %>
+    <% end %>
+  <% end %>
+  <% case @task.kind %>
+  <% when "attendance", "attendance_import" %>
+    <%= link_to "View attendance", admin_attendance_summaries_path(month: @task.payload["month"], year: @task.payload["year"]), class: "btn btn-primary" %>
+  <% when "payroll_reset" %>
+    <%= link_to "View payroll", admin_payroll_run_path(@task.payload["payroll_run_id"]), class: "btn btn-primary" %>
+  <% when "employee_import" %>
+    <%= link_to "View employees", admin_employees_path, class: "btn btn-primary" %>
+  <% end %>
+</div>

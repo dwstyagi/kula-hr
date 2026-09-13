@@ -1,29 +1,32 @@
 class PayrollProcessingJob < ApplicationJob
+  self.enqueue_after_transaction_commit = true
   queue_as :payroll
-
-  # Only retry once — if processing fails twice, HR should investigate
-  # and use the Reprocess button rather than having Sidekiq silently retry
   retry_on StandardError, attempts: 2, wait: 30.seconds
 
-  def perform(payroll_run_id)
-    payroll_run = PayrollRun.find(payroll_run_id)
-    return unless payroll_run.processing?
-
-    # Scope all queries to the correct tenant for this run
-    ActsAsTenant.with_tenant(payroll_run.tenant) do
-      processor = if payroll_run.full_and_final?
-        Payroll::FullAndFinalPayrollProcessor
-      elsif payroll_run.off_cycle?
-        Payroll::OffCyclePayrollProcessor
-      else
-        Payroll::PayrollProcessor
+  def perform(payroll_run_id, dispatch_id: nil)
+    Payroll::RunLock.with(payroll_run_id) do
+      run = ActsAsTenant.without_tenant { PayrollRun.find_by(id: payroll_run_id) }
+      unless run
+        JobDispatch.where(id: dispatch_id).delete_all
+        return
       end
-      result = processor.new(payroll_run: payroll_run).call
-
-      if result.errors.any?
-        PayrollMailer.processing_complete_with_errors(payroll_run, result.errors).deliver_later
-      else
-        PayrollMailer.processing_complete(payroll_run).deliver_later
+      ActsAsTenant.with_tenant(run.tenant) do
+        if run.processing?
+          processor = if run.full_and_final?
+            Payroll::FullAndFinalPayrollProcessor
+          elsif run.off_cycle?
+            Payroll::OffCyclePayrollProcessor
+          else
+            Payroll::PayrollProcessor
+          end
+          result = processor.new(payroll_run: run).call
+          if result.errors.any?
+            PayrollMailer.processing_complete_with_errors(run, result.errors).deliver_later
+          else
+            PayrollMailer.processing_complete(run).deliver_later
+          end
+        end
+        JobDispatch.where(id: dispatch_id).delete_all
       end
     end
   end

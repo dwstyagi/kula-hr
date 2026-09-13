@@ -116,6 +116,11 @@ RSpec.describe Payroll::PayrollProcessor do
         expect(payroll_run.payslips.count).to eq(0)
       end
 
+      it "does not count a skipped employee as paid" do
+        result
+        expect(payroll_run.reload.processed_employees).to eq(0)
+      end
+
       it "still transitions to processed" do
         result
         expect(payroll_run.reload.status).to eq("processed")
@@ -215,10 +220,48 @@ RSpec.describe Payroll::PayrollProcessor do
         expect(payslip.line_items.where(category: "variable")).to be_empty
       end
 
+      it "preserves the encashment amount through reset and recalculation" do
+        result
+        original_net = payslip.net_pay
+        original_id = payslip.id
+        payroll_run.reprocess!
+        expect(encashment.reload).to be_approved
+        expect(encashment.payslip_id).to be_nil
+        described_class.new(payroll_run: payroll_run).call
+        replacement = payroll_run.payslips.first
+        expect(replacement.id).not_to eq(original_id)
+        expect(replacement.net_pay).to eq(original_net)
+        expect(encashment.reload.payslip_id).to eq(replacement.id)
+        expect(encashment).to be_paid
+      end
+
       it "ignores a rejected encashment" do
         encashment.update_columns(status: LeaveEncashmentRequest.statuses[:rejected])
         result
         expect(payslip.line_items.where(category: "variable")).to be_empty
+      end
+    end
+
+    context "resuming interrupted work" do
+      it "keeps committed payslips and calculates only remaining employees" do
+        first = create_ready_employee
+        second = create_ready_employee
+        payroll_run.start_processing!
+        existing = create(:payslip, tenant: tenant, employee: first, payroll_run: payroll_run,
+          month: payroll_run.month, year: payroll_run.year)
+        allow(Payroll::SalaryCalculator).to receive(:new).and_call_original
+        expect(Payroll::SalaryCalculator).not_to receive(:new).with(hash_including(employee: first))
+        result = described_class.new(payroll_run: payroll_run).call
+        expect(result.processed).to eq([ second.id ])
+        expect(Payslip.exists?(existing.id)).to be(true)
+        expect(payroll_run.reload.processed_employees).to eq(2)
+      end
+
+      it "does not retain created payslips on the parent association" do
+        3.times { create_ready_employee }
+        described_class.new(payroll_run: payroll_run).call
+        expect(payroll_run.association(:payslips).target).to be_empty
+        expect(payroll_run.payslips.count).to eq(3)
       end
     end
 

@@ -5,6 +5,7 @@ module Admin
                                             :reprocess, :mark_paid, :bank_file,
                                             :download_bank_file, :destroy ]
     before_action :set_any_payroll_run, only: [ :restore ]
+    before_action :check_input_limit, only: [ :create, :update ]
 
     def index
       authorize PayrollRun
@@ -13,9 +14,24 @@ module Admin
       scope = @showing_deleted ? scope.deleted : scope.kept
 
       @deleted_count = policy_scope(PayrollRun).off_cycle.deleted.count
-      @payroll_runs = PayrollRunPresenter.wrap(
-        scope.includes(:initiated_by, :approved_by).order(payment_date: :desc, created_at: :desc)
-      )
+      @pagy, runs = pagy(:offset, scope.includes(:initiated_by, :approved_by)
+        .order(payment_date: :desc, created_at: :desc, id: :desc), limit: 25)
+      ids = runs.map(&:id)
+      @payslip_counts = Payslip.where(payroll_run_id: ids).group(:payroll_run_id).count
+      @entry_counts = OffCyclePayrollEntry.where(payroll_run_id: ids).group(:payroll_run_id).count
+      @settlement_counts = FullAndFinalSettlement.where(payroll_run_id: ids).group(:payroll_run_id).count
+      @payroll_runs = PayrollRunPresenter.wrap(runs)
+    end
+
+    def employee_options
+      authorize PayrollRun, :new?
+      scope = eligible_employees
+      scope = scope.joins(:department).where(departments: { name: params[:department] }) if params[:department].present?
+      if params[:q].present?
+        term = "%#{Employee.sanitize_sql_like(params[:q].to_s.strip.downcase)}%"
+        scope = scope.where("LOWER(first_name || ' ' || last_name || ' ' || employee_code) LIKE ?", term)
+      end
+      render json: scope.limit(50).map { |e| { id: e.id, name: e.full_name, code: e.employee_code, department: e.department&.name } }
     end
 
     def new
@@ -87,7 +103,7 @@ module Admin
         end
 
         @payroll_run.start_processing!
-        PayrollProcessingJob.perform_later(@payroll_run.id)
+        JobDispatch.enqueue!(PayrollProcessingJob, @payroll_run.id)
       end
       redirect_to admin_off_cycle_payroll_run_path(@payroll_run), notice: "Processing started."
     end
@@ -143,8 +159,8 @@ module Admin
 
     def reprocess
       authorize @payroll_run
-      @payroll_run.reprocess!
-      redirect_to admin_off_cycle_payroll_run_path(@payroll_run), notice: "Run reset. You can process it again."
+      task = @payroll_run.enqueue_reset!(user: current_user)
+      redirect_to admin_background_task_path(task), notice: "Payroll reset queued."
     end
 
     def mark_paid
@@ -182,10 +198,10 @@ module Admin
       authorize @payroll_run, :download_bank_file?
       bank = params[:bank].presence || "generic_csv"
       generator = Payroll::BankFileGenerators::Factory.for(bank, payroll_run: @payroll_run)
-      content = generator.call
+      content = generator.stream
       ext, mime = Payroll::BankFileGenerators::Factory.file_meta(bank)
       filename = "off_cycle_#{@payroll_run.id}_#{bank}.#{ext}"
-      send_data content, filename: filename, type: mime, disposition: "attachment"
+      stream_download content, filename: filename, type: mime
     rescue Payroll::BankFileGenerators::BankFileError => e
       redirect_to bank_file_admin_off_cycle_payroll_run_path(@payroll_run), alert: e.message
     end
@@ -248,19 +264,23 @@ module Admin
     def prepare_entries
       return if @payroll_run.full_and_final?
 
-      existing_employee_ids = @payroll_run.off_cycle_payroll_entries.map(&:employee_id)
-      eligible_employees.each do |employee|
+      existing_employee_ids = @payroll_run.off_cycle_payroll_entries.map(&:employee_id).to_set
+      eligible_employees.limit(50).each do |employee|
         next if existing_employee_ids.include?(employee.id)
-
         @payroll_run.off_cycle_payroll_entries.build(employee: employee, tenant: ActsAsTenant.current_tenant)
       end
-
-      @entry_departments = @payroll_run.off_cycle_payroll_entries
-        .filter_map { |entry| entry.employee&.department&.name }
-        .uniq
-        .sort
+      ActiveRecord::Associations::Preloader.new(records: @payroll_run.off_cycle_payroll_entries.to_a,
+        associations: { employee: :department }).call
+      @entry_departments = Department.order(:name).limit(100).pluck(:name)
     end
 
+
+    def check_input_limit
+      values = params.dig(:payroll_run, :off_cycle_payroll_entries_attributes)
+      if values && (values.respond_to?(:keys) ? values.keys.size : values.size) > 500
+        redirect_to admin_off_cycle_payroll_runs_path, alert: "Use at most 500 employee entries per submission."
+      end
+    end
 
     def redirect_unless_draft
       redirect_to admin_off_cycle_payroll_run_path(@payroll_run),

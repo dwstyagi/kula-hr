@@ -9,10 +9,21 @@ module Reports
     def initialize(month:, year:)
       @month = month
       @year = year
+      @tenant = ActsAsTenant.current_tenant
     end
 
-    def call
-      run = PayrollRun.where(status: %w[approved paid]).for_month(@month, @year).first
+    def source_scope
+      run = (@run ||= PayrollRun.where(status: %w[approved paid]).for_month(@month, @year).first)
+      return Payslip.none unless run
+      Payslip.where(payroll_run: run)
+                        .preload(:employee, :line_items)
+                        .joins(:employee)
+                        .where(employees: { pf_applicable: true })
+    end
+
+    def call(limit: 50, offset: 0)
+      index = 0
+      run = (@run ||= PayrollRun.where(status: %w[approved paid]).for_month(@month, @year).first)
       @rows = []
       @summary = { total_epf_ee: 0, total_eps_er: 0, total_epf_er_diff: 0,
                    total_gross_wages: 0, employee_count: 0 }
@@ -27,15 +38,12 @@ module Reports
       eps_rate = 8.33 / 100.0
       edli_rate = (setting.pf_edli_rate || 0.5).to_f / 100
 
-      payslips = Payslip.where(payroll_run: run)
-                        .includes(employee: :department)
-                        .joins(:employee)
-                        .where(employees: { pf_applicable: true })
+      payslips = source_scope
 
-      payslips.each do |payslip|
+      payslips.find_each(batch_size: 100) do |payslip|
         emp = payslip.employee
-        basic = payslip.line_items.find_by(component_name: "Basic", component_type: "earning")&.amount.to_f
-        da = payslip.line_items.find_by(component_name: "DA", component_type: "earning")&.amount.to_f
+        basic = payslip.line_items.find { |item| item.component_name == "Basic" && item.component_type == "earning" }&.amount.to_f
+        da = payslip.line_items.find { |item| item.component_name == "DA" && item.component_type == "earning" }&.amount.to_f
         pf_wages = basic + da
 
         epf_wages = [ pf_wages, pf_wage_ceiling ].min
@@ -59,7 +67,12 @@ module Reports
           ncp_days: payslip.lop_days.to_i,
           refund: 0
         )
-        @rows << row
+        if block_given?
+          yield row
+        elsif index >= offset && @rows.size < limit
+          @rows << row
+        end
+        index += 1
 
         @summary[:total_epf_ee] += epf_ee
         @summary[:total_eps_er] += eps_er
@@ -69,6 +82,19 @@ module Reports
       end
 
       self
+    end
+
+    def stream
+      Enumerator.new do |out|
+        ActsAsTenant.with_tenant(@tenant) do
+          prefix = ""
+          call do |r|
+            out << prefix + [ r.uan, r.name, r.gross_wages.to_i, r.epf_wages.to_i, r.eps_wages.to_i,
+              r.edli_wages.to_i, r.epf_ee.to_i, r.eps_er.to_i, r.epf_er_diff.to_i, r.ncp_days, r.refund ].join("|")
+            prefix = "\n"
+          end
+        end
+      end
     end
 
     def to_ecr

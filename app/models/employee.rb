@@ -12,6 +12,7 @@ class Employee < ApplicationRecord
 
   has_many :direct_reports, class_name: "Employee", foreign_key: :reporting_manager_id, dependent: :nullify, inverse_of: :reporting_manager
   has_many :employee_salaries, dependent: :destroy
+  has_one :current_employee_salary, -> { where(effective_to: nil).order(:id) }, class_name: "EmployeeSalary"
   has_many :leave_balances, dependent: :destroy
   has_many :leave_requests, dependent: :destroy
   has_many :leave_encashment_requests, dependent: :destroy
@@ -30,11 +31,12 @@ class Employee < ApplicationRecord
   enum :leave_approver, { hr: 0, reporting_manager: 1 }, default: :hr, prefix: :leave_approver
 
   # Validations
-  validates :employee_code, presence: true, uniqueness: { scope: :tenant_id }
+  validates :employee_code, presence: true
+  validates :employee_code, uniqueness: { scope: :tenant_id }, unless: -> { validation_context == :bulk_import }
+  validates :email, uniqueness: { scope: :tenant_id, case_sensitive: false }, unless: -> { validation_context == :bulk_import }
   validates :first_name, presence: true
   validates :last_name, presence: true
   validates :email, presence: true,
-                    uniqueness: { scope: :tenant_id, case_sensitive: false },
                     format: { with: URI::MailTo::EMAIL_REGEXP }
   validates :joining_date, presence: true
   validates :employment_status, presence: true, inclusion: { in: EMPLOYMENT_STATUSES }
@@ -68,7 +70,7 @@ class Employee < ApplicationRecord
   end
 
   def current_salary
-    employee_salaries.current.first
+    current_employee_salary
   end
 
   def active?
@@ -103,23 +105,6 @@ class Employee < ApplicationRecord
   def generate_employee_code
     return if employee_code.present?
 
-    lock_id = Zlib.crc32("emp_code:#{tenant_id}") & 0x7FFFFFFF
-    self.class.connection.exec_query(
-      "SELECT pg_advisory_xact_lock($1)",
-      "AdvisoryLock",
-      [ lock_id ]
-    )
-
-    last_code = self.class.where(tenant_id: tenant_id)
-                    .order(employee_code: :desc)
-                    .pick(:employee_code)
-
-    next_number = if last_code&.match?(/\AEMP\d+\z/)
-                    last_code.delete_prefix("EMP").to_i + 1
-    else
-      1
-    end
-
-    self.employee_code = "EMP#{next_number.to_s.rjust(4, '0')}"
+    self.employee_code = Employees::CodeAllocator.reserve(tenant).first
   end
 end

@@ -21,12 +21,20 @@ module Payroll
 
       employees = eligible_employees
       @run.update!(total_employees: employees.count)
+      completed = @run.payslips.count
+      employees = employees.where.not(id: @run.payslips.select(:employee_id))
 
       ActsAsTenant.with_tenant(@tenant) do
-        employees.find_each.with_index(1) do |employee, index|
-          process_employee(employee)
-          update_progress(index)
+        count = completed
+        employees.find_in_batches(batch_size: 100) do |batch|
+          @inputs = Payroll::BatchInputs.new(employees: batch, payroll_run: @run)
+          batch.each do |employee|
+            process_employee(employee)
+            count += 1
+            update_progress(count)
+          end
         end
+        update_progress(count, force: true)
       end
 
       finalize
@@ -52,7 +60,8 @@ module Payroll
       result = Payroll::SalaryCalculator.new(
         employee:        employee,
         payroll_run:     @run,
-        payroll_setting: @setting
+        payroll_setting: @setting,
+        inputs:          @inputs
       ).call
 
       create_payslip(result)
@@ -74,7 +83,7 @@ module Payroll
 
     def create_payslip(result)
       ActiveRecord::Base.transaction do
-        payslip = @run.payslips.create!(
+        payslip = Payslip.create!(payroll_run: @run,
           tenant:             @tenant,
           employee:           result.employee,
           month:              @run.month,
@@ -165,7 +174,10 @@ module Payroll
 
     # ── Progress + finalise ────────────────────────────────────────────────────
 
-    def update_progress(count)
+    def update_progress(count, force: false)
+      now = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+      return if !force && @last_progress_at && now - @last_progress_at < 1
+      @last_progress_at = now
       @run.update_column(:processed_employees, count)
       broadcast_progress
     end
@@ -181,6 +193,7 @@ module Payroll
 
     def finalize
       @run.update!(
+        processed_employees: @run.payslips.count,
         total_gross:         @run.payslips.sum(:gross_pay),
         total_deductions:    @run.payslips.sum(:total_deductions),
         total_net_pay:       @run.payslips.sum(:net_pay),
