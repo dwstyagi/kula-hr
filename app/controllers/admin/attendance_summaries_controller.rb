@@ -7,13 +7,7 @@ module Admin
 
     def index
       authorize AttendanceSummary, :index?
-      @summaries = policy_scope(AttendanceSummary)
-        .for_month(@month, @year)
-        .includes(employee: [ :department, :designation ])
-        .order("employees.last_name, employees.first_name")
-
-      @all_locked    = @summaries.any? && @summaries.all?(&:locked?)
-      @any_generated = @summaries.any?
+      load_summaries
     end
 
     def show
@@ -23,33 +17,23 @@ module Admin
 
     def edit
       authorize @summary
-      @summaries = policy_scope(AttendanceSummary)
-        .for_month(@summary.month, @summary.year)
-        .includes(employee: [ :department, :designation ])
-        .order("employees.last_name, employees.first_name")
-      @month = @summary.month
-      @year = @summary.year
-      @all_locked = @summaries.any? && @summaries.all?(&:locked?)
-      @any_generated = @summaries.any?
+      @month, @year = @summary.month, @summary.year
+      load_summaries
       @editing_summary = @summary
       render :index
     end
 
     def update
-      authorize @summary
-
-      if @summary.update(summary_params)
+      saved = @summary.with_lock do
+        authorize @summary
+        @summary.update(summary_params)
+      end
+      if saved
         redirect_to admin_attendance_summaries_path(month: @summary.month, year: @summary.year),
           notice: "Attendance updated for #{@summary.employee.full_name}."
       else
-        @summaries = policy_scope(AttendanceSummary)
-          .for_month(@summary.month, @summary.year)
-          .includes(employee: [ :department, :designation ])
-          .order("employees.last_name, employees.first_name")
-        @month = @summary.month
-        @year = @summary.year
-        @all_locked = @summaries.any? && @summaries.all?(&:locked?)
-        @any_generated = @summaries.any?
+        @month, @year = @summary.month, @summary.year
+        load_summaries
         @editing_summary = @summary
         render :index, status: :unprocessable_content
       end
@@ -58,12 +42,9 @@ module Admin
     def generate
       authorize AttendanceSummary, :generate?
 
-      Attendance::SummaryGenerator.new(
-        month: @month, year: @year, tenant: ActsAsTenant.current_tenant
-      ).call
-
-      redirect_to admin_attendance_summaries_path(month: @month, year: @year),
-        notice: "Attendance summary generated for #{Date::MONTHNAMES[@month]} #{@year}."
+      task = BackgroundTask.enqueue!(tenant: ActsAsTenant.current_tenant, user: current_user,
+        kind: "attendance", task_key: "#{@year}-#{@month}", payload: { month: @month, year: @year })
+      redirect_to admin_background_task_path(task), notice: "Attendance generation queued."
     end
 
     def lock_month
@@ -104,10 +85,10 @@ module Admin
 
       csv_data = Attendance::TemplateGenerator.new(
         month: @month, year: @year, tenant: ActsAsTenant.current_tenant
-      ).call
+      ).stream
 
       filename = "attendance_#{@year}_#{@month.to_s.rjust(2, '0')}.csv"
-      send_data csv_data, filename: filename, type: "text/csv", disposition: "attachment"
+      stream_download csv_data, filename: filename, type: "text/csv"
     end
 
     def upload_template
@@ -118,21 +99,31 @@ module Admin
                            alert: "Please select a CSV file to upload."
       end
 
-      result = Attendance::TemplateImporter.new(
-        file: params[:file], month: @month, year: @year,
-        tenant: ActsAsTenant.current_tenant
-      ).call
-
-      if result.success?
-        redirect_to admin_attendance_summaries_path(month: @month, year: @year),
-          notice: "#{result.imported_count} records updated successfully."
-      else
-        redirect_to admin_attendance_summaries_path(month: @month, year: @year),
-          alert: "Import completed with errors: #{result.errors.first(3).join('; ')}"
+      file = params[:file]
+      if file.size > Attendance::TemplateImporter::MAX_BYTES
+        return redirect_to admin_attendance_summaries_path(month: @month, year: @year), alert: "Attendance file exceeds 2 MB."
       end
+      task = BackgroundTask.enqueue!(tenant: ActsAsTenant.current_tenant, user: current_user,
+        kind: "attendance_import", task_key: SecureRandom.uuid,
+        payload: { csv: file.read, month: @month, year: @year })
+      redirect_to admin_background_task_path(task), notice: "Attendance import queued."
     end
 
     private
+
+    def load_summaries
+      scope = policy_scope(AttendanceSummary).for_month(@month, @year)
+      @any_generated = scope.exists?
+      @all_locked = @any_generated && !scope.where.not(status: :locked).exists?
+      ordered = scope.includes(employee: [ :department, :designation ])
+        .order("employees.last_name, employees.first_name, attendance_summaries.id")
+      @pagy, @summaries = pagy(:offset, ordered, limit: 50)
+      # A direct edit link must display its row even when the employee is not on
+      # the first page. The other rows remain bounded.
+      if @summary && !@summaries.any? { |row| row.id == @summary.id }
+        @summaries = [ @summary ] + @summaries.to_a.first(49)
+      end
+    end
 
     def set_month_year
       default = Attendance::MonthWindow.latest_open

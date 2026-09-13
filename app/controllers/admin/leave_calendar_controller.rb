@@ -11,7 +11,7 @@ module Admin
       @departments            = Department.order(:name)
       @selected_department_id = params[:department_id].presence
 
-      @employees = employees_scope
+      @pagy, @employees = pagy(:offset, employees_scope, limit: 50)
       @calendar  = Leave::TeamCalendar.new(
         employees: @employees, month: @month, year: @year, tenant: ActsAsTenant.current_tenant
       )

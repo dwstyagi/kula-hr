@@ -22,7 +22,11 @@ module Salary
       @structure = salary_structure
       @settings = payroll_setting
       @pt_slabs = professional_tax_slabs
-      @components = salary_structure.salary_structure_components.includes(:salary_component)
+      @components = if salary_structure.association(:salary_structure_components).loaded?
+        salary_structure.salary_structure_components
+      else
+        salary_structure.salary_structure_components.includes(:salary_component)
+      end
     end
 
     # apply_employer_pf_carve: nil → follow the tenant setting; true/false forces it.

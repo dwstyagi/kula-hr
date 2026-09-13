@@ -22,13 +22,11 @@ module Admin
       employees = employees.where(department_id: params[:department_id]) if params[:department_id].present?
       employees = employees.where(employment_status: params[:status]) if params[:status].present?
 
-      xlsx = Employees::ExportGenerator.new(employees).call
+      file = Employees::ExportGenerator.new(employees).file
       filename = "employees_#{ActsAsTenant.current_tenant.subdomain}_#{Date.today.strftime('%d_%m_%Y')}.xlsx"
 
-      send_data xlsx,
-                filename: filename,
-                type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                disposition: "attachment"
+      stream_download Downloads::TemporaryFile.new(file), filename: filename,
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     end
 
     def index

@@ -26,11 +26,19 @@ class Payslip < ApplicationRecord
   # ── Scoped line item helpers ─────────────────────────────────────────────────
 
   def earnings
-    line_items.where(component_type: "earning").order(:sort_order)
+    if association(:line_items).loaded?
+      line_items.select { |item| item.component_type == "earning" }.sort_by { |item| [ item.sort_order || 0, item.id || 0 ] }
+    else
+      line_items.where(component_type: "earning").order(:sort_order)
+    end
   end
 
   def deductions
-    line_items.where(component_type: "deduction").order(:sort_order)
+    if association(:line_items).loaded?
+      line_items.select { |item| item.component_type == "deduction" }.sort_by { |item| [ item.sort_order || 0, item.id || 0 ] }
+    else
+      line_items.where(component_type: "deduction").order(:sort_order)
+    end
   end
 
   # ── Computed helpers ─────────────────────────────────────────────────────────

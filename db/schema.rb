@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_08_22_093000) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_13_103000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "pg_catalog.plpgsql"
@@ -65,6 +65,21 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_22_093000) do
     t.index ["tenant_id", "month", "year"], name: "idx_att_sum_tenant_month_year"
     t.index ["tenant_id", "status"], name: "idx_att_sum_tenant_status"
     t.index ["tenant_id"], name: "index_attendance_summaries_on_tenant_id"
+  end
+
+  create_table "background_tasks", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "kind", null: false
+    t.jsonb "payload", default: {}, null: false
+    t.jsonb "result", default: {}, null: false
+    t.string "status", default: "queued", null: false
+    t.string "task_key", null: false
+    t.bigint "tenant_id", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "user_id", null: false
+    t.index ["tenant_id", "kind", "task_key"], name: "idx_background_tasks_active", unique: true, where: "((status)::text = ANY (ARRAY[('queued'::character varying)::text, ('running'::character varying)::text]))"
+    t.index ["tenant_id"], name: "index_background_tasks_on_tenant_id"
+    t.index ["user_id"], name: "index_background_tasks_on_user_id"
   end
 
   create_table "comp_off_requests", force: :cascade do |t|
@@ -228,6 +243,27 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_22_093000) do
     t.index ["tax_declaration_id", "section"], name: "idx_inv_decl_td_section"
     t.index ["tax_declaration_id"], name: "index_investment_declarations_on_tax_declaration_id"
     t.index ["tenant_id"], name: "index_investment_declarations_on_tenant_id"
+  end
+
+  create_table "job_dispatches", force: :cascade do |t|
+    t.jsonb "arguments", default: [], null: false
+    t.integer "attempts", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.datetime "dispatched_at"
+    t.string "job_class", null: false
+    t.text "last_error"
+    t.datetime "updated_at", null: false
+    t.index ["dispatched_at"], name: "index_job_dispatches_on_dispatched_at"
+    t.index ["job_class", "arguments"], name: "index_dispatches_unique_work", unique: true
+  end
+
+  create_table "leave_accruals", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.date "period", null: false
+    t.bigint "tenant_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["tenant_id", "period"], name: "index_leave_accruals_on_tenant_id_and_period", unique: true
+    t.index ["tenant_id"], name: "index_leave_accruals_on_tenant_id"
   end
 
   create_table "leave_balances", force: :cascade do |t|
@@ -529,6 +565,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_22_093000) do
     t.string "address"
     t.string "city"
     t.datetime "created_at", null: false
+    t.bigint "employee_sequence", default: 0, null: false
     t.string "esi_code"
     t.string "gstin"
     t.string "invite_token"
@@ -610,6 +647,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_22_093000) do
   add_foreign_key "announcements", "users", column: "author_id"
   add_foreign_key "attendance_summaries", "employees"
   add_foreign_key "attendance_summaries", "tenants"
+  add_foreign_key "background_tasks", "tenants"
+  add_foreign_key "background_tasks", "users"
   add_foreign_key "comp_off_requests", "employees"
   add_foreign_key "comp_off_requests", "tenants"
   add_foreign_key "comp_off_requests", "users", column: "approved_by_id"
@@ -632,6 +671,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_22_093000) do
   add_foreign_key "holidays", "work_locations"
   add_foreign_key "investment_declarations", "tax_declarations"
   add_foreign_key "investment_declarations", "tenants"
+  add_foreign_key "leave_accruals", "tenants"
   add_foreign_key "leave_balances", "employees"
   add_foreign_key "leave_balances", "leave_types"
   add_foreign_key "leave_balances", "tenants"

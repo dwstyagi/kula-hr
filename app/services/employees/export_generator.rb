@@ -33,64 +33,53 @@ module Employees
     end
 
     def call
-      package  = Axlsx::Package.new
-      workbook = package.workbook
+      file = self.file
+      File.binread(file.path)
+    ensure
+      file&.close!
+    end
 
-      workbook.styles do |s|
-        header_style = s.add_style(
-          bg_color:  "1D4ED8",
-          fg_color:  "FFFFFF",
-          b:         true,
-          sz:        11,
-          alignment: { horizontal: :center, vertical: :center, wrap_text: true },
-          border:    { style: :thin, color: "3B82F6" }
-        )
-
-        even_row = s.add_style(
-          bg_color:  "F8FAFC",
-          sz:        10,
-          alignment: { vertical: :center },
-          border:    { style: :thin, color: "E2E8F0" }
-        )
-
-        odd_row = s.add_style(
-          bg_color:  "FFFFFF",
-          sz:        10,
-          alignment: { vertical: :center },
-          border:    { style: :thin, color: "E2E8F0" }
-        )
-
-        workbook.add_worksheet(name: "Employees") do |sheet|
-          # Header row
-          sheet.add_row COLUMNS.map { |c| c[:header] },
-                        style: Array.new(COLUMNS.size, header_style),
-                        height: 24
-
-          # Data rows
-          @employees.each_with_index do |emp, idx|
-            values = COLUMNS.map do |col|
-              raw = col[:key].is_a?(Proc) ? col[:key].call(emp) : emp.public_send(col[:key])
-              raw.is_a?(Date) ? raw.strftime("%d/%m/%Y") : raw.to_s.presence || ""
-            end
-
-            row_style = Array.new(COLUMNS.size, idx.even? ? even_row : odd_row)
-            sheet.add_row values, style: row_style, height: 18
+    def file
+      file = Tempfile.new([ "employees", ".xlsx" ])
+      file.close
+      Zip::OutputStream.open(file.path) do |zip|
+        parts = {
+          "[Content_Types].xml" => '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/></Types>',
+          "_rels/.rels" => '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>',
+          "xl/workbook.xml" => '<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets><sheet name="Employees" sheetId="1" r:id="rId1"/></sheets></workbook>',
+          "xl/_rels/workbook.xml.rels" => '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/></Relationships>'
+        }
+        parts.each { |name, xml| zip.put_next_entry(name); zip.write(xml) }
+        zip.put_next_entry("xl/worksheets/sheet1.xml")
+        zip.write('<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetData>')
+        write_row(zip, COLUMNS.map { |c| c[:header] }, 1)
+        index = 1
+        source = @employees.respond_to?(:find_each) ? @employees.reorder(:id).find_each(batch_size: 100) : @employees.each
+        source.each do |employee|
+          values = COLUMNS.map do |column|
+            raw = column[:key].is_a?(Proc) ? column[:key].call(employee) : employee.public_send(column[:key])
+            raw.is_a?(Date) ? raw.strftime("%d/%m/%Y") : raw.to_s
           end
-
-          # Column widths
-          sheet.column_widths(*Array.new(COLUMNS.size, 20))
-
-          # Freeze header
-          sheet.sheet_view.pane do |pane|
-            pane.top_left_cell = "A2"
-            pane.state         = :frozen_split
-            pane.y_split       = 1
-            pane.active_pane   = :bottom_left
-          end
+          write_row(zip, values, index += 1)
         end
+        zip.write("</sheetData></worksheet>")
       end
+      file
+    rescue Exception
+      file&.close!
+      raise
+    end
 
-      package.to_stream.read
+    private
+
+    def write_row(zip, values, index)
+      zip.write(%(<row r="#{index}">))
+      values.each_with_index do |value, column|
+        letter = (65 + column).chr
+        clean = value.to_s.gsub(/[\x00-\x08\x0B\x0C\x0E-\x1F]/, "")
+        zip.write(%(<c r="#{letter}#{index}" t="inlineStr"><is><t xml:space="preserve">#{ERB::Util.html_escape(clean)}</t></is></c>))
+      end
+      zip.write("</row>")
     end
   end
 end

@@ -12,10 +12,21 @@ module Reports
     def initialize(month:, year:)
       @month = month
       @year = year
+      @tenant = ActsAsTenant.current_tenant
     end
 
-    def call
-      run = PayrollRun.where(status: %w[approved paid]).for_month(@month, @year).first
+    def source_scope
+      run = (@run ||= PayrollRun.where(status: %w[approved paid]).for_month(@month, @year).first)
+      return Payslip.none unless run
+      Payslip.where(payroll_run: run)
+                        .preload(:employee, :line_items)
+                        .joins(:employee)
+                        .where(employees: { pt_applicable: true })
+    end
+
+    def call(limit: 50, offset: 0)
+      index = 0
+      run = (@run ||= PayrollRun.where(status: %w[approved paid]).for_month(@month, @year).first)
       @rows = []
       @slab_summaries = []
       @summary = { total_pt: 0, employee_count: 0 }
@@ -27,17 +38,14 @@ module Reports
 
       slabs = ProfessionalTaxSlab.where(state: setting.pt_state).order(:salary_from)
 
-      payslips = Payslip.where(payroll_run: run)
-                        .includes(:employee, :line_items)
-                        .joins(:employee)
-                        .where(employees: { pt_applicable: true })
+      payslips = source_scope
 
       slab_map = Hash.new { |h, k| h[k] = { count: 0, total: 0 } }
 
-      payslips.each do |payslip|
+      payslips.find_each(batch_size: 100) do |payslip|
         emp = payslip.employee
-        pt = payslip.line_items.find_by(component_name: "Professional Tax", component_type: "deduction")&.amount.to_f
-        pt = payslip.line_items.find_by(component_name: "PT", component_type: "deduction")&.amount.to_f if pt == 0
+        pt = payslip.line_items.find { |item| item.component_name == "Professional Tax" && item.component_type == "deduction" }&.amount.to_f
+        pt = payslip.line_items.find { |item| item.component_name == "PT" && item.component_type == "deduction" }&.amount.to_f if pt == 0
 
         slab = slabs.find { |s| payslip.gross_pay >= s.salary_from && payslip.gross_pay <= s.salary_to }
         slab_range = slab ? "#{slab.salary_from.to_i}-#{slab.salary_to.to_i}" : "N/A"
@@ -49,7 +57,12 @@ module Reports
           pt_amount: pt.round(0),
           slab_range: slab_range
         )
-        @rows << row
+        if block_given?
+          yield row
+        elsif index >= offset && @rows.size < limit
+          @rows << row
+        end
+        index += 1
 
         slab_map[slab_range][:count] += 1
         slab_map[slab_range][:total] += pt
@@ -63,6 +76,19 @@ module Reports
       end
 
       self
+    end
+
+    def stream
+      Enumerator.new do |out|
+        ActsAsTenant.with_tenant(@tenant) do
+          out << CSV.generate_line([ "Employee Code", "Name", "Gross Pay", "PT Amount", "Slab Range" ])
+          call { |r| out << CSV.generate_line([ r.employee_code, r.name, r.gross_pay.to_i, r.pt_amount.to_i, r.slab_range ]) }
+          out << CSV.generate_line([])
+          out << CSV.generate_line([ "Slab Summary" ])
+          out << CSV.generate_line([ "Slab Range", "Employees", "Total PT" ])
+          slab_summaries.each { |r| out << CSV.generate_line([ r.slab_range, r.employee_count, r.total_pt.to_i ]) }
+        end
+      end
     end
 
     def to_csv

@@ -1,0 +1,10 @@
+<% if pagy.pages > 1 %>
+  <nav class="flex items-center justify-between gap-4 mt-4 text-sm" aria-label="Pagination">
+    <% page = pagy.page %>
+    <span class="text-stone-500">Page <%= page %> of <%= pagy.pages %></span>
+    <div class="flex gap-3">
+      <% if page > 1 %><%= link_to "← Previous", url_for(request.query_parameters.merge(page: page - 1)), class: "btn btn-ghost" %><% end %>
+      <% if page < pagy.pages %><%= link_to "Next →", url_for(request.query_parameters.merge(page: page + 1)), class: "btn btn-ghost" %><% end %>
+    </div>
+  </nav>
+<% end %>

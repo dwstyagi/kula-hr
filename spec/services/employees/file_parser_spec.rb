@@ -57,6 +57,40 @@ RSpec.describe Employees::FileParser do
       end
     end
 
+    it "rejects workbooks above the row limit" do
+      stub_const("Employees::FileParser::MAX_ROWS", 1)
+      file = build_xlsx(headers: valid_headers, rows: [ valid_rows.first, valid_rows.first ])
+      result = described_class.new(file).call
+      expect(result.errors.first).to include("at most 1")
+    end
+
+    it "rejects excessive expanded size before parsing" do
+      stub_const("Employees::FileParser::MAX_EXPANDED_BYTES", 1)
+      file = build_xlsx(headers: valid_headers, rows: valid_rows)
+      expect(described_class.new(file).call.errors.first).to include("expanded")
+    end
+
+    it "rejects a sparse far-right cell before Roo can hydrate it" do
+      file = Tempfile.new([ "sparse", ".xlsx" ])
+      file.close
+      Zip::OutputStream.open(file.path) do |zip|
+        zip.put_next_entry("xl/worksheets/sheet1.xml")
+        zip.write('<worksheet><sheetData><row r="1"><c r="XFD1"><v>1</v></c></row></sheetData></worksheet>')
+      end
+      expect(Roo::Spreadsheet).not_to receive(:open)
+      expect(described_class.new(file).call.errors.first).to include("Too many columns")
+    ensure
+      file&.close!
+    end
+
+    it "streams normal rows without using Roo's full-sheet cells API" do
+      file = build_xlsx(headers: valid_headers, rows: valid_rows)
+      expect_any_instance_of(Roo::Excelx::Sheet).not_to receive(:cells)
+      expect(described_class.new(file).call).to be_success
+    ensure
+      file&.close!
+    end
+
     context "with missing columns" do
       let(:file) { build_xlsx(headers: %w[first_name last_name]) }
 

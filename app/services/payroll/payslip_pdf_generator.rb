@@ -18,7 +18,9 @@ class Payroll::PayslipPdfGenerator
   TINT_TEAL   = "EEF3F1"
   WHITE       = "FFFFFF"
 
-  def initialize(payslip:)
+  def initialize(payslip:, ytd: nil)
+    @ytd = ytd
+    Payroll::PayslipPdfData.preload([ payslip ])
     @payslip  = payslip
     @employee = payslip.employee
     @tenant   = payslip.tenant
@@ -479,16 +481,8 @@ class Payroll::PayslipPdfGenerator
   end
 
   def ytd
-    @ytd ||= begin
-      start_year, = fy_bounds
-      scope = Payslip.where(employee_id: @employee.id)
-        .where("(year > ? OR (year = ? AND month >= 4))", start_year, start_year)
-        .where("(year < ? OR (year = ? AND month <= ?))", @payslip.year, @payslip.year, @payslip.month)
-      ids = scope.pluck(:id)
-      pf  = PayslipLineItem.where(payslip_id: ids, component_name: [ "PF", "EPF", "Provident Fund" ]).sum(:amount)
-      tds = PayslipLineItem.where(payslip_id: ids, component_name: [ "TDS", "Income Tax (TDS)", "Income Tax" ]).sum(:amount)
-      { gross: scope.sum(:gross_pay), net: scope.sum(:net_pay), pf: pf, tds: tds }
-    end
+    @ytd ||= Payroll::PayslipPdfData.ytd(employee_ids: [ @employee.id ], month: @payslip.month, year: @payslip.year)
+      .fetch(@employee.id, { gross: 0, net: 0, pf: 0, tds: 0 })
   end
 
   def slip_no

@@ -12,6 +12,11 @@ export default class extends Controller {
     this.boundKeydown = this.handleKeydown.bind(this)
   }
 
+  disconnect() {
+    document.removeEventListener("keydown", this.boundKeydown)
+    document.body.classList.remove("overflow-hidden")
+  }
+
   open() {
     this.index = 0
     this.dialogTarget.classList.remove("hidden")

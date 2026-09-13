@@ -6,7 +6,8 @@ module Employees
     end
 
     def call
-      existing_emails = Employee.where(tenant: @tenant)
+      emails = @rows.filter_map { |row| row["email"]&.strip&.downcase }.uniq
+      existing_emails = Employee.where(tenant: @tenant).where("LOWER(email) IN (?)", emails)
                                 .pluck(:email)
                                 .map(&:downcase)
                                 .to_set

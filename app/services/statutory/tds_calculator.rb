@@ -88,7 +88,7 @@ module Statutory
     # month             — current payroll month (1–12)
     # ytd_tds_deducted  — TDS already deducted April through previous month
     def initialize(employee:, annual_gross:, monthly_basic: 0, monthly_hra: 0,
-                   financial_year:, month:, ytd_tds_deducted: 0)
+                   financial_year:, month:, ytd_tds_deducted: 0, declaration: :load)
       @employee         = employee
       @annual_gross     = annual_gross.to_d
       @monthly_basic    = monthly_basic.to_d
@@ -96,7 +96,7 @@ module Statutory
       @financial_year   = financial_year
       @month            = month
       @ytd_tds_deducted = ytd_tds_deducted.to_d
-      @declaration      = load_declaration
+      @declaration      = declaration == :load ? load_declaration : declaration
       @rates            = rates_for(financial_year)
     end
 
@@ -201,9 +201,17 @@ module Statutory
 
     # ── Old Regime deduction calculators ────────────────────────────────────
 
+    def investment_total(sections)
+      if @declaration.association(:investment_declarations).loaded?
+        @declaration.investment_declarations.select { |item| sections.include?(item.section) }.sum(&:declared_amount)
+      else
+        @declaration.investment_declarations.where(section: sections).sum(:declared_amount)
+      end
+    end
+
     def calculate_80c
       declared = with_tenant do
-        @declaration.investment_declarations.where(section: "80C").sum(:declared_amount)
+        investment_total([ "80C" ])
       end
 
       # EPF employee contribution auto-counts under 80C
@@ -216,14 +224,22 @@ module Statutory
 
     def calculate_80d
       declared = with_tenant do
-        @declaration.investment_declarations.where(section: "80D").sum(:declared_amount)
+        investment_total([ "80D" ])
       end
       [ declared.to_f, 50_000 ].min.to_i
     end
 
+    def investment_total(sections)
+      if @declaration.association(:investment_declarations).loaded?
+        @declaration.investment_declarations.select { |item| sections.include?(item.section) }.sum(&:declared_amount)
+      else
+        @declaration.investment_declarations.where(section: sections).sum(:declared_amount)
+      end
+    end
+
     def calculate_80ccd1b
       declared = with_tenant do
-        @declaration.investment_declarations.where(section: "80CCD1B").sum(:declared_amount)
+        investment_total([ "80CCD1B" ])
       end
       [ declared.to_f, 50_000 ].min.to_i
     end
@@ -258,9 +274,7 @@ module Statutory
 
     def calculate_other_deductions
       with_tenant do
-        @declaration.investment_declarations
-                    .where(section: %w[80E 80G 80TTA])
-                    .sum(:declared_amount)
+        investment_total(%w[80E 80G 80TTA])
                     .to_i
       end
     end

@@ -33,6 +33,19 @@ RSpec.describe "Admin::OffCyclePayrollRuns", type: :request do
     )
   end
 
+  it "bounds the creation picker and searches employees outside its first page" do
+    55.times { create(:employee, tenant: tenant, first_name: "Aaron") }
+    last = create(:employee, tenant: tenant, first_name: "Zelda")
+    sign_in_as(hr_user)
+    get new_admin_off_cycle_payroll_run_path, headers: headers
+    expect(response).to have_http_status(:ok)
+    expect(response.body.scan('data-off-cycle-form-target="row"').size).to eq(50)
+    get admin_off_cycle_employee_options_path, params: { q: "Zelda" }, headers: headers
+    expect(response.parsed_body.map { |row| row["id"] }).to eq([ last.id ])
+    get admin_off_cycle_employee_options_path, headers: headers
+    expect(response.parsed_body.size).to eq(50)
+  end
+
   it "renders the list, creation form, draft, and edit pages" do
     run = create_run
     sign_in_as(hr_user)
@@ -97,7 +110,7 @@ RSpec.describe "Admin::OffCyclePayrollRuns", type: :request do
   it "enqueues processing" do
     run = create_run
     sign_in_as(hr_user)
-    expect(PayrollProcessingJob).to receive(:perform_later).with(run.id)
+    expect(PayrollProcessingJob).to receive(:perform_later).with(run.id, hash_including(:dispatch_id))
     post process_payroll_admin_off_cycle_payroll_run_path(run), headers: headers
     expect(run.reload).to be_processing
   end

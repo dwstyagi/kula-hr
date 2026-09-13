@@ -47,7 +47,7 @@ Rails.application.configure do
   config.active_support.report_deprecations = false
 
   # Use Redis for caching in production.
-  config.cache_store = :redis_cache_store, { url: ENV.fetch("REDIS_URL", "redis://localhost:6379/1") }
+  config.cache_store = :redis_cache_store, { url: ENV.fetch("CACHE_REDIS_URL", "redis://localhost:6380/0") }
 
   # Use Sidekiq for background jobs.
   config.active_job.queue_adapter = :sidekiq

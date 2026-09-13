@@ -22,9 +22,11 @@ module Payroll
       @run.update!(total_employees: settlements.size)
 
       ActsAsTenant.with_tenant(@tenant) do
-        settlements.each_with_index do |settlement, index|
+        index = @run.payslips.count
+        settlements.where.not(employee_id: @run.payslips.select(:employee_id)).find_each(batch_size: 100) do |settlement|
+          index += 1
           process_settlement(settlement)
-          @run.update_column(:processed_employees, index + 1)
+          @run.update_column(:processed_employees, index)
         end
       end
 
@@ -48,7 +50,7 @@ module Payroll
 
     def create_payslip(settlement)
       ActiveRecord::Base.transaction do
-        payslip = @run.payslips.create!(
+        payslip = Payslip.create!(payroll_run: @run,
           tenant: @tenant,
           employee: settlement.employee,
           month: @run.month,
@@ -98,7 +100,7 @@ module Payroll
 
     def finalize
       @run.update!(
-        processed_employees: @processed.size,
+        processed_employees: @run.payslips.count,
         total_gross: @run.payslips.sum(:gross_pay),
         total_deductions: @run.payslips.sum(:total_deductions),
         total_net_pay: @run.payslips.sum(:net_pay),

@@ -29,23 +29,25 @@ module Payroll
       end
     end
 
-    Result = Struct.new(:statuses, keyword_init: true) do
+    # Counts describe the whole group; iteration is a bounded detail preview.
+    class StatusList
+      include Enumerable
+      def initialize(scope, checker)
+        @scope, @checker = scope, checker
+      end
+      def size = @size ||= @scope.count
+      def empty? = size.zero?
+      def any?(&block) = block ? super(&block) : !empty?
+      def each(&block)
+        return enum_for(:each) unless block
+        @checker.statuses_for(@scope.limit(50).preload(:current_employee_salary).to_a).each(&block)
+      end
+    end
+
+    Result = Struct.new(:statuses, :ready, :blocking, :will_skip, :variance_flags, keyword_init: true) do
       def eligible_count = statuses.size
-      def ready          = statuses.select(&:ready?)
-      def ready_count    = ready.size
-
-      # Hard blockers — creation is refused while any of these exist.
-      def blocking       = statuses.select(&:blocks_creation?)
-      def can_create?    = blocking.empty?
-
-      # Not ready, but won't block creation → they get silently skipped at
-      # processing unless HR fixes them. This is the list we surface up front.
-      def will_skip      = statuses.reject(&:ready?).reject(&:blocks_creation?)
-
-      # Ready employees whose CTC changed since the previous payroll period —
-      # a raise, correction, or new joiner's first structured salary. Not a
-      # blocker, just something worth a second look before processing.
-      def variance_flags = ready.select(&:salary_recently_changed)
+      def ready_count = ready.size
+      def can_create? = blocking.empty?
     end
 
     # Same eligibility definition the processor uses: active + probation, plus
@@ -70,40 +72,39 @@ module Payroll
     end
 
     def call
-      # Guard against blank/invalid periods (e.g. while other validations on the
-      # PayrollRun are still failing) — Date.new would otherwise raise.
-      return Result.new(statuses: []) unless (1..12).cover?(@month) && @year.positive?
-
-      ActsAsTenant.with_tenant(@tenant) do
-        employees = self.class.eligible_employees(month: @month, year: @year, tenant: @tenant).to_a
-        emp_ids   = employees.map(&:id)
-
-        locked_ids = AttendanceSummary
-          .where(employee_id: emp_ids, month: @month, year: @year, status: :locked)
-          .pluck(:employee_id).to_set
-
-        current_salaries = EmployeeSalary
-          .where(employee_id: emp_ids, effective_to: nil)
-          .index_by(&:employee_id)
-
-        # A salary effective on/after the start of the *previous* period hasn't
-        # been through a payroll run at its current CTC yet — first time it's
-        # seen here, so it's worth flagging even though it isn't "wrong".
-        previous_period_start = Date.new(@year, @month, 1).prev_month
-
-        statuses = employees.map do |e|
-          salary = current_salaries[e.id]
-          EmployeeStatus.new(
-            employee:                e,
-            has_attendance:          locked_ids.include?(e.id),
-            has_salary:              !salary.nil?,
-            current_salary:          salary,
-            salary_recently_changed: salary.present? && salary.effective_from >= previous_period_start
-          )
-        end
-
-        Result.new(statuses: statuses)
+      unless (1..12).cover?(@month) && @year.positive?
+        return Result.new(statuses: [], ready: [], blocking: [], will_skip: [], variance_flags: [])
       end
+      ActsAsTenant.with_tenant(@tenant) do
+        scope = self.class.eligible_employees(month: @month, year: @year, tenant: @tenant)
+        salary = EmployeeSalary.where(effective_to: nil).select(:employee_id)
+        ready = scope.where(id: locked_scope).where(id: salary)
+        blocking = scope.where(employment_status: %w[active probation]).where.not(id: locked_scope)
+        skip = scope.where.not(id: ready.select(:id)).where.not(id: blocking.select(:id))
+        variance = ready.where(id: EmployeeSalary.where(effective_to: nil)
+          .where("effective_from >= ?", Date.new(@year, @month, 1).prev_month).select(:employee_id))
+        Result.new(statuses: StatusList.new(scope, self), ready: StatusList.new(ready, self),
+          blocking: StatusList.new(blocking, self), will_skip: StatusList.new(skip, self),
+          variance_flags: StatusList.new(variance, self))
+      end
+    end
+
+    def statuses_for(employees)
+      ActsAsTenant.with_tenant(@tenant) do
+        locked = locked_scope.where(employee_id: employees.map(&:id)).pluck(:employee_id).to_set
+        employees.map do |employee|
+          salary = employee.current_salary
+          EmployeeStatus.new(employee: employee, has_attendance: locked.include?(employee.id),
+            has_salary: salary.present?, current_salary: salary,
+            salary_recently_changed: salary.present? && salary.effective_from >= Date.new(@year, @month, 1).prev_month)
+        end
+      end
+    end
+
+    private
+
+    def locked_scope
+      AttendanceSummary.where(month: @month, year: @year, status: :locked).select(:employee_id)
     end
   end
 end

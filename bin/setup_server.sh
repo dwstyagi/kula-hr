@@ -76,8 +76,8 @@ sudo -u postgres psql -c "CREATE DATABASE kulahr_production OWNER kulahr;" 2>/de
 # ── 5. Redis — restrict to localhost ─────────────────────────────────────────
 echo "→ Configuring Redis..."
 sudo sed -i 's/^bind .*/bind 127.0.0.1/' /etc/redis/redis.conf
-sudo sed -i 's/^# maxmemory .*/maxmemory 100mb/' /etc/redis/redis.conf
-sudo sed -i 's/^# maxmemory-policy .*/maxmemory-policy allkeys-lru/' /etc/redis/redis.conf
+sudo sed -i -E 's/^#?[[:space:]]*maxmemory[[:space:]].*/maxmemory 100mb/' /etc/redis/redis.conf
+sudo sed -i -E 's/^#?[[:space:]]*maxmemory-policy[[:space:]].*/maxmemory-policy noeviction/' /etc/redis/redis.conf
 sudo systemctl enable redis-server
 sudo systemctl restart redis-server
 
@@ -103,6 +103,7 @@ RAILS_ENV=production
 APP_DOMAIN=${APP_DOMAIN}
 DATABASE_URL=postgres://kulahr:${DB_PASS}@localhost/kulahr_production
 REDIS_URL=redis://127.0.0.1:6379/0
+CACHE_REDIS_URL=redis://127.0.0.1:6380/0
 SECRET_KEY_BASE=${SECRET_KEY_BASE}
 RAILS_MAX_THREADS=2
 WEB_CONCURRENCY=1
@@ -138,14 +139,17 @@ RAILS_ENV=production bundle exec rails db:migrate
 echo "→ Installing systemd services..."
 sudo cp config/systemd/puma.service /etc/systemd/system/puma.service
 sudo cp config/systemd/sidekiq.service /etc/systemd/system/sidekiq.service
+sudo cp config/redis-cache.conf /etc/redis/hrms-cache.conf
+sudo cp config/systemd/redis-cache.service /etc/systemd/system/
+sudo cp config/systemd/hrms-dispatch.{service,timer} /etc/systemd/system/
 
 # Allow ubuntu user to restart puma/sidekiq without password (for CI/CD deploys)
 echo "ubuntu ALL=(ALL) NOPASSWD: /bin/systemctl reload puma, /bin/systemctl restart puma, /bin/systemctl restart sidekiq" | \
   sudo tee /etc/sudoers.d/kulahr-deploy
 
 sudo systemctl daemon-reload
-sudo systemctl enable puma sidekiq
-sudo systemctl start puma sidekiq
+sudo systemctl enable puma sidekiq redis-cache hrms-dispatch.timer
+sudo systemctl start puma sidekiq redis-cache hrms-dispatch.timer
 
 # ── 10. Nginx ─────────────────────────────────────────────────────────────────
 echo "→ Configuring Nginx..."

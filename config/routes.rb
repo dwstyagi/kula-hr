@@ -55,6 +55,12 @@ Rails.application.routes.draw do
 
     namespace :admin do
       root "dashboard#index"
+      resources :background_tasks, only: :show do
+        member do
+          post :retry_task
+          get :download_errors
+        end
+      end
       resources :departments do
         collection { post :bulk_import }
       end
@@ -162,6 +168,7 @@ Rails.application.routes.draw do
           end
         end
       end
+      get "off_cycle_employee_options", to: "off_cycle_payroll_runs#employee_options"
       resources :off_cycle_payroll_runs, only: [ :index, :new, :create, :show, :edit, :update, :destroy ] do
         member do
           patch :restore

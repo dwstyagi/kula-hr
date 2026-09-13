@@ -4,17 +4,22 @@ export default class extends Controller {
   static targets = ["input", "label", "filename", "dropzone"]
 
   connect() {
-    this.dropzoneTarget.addEventListener("dragover",  this.onDragOver.bind(this))
-    this.dropzoneTarget.addEventListener("dragenter", this.onDragEnter.bind(this))
-    this.dropzoneTarget.addEventListener("dragleave", this.onDragLeave.bind(this))
-    this.dropzoneTarget.addEventListener("drop",      this.onDrop.bind(this))
+    this.boundOnDragOver ||= this.onDragOver.bind(this)
+    this.boundOnDragEnter ||= this.onDragEnter.bind(this)
+    this.boundOnDragLeave ||= this.onDragLeave.bind(this)
+    this.boundOnDrop ||= this.onDrop.bind(this)
+
+    this.dropzoneTarget.addEventListener("dragover",  this.boundOnDragOver)
+    this.dropzoneTarget.addEventListener("dragenter", this.boundOnDragEnter)
+    this.dropzoneTarget.addEventListener("dragleave", this.boundOnDragLeave)
+    this.dropzoneTarget.addEventListener("drop",      this.boundOnDrop)
   }
 
   disconnect() {
-    this.dropzoneTarget.removeEventListener("dragover",  this.onDragOver.bind(this))
-    this.dropzoneTarget.removeEventListener("dragenter", this.onDragEnter.bind(this))
-    this.dropzoneTarget.removeEventListener("dragleave", this.onDragLeave.bind(this))
-    this.dropzoneTarget.removeEventListener("drop",      this.onDrop.bind(this))
+    this.dropzoneTarget.removeEventListener("dragover",  this.boundOnDragOver)
+    this.dropzoneTarget.removeEventListener("dragenter", this.boundOnDragEnter)
+    this.dropzoneTarget.removeEventListener("dragleave", this.boundOnDragLeave)
+    this.dropzoneTarget.removeEventListener("drop",      this.boundOnDrop)
   }
 
   onDragOver(event) {

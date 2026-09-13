@@ -3,6 +3,7 @@ require "rails_helper"
 RSpec.describe Leave::YearEndProcessingService, type: :service do
   let(:tenant) { create(:tenant) }
 
+  around { |example| travel_to(Time.zone.local(2027, 4, 1, 1)) { example.run } }
   before { set_tenant(tenant) }
 
   let!(:earned_type) do
@@ -15,14 +16,10 @@ RSpec.describe Leave::YearEndProcessingService, type: :service do
   end
   let!(:employee) { create(:employee, tenant: tenant, employment_status: :active) }
 
-  let(:current_fy) { LeaveBalance.current_financial_year }
+  let(:current_fy) { "2026-27" }
   let(:service)    { described_class.new(tenant: tenant) }
 
-  def next_fy
-    today = Date.today
-    year  = today.month >= 4 ? today.year : today.year - 1
-    "#{year + 1}-#{(year + 2).to_s.last(2)}"
-  end
+  def next_fy = "2027-28"
 
   describe "#call" do
     context "when employee has remaining earned leave" do

@@ -33,14 +33,16 @@ RSpec.describe "Admin::AttendanceSummaries", type: :request do
   end
 
   describe "POST /admin/attendance_summaries/generate" do
-    it "creates summaries for active employees and redirects" do
+    it "queues generation and creates summaries in the worker" do
       expect {
         post generate_admin_attendance_summaries_path(month: 1, year: 2025),
              headers: { "Host" => subdomain_host }
-      }.to change { AttendanceSummary.count }.by(1)
-
-      expect(response).to redirect_to(admin_attendance_summaries_path(month: 1, year: 2025))
-      expect(flash[:notice]).to include("generated")
+      }.to change { BackgroundTask.count }.by(1)
+      task = BackgroundTask.last
+      expect(response).to redirect_to(admin_background_task_path(task))
+      expect(AttendanceSummary.count).to eq(0)
+      expect { BackgroundTaskJob.perform_now(task.id) }.to change { AttendanceSummary.count }.by(1)
+      expect(task.reload.status).to eq("completed")
     end
   end
 

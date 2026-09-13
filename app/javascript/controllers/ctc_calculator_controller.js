@@ -8,12 +8,20 @@ export default class extends Controller {
     this._debounceTimer = null
   }
 
+  disconnect() {
+    clearTimeout(this._debounceTimer)
+    this.abortController?.abort()
+  }
+
   calculate() {
+    this.abortController?.abort()
     clearTimeout(this._debounceTimer)
     this._debounceTimer = setTimeout(() => this._fetchBreakup(), 400)
   }
 
   async _fetchBreakup() {
+    this.abortController = new AbortController()
+    const signal = this.abortController.signal
     const structureId = this.structureSelectTarget.value
     const ctc = this.ctcInputTarget.value
 
@@ -25,7 +33,7 @@ export default class extends Controller {
     try {
       const response = await fetch(
         `${this.urlValue}?salary_structure_id=${structureId}&annual_ctc=${ctc}`,
-        { headers: { "Accept": "application/json" } }
+        { headers: { "Accept": "application/json" }, signal }
       )
 
       if (!response.ok) {
@@ -34,9 +42,9 @@ export default class extends Controller {
       }
 
       const data = await response.json()
-      this.breakupTarget.innerHTML = this._renderBreakup(data)
+      if (!signal.aborted) this.breakupTarget.innerHTML = this._renderBreakup(data)
     } catch {
-      this.breakupTarget.innerHTML = ""
+      if (!signal.aborted) this.breakupTarget.innerHTML = ""
     }
   }
 
