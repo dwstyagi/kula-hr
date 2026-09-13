@@ -229,14 +229,6 @@ module Statutory
       [ declared.to_f, 50_000 ].min.to_i
     end
 
-    def investment_total(sections)
-      if @declaration.association(:investment_declarations).loaded?
-        @declaration.investment_declarations.select { |item| sections.include?(item.section) }.sum(&:declared_amount)
-      else
-        @declaration.investment_declarations.where(section: sections).sum(:declared_amount)
-      end
-    end
-
     def calculate_80ccd1b
       declared = with_tenant do
         investment_total([ "80CCD1B" ])
