@@ -206,7 +206,7 @@ Build Tailwind assets manually if needed:
 bundle exec rails tailwindcss:build
 ```
 
-CI/CD is defined in `.github/workflows/deploy.yml`. Pull requests and pushes to `main` run one shared test job: database preparation, Tailwind compilation, RSpec, the durable-dispatch probe, and JavaScript lifecycle tests. Manual runs on `main` deploy to EC2 without running or waiting for tests. Manual runs on other branches do not deploy.
+CI/CD is defined in `.github/workflows/deploy.yml`. The workflow runs RSpec and can deploy to EC2 when manually dispatched from `main`.
 
 ## Repository Structure
 

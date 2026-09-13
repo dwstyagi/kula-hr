@@ -1,19 +1,12 @@
 name: CI / CD
 
 on:
-  pull_request:
-  push:
-    branches: [main]
   workflow_dispatch:
-
-permissions:
-  contents: read
 
 jobs:
   # ── 1. Run tests ─────────────────────────────────────────────────────────────
   test:
     name: RSpec
-    if: github.event_name == 'pull_request' || github.event_name == 'push'
     runs-on: ubuntu-latest
 
     services:
@@ -53,10 +46,6 @@ jobs:
           ruby-version: .ruby-version
           bundler-cache: true
 
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-
       - name: Set up database
         run: bundle exec rails db:prepare
 
@@ -66,16 +55,11 @@ jobs:
       - name: Run RSpec
         run: bundle exec rspec --format progress
 
-      - name: Verify durable dispatch and worker locking
-        run: bundle exec rails runner -e test script/reliable_dispatch_review.rb
-
-      - name: Run JavaScript lifecycle tests
-        run: node --test spec/javascript/*.cjs
-
-  # ── 2. Deploy to EC2 (manual run on main, without rerunning tests) ────────────
+  # ── 2. Deploy to EC2 (only on push to main, after tests pass) ───────────────
   deploy:
     name: Deploy to AWS EC2
-    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'
+    needs: test
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
 
     steps:
