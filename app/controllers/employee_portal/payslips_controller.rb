@@ -8,10 +8,13 @@ module EmployeePortal
       @payslips = policy_scope(Payslip)
                     .includes(:payroll_run)
                     .order(year: :desc, month: :desc)
+                    .limit(24)
 
       # YTD summary for current financial year
       fy_start = Date.today.month >= 4 ? Date.new(Date.today.year, 4, 1) : Date.new(Date.today.year - 1, 4, 1)
-      @ytd_payslips = @payslips.select { |p| Date.new(p.year, p.month, 1) >= fy_start }
+      @ytd_payslips = policy_scope(Payslip)
+                        .where("(payslips.year > :fy_year) OR (payslips.year = :fy_year AND payslips.month >= :fy_month)",
+                               fy_year: fy_start.year, fy_month: fy_start.month)
       # Month-over-month changes
       @mom_changes = {}
       sorted = @payslips.reject(&:off_cycle?)

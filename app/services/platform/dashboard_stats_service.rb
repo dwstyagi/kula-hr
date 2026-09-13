@@ -24,6 +24,12 @@ module Platform
     end
 
     def call
+      Rails.cache.fetch("platform/dashboard_stats", expires_in: 5.minutes) { compute }
+    end
+
+    private
+
+    def compute
       Result.new(
         # Growth
         total_tenants: Tenant.count,
@@ -59,8 +65,6 @@ module Platform
         inactive_tenants: inactive_tenants
       )
     end
-
-    private
 
     def avg_company_size
       tenant_count = Tenant.count
@@ -138,11 +142,15 @@ module Platform
     def churn_risk_tenants
       recent = PayrollRun.where(created_at: 2.months.ago..).select(:tenant_id)
       at_risk_ids = Tenant.where(status: %w[active trial]).where.not(id: recent).select(:id)
-      Tenant.where(id: at_risk_ids).order(:name).limit(5).map do |t|
-        last_run = PayrollRun.where(tenant_id: t.id).order(year: :desc, month: :desc).first
+      tenants = Tenant.where(id: at_risk_ids).order(:name).limit(5).to_a
+      last_runs = PayrollRun.where(tenant_id: tenants.map(&:id))
+                             .select("DISTINCT ON (tenant_id) *")
+                             .order(:tenant_id, year: :desc, month: :desc)
+                             .index_by(&:tenant_id)
+      tenants.map do |t|
         {
           name: t.name, subdomain: t.subdomain, status: t.status,
-          last_payroll: last_run&.period_label || "Never"
+          last_payroll: last_runs[t.id]&.period_label || "Never"
         }
       end
     end
