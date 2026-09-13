@@ -12,7 +12,8 @@ permissions:
 jobs:
   # ── 1. Run tests ─────────────────────────────────────────────────────────────
   test:
-    name: tests
+    name: RSpec
+    if: github.event_name == 'pull_request' || github.event_name == 'push'
     runs-on: ubuntu-latest
 
     services:
@@ -71,10 +72,9 @@ jobs:
       - name: Run JavaScript lifecycle tests
         run: node --test spec/javascript/*.cjs
 
-  # ── 2. Deploy to EC2 (manual run on main, after all checks pass) ────────────
+  # ── 2. Deploy to EC2 (manual run on main, without rerunning tests) ────────────
   deploy:
     name: Deploy to AWS EC2
-    needs: test
     if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
 
