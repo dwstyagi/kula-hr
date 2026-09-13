@@ -13,7 +13,7 @@ RSpec.describe "Admin::Payslips", type: :request do
   end
 
   let(:employee) do
-    ActsAsTenant.with_tenant(tenant) { create(:employee, tenant: tenant) }
+    ActsAsTenant.with_tenant(tenant) { create(:employee, tenant: tenant, first_name: "Ernesto", last_name: "O'Keefe") }
   end
 
   let(:payslip) do
@@ -41,7 +41,7 @@ RSpec.describe "Admin::Payslips", type: :request do
       payslip  # ensure created
       get admin_payroll_run_payslips_path(run), headers: headers
       expect(response).to have_http_status(:ok)
-      expect(response.body).to include(employee.full_name)
+      expect(response.parsed_body.text).to include(employee.full_name)
     end
 
     it "filters by query param" do
@@ -52,8 +52,8 @@ RSpec.describe "Admin::Payslips", type: :request do
       end
 
       get admin_payroll_run_payslips_path(run, q: employee.first_name), headers: headers
-      expect(response.body).to include(employee.full_name)
-      expect(response.body).not_to include("ZYX ABC")
+      expect(response.parsed_body.text).to include(employee.full_name)
+      expect(response.parsed_body.text).not_to include(other_emp.full_name)
     end
 
     context "with more payslips than one page" do
@@ -100,7 +100,7 @@ RSpec.describe "Admin::Payslips", type: :request do
     it "returns 200 and shows payslip detail" do
       get admin_payslip_path(payslip), headers: headers
       expect(response).to have_http_status(:ok)
-      expect(response.body).to include(employee.full_name)
+      expect(response.parsed_body.text).to include(employee.full_name)
     end
   end
 
