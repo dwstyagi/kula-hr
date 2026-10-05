@@ -1,4 +1,5 @@
-<%# locals: (payroll_run:) — who a run skipped and why, as recorded by the processor %>
+<%# Who a run skipped and why, as recorded by the processor %>
+<%# locals: (payroll_run:) -%>
 <% errors = Array(payroll_run.processing_errors) %>
 <% if errors.any? %>
   <ul class="mt-2 space-y-1 text-sm">
