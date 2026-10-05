@@ -1,4 +1,5 @@
-<%# locals: (statuses:, path:, counts: nil) — statuses is [[label, value], ...]; path is ->(status) { url } %>
+<%# statuses is [[label, value], ...]; path is a lambda taking a status and returning a URL %>
+<%# locals: (statuses:, path:, counts: nil) -%>
 <div class="flex items-center gap-1 bg-stone-100 rounded-lg p-1">
   <% statuses.each do |label, value| %>
     <% count = counts && (value.blank? ? counts.values.sum : counts.fetch(value, 0)) %>

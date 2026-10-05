@@ -1,4 +1,5 @@
-<%# locals: (record:, approve_path:, reject_path:, title:, summary:) — approve/reject buttons with a reject-reason modal %>
+<%# Approve/reject buttons with a reject-reason modal %>
+<%# locals: (record:, approve_path:, reject_path:, title:, summary:) -%>
 <div class="flex items-center justify-end gap-2">
   <%= button_to approve_path, method: :patch, title: "Approve",
       class: "p-1.5 rounded-md bg-green-50 text-green-600 hover:bg-green-100 transition-colors cursor-pointer" do %>

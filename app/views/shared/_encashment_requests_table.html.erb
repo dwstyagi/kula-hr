@@ -1,4 +1,4 @@
-<%# locals: (requests:, reviewable: false, empty_message: "No encashment requests.") %>
+<%# locals: (requests:, reviewable: false, empty_message: "No encashment requests.") -%>
 <% badge = { "pending" => "badge-warning", "approved" => "badge-success", "rejected" => "badge-danger", "paid" => "badge-neutral" } %>
 <div class="card overflow-hidden">
   <% if requests.any? %>
