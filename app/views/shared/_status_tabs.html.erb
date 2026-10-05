@@ -1,0 +1,13 @@
+<%# locals: (statuses:, path:, counts: nil) — statuses is [[label, value], ...]; path is ->(status) { url } %>
+<div class="flex items-center gap-1 bg-stone-100 rounded-lg p-1">
+  <% statuses.each do |label, value| %>
+    <% count = counts && (value.blank? ? counts.values.sum : counts.fetch(value, 0)) %>
+    <%= link_to path.call(value.presence),
+        class: "px-3 py-1.5 text-sm font-medium rounded-md transition-colors flex items-center gap-1.5 #{params[:status].to_s == value ? 'bg-white text-stone-900 shadow-sm' : 'text-stone-500 hover:text-stone-900'}" do %>
+      <%= label %>
+      <% if count&.positive? %>
+        <span class="text-[10px] <%= value == 'pending' ? 'font-bold rounded-full bg-marigold-400 text-kula-950 px-1.5 py-px' : 'text-stone-400' %> amount"><%= count %></span>
+      <% end %>
+    <% end %>
+  <% end %>
+</div>

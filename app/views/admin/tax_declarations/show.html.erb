@@ -1,0 +1,31 @@
+<% content_for :page_title, "Tax Declaration" %>
+
+<div class="max-w-3xl mx-auto">
+  <div class="flex flex-wrap items-start justify-between gap-4 mb-6">
+    <div>
+      <%= link_to "← All declarations", admin_tax_declarations_path(financial_year: @declaration.financial_year), class: "text-sm text-stone-500 hover:text-stone-900" %>
+      <h1 class="page-title text-2xl mt-2"><%= @declaration.employee.full_name %></h1>
+      <p class="text-sm text-stone-500 mt-0.5">
+        <%= @declaration.employee.employee_code %> · FY <%= @declaration.financial_year %> ·
+        <%= render "admin/tax_declarations/status_badge", declaration: @declaration %>
+      </p>
+    </div>
+
+    <div class="flex items-center gap-3">
+      <% if policy(@declaration).verify? %>
+        <%= button_to "Verify", verify_admin_tax_declaration_path(@declaration), method: :patch,
+              class: "btn btn-primary cursor-pointer",
+              data: { turbo_confirm: "Mark this declaration as verified against the employee's proofs?" } %>
+      <% end %>
+      <% if policy(@declaration).return_to_draft? %>
+        <%= form_with url: return_to_draft_admin_tax_declaration_path(@declaration), method: :patch, class: "flex items-center gap-2" do |f| %>
+          <%= f.text_field :note, placeholder: "Note to employee (optional)", class: "input text-sm" %>
+          <%= f.submit "Return for changes", class: "btn btn-secondary cursor-pointer",
+                data: { turbo_confirm: "Return to draft? It will stop reducing TDS until the employee submits it again." } %>
+        <% end %>
+      <% end %>
+    </div>
+  </div>
+
+  <%= render "employee_portal/tax_declarations/details", declaration: @declaration %>
+</div>

@@ -1,0 +1,17 @@
+<div class="max-w-5xl mx-auto">
+  <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+    <div>
+      <h1 class="page-title text-2xl">Comp-off</h1>
+      <p class="text-sm text-stone-500 mt-1">
+        Worked on a weekend or holiday? Request a comp-off day.
+        <% if @comp_off_balance %>
+          Balance: <strong class="text-stone-900"><%= @comp_off_balance.remaining_days.to_i %></strong> day(s).
+        <% end %>
+      </p>
+    </div>
+    <%= link_to "Request comp-off", new_employee_portal_comp_off_request_path, class: "btn btn-primary" %>
+  </div>
+
+  <%= render "shared/comp_off_requests_table", requests: @comp_off_requests,
+        empty_message: "You have not requested any comp-off yet." %>
+</div>

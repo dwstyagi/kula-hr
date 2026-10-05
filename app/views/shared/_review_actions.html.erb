@@ -1,0 +1,39 @@
+<%# locals: (record:, approve_path:, reject_path:, title:, summary:) — approve/reject buttons with a reject-reason modal %>
+<div class="flex items-center justify-end gap-2">
+  <%= button_to approve_path, method: :patch, title: "Approve",
+      class: "p-1.5 rounded-md bg-green-50 text-green-600 hover:bg-green-100 transition-colors cursor-pointer" do %>
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
+      <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+    </svg>
+  <% end %>
+  <button type="button" title="Reject"
+      onclick="document.getElementById('reject-modal-<%= dom_id(record) %>').querySelector('[data-modal-target=dialog]').classList.remove('hidden')"
+      class="p-1.5 rounded-md bg-red-50 text-red-600 hover:bg-red-100 transition-colors cursor-pointer">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+    </svg>
+  </button>
+</div>
+
+<div id="reject-modal-<%= dom_id(record) %>" data-controller="modal" class="text-left">
+  <div data-modal-target="dialog" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+       data-action="click->modal#closeOnBackdrop">
+    <div class="bg-white rounded-xl shadow-xl w-full max-w-md p-6">
+      <h3 class="text-base font-semibold text-stone-900 mb-1"><%= title %></h3>
+      <p class="text-sm text-stone-500 mb-4"><%= summary %></p>
+      <%= form_with url: reject_path, method: :patch do |f| %>
+        <div class="mb-4">
+          <%= f.label :rejection_reason, "Reason for rejection", class: "label" %>
+          <%= f.text_area :rejection_reason, rows: 3, placeholder: "Enter reason (optional)",
+              class: "w-full rounded-lg border-stone-300 px-4 py-3 shadow-sm focus:border-red-400 focus:ring-red-400 text-sm" %>
+        </div>
+        <div class="flex justify-end gap-3">
+          <button type="button" data-action="modal#close"
+              class="px-4 py-2 text-sm font-medium text-stone-700 bg-stone-100 rounded-lg hover:bg-stone-200">Cancel</button>
+          <%= f.submit "Confirm Rejection",
+              class: "px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 cursor-pointer" %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>

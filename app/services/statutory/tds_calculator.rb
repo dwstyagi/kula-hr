@@ -187,7 +187,7 @@ module Statutory
 
     def load_declaration
       with_tenant do
-        TaxDeclaration.find_by(employee: @employee, financial_year: @financial_year)
+        TaxDeclaration.effective_for_tds.find_by(employee: @employee, financial_year: @financial_year)
       end
     end
 

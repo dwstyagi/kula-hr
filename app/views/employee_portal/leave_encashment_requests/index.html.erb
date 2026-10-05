@@ -1,0 +1,12 @@
+<div class="max-w-5xl mx-auto">
+  <div class="mb-6">
+    <h1 class="page-title text-2xl">Leave encashment</h1>
+    <p class="text-sm text-stone-500 mt-1">
+      Requests can be raised in March from <%= link_to "My Leaves", employee_portal_leave_requests_path, class: "text-kula-700 hover:underline" %>.
+      Approved amounts are paid with your next salary.
+    </p>
+  </div>
+
+  <%= render "shared/encashment_requests_table", requests: @encashment_requests,
+        empty_message: "You have not requested any leave encashment." %>
+</div>

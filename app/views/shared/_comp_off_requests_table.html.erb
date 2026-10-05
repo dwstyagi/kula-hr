@@ -1,0 +1,57 @@
+<%# locals: (requests:, reviewable: false, approve_path: nil, reject_path: nil, empty_message: "No comp-off requests.") %>
+<% badge = { "pending" => "badge-warning", "approved" => "badge-success", "rejected" => "badge-danger" } %>
+<div class="card overflow-hidden">
+  <% if requests.any? %>
+    <div class="overflow-x-auto">
+      <table class="tbl">
+        <thead>
+          <tr>
+            <% if reviewable %><th>Employee</th><% end %>
+            <th>Worked on</th>
+            <th>Reason</th>
+            <th>Status</th>
+            <th>Expires</th>
+            <% if reviewable %><th class="text-right">Actions</th><% end %>
+          </tr>
+        </thead>
+        <tbody>
+          <% requests.each do |request| %>
+            <tr class="hover:bg-stone-50" id="<%= dom_id(request) %>">
+              <% if reviewable %>
+                <td>
+                  <p class="text-sm font-medium text-stone-900"><%= request.employee.full_name %></p>
+                  <p class="text-xs text-stone-400"><%= request.employee.employee_code %></p>
+                </td>
+              <% end %>
+              <td class="text-sm text-stone-700"><%= request.worked_date.strftime("%a, %d %b %Y") %></td>
+              <td class="text-sm text-stone-500 max-w-xs truncate"><%= request.reason.presence || "—" %></td>
+              <td>
+                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium <%= badge[request.status] %>">
+                  <%= request.status.titleize %>
+                </span>
+                <% if request.rejected? && request.rejection_reason.present? %>
+                  <p class="text-xs text-red-400 mt-0.5 truncate max-w-40" title="<%= request.rejection_reason %>"><%= request.rejection_reason %></p>
+                <% end %>
+              </td>
+              <td class="text-sm text-stone-500"><%= request.expiry_date&.strftime("%d %b %Y") || "—" %></td>
+              <% if reviewable %>
+                <td class="text-right">
+                  <% if request.pending? %>
+                    <%= render "shared/review_actions", record: request,
+                          approve_path: approve_path.call(request), reject_path: reject_path.call(request),
+                          title: "Reject comp-off request",
+                          summary: "#{request.employee.full_name} · worked #{request.worked_date.strftime('%d %b %Y')}" %>
+                  <% else %>
+                    <span class="text-stone-300 text-xs">—</span>
+                  <% end %>
+                </td>
+              <% end %>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  <% else %>
+    <div class="p-12 text-center"><p class="text-sm text-stone-500"><%= empty_message %></p></div>
+  <% end %>
+</div>

@@ -70,4 +70,19 @@ RSpec.describe "EmployeePortal::Payslips", type: :request do
       expect(body).not_to include("₹1,100,000") # would only appear if the earlier FY leaked in
     end
   end
+
+  describe "an HR admin with an employee profile" do
+    let(:emp_user) { create(:user, :hr_admin).tap { |u| u.add_role(:employee) } }
+
+    it "sees only their own payslips in the portal" do
+      own = create_payslip(month: 8, year: 2026)
+      colleague = ActsAsTenant.with_tenant(tenant) do
+        create(:payslip, tenant: tenant, payroll_run: own.payroll_run, month: 8, year: 2026,
+               employee: create(:employee, tenant: tenant, email: "colleague@x.com"), net_pay: 98_765)
+      end
+      get employee_portal_payslips_path, headers: headers
+      expect(response).to have_http_status(:ok)
+      expect(response.body).not_to include("98,765")
+    end
+  end
 end

@@ -18,8 +18,12 @@
       <% unread_announcements = Announcement.published.where.not(id: current_employee.announcement_reads.select(:announcement_id)).count %>
       <%= nav_link "Announcements", employee_portal_announcements_path, icon: :megaphone, count: unread_announcements %>
 
+      <%= nav_link "Comp-off", employee_portal_comp_off_requests_path, icon: :refresh %>
+      <%= nav_link "Leave Encashment", employee_portal_leave_encashment_requests_path, icon: :banknote %>
+
       <% if current_employee.direct_reports.exists? %>
         <%= nav_link "My Team's Leaves", employee_portal_team_leave_requests_path, icon: :users %>
+        <%= nav_link "My Team's Comp-off", employee_portal_team_comp_off_requests_path, icon: :users %>
       <% end %>
 
       <div class="pt-5 pb-1"><p class="nav-label">Money &amp; Tax</p></div>

@@ -21,7 +21,7 @@ module Payroll
           associations: { current_employee_salary: { salary_structure: { salary_structure_components: :salary_component } } }).call
         # Only locked attendance is payable — the same rule ReadinessCheck uses.
         @attendance = AttendanceSummary.locked.where(employee_id: ids, month: month, year: year).index_by(&:employee_id)
-        @declarations = TaxDeclaration.where(employee_id: ids, financial_year: fy)
+        @declarations = TaxDeclaration.effective_for_tds.where(employee_id: ids, financial_year: fy)
           .includes(:investment_declarations).index_by(&:employee_id)
         @pt_slabs = ProfessionalTaxSlab.order(:id).to_a
         @ytd = self.class.ytd_totals(employee_ids: ids, month: month, year: year)
