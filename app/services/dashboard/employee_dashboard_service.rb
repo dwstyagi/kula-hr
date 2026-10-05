@@ -91,7 +91,7 @@ module Dashboard
     end
 
     def ytd_totals
-      fy_start = Date.current.month >= 4 ? Date.new(Date.current.year, 4, 1) : Date.new(Date.current.year - 1, 4, 1)
+      fy_start = Date.new(FinancialYear.start_year(Date.current), 4, 1)
 
       payslips = Payslip.where(employee: @employee)
                         .joins(:payroll_run)
@@ -133,12 +133,7 @@ module Dashboard
     end
 
     def current_fy
-      today = Date.current
-      if today.month >= 4
-        "#{today.year}-#{(today.year + 1).to_s.last(2)}"
-      else
-        "#{today.year - 1}-#{today.year.to_s.last(2)}"
-      end
+      FinancialYear.label
     end
   end
 end

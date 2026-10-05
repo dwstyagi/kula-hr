@@ -60,8 +60,14 @@ class PayrollRun < ApplicationRecord
     state :paid
 
     # draft → processing (kicked off by PayrollProcessingJob)
-    event :start_processing do
+    event :start_processing, after: :clear_processing_failure do
       transitions from: :draft, to: :processing
+    end
+
+    # processing → draft when processing gives up (retries exhausted). Payslips
+    # already created are kept; processing again resumes with the rest.
+    event :abandon_processing do
+      transitions from: :processing, to: :draft
     end
 
     # processing → processed (called by PayrollProcessor after all employees done)
@@ -112,6 +118,20 @@ class PayrollRun < ApplicationRecord
       BackgroundTask.enqueue!(tenant: tenant, user: user, kind: "payroll_reset", task_key: id.to_s,
         payload: { payroll_run_id: id })
     end
+  end
+
+  # Recompute the run's totals from its payslips (single source for the
+  # processors and manual payslip edits). Employer cost includes PF admin
+  # charges and EDLI, which the employer pays alongside PF and ESI.
+  def refresh_totals!
+    sums = payslips.pick(
+      Arel.sql("COUNT(*)"), Arel.sql("COALESCE(SUM(gross_pay), 0)"), Arel.sql("COALESCE(SUM(total_deductions), 0)"),
+      Arel.sql("COALESCE(SUM(net_pay), 0)"),
+      Arel.sql("COALESCE(SUM(COALESCE(employer_pf, 0) + COALESCE(employer_esi, 0) + employer_pf_admin + employer_edli), 0)")
+    )
+    count, gross, deductions, net, employer = sums
+    update!(processed_employees: count, total_gross: gross, total_deductions: deductions,
+            total_net_pay: net, total_employer_cost: employer)
   end
 
   # Called from controller after approve! so we have access to current_user
@@ -245,6 +265,10 @@ class PayrollRun < ApplicationRecord
     return if off_cycle_payroll_entries.where.not(id: removed).exists?
 
     errors.add(:base, "Add at least one employee with an amount")
+  end
+
+  def clear_processing_failure
+    update_columns(processing_failure: nil, processing_errors: [])
   end
 
   # Callback: wipe all payslips and reset totals when reprocessing

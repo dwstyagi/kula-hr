@@ -43,9 +43,11 @@ module Payroll
     def process_settlement(settlement)
       create_payslip(settlement)
       @processed << settlement.employee_id
-    rescue => e
+    rescue *Payroll::ProcessingErrors::INFRASTRUCTURE
+      raise
+    rescue StandardError => e
       @skipped << settlement.employee_id
-      @errors << { employee_id: settlement.employee_id, name: settlement.employee.full_name, error: e.message }
+      @errors << Payroll::ProcessingErrors.entry(employee_id: settlement.employee_id, name: settlement.employee.full_name, error: e)
     end
 
     def create_payslip(settlement)
@@ -99,13 +101,8 @@ module Payroll
     end
 
     def finalize
-      @run.update!(
-        processed_employees: @run.payslips.count,
-        total_gross: @run.payslips.sum(:gross_pay),
-        total_deductions: @run.payslips.sum(:total_deductions),
-        total_net_pay: @run.payslips.sum(:net_pay),
-        total_employer_cost: 0
-      )
+      @run.refresh_totals!
+      @run.update!(processing_errors: @errors.first(Payroll::ProcessingErrors::MAX_STORED))
       @run.finish_processing!
 
       ProcessingResult.new(

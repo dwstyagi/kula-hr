@@ -263,6 +263,13 @@ RSpec.describe "Admin::PayrollRuns", type: :request do
         expect(run.payslips.pluck(:status)).to all(eq("locked"))
         expect(response).to redirect_to(admin_payroll_run_path(run))
       end
+
+      it "explains a second approval instead of failing" do
+        patch approve_admin_payroll_run_path(run), headers: headers
+        patch approve_admin_payroll_run_path(run), headers: headers
+        expect(response).to be_redirect
+        expect(flash[:alert]).to match(/no longer available/)
+      end
     end
 
     context "as hr_admin" do

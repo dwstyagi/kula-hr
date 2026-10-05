@@ -8,7 +8,7 @@ module Payroll
     end
 
     def self.ytd(employee_ids:, month:, year:)
-      start_year = month >= 4 ? year : year - 1
+      start_year = FinancialYear.start_year(Date.new(year, month, 1))
       scope = Payslip.where(employee_id: employee_ids)
         .where("year > :first OR (year = :first AND month >= 4)", first: start_year)
         .where("year < :last OR (year = :last AND month <= :month)", last: year, month: month)

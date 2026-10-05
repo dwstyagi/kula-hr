@@ -56,6 +56,22 @@ class PayrollMailer < ApplicationMailer
     )
   end
 
+  # Sent to the HR who initiated the run when processing gave up after its
+  # retries. The run is back in draft; processing again resumes it.
+  def processing_failed(payroll_run, reason)
+    @payroll_run = payroll_run
+    @tenant      = payroll_run.tenant
+    @reason      = reason
+
+    hr_emails = hr_email_addresses(payroll_run)
+    return if hr_emails.empty?
+
+    mail(
+      to:      hr_emails,
+      subject: "Payroll Processing Failed — #{payroll_run.period_label} (#{@tenant.name})"
+    )
+  end
+
   private
 
   def hr_email_addresses(payroll_run)

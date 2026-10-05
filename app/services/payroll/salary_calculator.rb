@@ -233,7 +233,7 @@ module Payroll
     def remaining_employment_months
       last_position = 12
       if (lwd = @employee.last_working_date)
-        fy_start = Date.new(@month >= 4 ? @year : @year - 1, 4, 1)
+        fy_start = Date.new(FinancialYear.start_year(Date.new(@year, @month, 1)), 4, 1)
         if lwd < fy_start
           last_position = 0
         elsif lwd < fy_start.next_year
@@ -243,8 +243,7 @@ module Payroll
       [ last_position - fy_position(@month), 0 ].max
     end
 
-    # April = 1 … March = 12
-    def fy_position(month) = month >= 4 ? month - 3 : month + 9
+    def fy_position(month) = FinancialYear.position(month)
 
     # ── Helpers ────────────────────────────────────────────────────────────────
 
@@ -263,11 +262,7 @@ module Payroll
 
     # FY string: April 2026 → "2026-27",  March 2026 → "2025-26"
     def current_fy
-      if @month >= 4
-        "#{@year}-#{(@year + 1).to_s.last(2)}"
-      else
-        "#{@year - 1}-#{@year.to_s.last(2)}"
-      end
+      FinancialYear.for_period(@month, @year)
     end
   end
 end

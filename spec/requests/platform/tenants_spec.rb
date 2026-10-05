@@ -74,4 +74,20 @@ RSpec.describe "Platform::Tenants", type: :request do
       expect(response).to redirect_to(platform_admin_login_path)
     end
   end
+
+  describe "idle timeout" do
+    it "asks a platform admin to log in again after 30 minutes of inactivity" do
+      travel 31.minutes do
+        get platform_admin_tenants_path
+        expect(response).to redirect_to(platform_admin_login_path)
+      end
+    end
+
+    it "keeps an active session" do
+      travel 20.minutes do
+        get platform_admin_tenants_path
+        expect(response).to have_http_status(:ok)
+      end
+    end
+  end
 end

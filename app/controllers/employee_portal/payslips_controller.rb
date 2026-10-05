@@ -11,7 +11,7 @@ module EmployeePortal
                     .limit(24)
 
       # YTD summary for current financial year
-      fy_start = Date.today.month >= 4 ? Date.new(Date.today.year, 4, 1) : Date.new(Date.today.year - 1, 4, 1)
+      fy_start = Date.new(FinancialYear.start_year(Date.current), 4, 1)
       @ytd_payslips = portal_payslips
                         .where("(payslips.year > :fy_year) OR (payslips.year = :fy_year AND payslips.month >= :fy_month)",
                                fy_year: fy_start.year, fy_month: fy_start.month)

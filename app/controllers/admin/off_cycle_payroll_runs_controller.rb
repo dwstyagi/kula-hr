@@ -249,14 +249,14 @@ module Admin
     # selectable: a settlement is often raised after the status is updated.
     def addable_employees
       policy_scope(Employee)
-        .where(employment_status: %w[active probation notice_period resigned terminated])
+        .where(employment_status: Employee::EMPLOYMENT_STATUSES)
         .where.not(id: @payroll_run.full_and_final_settlements.select(:employee_id))
         .order(:first_name, :last_name)
     end
 
     def eligible_employees
       policy_scope(Employee)
-        .where(employment_status: %w[active probation notice_period])
+        .in_service
         .includes(:department)
         .order(:first_name, :last_name)
     end
