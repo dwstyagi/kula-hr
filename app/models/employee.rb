@@ -26,6 +26,10 @@ class Employee < ApplicationRecord
   has_paper_trail
 
   EMPLOYMENT_STATUSES = %w[active probation notice_period resigned terminated].freeze
+  # Still employed and paid every month. Serving notice is in service until the
+  # last working day.
+  IN_SERVICE_STATUSES = %w[active probation notice_period].freeze
+  EXITED_STATUSES     = %w[resigned terminated].freeze
   GENDERS = %w[male female other].freeze
 
   enum :leave_approver, { hr: 0, reporting_manager: 1 }, default: :hr, prefix: :leave_approver
@@ -49,6 +53,21 @@ class Employee < ApplicationRecord
   scope :active, -> { where(employment_status: "active") }
   scope :probation, -> { where(employment_status: "probation") }
   scope :resigned, -> { where(employment_status: "resigned") }
+  scope :in_service, -> { where(employment_status: IN_SERVICE_STATUSES) }
+
+  # Everyone owed salary for the month starting on month_start: joined by the
+  # month end, not gone before it started, and either still in service or
+  # exited with a last working day inside the month.
+  scope :payable_in, ->(month_start) {
+    month_end = month_start.end_of_month
+    where("employees.joining_date <= ?", month_end)
+      .where("employees.last_working_date IS NULL OR employees.last_working_date >= ?", month_start)
+      .where(
+        "employees.employment_status IN (:in_service) OR " \
+        "(employees.employment_status IN (:exited) AND employees.last_working_date BETWEEN :from AND :to)",
+        in_service: IN_SERVICE_STATUSES, exited: EXITED_STATUSES, from: month_start, to: month_end
+      )
+  }
 
   # Virtual attributes for emergency contact
   attr_writer :emergency_contact_first_name, :emergency_contact_last_name
@@ -75,6 +94,14 @@ class Employee < ApplicationRecord
 
   def active?
     employment_status == "active"
+  end
+
+  # The part of the month [month_start, month_end] this person was employed.
+  # Returns nil when they were not employed at all that month.
+  def employment_window(month_start, month_end = month_start.end_of_month)
+    from = [ month_start, joining_date ].compact.max
+    to   = [ month_end, last_working_date ].compact.min
+    from <= to ? (from..to) : nil
   end
 
   # Returns true if HR is the effective approver for this employee's leave requests.

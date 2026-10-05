@@ -116,4 +116,31 @@ RSpec.describe "Admin::SalaryComponents", type: :request do
       expect(component.reload.active).to be true
     end
   end
+
+  describe "components payroll relies on" do
+    let!(:basic) { ActsAsTenant.with_tenant(tenant) { create(:salary_component, tenant: tenant, name: "Basic") } }
+
+    it "cannot be renamed" do
+      patch admin_salary_component_path(basic),
+            params: { salary_component: { name: "Basic Salary" } },
+            headers: { "Host" => subdomain_host }
+      expect(response).to have_http_status(:unprocessable_content)
+      expect(basic.reload.name).to eq("Basic")
+    end
+
+    it "cannot be deleted" do
+      expect {
+        delete admin_salary_component_path(basic), headers: { "Host" => subdomain_host }
+      }.not_to change { SalaryComponent.count }
+      expect(response).to redirect_to(admin_salary_components_path)
+      expect(flash[:alert]).to match(/cannot be deleted/)
+    end
+
+    it "can still have other attributes edited" do
+      patch admin_salary_component_path(basic),
+            params: { salary_component: { sort_order: 5 } },
+            headers: { "Host" => subdomain_host }
+      expect(basic.reload.sort_order).to eq(5)
+    end
+  end
 end

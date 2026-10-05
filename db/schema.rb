@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_13_103000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_05_100200) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "pg_catalog.plpgsql"
@@ -53,6 +53,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_13_103000) do
     t.decimal "lop_days", precision: 5, scale: 1, default: "0.0", null: false
     t.decimal "lop_leaves", precision: 5, scale: 1, default: "0.0", null: false
     t.integer "month", null: false
+    t.decimal "non_employment_days", precision: 5, scale: 1, default: "0.0", null: false
     t.decimal "paid_days", precision: 5, scale: 1, default: "0.0", null: false
     t.integer "status", default: 0, null: false
     t.bigint "tenant_id", null: false
@@ -422,6 +423,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_13_103000) do
     t.decimal "full_amount", precision: 12, scale: 2
     t.bigint "payslip_id", null: false
     t.integer "sort_order", default: 0
+    t.boolean "taxable", default: true, null: false
     t.datetime "updated_at", null: false
     t.index ["payslip_id", "component_type"], name: "index_payslip_line_items_on_payslip_id_and_component_type"
     t.index ["payslip_id"], name: "index_payslip_line_items_on_payslip_id"

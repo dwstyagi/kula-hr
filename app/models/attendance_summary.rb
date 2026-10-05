@@ -31,11 +31,14 @@ class AttendanceSummary < ApplicationRecord
 
   private
 
+  # Working days before joining / after the last working day are neither
+  # present nor absent: they are excluded from pay without counting as LOP.
   def recalculate_derived_fields
+    employed_days = total_working_days - non_employment_days
     effective_present = days_present + (half_days * 0.5)
-    raw_absent = total_working_days - effective_present - approved_leaves - lop_leaves
+    raw_absent = employed_days - effective_present - approved_leaves - lop_leaves
     self.unapproved_absences = [ raw_absent, 0 ].max
     self.lop_days             = unapproved_absences + lop_leaves
-    self.paid_days            = [ total_working_days - lop_days, 0 ].max
+    self.paid_days            = [ employed_days - lop_days, 0 ].max
   end
 end

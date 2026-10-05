@@ -694,7 +694,7 @@
 
     <ul class="steps-list">
       <li class="step-item" onclick="toggleStep(this)"><div class="checkbox"></div><div class="step-text">Go to <strong>Payroll Settings</strong> — verify <strong>PF Employee Rate: 12%</strong> and <strong>PF Employer Rate: 12%</strong></div></li>
-      <li class="step-item" onclick="toggleStep(this)"><div class="checkbox"></div><div class="step-text">Verify <strong>PF wage ceiling: ₹15,000/month</strong> — PF is calculated on min(Basic+DA, ₹15,000)</div></li>
+      <li class="step-item" onclick="toggleStep(this)"><div class="checkbox"></div><div class="step-text">Verify <strong>PF wage ceiling: ₹25,000/month</strong> (statutory from 17 Sep 2026; September 2026 is prorated) — PF is calculated on min(Basic+DA, ₹25,000)</div></li>
       <li class="step-item" onclick="toggleStep(this)"><div class="checkbox"></div><div class="step-text">Verify <strong>ESI gross threshold: ₹21,000/month</strong> — ESI applies only if gross ≤ ₹21,000</div></li>
       <li class="step-item" onclick="toggleStep(this)"><div class="checkbox"></div><div class="step-text">Check <strong>Professional Tax Slabs</strong> — confirm slabs match your state (Maharashtra: 0 / ₹175 / ₹200; Karnataka: 0 / ₹200 / ₹200)</div></li>
       <li class="step-item" onclick="toggleStep(this)"><div class="checkbox"></div><div class="step-text">View <strong>TDS settings</strong> — confirm both Old and New Regime slabs are configured and Standard Deduction = ₹75,000</div></li>
@@ -705,7 +705,7 @@
       <div class="callout-icon">ℹ</div>
       <div class="callout-content">
         <div class="callout-title">Indian Statutory Rates (FY 2025–26)</div>
-        <div class="callout-body">PF: 12% of Basic+DA (capped at ₹15,000 base) · ESI: 0.75% employee + 3.25% employer (gross ≤ ₹21,000) · PT: Maharashtra max ₹2,500/yr · TDS: Standard deduction ₹75,000 (both regimes) · Cess: 4%</div>
+        <div class="callout-body">PF: 12% of Basic+DA (capped at ₹25,000 base from 17 Sep 2026) · ESI: 0.75% employee + 3.25% employer (gross ≤ ₹21,000) · PT: Maharashtra max ₹2,500/yr · TDS: Standard deduction ₹75,000 (both regimes) · Cess: 4%</div>
       </div>
     </div>
   </section>
@@ -781,7 +781,7 @@
     <div class="steps-group-label">Review Payslips</div>
     <ul class="steps-list">
       <li class="step-item" onclick="toggleStep(this)"><div class="checkbox"></div><div class="step-text">Click <strong>View Payslips</strong> — verify all employees have payslips with correct amounts</div></li>
-      <li class="step-item" onclick="toggleStep(this)"><div class="checkbox"></div><div class="step-text">For employee with CTC ₹8,00,000 (Maharashtra, full month): verify <strong>Employee PF = ₹1,800</strong> (12% × ₹15,000), <strong>PT = ₹200</strong>, ESI = ₹0 (gross > ₹21,000)</div></li>
+      <li class="step-item" onclick="toggleStep(this)"><div class="checkbox"></div><div class="step-text">For employee with CTC ₹8,00,000 (Maharashtra, full month): verify <strong>Employee PF = ₹3,000</strong> (12% × ₹25,000, payroll months from October 2026), <strong>PT = ₹200</strong>, ESI = ₹0 (gross > ₹21,000)</div></li>
       <li class="step-item" onclick="toggleStep(this)"><div class="checkbox"></div><div class="step-text">Verify the employee with <strong>1 LOP day</strong> has a prorated gross (gross × paid_days / working_days)</div></li>
       <li class="step-item" onclick="toggleStep(this)"><div class="checkbox"></div><div class="step-text">Try <strong>editing a payslip line item</strong> — change one component amount and save</div></li>
     </ul>
@@ -801,7 +801,7 @@
         <div class="callout-title">What to Verify — Payslip Math (CTC ₹8L, Maharashtra)</div>
         <div class="callout-body"><ul>
           <li>Basic = ₹26,667/mo · HRA = ₹13,333/mo · Special Allowance = remainder</li>
-          <li>Employee PF = ₹1,800 (12% × min(Basic, ₹15,000))</li>
+          <li>Employee PF = ₹3,000 (12% × min(Basic, ₹25,000))</li>
           <li>ESI = ₹0 (gross > ₹21,000, not applicable)</li>
           <li>PT = ₹200 (Maharashtra, gross > ₹10,000)</li>
           <li>Net Pay = Gross − PF − ESI − PT − TDS</li>

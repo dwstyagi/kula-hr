@@ -124,7 +124,7 @@ Four deductions apply to most Indian employers. Each has its own base, its own t
 
 ### Provident Fund
 
-PF is generally calculated on Basic plus Dearness Allowance, at **12% from the employee and 12% from the employer**. A statutory wage ceiling of **₹15,000 per month** applies — many employers cap the contribution there, which puts the employee deduction at ₹1,800.
+PF is generally calculated on Basic plus Dearness Allowance, at **12% from the employee and 12% from the employer**. A statutory wage ceiling of **₹25,000 per month** applies from 17 September 2026 (₹15,000 before) — many employers cap the contribution there, which puts the employee deduction at ₹3,000.
 
 The employer's 12% is not a single bucket. It splits into the Employees' Pension Scheme at **8.33%** and the Provident Fund at the remainder. The pension portion is always computed on the capped wage regardless of whether you contribute on full Basic. Employers also pay administrative and EDLI insurance charges on top.
 

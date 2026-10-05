@@ -5,8 +5,9 @@ RSpec.describe Statutory::PfCalculator do
   let(:setting)  { build(:payroll_setting, tenant: tenant) }
   let(:employee) { build(:employee, tenant: tenant) }
 
-  def calc(basic:, da: 0, emp: employee, s: setting)
-    described_class.new(basic: basic, da: da, setting: s, employee: emp).call
+  # Logic examples below use the pre-September-2026 ₹15,000 ceiling.
+  def calc(basic:, da: 0, emp: employee, s: setting, ceiling: 15_000)
+    described_class.new(basic: basic, da: da, setting: s, employee: emp, wage_ceiling: ceiling).call
   end
 
   # ── Standard employee (Basic > ceiling) ──────────────────────────────────
@@ -144,6 +145,36 @@ RSpec.describe Statutory::PfCalculator do
       result = calc(basic: 15_000)
       expect(result.pf_base).to eq(15_000)
       expect(result.employee_pf).to eq(1_800)
+    end
+  end
+
+  # ── ₹25,000 ceiling (S.O. 5109(E), from 17 Sep 2026) ─────────────────────
+
+  context "with the ₹25,000 wage ceiling" do
+    it "caps the PF base at ₹25,000" do
+      result = calc(basic: 40_000, ceiling: 25_000)
+      expect(result.pf_base).to eq(25_000)
+      expect(result.employee_pf).to eq(3_000)
+      expect(result.employer_pf).to eq(3_000)
+    end
+
+    it "caps EPS at 8.33% of ₹25,000" do
+      result = calc(basic: 40_000, ceiling: 25_000)
+      expect(result.eps_amount).to eq(2_083)
+      expect(result.epf_amount).to eq(917)
+    end
+
+    it "brings wages between ₹15,000 and ₹25,000 fully into the base" do
+      result = calc(basic: 20_000, ceiling: 25_000)
+      expect(result.pf_base).to eq(20_000)
+      expect(result.employee_pf).to eq(2_400)
+    end
+
+    it "uses the ceiling in force this month when none is given" do
+      travel_to(Date.new(2026, 10, 15)) do
+        result = described_class.new(basic: 40_000, setting: setting, employee: employee).call
+        expect(result.pf_base).to eq(25_000)
+      end
     end
   end
 end

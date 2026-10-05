@@ -6,7 +6,7 @@ module Leave
   # New FY balance is seeded with April's monthly accrual already included so the
   # monthly accrual explicitly skips April to avoid crediting it twice.
   class YearEndProcessingService
-    WORKING_STATUSES = %w[active probation].freeze
+    WORKING_STATUSES = Employee::IN_SERVICE_STATUSES
 
     def self.run_for_all_tenants
       Tenant.where(status: %w[trial active]).find_each do |tenant|

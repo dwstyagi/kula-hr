@@ -37,7 +37,7 @@
           </div>
           <div>
             <dt class="text-stone-500">Wage Ceiling</dt>
-            <dd class="font-medium text-stone-900">₹<%= number_with_delimiter(@payroll_setting.pf_wage_ceiling.to_i) %>/month</dd>
+            <dd class="font-medium text-stone-900">₹<%= number_with_delimiter(Statutory::PfWageCeiling.current.to_i) %>/month <span class="text-xs font-normal text-stone-400">(statutory)</span></dd>
           </div>
           <div>
             <dt class="text-stone-500">Include DA in Base</dt>

@@ -11,6 +11,12 @@
 
   <td class="px-5 py-3 text-center text-sm font-medium text-stone-700">
     <%= summary.total_working_days.to_i %>
+    <% if summary.non_employment_days.positive? %>
+      <p class="text-xs font-normal text-stone-400 mt-0.5"
+         title="Working days before joining or after the last working day are not paid">
+        <%= (summary.total_working_days - summary.non_employment_days).to_i %> employed
+      </p>
+    <% end %>
   </td>
 
   <td class="px-5 py-3 text-center text-sm text-stone-700">

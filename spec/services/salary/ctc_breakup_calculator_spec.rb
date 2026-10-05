@@ -1,6 +1,10 @@
 require "rails_helper"
 
 RSpec.describe Salary::CtcBreakupCalculator do
+  # These examples were written against the ₹15,000 PF ceiling; pin it so they
+  # keep testing the breakup logic rather than today's date. The ₹25,000
+  # ceiling is covered by its own example below.
+  before { allow(Statutory::PfWageCeiling).to receive(:current).and_return(15_000.to_d) }
   let(:tenant) { create(:tenant, state: "Maharashtra") }
 
   before { set_tenant(tenant) }

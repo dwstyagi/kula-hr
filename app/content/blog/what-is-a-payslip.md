@@ -87,7 +87,7 @@ Monthly CTC is ₹50,000. Employer PF of ₹1,800 comes out of that first, leavi
 
 **Net pay: ₹42,987**
 
-Two things in that example are worth noticing. The earnings are already reduced for the two LOP days — which is why a payslip must state the LOP count, or the figures cannot be checked. And employee PF is ₹1,800 rather than 12% of the Basic shown, because the contribution base is capped at the ₹15,000 statutory wage ceiling. The [PF calculator](/resources/pf-calculator) shows how that cap works.
+Two things in that example are worth noticing. The earnings are already reduced for the two LOP days — which is why a payslip must state the LOP count, or the figures cannot be checked. And employee PF is ₹1,800 rather than 12% of the Basic shown, because the contribution base is capped at the ₹15,000 statutory wage ceiling that applied when this example was written (the ceiling is ₹25,000 from 17 September 2026). The [PF calculator](/resources/pf-calculator) shows how that cap works.
 
 Run your own numbers with the [CTC to in-hand calculator](/resources/ctc-to-in-hand-salary-calculator) if you want to see the full breakup.
 

@@ -84,7 +84,7 @@ Two offers with the same CTC can produce noticeably different take-home. Three t
 
 **How much sits in Basic.** Basic is the base for PF, so a higher Basic means a larger PF deduction — lower take-home now, more retirement savings. A lower Basic does the reverse. Neither is wrong, but they are not the same offer.
 
-**How the employer treats the PF ceiling.** Capping the contribution at the ₹15,000 statutory wage ceiling produces higher take-home than contributing on full Basic.
+**How the employer treats the PF ceiling.** Capping the contribution at the statutory wage ceiling (₹25,000 a month from 17 September 2026, ₹15,000 before) produces higher take-home than contributing on full Basic.
 
 **How much is variable.** A CTC with a large performance-linked component is not guaranteed monthly income.
 
