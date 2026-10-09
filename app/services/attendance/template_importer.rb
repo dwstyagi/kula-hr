@@ -48,11 +48,11 @@ module Attendance
           end
           next if values.empty?
           tuples = values.values.map { |id, present, half| "(#{id.to_i}, #{present.to_f}, #{half.to_f})" }.join(",")
-          absent = "GREATEST(s.total_working_days - v.present - v.half * 0.5 - s.approved_leaves - s.lop_leaves, 0)"
+          absent = "GREATEST(s.total_working_days - s.non_employment_days - v.present - v.half * 0.5 - s.approved_leaves - s.lop_leaves, 0)"
           sql = <<~SQL
             UPDATE attendance_summaries s SET days_present = v.present, half_days = v.half,
               unapproved_absences = #{absent}, lop_days = #{absent} + s.lop_leaves,
-              paid_days = GREATEST(s.total_working_days - (#{absent}) - s.lop_leaves, 0), updated_at = CURRENT_TIMESTAMP
+              paid_days = GREATEST(s.total_working_days - s.non_employment_days - (#{absent}) - s.lop_leaves, 0), updated_at = CURRENT_TIMESTAMP
             FROM (VALUES #{tuples}) AS v(id, present, half)
             WHERE s.id = v.id AND s.tenant_id = #{@tenant.id.to_i} AND s.status = 0 RETURNING s.id
           SQL

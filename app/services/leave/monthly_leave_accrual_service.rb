@@ -1,6 +1,6 @@
 module Leave
   class MonthlyLeaveAccrualService
-    WORKING_STATUSES = %w[active probation].freeze
+    WORKING_STATUSES = Employee::IN_SERVICE_STATUSES
 
     def self.run_for_all_tenants(period: Date.current.beginning_of_month)
       Tenant.where(status: %w[trial active]).find_each do |tenant|

@@ -11,12 +11,17 @@ module Salary
 
     LineItem = Struct.new(:name, :component_type, :monthly, :annual, keyword_init: true)
 
-    def self.call(annual_ctc:, salary_structure:, payroll_setting:, professional_tax_slabs: [], apply_employer_pf_carve: nil)
-      new(annual_ctc, salary_structure, payroll_setting, professional_tax_slabs)
+    # pf_wage_ceiling: statutory ceiling for the month being previewed; defaults
+    # to the ceiling in force this month (see Statutory::PfWageCeiling).
+    def self.call(annual_ctc:, salary_structure:, payroll_setting:, professional_tax_slabs: [],
+                  apply_employer_pf_carve: nil, pf_wage_ceiling: Statutory::PfWageCeiling.current)
+      new(annual_ctc, salary_structure, payroll_setting, professional_tax_slabs, pf_wage_ceiling)
         .call(apply_employer_pf_carve: apply_employer_pf_carve)
     end
 
-    def initialize(annual_ctc, salary_structure, payroll_setting, professional_tax_slabs)
+    def initialize(annual_ctc, salary_structure, payroll_setting, professional_tax_slabs,
+                   pf_wage_ceiling = Statutory::PfWageCeiling.current)
+      @pf_wage_ceiling = pf_wage_ceiling.to_d
       @annual_ctc = annual_ctc.to_d
       @monthly_ctc = (@annual_ctc / 12).round(2)
       @structure = salary_structure
@@ -98,7 +103,7 @@ module Salary
       deductions = []
 
       # Employee PF: rate% of Basic, capped at ceiling
-      pf_base = [ basic_monthly, @settings.pf_wage_ceiling ].min
+      pf_base = [ basic_monthly, @pf_wage_ceiling ].min
       employee_pf = (pf_base * @settings.pf_employee_rate / 100).round(2)
       deductions << LineItem.new(name: "Employee PF", component_type: "deduction", monthly: employee_pf, annual: (employee_pf * 12).round(2))
 
@@ -122,7 +127,7 @@ module Salary
     def employer_pf_charges(basic_monthly)
       return [ 0, 0, 0 ] unless @settings.pf_enabled?
 
-      pf_base     = [ basic_monthly, @settings.pf_wage_ceiling ].min
+      pf_base     = [ basic_monthly, @pf_wage_ceiling ].min
       employer_pf = (pf_base * @settings.pf_employer_rate / 100).round(2)
       pf_admin    = (pf_base * @settings.pf_admin_charge_rate / 100).round(2)
       edli        = (pf_base * @settings.pf_edli_rate / 100).round(2)

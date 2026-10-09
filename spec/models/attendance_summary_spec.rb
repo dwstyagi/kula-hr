@@ -111,4 +111,20 @@ RSpec.describe AttendanceSummary, type: :model do
       expect(summary.reload).to be_locked
     end
   end
+
+  describe "days outside employment" do
+    let(:tenant)   { create(:tenant) }
+    let(:employee) { create(:employee, tenant: tenant) }
+
+    it "excludes non-employment days from pay without counting them as LOP" do
+      summary = ActsAsTenant.with_tenant(tenant) do
+        create(:attendance_summary, tenant: tenant, employee: employee,
+               total_working_days: 22, non_employment_days: 10, days_present: 11)
+      end
+      expect(summary.unapproved_absences).to eq(1)
+      expect(summary.lop_days).to eq(1)
+      expect(summary.paid_days).to eq(11)
+      expect(summary.proration_factor).to eq((11 / 22.0).round(6))
+    end
+  end
 end

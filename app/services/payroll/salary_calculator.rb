@@ -12,6 +12,7 @@ module Payroll
       :employer_costs,    # { pf: 1800, esi: 0 }
       :attendance,        # { working_days: 22, paid_days: 21, lop_days: 1, proration_factor: 0.9545 }
       :proration_factor,
+      :non_taxable_components, # earning names the salary structure marks non-taxable
       keyword_init: true
     )
 
@@ -42,7 +43,7 @@ module Payroll
       pf_result  = calculate_pf(prorated_earnings)
       esi_result = calculate_esi(gross)
       pt_result  = calculate_pt(gross)
-      tds_result = calculate_tds(gross, prorated_earnings)
+      tds_result = calculate_tds(prorated_earnings, full_earnings, pf_result)
 
       deductions = build_deductions(pf_result, esi_result, pt_result, tds_result)
       total_deductions = deductions.values.sum
@@ -63,7 +64,8 @@ module Payroll
           edli:  pf_result.edli_charge
         },
         attendance:        attendance,
-        proration_factor:  proration
+        proration_factor:  proration,
+        non_taxable_components: @non_taxable_components.to_a
       )
     end
 
@@ -72,13 +74,13 @@ module Payroll
     # ── Step 1: Attendance ─────────────────────────────────────────────────────
 
     def fetch_attendance
-      summary = @inputs ? @inputs.attendance[@employee.id] : AttendanceSummary.find_by(
+      summary = @inputs ? @inputs.attendance[@employee.id] : AttendanceSummary.locked.find_by(
         employee: @employee, month: @month, year: @year
       )
 
       unless summary
         raise CalculationError,
-          "No attendance summary for #{@employee.full_name} (#{@month}/#{@year})"
+          "No attendance summary (locked) for #{@employee.full_name} (#{@month}/#{@year})"
       end
 
       lop = Attendance::LopCalculator.new(attendance_summary: summary)
@@ -102,8 +104,13 @@ module Payroll
         salary_structure:        employee_salary.salary_structure,
         payroll_setting:         @setting,
         professional_tax_slabs:  [],   # PT handled separately via ProfessionalTaxCalculator
-        apply_employer_pf_carve: false # we carve here, proration-aware (see #call)
+        apply_employer_pf_carve: false, # we carve here, proration-aware (see #call)
+        pf_wage_ceiling:         pf_wage_ceiling
       )
+
+      @non_taxable_components = employee_salary.salary_structure.salary_structure_components
+        .select { |ssc| ssc.salary_component.earning? && !ssc.salary_component.taxable? }
+        .map { |ssc| ssc.salary_component.name }.to_set
 
       # Convert LineItem array → { "Basic" => 33333, "HRA" => 16667, ... }
       result.earnings.each_with_object({}) do |line_item, hash|
@@ -118,7 +125,8 @@ module Payroll
         basic:    earnings["Basic"] || 0,
         da:       earnings["DA"] || earnings["Dearness Allowance"] || 0,
         setting:  @setting,
-        employee: @employee
+        employee: @employee,
+        wage_ceiling: pf_wage_ceiling
       ).call
       carve = (pf.employer_pf + pf.admin_charge + pf.edli_charge).to_f
       return if carve <= 0
@@ -146,12 +154,21 @@ module Payroll
         basic:    basic,
         da:       da,
         setting:  @setting,
-        employee: @employee
+        employee: @employee,
+        wage_ceiling: pf_wage_ceiling
       ).call
     end
 
     def calculate_esi(gross)
-      Statutory::EsiCalculator.new(gross: gross, setting: @setting).call
+      Statutory::EsiCalculator.new(gross: gross, setting: @setting, continuing_coverage: esi_continuing_coverage?).call
+    end
+
+    # Covered earlier in the current ESI contribution period (Apr–Sep / Oct–Mar).
+    def esi_continuing_coverage?
+      covered = @inputs ? @inputs.esi_covered : ActsAsTenant.with_tenant(@employee.tenant) {
+        Payroll::BatchInputs.esi_covered(employee_ids: [ @employee.id ], month: @month, year: @year)
+      }
+      covered.include?(@employee.id)
     end
 
     def calculate_pt(gross)
@@ -164,20 +181,76 @@ module Payroll
       ).call
     end
 
-    def calculate_tds(gross, prorated_earnings)
+    # Annual taxable income is projected from what has actually been paid this
+    # financial year, plus this month, plus a full month for every month the
+    # employee is still expected to work. A mid-year joiner is therefore taxed
+    # on the months they work, not on twelve, and bonus/off-cycle pay already
+    # paid is included.
+    def calculate_tds(prorated_earnings, full_earnings, pf_result)
+      return Statutory::TdsCalculator::ZERO_RESULT unless @setting.tds_enabled?
+
+      ytd          = ytd_totals
+      months_ahead = remaining_employment_months
+      full_pf      = full_month_employee_pf(full_earnings)
+
+      projected_income = ytd.taxable_income + taxable_total(prorated_earnings) +
+                         taxable_total(full_earnings) * months_ahead
+      projected_pf     = ytd.employee_pf + pf_result.employee_pf + full_pf * months_ahead
+
       Statutory::TdsCalculator.new(
-        employee:         @employee,
-        annual_gross:     annualized_gross(gross),
-        monthly_basic:    prorated_earnings["Basic"] || 0,
-        monthly_hra:      prorated_earnings["HRA"] || 0,
-        financial_year:   current_fy,
-        month:            @month,
-        declaration: @inputs ? @inputs.declarations[@employee.id] : :load,
-        ytd_tds_deducted: @inputs ? @inputs.ytd_tds.fetch(@employee.id, 0) : ytd_tds_deducted
+        employee:           @employee,
+        annual_gross:       projected_income.round(2),
+        monthly_basic:      prorated_earnings["Basic"] || 0,
+        monthly_hra:        prorated_earnings["HRA"] || 0,
+        annual_employee_pf: projected_pf,
+        financial_year:     current_fy,
+        month:              @month,
+        remaining_months:   months_ahead + 1,
+        declaration:        @inputs ? @inputs.declarations[@employee.id] : :load,
+        ytd_tds_deducted:   ytd.tds
       ).call
     end
 
+    def taxable_total(earnings)
+      earnings.sum { |name, amount| @non_taxable_components.include?(name) ? 0 : amount }.to_d
+    end
+
+    def full_month_employee_pf(full_earnings)
+      calculate_pf(full_earnings).employee_pf
+    end
+
+    def ytd_totals
+      return @inputs.ytd_for(@employee.id) if @inputs
+
+      ActsAsTenant.with_tenant(@employee.tenant) do
+        Payroll::BatchInputs.ytd_totals(employee_ids: [ @employee.id ], month: @month, year: @year)
+          .fetch(@employee.id, Payroll::BatchInputs::NO_YTD)
+      end
+    end
+
+    # Months after this one, within the financial year, that the employee is
+    # expected to be paid for. A known last working date ends the projection.
+    def remaining_employment_months
+      last_position = 12
+      if (lwd = @employee.last_working_date)
+        fy_start = Date.new(@month >= 4 ? @year : @year - 1, 4, 1)
+        if lwd < fy_start
+          last_position = 0
+        elsif lwd < fy_start.next_year
+          last_position = fy_position(lwd.month)
+        end
+      end
+      [ last_position - fy_position(@month), 0 ].max
+    end
+
+    # April = 1 … March = 12
+    def fy_position(month) = month >= 4 ? month - 3 : month + 9
+
     # ── Helpers ────────────────────────────────────────────────────────────────
+
+    def pf_wage_ceiling
+      @pf_wage_ceiling ||= Statutory::PfWageCeiling.for_month(@month, @year)
+    end
 
     def build_deductions(pf, esi, pt, tds)
       {
@@ -188,42 +261,12 @@ module Payroll
       }.reject { |_, v| v.zero? }
     end
 
-    # Project monthly gross to full financial year
-    # e.g. March gross × 12 (simplification — treats every month as equal)
-    def annualized_gross(monthly_gross)
-      (monthly_gross * 12).round(2)
-    end
-
     # FY string: April 2026 → "2026-27",  March 2026 → "2025-26"
     def current_fy
       if @month >= 4
         "#{@year}-#{(@year + 1).to_s.last(2)}"
       else
         "#{@year - 1}-#{@year.to_s.last(2)}"
-      end
-    end
-
-    # Sum TDS from all approved payslips this employee had in the current FY
-    # so TdsCalculator can spread remaining tax over remaining months
-    def ytd_tds_deducted
-      fy_start_month, fy_start_year = @month >= 4 ? [ 4, @year ] : [ 4, @year - 1 ]
-
-      ActsAsTenant.with_tenant(@employee.tenant) do
-        Payslip
-          .joins(:payroll_run)
-          .joins("INNER JOIN payslip_line_items ON payslip_line_items.payslip_id = payslips.id")
-          .where(employee: @employee)
-          .where(payslip_line_items: { component_name: "TDS" })
-          .where(
-            "(payslips.year > :fy_year) OR (payslips.year = :fy_year AND payslips.month >= :fy_month)",
-            fy_year: fy_start_year, fy_month: fy_start_month
-          )
-          .where(
-            "(payslips.year < :cur_year) OR (payslips.year = :cur_year AND payslips.month < :cur_month)",
-            cur_year: @year, cur_month: @month
-          )
-          .where(payroll_runs: { status: %w[approved paid] })
-          .sum("payslip_line_items.amount")
       end
     end
   end

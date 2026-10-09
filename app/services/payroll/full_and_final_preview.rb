@@ -54,7 +54,8 @@ module Payroll
         salary_structure: salary.salary_structure,
         payroll_setting: setting,
         professional_tax_slabs: [],
-        apply_employer_pf_carve: nil
+        apply_employer_pf_carve: nil,
+        pf_wage_ceiling: Statutory::PfWageCeiling.for_month(@last_working_date.month, @last_working_date.year)
       )
       day_rate = breakup.gross_monthly.to_d / @last_working_date.end_of_month.day
       [ payable_days, (day_rate * payable_days).round(2) ]

@@ -4,7 +4,9 @@ FactoryBot.define do
     first_name        { Faker::Name.first_name }
     last_name         { Faker::Name.last_name }
     sequence(:email)  { |n| "employee#{n}@example.com" }
-    joining_date      { 1.year.ago.to_date }
+    # Fixed, well in the past: payroll and attendance only include employees who
+    # had joined by the month being processed, and specs use fixed months.
+    joining_date      { Date.new(2020, 1, 1) }
     employment_status { "active" }
     pf_applicable     { true }
     pf_on_full_basic  { false }

@@ -4,13 +4,15 @@ RSpec.describe Statutory::TdsCalculator do
   let(:tenant)   { create(:tenant) }
   let(:employee) { ActsAsTenant.with_tenant(tenant) { create(:employee, tenant: tenant) } }
 
-  def calc(annual_gross:, month: 2, monthly_basic: 0, monthly_hra: 0,
-           ytd_tds_deducted: 0, financial_year: "2025-26")
+  def calc(annual_gross:, month: 2, monthly_basic: 0, monthly_hra: 0, annual_employee_pf: 0,
+           ytd_tds_deducted: 0, financial_year: "2025-26", remaining_months: nil)
     described_class.new(
       employee:         employee,
       annual_gross:     annual_gross,
       monthly_basic:    monthly_basic,
       monthly_hra:      monthly_hra,
+      annual_employee_pf: annual_employee_pf,
+      remaining_months: remaining_months,
       financial_year:   financial_year,
       month:            month,
       ytd_tds_deducted: ytd_tds_deducted
@@ -198,14 +200,18 @@ RSpec.describe Statutory::TdsCalculator do
 
   # ── 80C with EPF auto-contribution ─────────────────────────────────────────
 
-  context "80C with EPF auto-contribution (monthly_basic provided)" do
+  context "80C with employee PF" do
     before { create_declaration({ regime: :old_regime }) }
 
-    it "adds EPF (12% of annual basic) to 80C automatically" do
-      # monthly_basic = 33333 → EPF = 33333 × 12 × 12% = 47999.52 → round(0) = 48000
-      # declared 80C = 0 → total = 48000 (under 1.5L cap)
-      result = calc(annual_gross: 978_400, month: 4, monthly_basic: 33_333)
-      expect(result.section_80c).to eq(48_000)
+    it "counts the employee PF actually deducted toward 80C" do
+      # PF capped at the wage ceiling: 1,800 × 12 = 21,600 — not 12% of a ₹33,333 Basic
+      result = calc(annual_gross: 978_400, month: 4, monthly_basic: 33_333, annual_employee_pf: 21_600)
+      expect(result.section_80c).to eq(21_600)
+    end
+
+    it "does not infer PF from Basic when none is deducted" do
+      result = calc(annual_gross: 978_400, month: 4, monthly_basic: 33_333, annual_employee_pf: 0)
+      expect(result.section_80c).to eq(0)
     end
   end
 
@@ -324,6 +330,48 @@ RSpec.describe Statutory::TdsCalculator do
       result = calc(annual_gross: 2_000_000, month: 3, ytd_tds_deducted: 0)
       # All tax due in March
       expect(result.monthly_tds).to eq(result.total_tax_with_cess)
+    end
+  end
+
+  # ── Surcharge (FY 2026-27 rates) ───────────────────────────────────────────
+
+  context "surcharge" do
+    def new_regime(gross, month: 4)
+      calc(annual_gross: gross, month: month, financial_year: "2026-27")
+    end
+
+    it "is zero up to ₹50 lakh of taxable income" do
+      expect(new_regime(5_075_000).surcharge).to eq(0)   # taxable exactly 50L
+    end
+
+    it "applies marginal relief just above ₹50 lakh" do
+      # taxable 50,10,000: tax 10,83,000; 10% would be 1,08,300 but tax+surcharge
+      # may exceed tax at 50L (10,80,000) only by the 10,000 earned above it.
+      result = new_regime(5_085_000)
+      expect(result.annual_tax).to eq(1_083_000)
+      expect(result.surcharge).to eq(7_000)
+      expect(result.cess).to eq(43_600)                 # 4% of (tax + surcharge)
+    end
+
+    it "charges 10% between ₹50 lakh and ₹1 crore" do
+      result = new_regime(10_000_000)                   # taxable 99,25,000
+      expect(result.surcharge).to eq(255_750)
+      expect(result.total_tax_with_cess).to eq(2_925_780)
+    end
+
+    it "caps the new-regime surcharge at 25%" do
+      result = new_regime(60_000_000)
+      expect(result.surcharge).to eq((result.annual_tax * 0.25).round(0))
+    end
+  end
+
+  # ── Spreading over a shorter employment ────────────────────────────────────
+
+  context "with remaining_months given" do
+    it "spreads the remaining tax over the months still to be worked" do
+      full   = calc(annual_gross: 2_000_000, month: 10, financial_year: "2026-27")
+      short  = calc(annual_gross: 2_000_000, month: 10, financial_year: "2026-27", remaining_months: 2)
+      expect(short.monthly_tds).to eq((full.total_tax_with_cess / 2.0).round(0))
     end
   end
 end

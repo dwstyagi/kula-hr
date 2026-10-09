@@ -5,45 +5,57 @@ module Attendance
     end
 
     def call
+      month_start = Date.new(@year, @month, 1)
+      month_end   = month_start.end_of_month
+
       ActsAsTenant.with_tenant(@tenant) do
         # Locked employees are excluded before any leave lookups or calculations.
         locked = AttendanceSummary.for_month(@month, @year).locked.select(:employee_id)
-        Employee.where(employment_status: %w[active probation]).where.not(id: locked)
+        Employee.payable_in(month_start).where.not(id: locked)
           .find_in_batches(batch_size: 100) do |employees|
           ids = employees.map(&:id)
           summaries = AttendanceSummary.for_month(@month, @year).where(employee_id: ids).index_by(&:employee_id)
-          start_date = Date.new(@year, @month, 1)
           leaves = LeaveRequest.approved.where(employee_id: ids)
-            .where("from_date <= ? AND to_date >= ?", start_date.end_of_month, start_date)
+            .where("from_date <= ? AND to_date >= ?", month_end, month_start)
             .includes(:leave_type).group_by(&:employee_id)
           now = Time.current
-          records = employees.map do |employee|
-            summary = summaries[employee.id]
+          records = employees.filter_map do |employee|
+            window = employee.employment_window(month_start, month_end)
+            next unless window
+
+            calendar = working_dates_for(employee.work_location_id)
+            working  = calendar.size
+            employed = calendar.count { |day| window.cover?(day) }
+            not_employed = working - employed
+
+            # Leave is counted on the same working-day calendar as the month
+            # total (week-off pattern + holidays), and only while employed.
             paid, lop = 0, 0
             Array(leaves[employee.id]).each do |request|
-              first = [ request.from_date, start_date ].max
-              last = [ request.to_date, start_date.end_of_month ].min
-              days = (first..last).count { |day| !day.saturday? && !day.sunday? }
+              days = calendar.count { |day| day.between?(request.from_date, request.to_date) && window.cover?(day) }
               request.leave_type.is_paid? ? paid += days : lop += days
             end
-            working = working_days_for(employee.work_location_id)
-            present = summary ? summary.days_present : [ working - paid, 0 ].max
+
+            summary = summaries[employee.id]
+            present = summary ? summary.days_present : [ employed - paid, 0 ].max
             half_days = summary ? summary.half_days : 0
-            absent = [ working - present - half_days * 0.5 - paid - lop, 0 ].max
+            absent = [ employed - present - half_days * 0.5 - paid - lop, 0 ].max
             { tenant_id: @tenant.id, employee_id: employee.id, month: @month, year: @year,
               status: AttendanceSummary.statuses[:draft], total_working_days: working,
+              non_employment_days: not_employed,
               approved_leaves: paid, lop_leaves: lop, days_present: present, half_days: half_days,
-              unapproved_absences: absent, lop_days: absent + lop, paid_days: [ working - absent - lop, 0 ].max,
+              unapproved_absences: absent, lop_days: absent + lop, paid_days: [ employed - absent - lop, 0 ].max,
               created_at: summary&.created_at || now, updated_at: now }
           end
           # A concurrent lock must win over generation, including a lock taken
           # after the initial employee selection. Existing manual attendance wins too.
-          updates = %w[total_working_days approved_leaves lop_leaves updated_at].map do |column|
+          updates = %w[total_working_days non_employment_days approved_leaves lop_leaves updated_at].map do |column|
             "#{column} = EXCLUDED.#{column}"
           end
-          absent_sql = "GREATEST(EXCLUDED.total_working_days - attendance_summaries.days_present - attendance_summaries.half_days * 0.5 - EXCLUDED.approved_leaves - EXCLUDED.lop_leaves, 0)"
+          employed_sql = "(EXCLUDED.total_working_days - EXCLUDED.non_employment_days)"
+          absent_sql = "GREATEST(#{employed_sql} - attendance_summaries.days_present - attendance_summaries.half_days * 0.5 - EXCLUDED.approved_leaves - EXCLUDED.lop_leaves, 0)"
           updates += [ "unapproved_absences = #{absent_sql}", "lop_days = #{absent_sql} + EXCLUDED.lop_leaves",
-                       "paid_days = GREATEST(EXCLUDED.total_working_days - (#{absent_sql}) - EXCLUDED.lop_leaves, 0)" ]
+                       "paid_days = GREATEST(#{employed_sql} - (#{absent_sql}) - EXCLUDED.lop_leaves, 0)" ]
           AttendanceSummary.upsert_all(records, unique_by: :idx_att_sum_emp_month_year,
             on_duplicate: Arel.sql("#{updates.join(', ')} WHERE attendance_summaries.status = 0")) if records.any?
         end
@@ -52,11 +64,11 @@ module Attendance
 
     private
 
-    def working_days_for(location_id)
-      @working_days_by_location ||= {}
-      @working_days_by_location[location_id] ||= WorkingDaysCalculator.new(
+    def working_dates_for(location_id)
+      @working_dates_by_location ||= {}
+      @working_dates_by_location[location_id] ||= WorkingDaysCalculator.new(
         month: @month, year: @year, tenant: @tenant, work_location: location_id
-      ).call
+      ).working_dates
     end
   end
 end

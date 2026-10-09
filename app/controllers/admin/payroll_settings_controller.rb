@@ -26,7 +26,7 @@ class Admin::PayrollSettingsController < Admin::BaseController
 
   def payroll_setting_params
     params.require(:payroll_setting).permit(
-      :pf_enabled, :pf_employee_rate, :pf_employer_rate, :pf_wage_ceiling,
+      :pf_enabled, :pf_employee_rate, :pf_employer_rate,
       :pf_include_da, :pf_admin_charge_rate, :pf_edli_rate,
       :employer_pf_in_ctc, :hide_employer_contributions_on_slip,
       :esi_enabled, :esi_employee_rate, :esi_employer_rate, :esi_ceiling,

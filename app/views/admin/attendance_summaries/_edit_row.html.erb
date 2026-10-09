@@ -19,7 +19,7 @@
   <td class="px-5 py-3 text-center">
     <input type="number" name="attendance_summary[days_present]"
            value="<%= summary.days_present %>"
-           min="0" max="<%= summary.total_working_days %>" step="0.5"
+           min="0" max="<%= summary.total_working_days - summary.non_employment_days %>" step="0.5"
            form="<%= form_id %>"
            class="w-20 text-sm text-center border border-kula-300 rounded-lg px-2 py-1 focus:ring-2 focus:ring-kula-600 focus:border-kula-600">
   </td>
@@ -28,7 +28,7 @@
   <td class="px-5 py-3 text-center">
     <input type="number" name="attendance_summary[half_days]"
            value="<%= summary.half_days %>"
-           min="0" max="<%= summary.total_working_days %>" step="1"
+           min="0" max="<%= summary.total_working_days - summary.non_employment_days %>" step="1"
            form="<%= form_id %>"
            class="w-16 text-sm text-center border border-kula-300 rounded-lg px-2 py-1 focus:ring-2 focus:ring-kula-600 focus:border-kula-600">
   </td>

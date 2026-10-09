@@ -33,7 +33,7 @@ module Reports
       setting = PayrollSetting.first
       return self unless setting&.pf_enabled?
 
-      pf_wage_ceiling = setting.pf_wage_ceiling || 15_000
+      pf_wage_ceiling = Statutory::PfWageCeiling.for_month(@month, @year).to_f
       pf_ee_rate = (setting.pf_employee_rate || 12).to_f / 100
       eps_rate = 8.33 / 100.0
       edli_rate = (setting.pf_edli_rate || 0.5).to_f / 100

@@ -23,10 +23,15 @@ module Attendance
     end
 
     def call
-      start_date = Date.new(@year, @month, 1)
-      end_date   = start_date.end_of_month
+      working_dates.size
+    end
 
-      (start_date..end_date).count do |date|
+    # The month's working dates (week-off pattern and applicable holidays
+    # removed). Used to count leave and employment days on the same calendar
+    # as the month's working-day total.
+    def working_dates
+      start_date = Date.new(@year, @month, 1)
+      (start_date..start_date.end_of_month).select do |date|
         self.class.working_day?(date, @pattern) && !holiday_dates.include?(date)
       end
     end

@@ -81,8 +81,10 @@ RSpec.describe "Location holiday flows into payroll", type: :service do
     add_one_lop_day(company_emp)
     add_one_lop_day(mumbai_emp)
 
-    # Generate location-aware attendance summaries for the month.
+    # Generate location-aware attendance summaries for the month, then lock
+    # them as HR does before payroll — payroll only pays locked attendance.
     Attendance::SummaryGenerator.new(month: 1, year: 2025, tenant: tenant).call
+    AttendanceSummary.for_month(1, 2025).update_all(status: AttendanceSummary.statuses[:locked])
   end
 
   it "gives the Mumbai employee fewer working days due to the location holiday" do

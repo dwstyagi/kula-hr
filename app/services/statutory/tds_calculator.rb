@@ -13,6 +13,7 @@ module Statutory
       :taxable_income,
       :annual_tax,
       :rebate,
+      :surcharge,
       :cess,
       :total_tax_with_cess,
       :monthly_tds,
@@ -25,7 +26,7 @@ module Statutory
       annual_gross: 0, standard_deduction: 0, section_80c: 0,
       section_80d: 0, section_80ccd1b: 0, hra_exemption: 0,
       home_loan_interest: 0, other_deductions: 0, total_deductions: 0,
-      taxable_income: 0, annual_tax: 0, rebate: 0, cess: 0,
+      taxable_income: 0, annual_tax: 0, rebate: 0, surcharge: 0, cess: 0,
       total_tax_with_cess: 0, monthly_tds: 0, regime: nil, applicable: false
     ).freeze
 
@@ -42,6 +43,9 @@ module Statutory
     # rebate_limit    — 87A: rebate applies when taxable income is at or below this
     # rebate_cap      — 87A: maximum rebate available
     # marginal_relief — 87A: cap tax at the income above rebate_limit (new regime only)
+    # surcharge       — rate (%) on income tax once taxable income exceeds `above`;
+    #                   the new regime is capped at 25%. Marginal relief applies
+    #                   at every threshold.
     FY_2025_26_RATES = {
       old_regime: {
         slabs: [
@@ -53,7 +57,13 @@ module Statutory
         standard_deduction: 50_000,
         rebate_limit:       500_000,
         rebate_cap:         12_500,
-        marginal_relief:    false
+        marginal_relief:    false,
+        surcharge: [
+          { above: 5_000_000,  rate: 10 },
+          { above: 10_000_000, rate: 15 },
+          { above: 20_000_000, rate: 25 },
+          { above: 50_000_000, rate: 37 }
+        ].freeze
       }.freeze,
 
       new_regime: {
@@ -69,7 +79,12 @@ module Statutory
         standard_deduction: 75_000,
         rebate_limit:       1_200_000,
         rebate_cap:         60_000,
-        marginal_relief:    true
+        marginal_relief:    true,
+        surcharge: [
+          { above: 5_000_000,  rate: 10 },
+          { above: 10_000_000, rate: 15 },
+          { above: 20_000_000, rate: 25 }
+        ].freeze
       }.freeze,
 
       cess_rate: 4
@@ -80,22 +95,31 @@ module Statutory
       "2026-27" => FY_2025_26_RATES
     }.freeze
 
-    # employee          — Employee record
-    # annual_gross      — projected annual gross salary
-    # monthly_basic     — for EPF auto-contribution under 80C + HRA calc
-    # monthly_hra       — monthly HRA component received (for HRA exemption)
-    # financial_year    — "2025-26"; also selects the rate set from RATES_BY_FY
-    # month             — current payroll month (1–12)
-    # ytd_tds_deducted  — TDS already deducted April through previous month
-    def initialize(employee:, annual_gross:, monthly_basic: 0, monthly_hra: 0,
-                   financial_year:, month:, ytd_tds_deducted: 0, declaration: :load)
+    # employee           — Employee record
+    # annual_gross       — projected taxable income for the financial year:
+    #                      taxable earnings already paid + this month + the
+    #                      months still to be worked (see SalaryCalculator)
+    # monthly_basic      — for the HRA exemption
+    # monthly_hra        — monthly HRA component received (for HRA exemption)
+    # annual_employee_pf — employee PF actually deducted/projected for the year;
+    #                      counts toward 80C under the old regime
+    # financial_year     — "2025-26"; also selects the rate set from RATES_BY_FY
+    # month              — current payroll month (1–12)
+    # ytd_tds_deducted   — TDS already deducted April through previous month
+    # remaining_months   — months (including this one) to spread the remaining
+    #                      tax over; defaults to the months left in the FY.
+    #                      Shorter when the employee's last working day is known.
+    def initialize(employee:, annual_gross:, monthly_basic: 0, monthly_hra: 0, annual_employee_pf: 0,
+                   financial_year:, month:, ytd_tds_deducted: 0, declaration: :load, remaining_months: nil)
       @employee         = employee
       @annual_gross     = annual_gross.to_d
       @monthly_basic    = monthly_basic.to_d
+      @annual_employee_pf = annual_employee_pf.to_d
       @monthly_hra      = monthly_hra.to_d
       @financial_year   = financial_year
       @month            = month
       @ytd_tds_deducted = ytd_tds_deducted.to_d
+      @remaining_months = remaining_months
       @declaration      = declaration == :load ? load_declaration : declaration
       @rates            = rates_for(financial_year)
     end
@@ -110,8 +134,9 @@ module Statutory
       # Rebate reduces the tax BEFORE cess; cess is charged on what remains.
       slab_tax   = calculate_tax(taxable, regime)
       annual_tax = apply_rebate(slab_tax, taxable, regime)
-      cess       = (annual_tax * @rates[:cess_rate] / 100.0).round(0).to_i
-      total_tax  = annual_tax + cess
+      surcharge  = calculate_surcharge(annual_tax, taxable, regime)
+      cess       = ((annual_tax + surcharge) * @rates[:cess_rate] / 100.0).round(0).to_i
+      total_tax  = annual_tax + surcharge + cess
       monthly    = calculate_monthly_tds(total_tax)
 
       TdsResult.new(
@@ -127,6 +152,7 @@ module Statutory
         taxable_income:      taxable,
         annual_tax:          annual_tax,
         rebate:              slab_tax - annual_tax,
+        surcharge:           surcharge,
         cess:                cess,
         total_tax_with_cess: total_tax,
         monthly_tds:         monthly,
@@ -214,11 +240,11 @@ module Statutory
         investment_total([ "80C" ])
       end
 
-      # EPF employee contribution auto-counts under 80C
-      epf_auto     = (@monthly_basic * 12 * 0.12).round(0)
+      # Employee PF actually deducted (capped at the wage ceiling, zero when
+      # the employee is not covered) counts under 80C.
       home_principal = @declaration.home_loan_principal.to_f
 
-      total = declared.to_f + epf_auto + home_principal
+      total = declared.to_f + @annual_employee_pf.round(0) + home_principal
       [ total, 150_000 ].min.to_i
     end
 
@@ -306,12 +332,29 @@ module Statutory
       end
     end
 
+    # Surcharge on income tax for high incomes, with marginal relief: the tax
+    # plus surcharge above a threshold may not exceed the tax plus surcharge
+    # at the threshold by more than the income earned above it.
+    def calculate_surcharge(tax, taxable_income, regime)
+      bands = @rates.fetch(regime)[:surcharge]
+      index = bands.rindex { |band| taxable_income > band[:above] }
+      return 0 unless index && tax.positive?
+
+      band      = bands[index]
+      prev_rate = index.zero? ? 0 : bands[index - 1][:rate]
+      surcharge = tax * band[:rate] / 100.0
+
+      at_threshold = calculate_tax(band[:above], regime)
+      ceiling      = at_threshold * (100 + prev_rate) / 100.0 + (taxable_income - band[:above])
+      [ [ tax + surcharge, ceiling ].min - tax, 0 ].max.round(0).to_i
+    end
+
     # ── Progressive monthly TDS ──────────────────────────────────────────────
 
     def calculate_monthly_tds(total_annual_tax)
       return 0 if total_annual_tax <= 0
 
-      remaining_months = months_remaining_in_fy
+      remaining_months = @remaining_months || months_remaining_in_fy
       return 0 if remaining_months <= 0
 
       remaining_tax = [ total_annual_tax - @ytd_tds_deducted, 0 ].max

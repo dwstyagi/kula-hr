@@ -31,6 +31,27 @@ RSpec.describe Payroll::ReadinessCheck do
       expect(result.eligible_count).to eq(0)
     end
 
+    it "includes employees serving notice" do
+      on_notice = create(:employee, tenant: tenant, employment_status: "notice_period")
+      expect(result.statuses.map(&:employee)).to include(on_notice)
+    end
+
+    it "blocks creation when someone serving notice has no locked attendance" do
+      create(:employee, tenant: tenant, employment_status: "notice_period")
+      expect(result.can_create?).to be false
+    end
+
+    it "excludes employees who join after the month" do
+      create(:employee, tenant: tenant, joining_date: Date.new(year, month, 1).next_month)
+      expect(result.eligible_count).to eq(0)
+    end
+
+    it "excludes anyone whose last working day was before the month" do
+      create(:employee, tenant: tenant, employment_status: "notice_period",
+             last_working_date: Date.new(year, month, 1) - 1)
+      expect(result.eligible_count).to eq(0)
+    end
+
     it "includes resigned employees whose last working day falls in the month" do
       leaver = create(:employee, :resigned, tenant: tenant,
                       last_working_date: Date.new(year, month, 15))

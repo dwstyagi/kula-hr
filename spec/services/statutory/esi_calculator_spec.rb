@@ -94,4 +94,23 @@ RSpec.describe Statutory::EsiCalculator do
       expect(result.employee_amount).to eq(115)
     end
   end
+
+  # ── Contribution period continuity ───────────────────────────────────────
+
+  context "when covered earlier in the contribution period" do
+    def continuing(gross)
+      described_class.new(gross: gross, setting: setting, continuing_coverage: true).call
+    end
+
+    it "keeps deducting ESI after a raise takes gross above the ceiling" do
+      result = continuing(24_000)
+      expect(result.applicable).to be true
+      expect(result.employee_amount).to eq(180)   # 24000 × 0.75%
+      expect(result.employer_amount).to eq(780)   # 24000 × 3.25%
+    end
+
+    it "does not apply to a new contribution period" do
+      expect(calc(gross: 24_000).applicable).to be false
+    end
+  end
 end

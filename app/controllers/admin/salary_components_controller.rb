@@ -46,8 +46,11 @@ module Admin
 
     def destroy
       authorize @salary_component
-      @salary_component.destroy!
-      redirect_to admin_salary_components_path, notice: "Salary component deleted successfully."
+      if @salary_component.destroy
+        redirect_to admin_salary_components_path, notice: "Salary component deleted successfully."
+      else
+        redirect_to admin_salary_components_path, alert: @salary_component.errors.full_messages.to_sentence
+      end
     end
 
     def toggle_active

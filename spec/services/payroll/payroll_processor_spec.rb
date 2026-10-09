@@ -286,4 +286,24 @@ RSpec.describe Payroll::PayrollProcessor do
       end
     end
   end
+
+  describe "notice period and taxable flags" do
+    subject(:run_payroll) { described_class.new(payroll_run: payroll_run).call }
+
+    it "pays employees serving notice" do
+      on_notice = create_ready_employee(employment_status: "notice_period")
+      run_payroll
+      expect(payroll_run.payslips.where(employee: on_notice)).to exist
+    end
+
+    it "stores each earning's taxable flag on the payslip line" do
+      hra_comp.update!(taxable: false)
+      employee = create_ready_employee
+      run_payroll
+      lines = payroll_run.payslips.find_by(employee: employee).line_items
+      expect(lines.find_by(component_name: "Basic").taxable).to be true
+      expect(lines.find_by(component_name: "HRA").taxable).to be false
+      expect(lines.find_by(component_name: "PF").taxable).to be false
+    end
+  end
 end

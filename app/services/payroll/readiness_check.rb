@@ -14,11 +14,11 @@ module Payroll
                                  keyword_init: true) do
       def ready? = has_attendance && has_salary
 
-      # Active/probation employees with no locked attendance are the ONLY thing
-      # that blocks PayrollRun creation (matches the historical hard gate).
+      # In-service employees (including those serving notice) with no locked
+      # attendance are the ONLY thing that blocks PayrollRun creation.
       # Resigned/terminated with no attendance are merely skipped at processing.
       def blocks_creation?
-        !has_attendance && %w[active probation].include?(employee.employment_status)
+        !has_attendance && Employee::IN_SERVICE_STATUSES.include?(employee.employment_status)
       end
 
       def reasons
@@ -50,18 +50,14 @@ module Payroll
       def can_create? = blocking.empty?
     end
 
-    # Same eligibility definition the processor uses: active + probation, plus
+    # Same eligibility definition the processor uses: everyone in service
+    # (active, probation, serving notice) who has joined by the month end, plus
     # anyone resigned/terminated whose last working day falls in this month.
     def self.eligible_employees(month:, year:, tenant:)
       month_start = Date.new(year.to_i, month.to_i, 1)
-      month_end   = month_start.end_of_month
 
       ActsAsTenant.with_tenant(tenant) do
-        Employee.where(
-          "employment_status IN (?) OR " \
-          "(employment_status IN (?) AND last_working_date BETWEEN ? AND ?)",
-          %w[active probation], %w[resigned terminated], month_start, month_end
-        )
+        Employee.payable_in(month_start)
       end
     end
 
@@ -79,7 +75,7 @@ module Payroll
         scope = self.class.eligible_employees(month: @month, year: @year, tenant: @tenant)
         salary = EmployeeSalary.where(effective_to: nil).select(:employee_id)
         ready = scope.where(id: locked_scope).where(id: salary)
-        blocking = scope.where(employment_status: %w[active probation]).where.not(id: locked_scope)
+        blocking = scope.where(employment_status: Employee::IN_SERVICE_STATUSES).where.not(id: locked_scope)
         skip = scope.where.not(id: ready.select(:id)).where.not(id: blocking.select(:id))
         variance = ready.where(id: EmployeeSalary.where(effective_to: nil)
           .where("effective_from >= ?", Date.new(@year, @month, 1).prev_month).select(:employee_id))

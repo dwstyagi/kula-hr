@@ -125,6 +125,7 @@ module Payroll
           full_amount:    req.encashment_amount,
           sort_order:     max_sort + i,
           category:       "variable",
+          taxable:        true,
           created_at:     now,
           updated_at:     now
         }
@@ -149,6 +150,7 @@ module Payroll
           full_amount:    result.full_earnings[name],
           sort_order:     (sort += 1),
           category:       "fixed",
+          taxable:        !result.non_taxable_components.include?(name),
           created_at:     now,
           updated_at:     now
         }
@@ -164,6 +166,7 @@ module Payroll
           full_amount:    nil,
           sort_order:     (sort += 1),
           category:       "statutory",
+          taxable:        false,
           created_at:     now,
           updated_at:     now
         }
