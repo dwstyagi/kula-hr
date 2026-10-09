@@ -1,0 +1,62 @@
+<%# locals: (requests:, reviewable: false, empty_message: "No encashment requests.") -%>
+<% badge = { "pending" => "badge-warning", "approved" => "badge-success", "rejected" => "badge-danger", "paid" => "badge-neutral" } %>
+<div class="card overflow-hidden">
+  <% if requests.any? %>
+    <div class="overflow-x-auto">
+      <table class="tbl">
+        <thead>
+          <tr>
+            <% if reviewable %><th>Employee</th><% end %>
+            <th>Leave type</th>
+            <th>FY</th>
+            <th>Days</th>
+            <th class="text-right">Amount</th>
+            <th>Status</th>
+            <% if reviewable %><th class="text-right">Actions</th><% end %>
+          </tr>
+        </thead>
+        <tbody>
+          <% requests.each do |request| %>
+            <tr class="hover:bg-stone-50" id="<%= dom_id(request) %>">
+              <% if reviewable %>
+                <td>
+                  <p class="text-sm font-medium text-stone-900"><%= request.employee.full_name %></p>
+                  <p class="text-xs text-stone-400"><%= request.employee.employee_code %></p>
+                </td>
+              <% end %>
+              <td class="text-sm text-stone-700"><%= request.leave_type.name %></td>
+              <td class="text-sm text-stone-500"><%= request.financial_year %></td>
+              <td class="text-sm font-medium text-stone-900"><%= request.number_of_days.to_i %></td>
+              <td class="text-sm text-right amount">
+                <%= request.encashment_amount ? "₹#{number_with_delimiter(request.encashment_amount.to_i)}" : "—" %>
+              </td>
+              <td>
+                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium <%= badge[request.status] %>">
+                  <%= request.paid? ? "Paid in payroll" : request.status.titleize %>
+                </span>
+                <% if request.rejected? && request.rejection_reason.present? %>
+                  <p class="text-xs text-red-400 mt-0.5 truncate max-w-40" title="<%= request.rejection_reason %>"><%= request.rejection_reason %></p>
+                <% end %>
+              </td>
+              <% if reviewable %>
+                <td class="text-right">
+                  <% if request.pending? %>
+                    <%= render "shared/review_actions", record: request,
+                          approve_path: approve_admin_leave_encashment_request_path(request),
+                          reject_path: reject_admin_leave_encashment_request_path(request),
+                          title: "Reject encashment request",
+                          summary: "#{request.employee.full_name} · #{request.number_of_days.to_i} #{request.leave_type.name} day(s)" %>
+                  <% else %>
+                    <span class="text-stone-300 text-xs">—</span>
+                  <% end %>
+                </td>
+              <% end %>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  <% else %>
+    <div class="p-12 text-center"><p class="text-sm text-stone-500"><%= empty_message %></p></div>
+  <% end %>
+</div>

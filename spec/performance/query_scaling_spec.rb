@@ -63,7 +63,7 @@ RSpec.describe "Performance query budgets" do
     employee = add_employee
     run.update_columns(month: 1, year: 2027)
     create(:attendance_summary, :locked, tenant: tenant, employee: employee, month: 1, year: 2027)
-    declaration = create(:tax_declaration, :old_regime, tenant: tenant, employee: employee, financial_year: "2026-27")
+    declaration = create(:tax_declaration, :old_regime, :submitted, tenant: tenant, employee: employee, financial_year: "2026-27")
     %w[80C 80D 80CCD1B 80E].each do |section|
       create(:investment_declaration, tenant: tenant, tax_declaration: declaration, section: section, declared_amount: 10_000)
     end

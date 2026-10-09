@@ -1,0 +1,51 @@
+<% content_for :page_title, "Tax Declarations" %>
+
+<div class="max-w-6xl mx-auto">
+  <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+    <div>
+      <h1 class="page-title text-2xl">Tax declarations · FY <%= @financial_year %></h1>
+      <p class="page-sub">Submitted declarations reduce TDS from the next payroll run. Verify proofs, or return a declaration for changes.</p>
+    </div>
+    <%= render "shared/status_tabs", counts: @status_counts,
+          statuses: [ [ "All", "" ], [ "Submitted", "submitted" ], [ "Verified", "verified" ], [ "Draft", "draft" ] ],
+          path: ->(status) { admin_tax_declarations_path(status: status, financial_year: @financial_year) } %>
+  </div>
+
+  <div class="card overflow-hidden">
+    <% if @declarations.any? %>
+      <div class="overflow-x-auto">
+        <table class="tbl">
+          <thead>
+            <tr>
+              <th>Employee</th>
+              <th>Regime</th>
+              <th class="text-right">Declared investments</th>
+              <th>Status</th>
+              <th>Last updated</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @declarations.each do |declaration| %>
+              <tr class="hover:bg-stone-50">
+                <td>
+                  <%= link_to admin_tax_declaration_path(declaration), class: "block" do %>
+                    <p class="text-sm font-medium text-stone-900"><%= declaration.employee.full_name %></p>
+                    <p class="text-xs text-stone-400"><%= declaration.employee.employee_code %></p>
+                  <% end %>
+                </td>
+                <td class="text-sm text-stone-700"><%= declaration.regime_old_regime? ? "Old" : "New" %></td>
+                <td class="text-sm text-right amount">₹<%= number_with_delimiter(declaration.total_declared_investments.to_i) %></td>
+                <td><%= render "admin/tax_declarations/status_badge", declaration: declaration %></td>
+                <td class="text-sm text-stone-500"><%= declaration.updated_at.strftime("%d %b %Y") %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    <% else %>
+      <div class="p-12 text-center"><p class="text-sm text-stone-500">No <%= params[:status] %> declarations for FY <%= @financial_year %>.</p></div>
+    <% end %>
+  </div>
+
+  <div class="mt-4"><%= render "shared/pagy_nav", pagy: @pagy %></div>
+</div>

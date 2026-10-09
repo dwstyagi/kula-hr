@@ -26,7 +26,7 @@ module Admin
     end
 
     def employees_scope
-      scope = Employee.where(employment_status: %w[active probation notice_period])
+      scope = Employee.in_service
       scope = scope.where(department_id: @selected_department_id) if @selected_department_id
       scope.order(:first_name)
     end

@@ -20,10 +20,10 @@ module Platform
           redirect_to platform_admin_tenant_path(result.tenant), notice: "Tenant '#{result.tenant.name}' created successfully."
         else
           flash.now[:alert] = result.error
-          render :new, status: :unprocessable_entity
+          render :new, status: :unprocessable_content
         end
       else
-        render :new, status: :unprocessable_entity
+        render :new, status: :unprocessable_content
       end
     end
 
@@ -37,7 +37,7 @@ module Platform
       if @tenant.update(tenant_params)
         redirect_to platform_admin_tenant_path(@tenant), notice: "Tenant updated successfully."
       else
-        render :edit, status: :unprocessable_entity
+        render :edit, status: :unprocessable_content
       end
     end
 

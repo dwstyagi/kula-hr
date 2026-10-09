@@ -1,0 +1,23 @@
+<%# ── Banner ── %>
+<div style="background:linear-gradient(135deg,#DC2626 0%,#EF4444 100%);padding:36px 40px 32px;">
+  <p style="margin:0 0 6px;font-size:12px;font-weight:600;color:#FECACA;letter-spacing:1px;text-transform:uppercase;">Payroll Processing</p>
+  <h1 style="margin:0;font-size:26px;font-weight:700;color:#ffffff;line-height:1.2;">Processing Failed</h1>
+  <p style="margin:10px 0 0;font-size:15px;color:#FEE2E2;"><%= @payroll_run.period_label %> &middot; <%= @tenant.name %></p>
+</div>
+
+<%# ── Body ── %>
+<div style="padding:36px 40px;">
+  <p style="margin:0 0 24px;font-size:15px;color:#374151;line-height:1.6;">
+    Hi <%= @payroll_run.initiated_by.full_name %>,<br><br>
+    Processing for <strong><%= @payroll_run.period_label %></strong> stopped after retrying and the run is back in
+    <strong>Draft</strong>. Payslips already calculated are kept; when the cause is fixed, click
+    <strong>Process</strong> again to finish the remaining employees.
+  </p>
+
+  <div style="background:#FEF2F2;border:1px solid #FECACA;border-left:4px solid #DC2626;border-radius:6px;padding:18px 20px;margin-bottom:28px;">
+    <p style="margin:0 0 8px;font-size:12px;font-weight:700;color:#991B1B;text-transform:uppercase;letter-spacing:0.5px;">Reason</p>
+    <p style="margin:0;font-size:14px;color:#7F1D1D;line-height:1.6;"><%= @reason %></p>
+  </div>
+
+  <p style="margin:0;font-size:14px;color:#9CA3AF;">If this keeps happening, contact Kula HR support with the reason above.</p>
+</div>

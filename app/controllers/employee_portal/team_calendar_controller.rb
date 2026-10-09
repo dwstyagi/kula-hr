@@ -36,7 +36,7 @@ module EmployeePortal
           Employee.where(id: current_employee.id)
         end
 
-      scope.where(employment_status: %w[active probation notice_period]).order(:first_name)
+      scope.in_service.order(:first_name)
     end
   end
 end

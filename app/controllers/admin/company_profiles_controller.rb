@@ -16,7 +16,7 @@ module Admin
       if @tenant.update(company_profile_params)
         redirect_to admin_company_profile_path, notice: "Company profile updated."
       else
-        render :edit, status: :unprocessable_entity
+        render :edit, status: :unprocessable_content
       end
     end
 

@@ -23,7 +23,7 @@ RSpec.describe PayslipPolicy, type: :policy do
   # ── Super Admin ───────────────────────────────────────────────────────────
 
   describe "for a super_admin" do
-    subject { described_class.new(admin, own_payslip) }
+    subject { described_class.new(admin, pending_payslip) }   # processed run — still editable
 
     it { is_expected.to be_index }
     it { is_expected.to be_show }
@@ -41,7 +41,7 @@ RSpec.describe PayslipPolicy, type: :policy do
   # ── HR Admin ──────────────────────────────────────────────────────────────
 
   describe "for an hr_admin (generated payslip)" do
-    subject { described_class.new(hr_user, own_payslip) }
+    subject { described_class.new(hr_user, pending_payslip) }
 
     it { is_expected.to be_index }
     it { is_expected.to be_show }
@@ -109,6 +109,43 @@ RSpec.describe PayslipPolicy, type: :policy do
       user_without_employee = create(:user, :employee)
       scope = described_class::Scope.new(user_without_employee, Payslip.all).resolve
       expect(scope.count).to eq(0)
+    end
+  end
+
+  # ── Editing window ───────────────────────────────────────────────────────
+
+  describe "editing by run state" do
+    def payslip_in(state, month)
+      run = create(:payroll_run, state, tenant: tenant, initiated_by: hr_user, month: month, year: 2025)
+      create(:payslip, tenant: tenant, payroll_run: run, employee: employee, month: month, year: 2025)
+    end
+
+    it "allows edits on a rejected run" do
+      expect(described_class.new(hr_user, payslip_in(:rejected, 3))).to be_edit
+    end
+
+    it "blocks edits while the run is under review" do
+      expect(described_class.new(hr_user, payslip_in(:under_review, 4))).not_to be_edit
+    end
+
+    it "blocks edits once the run is approved, even before payslips are locked" do
+      expect(described_class.new(hr_user, own_payslip)).not_to be_edit
+    end
+  end
+
+  describe "Scope for unusual users" do
+    before { own_payslip; other_payslip }
+
+    it "returns nothing for a user with no role" do
+      roleless = create(:user)
+      roleless.roles.clear
+      expect(described_class::Scope.new(roleless, Payslip.all).resolve).to be_empty
+    end
+
+    it "returns everything in the admin panel for an HR admin who is also an employee" do
+      hr_user.add_role(:employee)
+      create(:employee, tenant: tenant, user: hr_user)
+      expect(described_class::Scope.new(hr_user, Payslip.all).resolve.count).to eq(2)
     end
   end
 end

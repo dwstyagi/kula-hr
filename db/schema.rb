@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_13_103000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_05_110100) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "pg_catalog.plpgsql"
@@ -53,6 +53,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_13_103000) do
     t.decimal "lop_days", precision: 5, scale: 1, default: "0.0", null: false
     t.decimal "lop_leaves", precision: 5, scale: 1, default: "0.0", null: false
     t.integer "month", null: false
+    t.decimal "non_employment_days", precision: 5, scale: 1, default: "0.0", null: false
     t.decimal "paid_days", precision: 5, scale: 1, default: "0.0", null: false
     t.integer "status", default: 0, null: false
     t.bigint "tenant_id", null: false
@@ -61,7 +62,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_13_103000) do
     t.datetime "updated_at", null: false
     t.integer "year", null: false
     t.index ["employee_id", "month", "year"], name: "idx_att_sum_emp_month_year", unique: true
-    t.index ["employee_id"], name: "index_attendance_summaries_on_employee_id"
     t.index ["tenant_id", "month", "year"], name: "idx_att_sum_tenant_month_year"
     t.index ["tenant_id", "status"], name: "idx_att_sum_tenant_status"
     t.index ["tenant_id"], name: "index_attendance_summaries_on_tenant_id"
@@ -250,6 +250,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_13_103000) do
     t.integer "attempts", default: 0, null: false
     t.datetime "created_at", null: false
     t.datetime "dispatched_at"
+    t.datetime "failed_at"
     t.string "job_class", null: false
     t.text "last_error"
     t.datetime "updated_at", null: false
@@ -367,6 +368,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_13_103000) do
     t.text "notes"
     t.date "payment_date"
     t.integer "processed_employees", default: 0
+    t.jsonb "processing_errors", default: [], null: false
+    t.text "processing_failure"
     t.text "rejection_reason"
     t.string "run_type", default: "regular", null: false
     t.string "status", default: "draft", null: false
@@ -422,6 +425,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_13_103000) do
     t.decimal "full_amount", precision: 12, scale: 2
     t.bigint "payslip_id", null: false
     t.integer "sort_order", default: 0
+    t.boolean "taxable", default: true, null: false
     t.datetime "updated_at", null: false
     t.index ["payslip_id", "component_type"], name: "index_payslip_line_items_on_payslip_id_and_component_type"
     t.index ["payslip_id"], name: "index_payslip_line_items_on_payslip_id"
@@ -449,10 +453,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_13_103000) do
     t.datetime "updated_at", null: false
     t.integer "year", null: false
     t.index ["employee_id", "month", "year"], name: "index_payslips_on_employee_id_and_month_and_year"
-    t.index ["employee_id"], name: "index_payslips_on_employee_id"
     t.index ["payroll_run_id", "employee_id"], name: "index_payslips_on_payroll_run_id_and_employee_id", unique: true
     t.index ["payroll_run_id", "status"], name: "idx_payslips_run_status"
-    t.index ["payroll_run_id"], name: "index_payslips_on_payroll_run_id"
     t.index ["tenant_id"], name: "index_payslips_on_tenant_id"
   end
 

@@ -1,6 +1,6 @@
 module Leave
   class MonthlyLeaveAccrualService
-    WORKING_STATUSES = %w[active probation].freeze
+    WORKING_STATUSES = Employee::IN_SERVICE_STATUSES
 
     def self.run_for_all_tenants(period: Date.current.beginning_of_month)
       Tenant.where(status: %w[trial active]).find_each do |tenant|
@@ -18,8 +18,7 @@ module Leave
           LeaveAccrual.create!(tenant: @tenant, period: @period)
           # April is seeded by rollover; the joining allocation seeds new hires.
           unless @period.month == 4
-            year = @period.month >= 4 ? @period.year : @period.year - 1
-            fy = "#{year}-#{(year + 1).to_s.last(2)}"
+            fy = FinancialYear.label(@period)
             employees = Employee.where(employment_status: WORKING_STATUSES).where("joining_date < ?", @period).select(:id)
             LeaveType.active.paid.find_each do |type|
               quota = (type.annual_quota / 12.0).round(2)

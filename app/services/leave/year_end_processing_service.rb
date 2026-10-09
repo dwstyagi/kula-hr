@@ -6,7 +6,7 @@ module Leave
   # New FY balance is seeded with April's monthly accrual already included so the
   # monthly accrual explicitly skips April to avoid crediting it twice.
   class YearEndProcessingService
-    WORKING_STATUSES = %w[active probation].freeze
+    WORKING_STATUSES = Employee::IN_SERVICE_STATUSES
 
     def self.run_for_all_tenants
       Tenant.where(status: %w[trial active]).find_each do |tenant|
@@ -31,9 +31,9 @@ module Leave
       leave_types = LeaveType.active.paid.to_a
       return if leave_types.empty?
 
-      opening_year = @opening_on.month >= 4 ? @opening_on.year : @opening_on.year - 1
-      current_fy = "#{opening_year - 1}-#{opening_year.to_s.last(2)}"
-      new_fy = "#{opening_year}-#{(opening_year + 1).to_s.last(2)}"
+      opening_year = FinancialYear.start_year(@opening_on)
+      current_fy = FinancialYear.label_for_start_year(opening_year - 1)
+      new_fy = FinancialYear.label_for_start_year(opening_year)
       now        = Time.current
 
       Employee.where(employment_status: WORKING_STATUSES).in_batches(of: 100) do |batch|

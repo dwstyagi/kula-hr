@@ -1,6 +1,10 @@
 require "rails_helper"
 
 RSpec.describe Salary::CtcBreakupCalculator do
+  # These examples were written against the ₹15,000 PF ceiling; pin it so they
+  # keep testing the breakup logic rather than today's date. The ₹25,000
+  # ceiling is covered by its own example below.
+  before { allow(Statutory::PfWageCeiling).to receive(:current).and_return(15_000.to_d) }
   let(:tenant) { create(:tenant, state: "Maharashtra") }
 
   before { set_tenant(tenant) }
@@ -254,6 +258,31 @@ RSpec.describe Salary::CtcBreakupCalculator do
       off = described_class.call(annual_ctc: 1_200_000, salary_structure: structure,
                                  payroll_setting: payroll_setting, professional_tax_slabs: pt_slabs)
       expect(off.earnings.find { |e| e.name == "Special Allowance" }.monthly).to eq(30_000)
+    end
+  end
+
+  describe "statutory deductions follow payroll settings" do
+    it "shows no PF when PF is disabled" do
+      setting = create(:payroll_setting, :no_pf, tenant: tenant)
+      result = described_class.call(annual_ctc: 1_200_000, salary_structure: structure,
+                                    payroll_setting: setting, professional_tax_slabs: [])
+      expect(result.deductions.find { |d| d.name == "Employee PF" }.monthly).to eq(0)
+      expect(result.employer_contributions.find { |c| c.name == "Employer PF" }.monthly).to eq(0)
+    end
+
+    it "rounds ESI up to the rupee, as payroll does" do
+      result = described_class.call(annual_ctc: 230_000, salary_structure: structure,   # gross 18,850
+                                    payroll_setting: payroll_setting, professional_tax_slabs: [])
+      expect(result.deductions.find { |d| d.name == "ESI" }.monthly).to eq((result.gross_monthly * 0.0075).ceil)
+    end
+
+    it "uses the ₹25,000 ceiling from October 2026" do
+      allow(Statutory::PfWageCeiling).to receive(:current).and_call_original
+      travel_to(Date.new(2026, 10, 15)) do
+        result = described_class.call(annual_ctc: 1_200_000, salary_structure: structure,
+                                      payroll_setting: payroll_setting, professional_tax_slabs: [])
+        expect(result.deductions.find { |d| d.name == "Employee PF" }.monthly).to eq(3_000)
+      end
     end
   end
 end

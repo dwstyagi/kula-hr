@@ -21,7 +21,7 @@ module Leave
       leave_types = LeaveType.active.paid.where(carry_forward: true).to_a
       return if leave_types.empty?
 
-      employees = Employee.where(employment_status: %w[active probation])
+      employees = Employee.in_service
       return if employees.empty?
 
       employees.each do |employee|

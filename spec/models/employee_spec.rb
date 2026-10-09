@@ -195,4 +195,41 @@ RSpec.describe Employee, type: :model do
       expect(Employee.probation.count).to eq(1)
     end
   end
+
+  describe ".payable_in" do
+    let(:tenant)      { create(:tenant) }
+    let(:month_start) { Date.new(2026, 10, 1) }
+
+    around { |ex| ActsAsTenant.with_tenant(tenant) { ex.run } }
+
+    it "includes everyone in service, including those serving notice" do
+      active    = create(:employee, tenant: tenant)
+      on_notice = create(:employee, tenant: tenant, employment_status: "notice_period",
+                         last_working_date: Date.new(2026, 11, 15))
+      expect(Employee.payable_in(month_start)).to contain_exactly(active, on_notice)
+    end
+
+    it "includes leavers only in the month of their last working day" do
+      leaver = create(:employee, :resigned, tenant: tenant, last_working_date: Date.new(2026, 10, 12))
+      expect(Employee.payable_in(month_start)).to include(leaver)
+      expect(Employee.payable_in(Date.new(2026, 11, 1))).not_to include(leaver)
+    end
+
+    it "excludes people who have not joined by the month end" do
+      create(:employee, tenant: tenant, joining_date: Date.new(2026, 11, 2))
+      expect(Employee.payable_in(month_start)).to be_empty
+    end
+  end
+
+  describe "#employment_window" do
+    it "is the part of the month between joining and the last working day" do
+      employee = build(:employee, joining_date: Date.new(2026, 10, 16), last_working_date: Date.new(2026, 10, 20))
+      expect(employee.employment_window(Date.new(2026, 10, 1))).to eq(Date.new(2026, 10, 16)..Date.new(2026, 10, 20))
+    end
+
+    it "is nil when not employed that month" do
+      employee = build(:employee, joining_date: Date.new(2026, 11, 1))
+      expect(employee.employment_window(Date.new(2026, 10, 1))).to be_nil
+    end
+  end
 end

@@ -6,7 +6,8 @@ module EmployeePortal
     skip_after_action :verify_policy_scoped, only: [ :new, :create, :cancel ]
 
     def index
-      @leave_requests = policy_scope(LeaveRequest)
+      # Own requests only, also for an HR admin with an employee profile.
+      @leave_requests = policy_scope(LeaveRequest).where(employee: current_employee)
         .includes(:leave_type, :approved_by)
         .order(created_at: :desc)
       @leave_balances = current_employee.leave_balances.current.includes(:leave_type).order("leave_types.name")

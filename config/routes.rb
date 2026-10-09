@@ -137,6 +137,12 @@ Rails.application.routes.draw do
           patch :reject
         end
       end
+      resources :tax_declarations, only: [ :index, :show ] do
+        member do
+          patch :verify
+          patch :return_to_draft
+        end
+      end
       resources :attendance_summaries, only: [ :index, :show, :edit, :update ] do
         collection do
           post :generate
@@ -308,6 +314,7 @@ Rails.application.routes.draw do
   # Sidekiq Web UI — only accessible to authenticated Platform Admins
   PLATFORM_ADMIN_CONSTRAINT = lambda do |request|
     request.session[:platform_admin_id].present? &&
+      request.session[:platform_admin_seen_at].to_i >= 30.minutes.ago.to_i &&
       PlatformAdmin.exists?(request.session[:platform_admin_id])
   end unless defined?(PLATFORM_ADMIN_CONSTRAINT)
 

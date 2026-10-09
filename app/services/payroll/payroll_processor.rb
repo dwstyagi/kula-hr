@@ -67,16 +67,18 @@ module Payroll
       create_payslip(result)
       @processed << employee.id
 
-    rescue Payroll::SalaryCalculator::CalculationError => e
-      record_skip(employee, e.message)
-    rescue => e
-      record_skip(employee, "Unexpected error: #{e.message}")
+    rescue *Payroll::ProcessingErrors::INFRASTRUCTURE
+      raise
+    rescue StandardError => e
+      record_skip(employee, e)
     end
 
-    def record_skip(employee, reason)
+    def record_skip(employee, error)
+      entry = Payroll::ProcessingErrors.entry(employee_id: employee.id, name: employee.full_name, error: error)
       @skipped << employee.id
-      @errors  << { employee_id: employee.id, name: employee.full_name, error: reason }
-      Rails.logger.warn("[PayrollProcessor] Skipped #{employee.full_name}: #{reason}")
+      @errors  << entry
+      Rails.logger.warn("[PayrollProcessor] run=#{@run.id} skipped employee=#{employee.id}: #{entry['error']}")
+      Rails.logger.debug { error.backtrace&.first(10)&.join("\n") } if error.is_a?(Exception)
     end
 
     # ── Payslip creation ───────────────────────────────────────────────────────
@@ -125,6 +127,7 @@ module Payroll
           full_amount:    req.encashment_amount,
           sort_order:     max_sort + i,
           category:       "variable",
+          taxable:        true,
           created_at:     now,
           updated_at:     now
         }
@@ -149,6 +152,7 @@ module Payroll
           full_amount:    result.full_earnings[name],
           sort_order:     (sort += 1),
           category:       "fixed",
+          taxable:        !result.non_taxable_components.include?(name),
           created_at:     now,
           updated_at:     now
         }
@@ -164,6 +168,7 @@ module Payroll
           full_amount:    nil,
           sort_order:     (sort += 1),
           category:       "statutory",
+          taxable:        false,
           created_at:     now,
           updated_at:     now
         }
@@ -192,13 +197,8 @@ module Payroll
     end
 
     def finalize
-      @run.update!(
-        processed_employees: @run.payslips.count,
-        total_gross:         @run.payslips.sum(:gross_pay),
-        total_deductions:    @run.payslips.sum(:total_deductions),
-        total_net_pay:       @run.payslips.sum(:net_pay),
-        total_employer_cost: @run.payslips.sum(:employer_pf) + @run.payslips.sum(:employer_esi)
-      )
+      @run.refresh_totals!
+      @run.update!(processing_errors: @errors.first(Payroll::ProcessingErrors::MAX_STORED))
 
       @run.finish_processing!
       # One last broadcast in the final state so a watching run page can

@@ -105,4 +105,74 @@ RSpec.describe Attendance::SummaryGenerator do
       expect(summary.approved_leaves).to eq(3)
     end
   end
+
+  describe "employment window" do
+    # January 2025 (Mon–Fri): 23 working days. 1–15 Jan = 11, 16–31 Jan = 12.
+
+    it "prorates a mid-month joiner without counting days before joining as absences" do
+      joiner = create(:employee, tenant: tenant, joining_date: Date.new(2025, 1, 16))
+      generator.call
+      summary = AttendanceSummary.find_by(employee: joiner, month: 1, year: 2025)
+      expect(summary.total_working_days).to eq(23)
+      expect(summary.non_employment_days).to eq(11)
+      expect(summary.days_present).to eq(12)
+      expect(summary.unapproved_absences).to eq(0)
+      expect(summary.lop_days).to eq(0)
+      expect(summary.paid_days).to eq(12)
+    end
+
+    it "prorates someone whose last working day falls in the month" do
+      leaver = create(:employee, :resigned, tenant: tenant, last_working_date: Date.new(2025, 1, 10))
+      generator.call
+      summary = AttendanceSummary.find_by(employee: leaver, month: 1, year: 2025)
+      expect(summary.non_employment_days).to eq(15)   # 13–31 Jan
+      expect(summary.paid_days).to eq(8)              # 1–10 Jan
+    end
+
+    it "generates attendance for employees serving notice" do
+      on_notice = create(:employee, tenant: tenant, employment_status: "notice_period")
+      generator.call
+      expect(AttendanceSummary.find_by(employee: on_notice, month: 1, year: 2025)).to be_present
+    end
+
+    it "skips employees who join after the month" do
+      future = create(:employee, tenant: tenant, joining_date: Date.new(2025, 2, 3))
+      generator.call
+      expect(AttendanceSummary.find_by(employee: future, month: 1, year: 2025)).to be_nil
+    end
+
+    it "only counts leave taken while employed" do
+      joiner = create(:employee, tenant: tenant, joining_date: Date.new(2025, 1, 16))
+      lr = build(:leave_request, :approved, tenant: tenant, employee: joiner, leave_type: lop_type,
+                 from_date: Date.new(2025, 1, 13), to_date: Date.new(2025, 1, 17))
+      lr.save(validate: false)
+      generator.call
+      expect(AttendanceSummary.find_by(employee: joiner, month: 1, year: 2025).lop_leaves).to eq(2)  # 16, 17 Jan
+    end
+  end
+
+  describe "leave days on the working-day calendar" do
+    it "skips a holiday inside a leave" do
+      create(:holiday, tenant: tenant, date: Date.new(2025, 1, 7))   # company-wide, Tuesday
+      lr = build(:leave_request, :approved, tenant: tenant, employee: employee, leave_type: lop_type,
+                 from_date: Date.new(2025, 1, 6), to_date: Date.new(2025, 1, 8))
+      lr.save(validate: false)
+      generator.call
+      summary = AttendanceSummary.find_by(employee: employee, month: 1, year: 2025)
+      expect(summary.total_working_days).to eq(22)
+      expect(summary.lop_leaves).to eq(2)
+    end
+
+    context "for a six-day week" do
+      let(:payroll_setting) { create(:payroll_setting, tenant: tenant, week_off_pattern: "only_sundays") }
+
+      it "counts a Saturday on leave" do
+        lr = build(:leave_request, :approved, tenant: tenant, employee: employee, leave_type: lop_type,
+                   from_date: Date.new(2025, 1, 6), to_date: Date.new(2025, 1, 11))   # Mon–Sat
+        lr.save(validate: false)
+        generator.call
+        expect(AttendanceSummary.find_by(employee: employee, month: 1, year: 2025).lop_leaves).to eq(6)
+      end
+    end
+  end
 end

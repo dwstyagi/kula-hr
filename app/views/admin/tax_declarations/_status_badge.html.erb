@@ -1,0 +1,5 @@
+<%# locals: (declaration:) -%>
+<% styles = { "draft" => "badge-neutral", "submitted" => "badge-warning", "verified" => "badge-success" } %>
+<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium <%= styles[declaration.status] %>">
+  <%= { "draft" => "Draft (not used for TDS)", "submitted" => "Submitted", "verified" => "Verified" }[declaration.status] %>
+</span>

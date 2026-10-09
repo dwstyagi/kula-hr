@@ -1,4 +1,7 @@
 class PayslipLineItem < ApplicationRecord
+  # Every manual correction is kept (who, when, before/after).
+  has_paper_trail
+
   belongs_to :payslip
 
   COMPONENT_TYPES = %w[earning deduction].freeze

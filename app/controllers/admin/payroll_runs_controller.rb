@@ -46,7 +46,7 @@ module Admin
                     notice: "Payroll run created for #{@payroll_run.period_label}."
       else
         @readiness = readiness_for(@payroll_run)
-        render :new, status: :unprocessable_entity
+        render :new, status: :unprocessable_content
       end
     rescue ActiveRecord::RecordNotUnique
       # Lost a concurrent create race: the DB unique index blocked the duplicate.
@@ -54,7 +54,7 @@ module Admin
       # (the winning run is now committed, so no_existing_run_for_period sees it).
       @payroll_run.valid?
       @readiness = readiness_for(@payroll_run)
-      render :new, status: :unprocessable_entity
+      render :new, status: :unprocessable_content
     end
 
     # GET /admin/payroll_runs/:id
@@ -91,14 +91,12 @@ module Admin
     def submit_for_review
       authorize @payroll_run
 
-      if @payroll_run.submit_for_review!
-        PayrollMailer.submitted_for_review(@payroll_run).deliver_later
-        redirect_to admin_payroll_run_path(@payroll_run),
-                    notice: "Payroll submitted for review. Super admins have been notified."
-      else
-        redirect_to admin_payroll_run_path(@payroll_run),
-                    alert: "Could not submit for review."
-      end
+      # submit_for_review! raises AASM::InvalidTransition (handled in
+      # Admin::BaseController) rather than returning false.
+      @payroll_run.with_lock { @payroll_run.submit_for_review! }
+      PayrollMailer.submitted_for_review(@payroll_run).deliver_later
+      redirect_to admin_payroll_run_path(@payroll_run),
+                  notice: "Payroll submitted for review. Super admins have been notified."
     end
 
     # PATCH /admin/payroll_runs/:id/approve
@@ -153,7 +151,7 @@ module Admin
     def mark_paid
       authorize @payroll_run
 
-      @payroll_run.mark_paid!
+      @payroll_run.with_lock { @payroll_run.mark_paid! }
 
       redirect_to admin_payroll_run_path(@payroll_run),
                   notice: "Payroll marked as paid for #{@payroll_run.period_label}."

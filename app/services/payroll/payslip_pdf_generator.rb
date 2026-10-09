@@ -472,7 +472,8 @@ class Payroll::PayslipPdfGenerator
   end
 
   def fy_bounds
-    @payslip.month >= 4 ? [ @payslip.year, @payslip.year + 1 ] : [ @payslip.year - 1, @payslip.year ]
+    first = FinancialYear.start_year(Date.new(@payslip.year, @payslip.month, 1))
+    [ first, first + 1 ]
   end
 
   def fy_label

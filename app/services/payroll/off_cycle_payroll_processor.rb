@@ -78,22 +78,19 @@ module Payroll
       end
 
       @processed << entry.employee_id
-    rescue => e
+    rescue *Payroll::ProcessingErrors::INFRASTRUCTURE
+      raise
+    rescue StandardError => e
       @skipped << entry.employee_id
-      @errors << { employee_id: entry.employee_id, name: entry.employee.full_name, error: e.message }
+      @errors << Payroll::ProcessingErrors.entry(employee_id: entry.employee_id, name: entry.employee.full_name, error: e)
     end
 
     def finalize
       # processed_employees doubles as the live progress counter while the run
       # is processing, so settle it on the true success count here — otherwise a
       # run whose entries all failed reports 40/40 with zero payslips.
-      @run.update!(
-        processed_employees: @run.payslips.count,
-        total_gross: @run.payslips.sum(:gross_pay),
-        total_deductions: @run.payslips.sum(:total_deductions),
-        total_net_pay: @run.payslips.sum(:net_pay),
-        total_employer_cost: 0
-      )
+      @run.refresh_totals!
+      @run.update!(processing_errors: @errors.first(Payroll::ProcessingErrors::MAX_STORED))
       @run.finish_processing!
 
       ProcessingResult.new(

@@ -1,5 +1,9 @@
 import { Controller } from "@hotwired/stimulus"
 
+// Statutory EPF/EPS/EDLI wage ceiling from 17 September 2026 (S.O. 5109(E)).
+// Keep in step with Statutory::PfWageCeiling.
+const PF_WAGE_CEILING = 25000
+
 export default class extends Controller {
   static targets = [
     "pfBasic", "pfDa", "pfFull", "pfBase", "pfEmployee", "pfEmployer", "pfEps", "pfEpf",
@@ -23,10 +27,10 @@ export default class extends Controller {
 
   calculatePf() {
     const wage = this.number(this.pfBasicTarget) + this.number(this.pfDaTarget)
-    const base = this.pfFullTarget.checked ? wage : Math.min(wage, 15000)
+    const base = this.pfFullTarget.checked ? wage : Math.min(wage, PF_WAGE_CEILING)
     const employee = Math.round(base * 0.12)
     const employer = Math.round(base * 0.12)
-    const eps = Math.min(employer, Math.round(Math.min(base, 15000) * 0.0833))
+    const eps = Math.min(employer, Math.round(Math.min(base, PF_WAGE_CEILING) * 0.0833))
 
     this.write(this.pfBaseTarget, base)
     this.write(this.pfEmployeeTarget, employee)
@@ -53,7 +57,7 @@ export default class extends Controller {
   calculateCtc() {
     const monthlyCtc = this.number(this.ctcAnnualTarget) / 12
     const basic = monthlyCtc * (this.number(this.ctcBasicPercentTarget, 40) / 100)
-    const employerPfBase = this.ctcFullPfTarget.checked ? basic : Math.min(basic, 15000)
+    const employerPfBase = this.ctcFullPfTarget.checked ? basic : Math.min(basic, PF_WAGE_CEILING)
     const employerPf = Math.round(employerPfBase * 0.12)
     const beforeEsi = Math.max(monthlyCtc - employerPf, 0)
     const employerEsi = beforeEsi > 0 && beforeEsi <= 21000 ? Math.ceil(beforeEsi * 0.0325) : 0

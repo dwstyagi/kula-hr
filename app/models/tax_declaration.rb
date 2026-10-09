@@ -8,6 +8,12 @@ class TaxDeclaration < ApplicationRecord
   enum :regime, { old_regime: 0, new_regime: 1 }, prefix: true
   enum :status, { draft: 0, submitted: 1, verified: 2 }, prefix: true
 
+  # Only what the employee has submitted reduces TDS. A draft can change at
+  # any time and has not been put forward by the employee.
+  scope :effective_for_tds, -> { where(status: [ statuses[:submitted], statuses[:verified] ]) }
+
+  has_paper_trail
+
   RENTAL_CITIES = %w[metro non_metro].freeze
 
   accepts_nested_attributes_for :investment_declarations,

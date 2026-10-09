@@ -25,6 +25,16 @@ RSpec.describe Leave::EncashmentCalculator, type: :service do
       expect(result).to eq(4000.00)
     end
 
+    it "handles a flat Basic, not only a percentage of CTC" do
+      structure  = create(:salary_structure, tenant: tenant)
+      basic_comp = create(:salary_component, tenant: tenant, name: "Basic",
+                          component_type: "earning", calculation_type: "flat")
+      create(:salary_structure_component, salary_structure: structure, salary_component: basic_comp, value: 30_000)
+      create(:employee_salary, tenant: tenant, employee: employee, salary_structure: structure,
+             annual_ctc: 600_000, effective_to: nil)
+      expect(described_class.new(employee: employee, number_of_days: 6).call).to eq(6_000)
+    end
+
     it "raises NoSalaryError when employee has no salary" do
       expect {
         described_class.new(employee: employee, number_of_days: 6).call

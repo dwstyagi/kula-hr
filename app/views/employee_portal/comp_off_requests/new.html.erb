@@ -1,0 +1,29 @@
+<div class="max-w-xl mx-auto">
+  <h1 class="page-title text-2xl mb-1">Request comp-off</h1>
+  <p class="text-sm text-stone-500 mb-6">Choose the weekend or holiday you worked. Your reporting manager (or HR) will review it.</p>
+
+  <div class="card p-6">
+    <%= form_with model: @comp_off_request, url: employee_portal_comp_off_requests_path do |f| %>
+      <% if @comp_off_request.errors.any? %>
+        <div class="mb-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">
+          <%= @comp_off_request.errors.full_messages.to_sentence %>
+        </div>
+      <% end %>
+
+      <div class="mb-4">
+        <%= f.label :worked_date, "Date worked", class: "label" %>
+        <%= f.date_field :worked_date, max: Date.yesterday, required: true, class: "input" %>
+      </div>
+
+      <div class="mb-6">
+        <%= f.label :reason, class: "label" %>
+        <%= f.text_area :reason, rows: 3, maxlength: 255, class: "input", placeholder: "What did you work on?" %>
+      </div>
+
+      <div class="flex justify-end gap-3">
+        <%= link_to "Cancel", employee_portal_comp_off_requests_path, class: "btn btn-secondary" %>
+        <%= f.submit "Submit request", class: "btn btn-primary cursor-pointer" %>
+      </div>
+    <% end %>
+  </div>
+</div>

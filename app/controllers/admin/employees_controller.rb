@@ -69,27 +69,52 @@ module Admin
       if tenant.at_employee_limit?
         load_form_options
         flash.now[:alert] = "Trial accounts are limited to #{Tenant::TRIAL_EMPLOYEE_LIMIT} employees. Upgrade to add more."
-        return render :new, status: :unprocessable_entity
+        return render :new, status: :unprocessable_content
       end
 
-      ActiveRecord::Base.transaction do
-        user = User.create!(
-          first_name: @employee.first_name,
-          last_name: @employee.last_name,
-          email: @employee.email,
-          password: SecureRandom.hex(20)
-        )
+      existing_user = User.find_by(email: @employee.email.to_s.strip.downcase)
+      if existing_user && (error = existing_account_error(existing_user, tenant))
+        @employee.errors.add(:email, error)
+        load_form_options
+        return render :new, status: :unprocessable_content
+      end
 
-        TenantUser.create!(tenant: ActsAsTenant.current_tenant, user: user)
-        user.assign_role(:employee)
-        @employee.user = user
-        @employee.save!
-        user.invite!(current_user)
+      invited = false
+      ActiveRecord::Base.transaction do
+        if existing_user
+          # Someone who already signs in to this company (e.g. an HR admin) is
+          # linked to the new employee record; their admin role is kept.
+          existing_user.add_role(:employee) unless existing_user.has_role?(:employee)
+          @employee.user = existing_user
+          @employee.save!
+        else
+          user = User.create!(
+            first_name: @employee.first_name,
+            last_name: @employee.last_name,
+            email: @employee.email,
+            password: SecureRandom.hex(20)
+          )
+
+          TenantUser.create!(tenant: tenant, user: user)
+          user.assign_role(:employee)
+          @employee.user = user
+          @employee.save!
+          user.invite!(current_user)
+          invited = true
+        end
         Leave::LeaveBalanceAllocator.new(employee: @employee).call
       end
 
-      redirect_to admin_employee_path(@employee), notice: "Employee created and invitation sent to #{@employee.email}."
-    rescue ActiveRecord::RecordInvalid
+      notice = invited ? "Employee created and invitation sent to #{@employee.email}." :
+                         "Employee created and linked to the existing account for #{@employee.email}."
+      redirect_to admin_employee_path(@employee), notice: notice
+    rescue ActiveRecord::RecordInvalid => e
+      # Surface errors raised on the User (e.g. a malformed email) on the form.
+      unless e.record.equal?(@employee)
+        e.record.errors.each do |err|
+          @employee.errors.add(err.attribute == :email ? :email : :base, err.message)
+        end
+      end
       load_form_options
       render :new, status: :unprocessable_content
     end
@@ -201,6 +226,14 @@ module Admin
     end
 
     private
+
+    # Why an existing login cannot be linked to a new employee here, or nil.
+    def existing_account_error(user, tenant)
+      return "is already used by an account in another company" unless user.member_of?(tenant)
+
+      linked = Employee.where(user: user).first
+      "is already linked to employee #{linked.full_name} (#{linked.employee_code})" if linked
+    end
 
     def set_employee
       @employee = Employee.find(params[:id])

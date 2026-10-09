@@ -5,14 +5,14 @@ module EmployeePortal
 
     # GET /portal/payslips
     def index
-      @payslips = policy_scope(Payslip)
+      @payslips = portal_payslips
                     .includes(:payroll_run)
                     .order(year: :desc, month: :desc)
                     .limit(24)
 
       # YTD summary for current financial year
-      fy_start = Date.today.month >= 4 ? Date.new(Date.today.year, 4, 1) : Date.new(Date.today.year - 1, 4, 1)
-      @ytd_payslips = policy_scope(Payslip)
+      fy_start = Date.new(FinancialYear.start_year(Date.current), 4, 1)
+      @ytd_payslips = portal_payslips
                         .where("(payslips.year > :fy_year) OR (payslips.year = :fy_year AND payslips.month >= :fy_month)",
                                fy_year: fy_start.year, fy_month: fy_start.month)
       # Month-over-month changes
@@ -47,8 +47,16 @@ module EmployeePortal
 
     private
 
+    # The portal shows only the signed-in person's released payslips — also
+    # for an HR admin who has an employee profile, whose policy scope in the
+    # admin panel covers everyone.
+    def portal_payslips
+      policy_scope(Payslip).joins(:payroll_run)
+        .where(employee: current_employee, payroll_runs: { status: %w[approved paid] })
+    end
+
     def set_payslip
-      @payslip = policy_scope(Payslip).find(params[:id])
+      @payslip = portal_payslips.find(params[:id])
     end
 
     def require_employee!

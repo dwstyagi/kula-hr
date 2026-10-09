@@ -13,16 +13,19 @@ module Platform
       admin = PlatformAdmin.find_by(email: params[:email]&.downcase&.strip)
 
       if admin&.authenticate(params[:password])
+        # New session id on sign-in (session fixation), then start the idle timer.
+        reset_session
         session[:platform_admin_id] = admin.id
+        session[:platform_admin_seen_at] = Time.current.to_i
         redirect_to platform_admin_root_path, notice: "Logged in successfully."
       else
         flash.now[:alert] = "Invalid email or password."
-        render :new, status: :unprocessable_entity
+        render :new, status: :unprocessable_content
       end
     end
 
     def destroy
-      session.delete(:platform_admin_id)
+      reset_session
       redirect_to platform_admin_login_path, notice: "Logged out successfully."
     end
   end
