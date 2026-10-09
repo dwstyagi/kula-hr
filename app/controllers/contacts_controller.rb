@@ -15,7 +15,7 @@ class ContactsController < ApplicationController
 
     if @name.blank? || @email.blank? || @message.blank?
       flash.now[:alert] = "Please fill in all fields."
-      render :new, status: :unprocessable_entity
+      render :new, status: :unprocessable_content
       return
     end
 

@@ -23,6 +23,18 @@
     <div class="alert alert-error"><div><p class="font-semibold">Rejected</p><p><%= @payroll_run.rejection_reason %></p></div></div>
   <% end %>
 
+  <% if @payroll_run.draft? && @payroll_run.processing_failure.present? %>
+    <div class="alert alert-error"><p><strong>The last calculation attempt stopped:</strong> <%= @payroll_run.processing_failure %>
+      Payslips already created are kept — calculate again to finish the rest.</p></div>
+  <% end %>
+
+  <% if Array(@payroll_run.processing_errors).any? && !@payroll_run.draft? %>
+    <div class="alert alert-warning"><div>
+      <p><strong><%= @payroll_run.processing_errors.size %> employee(s)</strong> could not be paid in this run.</p>
+      <%= render "admin/payroll_runs/processing_errors", payroll_run: @payroll_run %>
+    </div></div>
+  <% end %>
+
   <% if @payroll_run.draft? || @payroll_run.processing? %>
     <% if @payroll_run.full_and_final? %>
       <%= render "full_and_final_summary", payroll_run: @payroll_run %>

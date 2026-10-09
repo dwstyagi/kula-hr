@@ -7,6 +7,14 @@ module Admin
 
     layout "admin"
 
+    # A double click or a second admin acting on the same payroll run raises
+    # here (e.g. approving a run that was just approved). Explain instead of 500.
+    rescue_from AASM::InvalidTransition do |error|
+      state = error.object.aasm.current_state.to_s.humanize.downcase
+      redirect_back fallback_location: admin_root_path,
+                    alert: "That action is no longer available — this payroll run is now #{state}."
+    end
+
     private
 
     def verify_admin_or_hr!

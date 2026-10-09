@@ -86,14 +86,14 @@ module Admin
         )
 
         @payslip.recalculate_totals!
-        update_payroll_run_totals
+        @payroll_run.refresh_totals!
       end
 
       redirect_to admin_payslip_path(@payslip),
                   notice: "Payslip updated and totals recalculated."
     rescue ActiveRecord::RecordInvalid => e
       flash.now[:alert] = e.message
-      render :edit, status: :unprocessable_entity
+      render :edit, status: :unprocessable_content
     end
 
     private
@@ -105,19 +105,6 @@ module Admin
     def set_payslip
       @payslip     = policy_scope(Payslip).find(params[:id])
       @payroll_run = @payslip.payroll_run
-    end
-
-    # Recalculate the PayrollRun aggregate totals after a payslip edit
-    def update_payroll_run_totals
-      @payroll_run.with_lock do
-        @payroll_run.update!(
-          total_gross:       @payroll_run.payslips.sum(:gross_pay),
-          total_deductions:  @payroll_run.payslips.sum(:total_deductions),
-          total_net_pay:     @payroll_run.payslips.sum(:net_pay),
-          total_employer_cost: @payroll_run.payslips.sum(:employer_pf) +
-                               @payroll_run.payslips.sum(:employer_esi)
-        )
-      end
     end
   end
 end

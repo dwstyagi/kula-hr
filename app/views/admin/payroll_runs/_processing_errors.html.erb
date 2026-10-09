@@ -1,0 +1,13 @@
+<%# Who a run skipped and why, as recorded by the processor %>
+<%# locals: (payroll_run:) -%>
+<% errors = Array(payroll_run.processing_errors) %>
+<% if errors.any? %>
+  <ul class="mt-2 space-y-1 text-sm">
+    <% errors.first(50).each do |entry| %>
+      <li><strong><%= entry["name"] %></strong> — <%= entry["error"] %></li>
+    <% end %>
+  </ul>
+  <% if errors.size > 50 %>
+    <p class="mt-1 text-xs">…and <%= errors.size - 50 %> more.</p>
+  <% end %>
+<% end %>

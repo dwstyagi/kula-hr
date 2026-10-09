@@ -46,11 +46,16 @@ module Reports
         da = payslip.line_items.find { |item| item.component_name == "DA" && item.component_type == "earning" }&.amount.to_f
         pf_wages = basic + da
 
-        epf_wages = [ pf_wages, pf_wage_ceiling ].min
+        # EPF wages follow the employee's contribution choice; EPS and EDLI are
+        # always capped at the statutory ceiling.
+        epf_wages = emp.pf_on_full_basic? ? pf_wages : [ pf_wages, pf_wage_ceiling ].min
         eps_wages = [ pf_wages, pf_wage_ceiling ].min
         edli_wages = [ pf_wages, pf_wage_ceiling ].min
 
-        epf_ee = (epf_wages * pf_ee_rate).round(0)
+        # The ECR must match what was deducted on the payslip; recompute only
+        # for payslips that carry no PF line.
+        pf_line = payslip.line_items.find { |item| item.component_name == "PF" && item.component_type == "deduction" }
+        epf_ee = pf_line ? pf_line.amount.to_f.round(0) : (epf_wages * pf_ee_rate).round(0)
         eps_er = (eps_wages * eps_rate).round(0)
         epf_er_diff = (epf_ee - eps_er).clamp(0, Float::INFINITY).round(0)
 

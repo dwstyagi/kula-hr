@@ -364,7 +364,7 @@ module Statutory
     def months_remaining_in_fy
       # FY runs April (month 4) through March (month 3)
       # April = position 1, March = position 12
-      month_in_fy = @month >= 4 ? (@month - 3) : (@month + 9)
+      month_in_fy = FinancialYear.position(@month)
       13 - month_in_fy
     end
   end

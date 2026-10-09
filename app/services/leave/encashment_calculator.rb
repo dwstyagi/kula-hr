@@ -25,18 +25,20 @@ module Leave
         .first
       raise NoSalaryError, "No salary assigned for #{@employee.full_name}" unless salary
 
-      structure   = salary.salary_structure
-      basic_component = structure.salary_structure_components
-                                 .joins(:salary_component)
-                                 .find_by(salary_components: { name: "Basic" })
-
-      unless basic_component
+      # Same earnings breakup payroll uses, so a flat or percentage Basic is
+      # handled identically (Basic used to be assumed a % of CTC here).
+      breakup = Salary::CtcBreakupCalculator.call(
+        annual_ctc:              salary.annual_ctc,
+        salary_structure:        salary.salary_structure,
+        payroll_setting:         @employee.tenant.payroll_setting || PayrollSetting.new,
+        apply_employer_pf_carve: false
+      )
+      basic = breakup.earnings.find { |line| line.name == "Basic" }
+      unless basic
         raise NoSalaryError, "No Basic component found in salary structure for #{@employee.full_name}"
       end
 
-      annual_ctc    = salary.annual_ctc.to_d
-      basic_percent = basic_component.value.to_d
-      ((annual_ctc * basic_percent / 100) / 12).round(2)
+      basic.monthly.to_d.round(2)
     end
   end
 end

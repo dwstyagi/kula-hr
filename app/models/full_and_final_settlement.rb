@@ -42,7 +42,7 @@ class FullAndFinalSettlement < ApplicationRecord
   # Statuses that still make an employee payroll-eligible. Anyone already
   # resigned or terminated keeps the status HR set, so a dismissal is never
   # relabelled as a resignation by the settlement.
-  IN_SERVICE_STATUSES = %w[active probation notice_period].freeze
+  IN_SERVICE_STATUSES = Employee::IN_SERVICE_STATUSES
 
   # Closes the employee out of payroll. Called when the run is approved — the
   # point where payslips lock and the payout is committed. Until this runs the

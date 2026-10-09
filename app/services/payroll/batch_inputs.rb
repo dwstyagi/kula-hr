@@ -11,8 +11,7 @@ module Payroll
     def initialize(employees:, payroll_run:)
       tenant = payroll_run.tenant
       month, year = payroll_run.month, payroll_run.year
-      fy_year = month >= 4 ? year : year - 1
-      fy = "#{fy_year}-#{(fy_year + 1).to_s.last(2)}"
+      fy = FinancialYear.for_period(month, year)
       ids = employees.map(&:id)
 
       ActsAsTenant.with_tenant(tenant) do
@@ -38,7 +37,7 @@ module Payroll
     # deducted so far this financial year, per employee. Call inside the
     # tenant scope.
     def self.ytd_totals(employee_ids:, month:, year:)
-      fy_year = month >= 4 ? year : year - 1
+      fy_year = FinancialYear.start_year(Date.new(year, month, 1))
       PayslipLineItem.joins(payslip: :payroll_run)
         .where(payslips: { employee_id: employee_ids }, payroll_runs: { status: %w[approved paid] })
         .where("(payslips.year > :fy) OR (payslips.year = :fy AND payslips.month >= 4)", fy: fy_year)

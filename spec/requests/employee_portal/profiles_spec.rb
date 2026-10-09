@@ -44,7 +44,7 @@ RSpec.describe "EmployeePortal::Profiles", type: :request do
             params: { employee: { pan_number: "INVALID" } },
             headers: { "Host" => subdomain_host }
 
-      expect(response).to have_http_status(:unprocessable_entity)
+      expect(response).to have_http_status(:unprocessable_content)
     end
   end
 

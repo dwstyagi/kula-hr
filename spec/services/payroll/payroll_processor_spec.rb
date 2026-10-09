@@ -306,4 +306,30 @@ RSpec.describe Payroll::PayrollProcessor do
       expect(lines.find_by(component_name: "PF").taxable).to be false
     end
   end
+
+  describe "operability" do
+    it "keeps who was skipped and why on the run" do
+      emp = create(:employee, tenant: tenant)
+      create(:attendance_summary, :locked, tenant: tenant, employee: emp,
+             month: payroll_run.month, year: payroll_run.year, total_working_days: 22, days_present: 22)
+      described_class.new(payroll_run: payroll_run).call
+      errors = payroll_run.reload.processing_errors
+      expect(errors.first["name"]).to eq(emp.full_name)
+      expect(errors.first["error"]).to match(/No salary assigned/)
+    end
+
+    it "lets database failures stop the run so the job retries" do
+      create_ready_employee
+      allow(Payroll::SalaryCalculator).to receive(:new).and_raise(ActiveRecord::ConnectionNotEstablished)
+      expect { described_class.new(payroll_run: payroll_run).call }.to raise_error(ActiveRecord::ConnectionNotEstablished)
+    end
+
+    it "includes PF admin charges and EDLI in the employer cost" do
+      create_ready_employee
+      described_class.new(payroll_run: payroll_run).call
+      slip = payroll_run.payslips.first
+      expected = slip.employer_pf + slip.employer_esi + slip.employer_pf_admin + slip.employer_edli
+      expect(payroll_run.reload.total_employer_cost).to eq(expected)
+    end
+  end
 end

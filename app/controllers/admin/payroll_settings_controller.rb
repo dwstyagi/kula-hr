@@ -14,7 +14,7 @@ class Admin::PayrollSettingsController < Admin::BaseController
     if @payroll_setting.update(payroll_setting_params)
       redirect_to admin_payroll_setting_path, notice: "Payroll settings saved."
     else
-      render :edit, status: :unprocessable_entity
+      render :edit, status: :unprocessable_content
     end
   end
 

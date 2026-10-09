@@ -149,7 +149,7 @@ RSpec.describe "Admin::PayrollRuns", type: :request do
         post admin_payroll_runs_path,
              params: { payroll_run: { month: 1, year: 2026 } },
              headers: headers
-        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response).to have_http_status(:unprocessable_content)
       end
     end
 
@@ -168,7 +168,7 @@ RSpec.describe "Admin::PayrollRuns", type: :request do
              params: { payroll_run: { month: 4, year: 2026 } },
              headers: headers
 
-        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response).to have_http_status(:unprocessable_content)
         expect(response.body).to include("Payroll for April 2026")
       end
     end
@@ -262,6 +262,13 @@ RSpec.describe "Admin::PayrollRuns", type: :request do
         expect(run.reload.status).to eq("approved")
         expect(run.payslips.pluck(:status)).to all(eq("locked"))
         expect(response).to redirect_to(admin_payroll_run_path(run))
+      end
+
+      it "explains a second approval instead of failing" do
+        patch approve_admin_payroll_run_path(run), headers: headers
+        patch approve_admin_payroll_run_path(run), headers: headers
+        expect(response).to be_redirect
+        expect(flash[:alert]).to match(/no longer available/)
       end
     end
 

@@ -4,7 +4,7 @@ module Payroll
     def self.root = Rails.root.join("tmp", "payslip_archives")
     def self.version(run)
       employees = Employee.where(id: run.payslips.select(:employee_id))
-      year = run.month >= 4 ? run.year : run.year - 1
+      year = FinancialYear.start_year(Date.new(run.year, run.month, 1))
       history = Payslip.where(employee_id: employees.select(:id))
         .where("year > ? OR (year = ? AND month >= 4)", year, year)
         .where("year < ? OR (year = ? AND month <= ?)", run.year, run.year, run.month)

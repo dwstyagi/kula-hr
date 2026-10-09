@@ -108,7 +108,7 @@ module Payroll
     end
 
     def financial_year_for(date)
-      date.month >= 4 ? "#{date.year}-#{(date.year + 1).to_s.last(2)}" : "#{date.year - 1}-#{date.year.to_s.last(2)}"
+      FinancialYear.label(date)
     end
   end
 end

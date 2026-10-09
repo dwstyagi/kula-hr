@@ -95,12 +95,7 @@ module Admin
     private
 
     def current_fy
-      today = Date.current
-      if today.month >= 4
-        "#{today.year}-#{(today.year + 1).to_s.last(2)}"
-      else
-        "#{today.year - 1}-#{today.year.to_s.last(2)}"
-      end
+      FinancialYear.label
     end
   end
 end

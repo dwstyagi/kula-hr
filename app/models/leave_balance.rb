@@ -14,11 +14,6 @@ class LeaveBalance < ApplicationRecord
   scope :current, -> { for_year(LeaveBalance.current_financial_year) }
 
   def self.current_financial_year
-    today = Date.today
-    if today.month >= 4
-      "#{today.year}-#{(today.year + 1).to_s.last(2)}"
-    else
-      "#{today.year - 1}-#{today.year.to_s.last(2)}"
-    end
+    FinancialYear.label
   end
 end

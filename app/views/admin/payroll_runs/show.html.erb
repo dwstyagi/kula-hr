@@ -30,6 +30,12 @@
 
   <%# Step content %>
   <% if @payroll_run.draft? %>
+    <% if @payroll_run.processing_failure.present? %>
+      <div class="alert alert-error mb-4">
+        <p><strong>The last processing attempt stopped:</strong> <%= @payroll_run.processing_failure %>
+           Payslips already calculated are kept — process again to finish the rest.</p>
+      </div>
+    <% end %>
     <%= render "step_review", payroll_run: @payroll_run, readiness: @readiness %>
 
   <% elsif @payroll_run.processing? %>
@@ -87,7 +93,10 @@
         <svg class="size-5 shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/>
         </svg>
-        <p><strong><%= skipped %> employee<%= "s" unless skipped == 1 %></strong> <%= skipped == 1 ? "was" : "were" %> skipped in this run (missing locked attendance or salary). They will not be paid unless you fix and reprocess.</p>
+        <div>
+          <p><strong><%= skipped %> employee<%= "s" unless skipped == 1 %></strong> <%= skipped == 1 ? "was" : "were" %> skipped in this run. They will not be paid unless you fix the cause and reprocess.</p>
+          <%= render "admin/payroll_runs/processing_errors", payroll_run: @payroll_run %>
+        </div>
       </div>
     <% end %>
 

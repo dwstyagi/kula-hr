@@ -59,7 +59,7 @@ module Admin
                     notice: "#{@payroll_run.run_type_label} run created."
       else
         prepare_entries
-        render :new, status: :unprocessable_entity
+        render :new, status: :unprocessable_content
       end
     end
 
@@ -85,7 +85,7 @@ module Admin
         redirect_to admin_off_cycle_payroll_run_path(@payroll_run), notice: "Payment inputs updated."
       else
         @addable_employees = addable_employees if @payroll_run.full_and_final?
-        render :edit, status: :unprocessable_entity
+        render :edit, status: :unprocessable_content
       end
     end
 
@@ -249,14 +249,14 @@ module Admin
     # selectable: a settlement is often raised after the status is updated.
     def addable_employees
       policy_scope(Employee)
-        .where(employment_status: %w[active probation notice_period resigned terminated])
+        .where(employment_status: Employee::EMPLOYMENT_STATUSES)
         .where.not(id: @payroll_run.full_and_final_settlements.select(:employee_id))
         .order(:first_name, :last_name)
     end
 
     def eligible_employees
       policy_scope(Employee)
-        .where(employment_status: %w[active probation notice_period])
+        .in_service
         .includes(:department)
         .order(:first_name, :last_name)
     end
