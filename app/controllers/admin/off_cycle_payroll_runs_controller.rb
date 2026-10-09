@@ -59,7 +59,7 @@ module Admin
                     notice: "#{@payroll_run.run_type_label} run created."
       else
         prepare_entries
-        render :new, status: :unprocessable_entity
+        render :new, status: :unprocessable_content
       end
     end
 
@@ -85,7 +85,7 @@ module Admin
         redirect_to admin_off_cycle_payroll_run_path(@payroll_run), notice: "Payment inputs updated."
       else
         @addable_employees = addable_employees if @payroll_run.full_and_final?
-        render :edit, status: :unprocessable_entity
+        render :edit, status: :unprocessable_content
       end
     end
 

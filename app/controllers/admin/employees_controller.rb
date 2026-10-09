@@ -69,7 +69,7 @@ module Admin
       if tenant.at_employee_limit?
         load_form_options
         flash.now[:alert] = "Trial accounts are limited to #{Tenant::TRIAL_EMPLOYEE_LIMIT} employees. Upgrade to add more."
-        return render :new, status: :unprocessable_entity
+        return render :new, status: :unprocessable_content
       end
 
       existing_user = User.find_by(email: @employee.email.to_s.strip.downcase)

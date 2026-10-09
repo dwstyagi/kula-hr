@@ -28,7 +28,7 @@ module Admin
         redirect_to edit_admin_off_cycle_payroll_run_path(@payroll_run),
                     notice: "Settlement run created. Add the employees you are settling."
       else
-        render :new, status: :unprocessable_entity
+        render :new, status: :unprocessable_content
       end
     end
 

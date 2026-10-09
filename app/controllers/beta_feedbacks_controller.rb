@@ -10,7 +10,7 @@ class BetaFeedbacksController < ApplicationController
     message = params[:message].to_s.strip
 
     if name.blank? || email.blank? || message.blank?
-      render json: { error: "Please fill in all required fields." }, status: :unprocessable_entity
+      render json: { error: "Please fill in all required fields." }, status: :unprocessable_content
       return
     end
 

@@ -21,10 +21,10 @@ class SignupsController < ApplicationController
                     notice: "Company registered successfully! Please log in."
       else
         flash.now[:alert] = result.error
-        render :new, status: :unprocessable_entity
+        render :new, status: :unprocessable_content
       end
     else
-      render :new, status: :unprocessable_entity
+      render :new, status: :unprocessable_content
     end
   end
 

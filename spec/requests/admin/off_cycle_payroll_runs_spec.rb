@@ -199,7 +199,7 @@ RSpec.describe "Admin::OffCyclePayrollRuns", type: :request do
       }
     }
 
-    expect(response).to have_http_status(:unprocessable_entity)
+    expect(response).to have_http_status(:unprocessable_content)
     expect(run.reload.off_cycle_payroll_entries.count).to eq(1)
   end
 

@@ -93,7 +93,7 @@ module Admin
                   notice: "Payslip updated and totals recalculated."
     rescue ActiveRecord::RecordInvalid => e
       flash.now[:alert] = e.message
-      render :edit, status: :unprocessable_entity
+      render :edit, status: :unprocessable_content
     end
 
     private

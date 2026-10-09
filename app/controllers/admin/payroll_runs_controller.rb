@@ -46,7 +46,7 @@ module Admin
                     notice: "Payroll run created for #{@payroll_run.period_label}."
       else
         @readiness = readiness_for(@payroll_run)
-        render :new, status: :unprocessable_entity
+        render :new, status: :unprocessable_content
       end
     rescue ActiveRecord::RecordNotUnique
       # Lost a concurrent create race: the DB unique index blocked the duplicate.
@@ -54,7 +54,7 @@ module Admin
       # (the winning run is now committed, so no_existing_run_for_period sees it).
       @payroll_run.valid?
       @readiness = readiness_for(@payroll_run)
-      render :new, status: :unprocessable_entity
+      render :new, status: :unprocessable_content
     end
 
     # GET /admin/payroll_runs/:id
