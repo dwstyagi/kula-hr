@@ -24,7 +24,7 @@ RSpec.describe Statutory::TdsCalculator do
       decl = create(:tax_declaration,
         attrs.reverse_merge(
           tenant: tenant, employee: employee,
-          financial_year: "2025-26", regime: :old_regime
+          financial_year: "2025-26", regime: :old_regime, status: :submitted
         )
       )
       investments.each do |inv|
@@ -372,6 +372,26 @@ RSpec.describe Statutory::TdsCalculator do
       full   = calc(annual_gross: 2_000_000, month: 10, financial_year: "2026-27")
       short  = calc(annual_gross: 2_000_000, month: 10, financial_year: "2026-27", remaining_months: 2)
       expect(short.monthly_tds).to eq((full.total_tax_with_cess / 2.0).round(0))
+    end
+  end
+
+  # ── Declaration status ─────────────────────────────────────────────────────
+
+  context "with a draft declaration" do
+    before { create_declaration({ regime: :old_regime, status: :draft, home_loan_interest: 200_000 }) }
+
+    it "ignores it: drafts have not been put forward by the employee" do
+      result = calc(annual_gross: 978_400, month: 4)
+      expect(result.regime).to eq(:new_regime)
+      expect(result.home_loan_interest).to eq(0)
+    end
+  end
+
+  context "with a verified declaration" do
+    before { create_declaration({ regime: :old_regime, status: :verified, home_loan_interest: 200_000 }) }
+
+    it "applies it" do
+      expect(calc(annual_gross: 978_400, month: 4).home_loan_interest).to eq(200_000)
     end
   end
 end

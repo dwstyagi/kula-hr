@@ -1,0 +1,18 @@
+<% content_for :page_title, "Leave Encashment" %>
+
+<div class="max-w-6xl mx-auto">
+  <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+    <div>
+      <h1 class="page-title text-2xl">Leave encashment</h1>
+      <p class="page-sub">Approved amounts (days × Basic ÷ 30) are paid in the next regular payroll run.</p>
+    </div>
+    <%= render "shared/status_tabs", counts: @status_counts,
+          statuses: [ [ "All", "" ], [ "Pending", "pending" ], [ "Approved", "approved" ], [ "Paid", "paid" ], [ "Rejected", "rejected" ] ],
+          path: ->(status) { admin_leave_encashment_requests_path(status: status) } %>
+  </div>
+
+  <%= render "shared/encashment_requests_table", requests: @encashment_requests, reviewable: true,
+        empty_message: "No #{params[:status]} encashment requests." %>
+
+  <div class="mt-4"><%= render "shared/pagy_nav", pagy: @pagy %></div>
+</div>
