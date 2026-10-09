@@ -41,6 +41,9 @@ RSpec.describe "Admin::LeaveEncashmentRequests", type: :request do
   end
 
   it "is not available to employees" do
+    # Sign the HR user out first: Devise ignores a second sign-in while one
+    # session is active, which would leave the request running as HR.
+    delete destroy_user_session_path, headers: host
     sign_in_as(create(:user, :employee).tap { |u| ActsAsTenant.with_tenant(tenant) { create(:tenant_user, tenant: tenant, user: u) } })
     get admin_leave_encashment_requests_path, headers: host
     expect(response).to be_redirect
