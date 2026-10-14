@@ -174,21 +174,6 @@ Rails.application.routes.draw do
           end
         end
       end
-      resources :full_and_final_payroll_runs, only: [ :index, :new, :create, :show, :edit, :update, :destroy ] do
-        member do
-          post :add_employee
-          patch :restore
-          post :process_payroll
-          patch :submit_for_review
-          patch :approve
-          patch :reject
-          patch :resubmit_for_review
-          patch :reprocess
-          patch :mark_paid
-          get :bank_file
-          get :download_bank_file
-        end
-      end
       resources :reports, only: [ :index ] do
         collection do
           get :department_breakdown

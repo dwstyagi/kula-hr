@@ -17,7 +17,7 @@ module EmployeePortal
                                fy_year: fy_start.year, fy_month: fy_start.month)
       # Month-over-month changes
       @mom_changes = {}
-      sorted = @payslips.reject(&:full_and_final?)
+      sorted = @payslips.select { |payslip| payslip.payroll_run.regular? }
       sorted.each_with_index do |payslip, i|
         prev = sorted[i + 1]
         if prev && prev.net_pay > 0

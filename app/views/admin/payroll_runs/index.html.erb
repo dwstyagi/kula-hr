@@ -3,11 +3,7 @@
   <div class="flex items-center justify-between">
     <div>
       <h1 class="page-title text-2xl">Payroll Runs</h1>
-      <p class="text-sm text-stone-500 mt-0.5">
-        Manage monthly payroll processing &middot;
-        <%= link_to "Settling an employee exit?", admin_full_and_final_payroll_runs_path,
-              class: "text-kula-700 hover:underline" %>
-      </p>
+      <p class="text-sm text-stone-500 mt-0.5">Manage monthly payroll processing</p>
     </div>
     <div class="flex items-center gap-3">
       <% if @years.any? %>

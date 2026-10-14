@@ -12,12 +12,7 @@ class PayrollRunPolicy < ApplicationPolicy
 
   def download_bank_file? = admin_or_hr?
 
-  # Whoever can raise a run can clear away their own mistake, but only while it
-  # is still a draft. PayrollRun#deletable? is the single source of truth.
-  def destroy? = admin_or_hr? && record.deletable?
-  def restore? = admin_or_hr?
-
-  # Only Super Admin can approve or reject payroll and settlement runs.
+  # Only Super Admin can approve or reject payroll runs.
   def approve? = super_admin?
   def reject?  = super_admin?
 

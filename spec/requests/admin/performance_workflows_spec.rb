@@ -38,13 +38,6 @@ RSpec.describe "Bounded admin pages and background status", type: :request do
     expect(Nokogiri::HTML(response.body).css("tbody tr").size).to eq(1)
   end
 
-  it "paginates settlement history" do
-    26.times { |i| create(:payroll_run, tenant: tenant, initiated_by: user, run_type: "full_and_final", title: "Settlement #{i}", payment_date: Date.new(2026, 4, 1)) }
-    get admin_full_and_final_payroll_runs_path, headers: headers
-    expect(response).to have_http_status(:ok)
-    expect(Nokogiri::HTML(response.body).css("tbody tr").size).to eq(25)
-  end
-
   it "shows operation status and permits retry after failure" do
     task = BackgroundTask.enqueue!(tenant: tenant, user: user, kind: "attendance", task_key: "2026-4", payload: { month: 4, year: 2026 })
     get admin_background_task_path(task), headers: headers

@@ -27,12 +27,7 @@ class PayrollProcessingJob < ApplicationJob
       end
       ActsAsTenant.with_tenant(run.tenant) do
         if run.processing?
-          processor = if run.full_and_final?
-            Payroll::FullAndFinalPayrollProcessor
-          else
-            Payroll::PayrollProcessor
-          end
-          result = processor.new(payroll_run: run).call
+          result = Payroll::PayrollProcessor.new(payroll_run: run).call
           if result.errors.any?
             PayrollMailer.processing_complete_with_errors(run, result.errors).deliver_later
           else

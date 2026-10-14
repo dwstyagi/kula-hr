@@ -8,7 +8,6 @@ class Payslip < ApplicationRecord
   belongs_to :employee
   has_many :line_items, class_name: "PayslipLineItem", dependent: :destroy
   has_many :leave_encashment_requests, dependent: :nullify
-  has_one :full_and_final_settlement, dependent: :nullify
 
   STATUSES = %w[generated revised locked].freeze
 
@@ -63,23 +62,9 @@ class Payslip < ApplicationRecord
     Date::MONTHNAMES[month]
   end
 
-  def full_and_final?
-    payroll_run&.full_and_final? || false
-  end
-
-  def document_title
-    return "Full & Final Statement" if full_and_final?
-
-    "Salary Slip"
-  end
-
-  def recoverable_amount
-    full_and_final_settlement&.recoverable_amount.to_d
-  end
+  def document_title = "Salary Slip"
 
   def period_label
-    return payroll_run.period_label if full_and_final?
-
     "#{month_name} #{year}"
   end
 

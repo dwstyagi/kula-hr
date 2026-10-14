@@ -6,19 +6,14 @@ class PayrollRun < ApplicationRecord
   belongs_to :initiated_by, class_name: "User"
   belongs_to :approved_by,  class_name: "User", optional: true
   has_many   :payslips, dependent: :destroy
-  has_many   :full_and_final_settlements, dependent: :destroy
 
-  RUN_TYPES = %w[regular full_and_final].freeze
-
-  accepts_nested_attributes_for :full_and_final_settlements, allow_destroy: true
+  RUN_TYPES = %w[regular].freeze
 
   # ── Validations ──────────────────────────────────────────────────────────────
 
   validates :month, presence: true, inclusion: { in: 1..12 }
   validates :year,  presence: true
   validates :run_type, presence: true, inclusion: { in: RUN_TYPES }
-  validates :title, presence: true, length: { maximum: 100 }, if: :full_and_final?
-  validates :payment_date, presence: true, if: :full_and_final?
   validate  :no_existing_run_for_period, on: :create
   validate  :attendance_must_be_locked, on: :create
 
@@ -27,13 +22,6 @@ class PayrollRun < ApplicationRecord
   scope :recent, -> { order(year: :desc, month: :desc) }
   scope :for_month, ->(month, year) { where(month: month, year: year) }
   scope :regular_runs, -> { where(run_type: "regular") }
-  scope :full_and_final, -> { where(run_type: "full_and_final") }
-  # No default_scope on purpose: acts_as_tenant already scopes this model, and a
-  # second invisible filter makes "why is my record missing" much harder to
-  # answer. Callers ask for .kept explicitly.
-  scope :kept, -> { where(deleted_at: nil) }
-  scope :deleted, -> { where.not(deleted_at: nil) }
-
   # ── AASM State Machine ───────────────────────────────────────────────────────
 
   aasm column: :status do
@@ -150,39 +138,10 @@ class PayrollRun < ApplicationRecord
   end
 
   def period_label
-    return "#{title} · #{month_name} #{year}" if full_and_final?
-
     "#{month_name} #{year}"
   end
 
-  def deleted? = deleted_at.present?
-
-  # Only a draft can be removed. Once a run has been calculated it holds
-  # payslips and a place in the audit trail, and a mistake there is corrected
-  # by recalculating or rejecting, not by hiding the run.
-  def deletable? = draft? && !deleted?
-
-  def soft_delete!
-    return false unless deletable?
-
-    update_columns(deleted_at: Time.current)
-  end
-
-  def restore!
-    return false unless deleted?
-
-    update_columns(deleted_at: nil)
-  end
-
   def regular? = run_type == "regular"
-  def full_and_final? = run_type == "full_and_final"
-
-  def run_type_label
-    {
-      "regular" => "Regular Payroll",
-      "full_and_final" => "Full & Final"
-    }.fetch(run_type, run_type.to_s.humanize)
-  end
 
   def progress_percentage
     return 0 if total_employees.zero?
@@ -243,7 +202,6 @@ class PayrollRun < ApplicationRecord
     # Preserve dependent nullification, without instantiating every child record.
     ids = payslips.select(:id)
     LeaveEncashmentRequest.where(payslip_id: ids).update_all(payslip_id: nil, status: LeaveEncashmentRequest.statuses[:approved])
-    FullAndFinalSettlement.where(payslip_id: ids).update_all(payslip_id: nil)
     PayslipLineItem.where(payslip_id: ids).delete_all
     payslips.delete_all
     payslips.reset

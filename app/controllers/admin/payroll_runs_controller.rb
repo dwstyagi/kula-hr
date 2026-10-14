@@ -60,9 +60,6 @@ module Admin
     # GET /admin/payroll_runs/:id
     def show
       authorize @payroll_run
-      if @payroll_run.full_and_final?
-        return redirect_to admin_full_and_final_payroll_run_path(@payroll_run)
-      end
       # Compute readiness while still in draft so the page can warn about
       # employees who will be skipped before HR clicks "Process".
       @readiness = readiness_for(@payroll_run) if @payroll_run.draft?
@@ -203,9 +200,7 @@ module Admin
     private
 
     def set_payroll_run
-      scope = policy_scope(PayrollRun).where(run_type: PayrollRun::RUN_TYPES)
-      scope = scope.regular_runs unless action_name == "show"
-      @payroll_run = scope.find(params[:id])
+      @payroll_run = policy_scope(PayrollRun).regular_runs.find(params[:id])
     end
 
     def readiness_for(payroll_run)

@@ -51,8 +51,6 @@ module Payroll
       end
 
       def narration
-        return "SETTLEMENT-#{@payroll_run.id}" if @payroll_run.full_and_final?
-
         "SAL-#{@payroll_run.month_name[0..2].upcase}-#{@payroll_run.year}"
       end
 

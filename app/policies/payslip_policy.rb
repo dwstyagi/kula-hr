@@ -5,7 +5,7 @@ class PayslipPolicy < ApplicationPolicy
   # or after it is rejected. Once under review, the approver must see the
   # figures they approve; once approved, payslips are locked.
   EDITABLE_RUN_STATES = %w[processed rejected].freeze
-  def edit?   = admin_or_hr? && !record.locked? && !record.full_and_final? &&
+  def edit?   = admin_or_hr? && !record.locked? && record.payroll_run.regular? &&
                 record.payroll_run.status.in?(EDITABLE_RUN_STATES)
   def update? = edit?
 

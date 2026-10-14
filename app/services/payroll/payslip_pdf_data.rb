@@ -1,6 +1,6 @@
 module Payroll
   class PayslipPdfData
-    ASSOCIATIONS = [ :line_items, :payroll_run, :full_and_final_settlement,
+    ASSOCIATIONS = [ :line_items, :payroll_run,
       { tenant: :payroll_setting }, { employee: [ :department, :designation, :current_employee_salary ] } ].freeze
 
     def self.preload(payslips)

@@ -39,17 +39,26 @@ RSpec.describe PayrollProcessingJob do
     run.start_processing!
     expect(run.reload.processing_failure).to be_nil
   end
-  it "discards stale payment dispatches without calculating monthly salary" do
-    run.update_columns(run_type: "bonus")
-    payslip = create(:payslip, tenant: tenant, payroll_run: run)
-    dispatch = JobDispatch.enqueue!(described_class, run.id)
-    expect(Payroll::PayrollProcessor).not_to receive(:new)
+  shared_examples "a retired payroll dispatch" do
+    it "discards stale dispatches without calculating monthly salary" do
+      run.update_columns(run_type: retired_type)
+      payslip = create(:payslip, tenant: tenant, payroll_run: run)
+      dispatch = JobDispatch.enqueue!(described_class, run.id)
+      expect(Payroll::PayrollProcessor).not_to receive(:new)
 
-    described_class.perform_now(run.id, dispatch_id: dispatch.id)
+      described_class.perform_now(run.id, dispatch_id: dispatch.id)
 
-    expect(run.reload).to be_draft
-    expect(run.processing_failure).to include("no longer supported")
-    expect(run.payslips).to include(payslip)
-    expect(JobDispatch.exists?(dispatch.id)).to be(false)
+      expect(run.reload).to be_draft
+      expect(run.processing_failure).to include("no longer supported")
+      expect(run.payslips).to include(payslip)
+      expect(JobDispatch.exists?(dispatch.id)).to be(false)
+    end
+  end
+
+  %w[bonus additional full_and_final].each do |type|
+    context "with a #{type} run" do
+      let(:retired_type) { type }
+      include_examples "a retired payroll dispatch"
+    end
   end
 end
