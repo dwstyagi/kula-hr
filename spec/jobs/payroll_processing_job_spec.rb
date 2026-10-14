@@ -39,4 +39,17 @@ RSpec.describe PayrollProcessingJob do
     run.start_processing!
     expect(run.reload.processing_failure).to be_nil
   end
+  it "discards stale payment dispatches without calculating monthly salary" do
+    run.update_columns(run_type: "bonus")
+    payslip = create(:payslip, tenant: tenant, payroll_run: run)
+    dispatch = JobDispatch.enqueue!(described_class, run.id)
+    expect(Payroll::PayrollProcessor).not_to receive(:new)
+
+    described_class.perform_now(run.id, dispatch_id: dispatch.id)
+
+    expect(run.reload).to be_draft
+    expect(run.processing_failure).to include("no longer supported")
+    expect(run.payslips).to include(payslip)
+    expect(JobDispatch.exists?(dispatch.id)).to be(false)
+  end
 end

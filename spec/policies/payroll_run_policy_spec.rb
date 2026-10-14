@@ -30,24 +30,24 @@ RSpec.describe PayrollRunPolicy, type: :policy do
     it { is_expected.to be_reject }
   end
 
-  # ── Off-cycle runs ────────────────────────────────────────────────────────
+  # ── Settlement runs ────────────────────────────────────────────────────────
 
-  describe "for an off-cycle run" do
-    let(:off_cycle_run) do
+  describe "for an settlement run" do
+    let(:full_and_final_run) do
       create(:payroll_run, tenant: tenant, initiated_by: admin,
-             run_type: "bonus", title: "Diwali Bonus", payment_date: Date.current)
+             run_type: "full_and_final", title: "Exit Settlement", payment_date: Date.current)
     end
 
     it "lets a super admin approve one they raised themselves" do
-      expect(described_class.new(admin, off_cycle_run)).to be_approve
+      expect(described_class.new(admin, full_and_final_run)).to be_approve
     end
 
     it "lets a super admin reject one they raised themselves" do
-      expect(described_class.new(admin, off_cycle_run)).to be_reject
+      expect(described_class.new(admin, full_and_final_run)).to be_reject
     end
 
     it "keeps approval and rejection off-limits for hr_admin" do
-      policy = described_class.new(hr_user, off_cycle_run)
+      policy = described_class.new(hr_user, full_and_final_run)
       expect(policy).not_to be_approve
       expect(policy).not_to be_reject
     end
@@ -58,7 +58,7 @@ RSpec.describe PayrollRunPolicy, type: :policy do
   describe "deletion" do
     let(:draft_run) do
       create(:payroll_run, tenant: tenant, initiated_by: hr_user,
-             run_type: "bonus", title: "Diwali Bonus", payment_date: Date.current)
+             run_type: "full_and_final", title: "Exit Settlement", payment_date: Date.current)
     end
 
     it "lets hr_admin delete a draft they raised" do

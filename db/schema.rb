@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_05_110100) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_14_180000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "pg_catalog.plpgsql"
@@ -343,21 +343,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_05_110100) do
     t.index ["tenant_id"], name: "index_leave_types_on_tenant_id"
   end
 
-  create_table "off_cycle_payroll_entries", force: :cascade do |t|
-    t.datetime "created_at", null: false
-    t.bigint "employee_id", null: false
-    t.decimal "gross_amount", precision: 12, scale: 2, null: false
-    t.text "notes"
-    t.bigint "payroll_run_id", null: false
-    t.decimal "tds_amount", precision: 12, scale: 2, default: "0.0", null: false
-    t.bigint "tenant_id", null: false
-    t.datetime "updated_at", null: false
-    t.index ["employee_id"], name: "index_off_cycle_payroll_entries_on_employee_id"
-    t.index ["payroll_run_id", "employee_id"], name: "idx_off_cycle_entries_run_employee", unique: true
-    t.index ["payroll_run_id"], name: "index_off_cycle_payroll_entries_on_payroll_run_id"
-    t.index ["tenant_id"], name: "index_off_cycle_payroll_entries_on_tenant_id"
-  end
-
   create_table "payroll_runs", force: :cascade do |t|
     t.datetime "approved_at"
     t.bigint "approved_by_id"
@@ -687,9 +672,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_05_110100) do
   add_foreign_key "leave_requests", "tenants"
   add_foreign_key "leave_requests", "users", column: "approved_by_id"
   add_foreign_key "leave_types", "tenants"
-  add_foreign_key "off_cycle_payroll_entries", "employees"
-  add_foreign_key "off_cycle_payroll_entries", "payroll_runs"
-  add_foreign_key "off_cycle_payroll_entries", "tenants"
   add_foreign_key "payroll_runs", "tenants"
   add_foreign_key "payroll_runs", "users", column: "approved_by_id"
   add_foreign_key "payroll_runs", "users", column: "initiated_by_id"

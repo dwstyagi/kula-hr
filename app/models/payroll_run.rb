@@ -6,22 +6,10 @@ class PayrollRun < ApplicationRecord
   belongs_to :initiated_by, class_name: "User"
   belongs_to :approved_by,  class_name: "User", optional: true
   has_many   :payslips, dependent: :destroy
-  has_many   :off_cycle_payroll_entries, dependent: :destroy
   has_many   :full_and_final_settlements, dependent: :destroy
 
-  RUN_TYPES = %w[regular bonus additional full_and_final].freeze
+  RUN_TYPES = %w[regular full_and_final].freeze
 
-  # A blank or zero amount means "this employee is not part of the run", so the
-  # row is dropped rather than failing validation. A row flagged for removal is
-  # never rejected, otherwise clearing the amount and ticking Remove in the same
-  # submit would silently keep the entry at its old value.
-  accepts_nested_attributes_for :off_cycle_payroll_entries,
-    allow_destroy: true,
-    reject_if: ->(attrs) {
-      next false if ActiveRecord::Type::Boolean.new.cast(attrs["_destroy"])
-
-      attrs["gross_amount"].blank? || attrs["gross_amount"].to_d <= 0
-    }
   accepts_nested_attributes_for :full_and_final_settlements, allow_destroy: true
 
   # ── Validations ──────────────────────────────────────────────────────────────
@@ -29,18 +17,17 @@ class PayrollRun < ApplicationRecord
   validates :month, presence: true, inclusion: { in: 1..12 }
   validates :year,  presence: true
   validates :run_type, presence: true, inclusion: { in: RUN_TYPES }
-  validates :title, presence: true, length: { maximum: 100 }, if: :off_cycle?
-  validates :payment_date, presence: true, if: :off_cycle?
+  validates :title, presence: true, length: { maximum: 100 }, if: :full_and_final?
+  validates :payment_date, presence: true, if: :full_and_final?
   validate  :no_existing_run_for_period, on: :create
   validate  :attendance_must_be_locked, on: :create
-  validate  :off_cycle_must_have_entries
 
   # ── Scopes ───────────────────────────────────────────────────────────────────
 
   scope :recent, -> { order(year: :desc, month: :desc) }
   scope :for_month, ->(month, year) { where(month: month, year: year) }
   scope :regular_runs, -> { where(run_type: "regular") }
-  scope :off_cycle, -> { where.not(run_type: "regular") }
+  scope :full_and_final, -> { where(run_type: "full_and_final") }
   # No default_scope on purpose: acts_as_tenant already scopes this model, and a
   # second invisible filter makes "why is my record missing" much harder to
   # answer. Callers ask for .kept explicitly.
@@ -163,7 +150,7 @@ class PayrollRun < ApplicationRecord
   end
 
   def period_label
-    return "#{title} · #{month_name} #{year}" if off_cycle?
+    return "#{title} · #{month_name} #{year}" if full_and_final?
 
     "#{month_name} #{year}"
   end
@@ -188,14 +175,11 @@ class PayrollRun < ApplicationRecord
   end
 
   def regular? = run_type == "regular"
-  def off_cycle? = !regular?
   def full_and_final? = run_type == "full_and_final"
 
   def run_type_label
     {
       "regular" => "Regular Payroll",
-      "bonus" => "Bonus",
-      "additional" => "Additional Payment",
       "full_and_final" => "Full & Final"
     }.fetch(run_type, run_type.to_s.humanize)
   end
@@ -248,23 +232,6 @@ class PayrollRun < ApplicationRecord
     names += ", and #{blocked.size - 10} more" if blocked.size > 10
     errors.add(:base,
       "Attendance not locked for #{blocked.size} employee(s) for #{month_name} #{year}: #{names}.")
-  end
-
-  # Also runs on update: entries can now be removed from a draft, and emptying
-  # the run that way must fail here rather than producing a run that processes
-  # into zero payslips.
-  def off_cycle_must_have_entries
-    return unless off_cycle?
-    # Settlement runs are deliberately created empty: employees are added one
-    # at a time from the draft, each with their own last working date. That the
-    # run is non-empty is enforced when it is calculated, not when it is made.
-    return if full_and_final?
-    entries = association(:off_cycle_payroll_entries).target
-    return if entries.any? { |entry| !entry.marked_for_destruction? }
-    removed = entries.filter_map { |entry| entry.id if entry.marked_for_destruction? }
-    return if off_cycle_payroll_entries.where.not(id: removed).exists?
-
-    errors.add(:base, "Add at least one employee with an amount")
   end
 
   def clear_processing_failure

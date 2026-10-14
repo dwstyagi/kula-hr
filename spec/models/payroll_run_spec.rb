@@ -257,36 +257,36 @@ RSpec.describe PayrollRun, type: :model do
 
     before { set_tenant(tenant) }
 
-    def off_cycle_run(status: "draft")
+    def full_and_final_run(status: "draft")
       run = create(:payroll_run, tenant: tenant, initiated_by: hr_user,
-                   run_type: "bonus", title: "Diwali Bonus", payment_date: Date.current)
+                   run_type: "full_and_final", title: "Exit Settlement", payment_date: Date.current)
       run.update_columns(status: status)
       run.reload
     end
 
     it "marks a draft deleted without removing the row" do
-      run = off_cycle_run
+      run = full_and_final_run
 
       expect { run.soft_delete! }.not_to change { PayrollRun.unscoped.count }
       expect(run.reload).to be_deleted
     end
 
     it "refuses to delete a run that has been calculated" do
-      run = off_cycle_run(status: "processed")
+      run = full_and_final_run(status: "processed")
 
       expect(run.soft_delete!).to be(false)
       expect(run.reload).not_to be_deleted
     end
 
     it "refuses to delete an already deleted run" do
-      run = off_cycle_run
+      run = full_and_final_run
       run.soft_delete!
 
       expect(run.reload.soft_delete!).to be(false)
     end
 
     it "restores a deleted run" do
-      run = off_cycle_run
+      run = full_and_final_run
       run.soft_delete!
 
       expect(run.reload.restore!).to be_truthy
@@ -294,13 +294,20 @@ RSpec.describe PayrollRun, type: :model do
     end
 
     it "separates kept from deleted in the scopes" do
-      kept_run = off_cycle_run
-      gone = off_cycle_run
+      kept_run = full_and_final_run
+      gone = full_and_final_run
       gone.soft_delete!
 
       expect(PayrollRun.kept).to include(kept_run)
       expect(PayrollRun.kept).not_to include(gone)
       expect(PayrollRun.deleted).to contain_exactly(gone)
+    end
+  end
+  it "rejects retired bonus and additional payment run types" do
+    %w[bonus additional].each do |type|
+      run = build(:payroll_run, run_type: type)
+      run.valid?
+      expect(run.errors[:run_type]).to include("is not included in the list")
     end
   end
 end

@@ -39,7 +39,7 @@ class Payroll::PayslipPdfGenerator
       rule(pdf, HAIR_STRONG, 18)
       render_details(pdf)
       rule(pdf, HAIR, 16)
-      render_attendance(pdf) unless @payslip.off_cycle?
+      render_attendance(pdf) unless @payslip.full_and_final?
       render_ledger(pdf)
       render_net_pay(pdf)
       render_trio(pdf) unless @payslip.full_and_final?
@@ -497,7 +497,7 @@ class Payroll::PayslipPdfGenerator
   end
 
   def period_range
-    return @payslip.payroll_run.title if @payslip.off_cycle?
+    return @payslip.payroll_run.title if @payslip.full_and_final?
 
     s = Date.new(@payslip.year, @payslip.month, 1)
     "#{s.strftime('%d %b')} – #{s.end_of_month.strftime('%d %b %Y')}"

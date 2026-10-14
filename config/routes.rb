@@ -174,9 +174,9 @@ Rails.application.routes.draw do
           end
         end
       end
-      get "off_cycle_employee_options", to: "off_cycle_payroll_runs#employee_options"
-      resources :off_cycle_payroll_runs, only: [ :index, :new, :create, :show, :edit, :update, :destroy ] do
+      resources :full_and_final_payroll_runs, only: [ :index, :new, :create, :show, :edit, :update, :destroy ] do
         member do
+          post :add_employee
           patch :restore
           post :process_payroll
           patch :submit_for_review
@@ -187,11 +187,6 @@ Rails.application.routes.draw do
           patch :mark_paid
           get :bank_file
           get :download_bank_file
-        end
-      end
-      resources :full_and_final_payroll_runs, only: [ :new, :create ] do
-        member do
-          post :add_employee
         end
       end
       resources :reports, only: [ :index ] do

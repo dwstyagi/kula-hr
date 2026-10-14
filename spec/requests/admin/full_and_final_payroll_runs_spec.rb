@@ -37,7 +37,7 @@ RSpec.describe "Admin::FullAndFinalPayrollRuns", type: :request do
     expect(run.month).to eq(8)
     expect(run.year).to eq(2026)
     expect(run.full_and_final_settlements).to be_empty
-    expect(response).to redirect_to(edit_admin_off_cycle_payroll_run_path(run))
+    expect(response).to redirect_to(edit_admin_full_and_final_payroll_run_path(run))
   end
 
   it "adds an employee with previewed amounts" do
@@ -52,7 +52,7 @@ RSpec.describe "Admin::FullAndFinalPayrollRuns", type: :request do
     settlement = run.full_and_final_settlements.last
     expect(settlement.employee).to eq(employee)
     expect(settlement.last_working_date).to eq(Date.new(2026, 8, 15))
-    expect(response).to redirect_to(edit_admin_off_cycle_payroll_run_path(run))
+    expect(response).to redirect_to(edit_admin_full_and_final_payroll_run_path(run))
   end
 
   it "settles several employees in one run" do
@@ -105,7 +105,7 @@ RSpec.describe "Admin::FullAndFinalPayrollRuns", type: :request do
     settlement = create(:full_and_final_settlement, tenant: tenant)
     run = settlement.payroll_run
 
-    patch admin_off_cycle_payroll_run_path(run),
+    patch admin_full_and_final_payroll_run_path(run),
       params: {
         payroll_run: {
           title: run.title,
@@ -123,7 +123,7 @@ RSpec.describe "Admin::FullAndFinalPayrollRuns", type: :request do
       },
       headers: headers
 
-    expect(response).to redirect_to(admin_off_cycle_payroll_run_path(run))
+    expect(response).to redirect_to(admin_full_and_final_payroll_run_path(run))
     expect(settlement.reload.earned_salary).to eq(35_000)
     expect(run.reload).to be_full_and_final
   end
@@ -132,7 +132,7 @@ RSpec.describe "Admin::FullAndFinalPayrollRuns", type: :request do
     settlement = create(:full_and_final_settlement, tenant: tenant)
     run = settlement.payroll_run
 
-    patch admin_off_cycle_payroll_run_path(run),
+    patch admin_full_and_final_payroll_run_path(run),
       params: {
         payroll_run: {
           title: run.title, payment_date: "2026-09-01",
@@ -149,7 +149,7 @@ RSpec.describe "Admin::FullAndFinalPayrollRuns", type: :request do
   it "refuses to calculate a run with nobody in it" do
     run = create_run
 
-    post process_payroll_admin_off_cycle_payroll_run_path(run), headers: headers
+    post process_payroll_admin_full_and_final_payroll_run_path(run), headers: headers
 
     expect(run.reload).to be_draft
     expect(flash[:alert]).to match(/at least one employee to settle/)
@@ -163,7 +163,7 @@ RSpec.describe "Admin::FullAndFinalPayrollRuns", type: :request do
     post add_employee_admin_full_and_final_payroll_run_path(run),
       params: { employee_id: other.id, last_working_date: "2026-08-20" }, headers: headers
 
-    get edit_admin_off_cycle_payroll_run_path(run), headers: headers
+    get edit_admin_full_and_final_payroll_run_path(run), headers: headers
 
     expect(response).to have_http_status(:ok)
     expect(response.body).to include("Add an employee to settle")
@@ -175,14 +175,69 @@ RSpec.describe "Admin::FullAndFinalPayrollRuns", type: :request do
   it "renders the draft summary and the empty state" do
     run = create_run
 
-    get edit_admin_off_cycle_payroll_run_path(run), headers: headers
+    get edit_admin_full_and_final_payroll_run_path(run), headers: headers
     expect(response.body).to include("No employees added yet")
 
     post add_employee_admin_full_and_final_payroll_run_path(run),
       params: { employee_id: employee.id, last_working_date: "2026-08-15" }, headers: headers
 
-    get admin_off_cycle_payroll_run_path(run), headers: headers
+    get admin_full_and_final_payroll_run_path(run), headers: headers
     expect(response).to have_http_status(:ok)
     expect(response.body).to include("Settlement inputs", "1 employee")
+  end
+  it "lists settlements and links monthly payroll to their own pages" do
+    run = create_run
+    get admin_full_and_final_payroll_runs_path, headers: headers
+    expect(response).to have_http_status(:ok)
+    expect(response.body).to include(admin_full_and_final_payroll_run_path(run))
+    expect(response.body).not_to include("off_cycle", "New bonus/payment")
+
+    get admin_payroll_runs_path, headers: headers
+    expect(response.body).to include(admin_full_and_final_payroll_runs_path)
+    get admin_payroll_run_path(run), headers: headers
+    expect(response).to redirect_to(admin_full_and_final_payroll_run_path(run))
+  end
+
+  it "deletes and restores a draft settlement" do
+    run = create_run
+    delete admin_full_and_final_payroll_run_path(run), headers: headers
+    expect(run.reload).to be_deleted
+    expect(response).to redirect_to(admin_full_and_final_payroll_runs_path)
+    get admin_full_and_final_payroll_runs_path(filter: "deleted"), headers: headers
+    expect(response.body).to include(run.title)
+    patch restore_admin_full_and_final_payroll_run_path(run), headers: headers
+    expect(run.reload).not_to be_deleted
+  end
+
+  it "rejects removed run types and cannot mutate settlements via monthly payroll" do
+    run = create_run
+    patch admin_full_and_final_payroll_run_path(run), headers: headers,
+      params: { payroll_run: { run_type: "bonus", title: run.title, payment_date: run.payment_date } }
+    expect(run.reload).to be_full_and_final
+    post process_payroll_admin_payroll_run_path(run), headers: headers
+    expect(response).to have_http_status(:not_found)
+    expect(run.reload).to be_draft
+
+    legacy = create(:payroll_run, tenant: tenant, initiated_by: hr_user, run_type: "bonus")
+    get admin_full_and_final_payroll_run_path(legacy), headers: headers
+    expect(response).to have_http_status(:not_found)
+    get admin_payroll_run_path(legacy), headers: headers
+    expect(response).to have_http_status(:not_found)
+  end
+
+  it "approves a settlement and closes the employee out through its own endpoint" do
+    admin = create(:user, :super_admin)
+    create(:tenant_user, tenant: tenant, user: admin)
+    delete destroy_user_session_path, headers: headers
+    sign_in_as(admin)
+    settlement = create(:full_and_final_settlement, tenant: tenant)
+    run = settlement.payroll_run
+    run.update_columns(status: "under_review")
+    payslip = create(:payslip, tenant: tenant, payroll_run: run, employee: settlement.employee)
+    patch approve_admin_full_and_final_payroll_run_path(run), headers: headers
+    expect(response).to redirect_to(admin_full_and_final_payroll_run_path(run))
+    expect(run.reload).to be_approved
+    expect(payslip.reload).to be_locked
+    expect(settlement.employee.reload.employment_status).to eq("resigned")
   end
 end

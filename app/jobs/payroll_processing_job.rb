@@ -18,12 +18,17 @@ class PayrollProcessingJob < ApplicationJob
         JobDispatch.where(id: dispatch_id).delete_all
         return
       end
+      # A dispatch queued before feature removal must never calculate a legacy
+      # payment run as monthly salary. Keep its existing payslips for the audit trail.
+      unless PayrollRun::RUN_TYPES.include?(run.run_type)
+        run.update_columns(status: "draft", processing_failure: "This payroll run type is no longer supported.") if run.processing?
+        JobDispatch.where(id: dispatch_id).delete_all
+        return
+      end
       ActsAsTenant.with_tenant(run.tenant) do
         if run.processing?
           processor = if run.full_and_final?
             Payroll::FullAndFinalPayrollProcessor
-          elsif run.off_cycle?
-            Payroll::OffCyclePayrollProcessor
           else
             Payroll::PayrollProcessor
           end

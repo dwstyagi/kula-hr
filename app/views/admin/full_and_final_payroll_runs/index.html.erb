@@ -1,26 +1,25 @@
-<% content_for :page_title, "Off-cycle Payroll" %>
+<% content_for :page_title, "Full & Final Settlements" %>
 
 <div class="space-y-6">
   <div class="flex flex-wrap items-center justify-between gap-4">
     <div>
-      <h1 class="page-title text-2xl">Off-cycle Payroll</h1>
+      <h1 class="page-title text-2xl">Full & Final Settlements</h1>
       <p class="page-sub">
-        Bonus, additional payments, and employee settlements outside regular payroll &middot;
+        Employee exit settlements &middot;
         <%= link_to "Back to monthly payroll", admin_payroll_runs_path,
               class: "text-kula-700 hover:underline" %>
       </p>
     </div>
     <div class="flex gap-2">
       <%= link_to "New F&F", new_admin_full_and_final_payroll_run_path, class: "btn btn-secondary" %>
-      <%= link_to "New bonus/payment", new_admin_off_cycle_payroll_run_path, class: "btn btn-primary" %>
     </div>
   </div>
 
   <% if @deleted_count.positive? || @showing_deleted %>
     <div class="flex items-center gap-1 border-b border-stone-200">
-      <%= link_to "Active", admin_off_cycle_payroll_runs_path,
+      <%= link_to "Active", admin_full_and_final_payroll_runs_path,
             class: "px-4 py-2 text-sm font-medium border-b-2 #{@showing_deleted ? 'border-transparent text-stone-500 hover:text-stone-700' : 'border-kula-700 text-kula-700'}" %>
-      <%= link_to admin_off_cycle_payroll_runs_path(filter: "deleted"),
+      <%= link_to admin_full_and_final_payroll_runs_path(filter: "deleted"),
             class: "px-4 py-2 text-sm font-medium border-b-2 #{@showing_deleted ? 'border-kula-700 text-kula-700' : 'border-transparent text-stone-500 hover:text-stone-700'}" do %>
         Deleted <span class="text-xs text-stone-400">(<%= @deleted_count %>)</span>
       <% end %>
@@ -49,7 +48,7 @@
                   <% if @showing_deleted %>
                     <span class="font-medium text-stone-500"><%= run.title %></span>
                   <% else %>
-                    <%= link_to run.title, admin_off_cycle_payroll_run_path(run),
+                    <%= link_to run.title, admin_full_and_final_payroll_run_path(run),
                           class: "font-medium text-stone-900 hover:text-kula-700" %>
                   <% end %>
                   <p class="text-xs text-stone-400 mt-0.5">
@@ -62,14 +61,14 @@
                 <td><span class="badge badge-neutral"><%= run.run_type_label %></span></td>
                 <td class="text-stone-600"><%= run.payment_date.strftime("%d %b %Y") %></td>
                 <td><%= render "admin/payroll_runs/status_badge", payroll_run: run %></td>
-                <td class="num"><%= @payslip_counts.fetch(run.id, 0).positive? ? @payslip_counts[run.id] : (run.full_and_final? ? @settlement_counts.fetch(run.id, 0) : @entry_counts.fetch(run.id, 0)) %></td>
+                <td class="num"><%= @payslip_counts.fetch(run.id, 0).positive? ? @payslip_counts[run.id] : @settlement_counts.fetch(run.id, 0) %></td>
                 <td class="num font-semibold"><%= run.total_net_pay.positive? ? run.formatted_total_net_pay : "—" %></td>
                 <td class="text-right">
                   <% if @showing_deleted %>
-                    <%= button_to "Restore", restore_admin_off_cycle_payroll_run_path(run),
+                    <%= button_to "Restore", restore_admin_full_and_final_payroll_run_path(run),
                           method: :patch, class: "btn btn-secondary btn-sm cursor-pointer" %>
                   <% else %>
-                    <%= link_to "Open →", admin_off_cycle_payroll_run_path(run), class: "text-sm text-kula-700" %>
+                    <%= link_to "Open →", admin_full_and_final_payroll_run_path(run), class: "text-sm text-kula-700" %>
                   <% end %>
                 </td>
               </tr>
@@ -83,8 +82,8 @@
           <p class="font-medium text-stone-700">Nothing deleted</p>
           <p class="text-sm text-stone-400 mt-1">Deleted draft runs appear here and can be restored.</p>
         <% else %>
-          <p class="font-medium text-stone-700">No off-cycle runs yet</p>
-          <p class="text-sm text-stone-400 mt-1">Create one for a bonus, additional payment, or employee settlement.</p>
+          <p class="font-medium text-stone-700">No settlement runs yet</p>
+          <p class="text-sm text-stone-400 mt-1">Create a run to settle an employee exit.</p>
         <% end %>
       </div>
     <% end %>

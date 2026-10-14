@@ -29,7 +29,7 @@ module Payroll
               emp.bank_account_number,
               emp.ifsc_code,
               payslip.net_pay.round(2),
-              @payroll_run.off_cycle? ? @payroll_run.title : "Salary #{@payroll_run.period_label}"
+              @payroll_run.full_and_final? ? @payroll_run.title : "Salary #{@payroll_run.period_label}"
             ]
           end
       end

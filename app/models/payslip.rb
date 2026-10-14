@@ -63,17 +63,12 @@ class Payslip < ApplicationRecord
     Date::MONTHNAMES[month]
   end
 
-  def off_cycle?
-    payroll_run&.off_cycle? || false
-  end
-
   def full_and_final?
     payroll_run&.full_and_final? || false
   end
 
   def document_title
     return "Full & Final Statement" if full_and_final?
-    return "Off-cycle Payslip" if off_cycle?
 
     "Salary Slip"
   end
@@ -83,7 +78,7 @@ class Payslip < ApplicationRecord
   end
 
   def period_label
-    return payroll_run.period_label if payroll_run&.off_cycle?
+    return payroll_run.period_label if full_and_final?
 
     "#{month_name} #{year}"
   end
