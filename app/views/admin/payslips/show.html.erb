@@ -48,7 +48,6 @@
   <% end %>
 
   <%# Attendance snapshot %>
-  <% unless @payslip.off_cycle? %>
   <div class="card p-4">
     <h2 class="text-sm font-semibold text-stone-700 mb-3">Attendance</h2>
     <div class="grid grid-cols-3 gap-4 text-sm">
@@ -67,7 +66,7 @@
             <span class="text-red-600 font-medium"><%= @payslip.lop_days %></span>
           <% else %>
             <span class="text-stone-300">—</span>
-          <% end %>
+
         </p>
       </div>
     </div>
@@ -157,17 +156,11 @@
   </div>
 
   <%# Net Pay + Employer Cost summary %>
-  <div class="grid grid-cols-2 <%= @payslip.off_cycle? ? "md:grid-cols-2" : "md:grid-cols-4" %> gap-4">
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
     <div class="card p-4">
       <p class="text-xs text-stone-400 uppercase tracking-wide">Net Pay</p>
       <p class="page-title text-2xl mt-1">₹<%= number_with_delimiter(@payslip.net_pay.round(0)) %></p>
     </div>
-    <% if @payslip.off_cycle? %>
-      <div class="card p-4">
-        <p class="text-xs text-stone-400 uppercase tracking-wide">Payment Date</p>
-        <p class="text-xl font-bold text-stone-700 mt-1"><%= @payslip.payroll_run.payment_date.strftime("%d %b %Y") %></p>
-      </div>
-    <% else %>
     <div class="card p-4">
       <p class="text-xs text-stone-400 uppercase tracking-wide">Employer PF</p>
       <p class="text-2xl font-bold text-stone-600 mt-1">₹<%= number_with_delimiter(@payslip.employer_pf.round(0)) %></p>
@@ -180,10 +173,7 @@
       <p class="text-xs text-stone-400 uppercase tracking-wide">CTC This Month</p>
       <p class="text-2xl font-bold text-purple-700 mt-1">₹<%= number_with_delimiter(@payslip.ctc_this_month.round(0)) %></p>
     </div>
-    <% end %>
+
   </div>
 
-  <% if @payslip.recoverable_amount.positive? %>
-    <div class="alert alert-warning"><div><p class="font-semibold">Amount recoverable from employee</p><p>₹<%= number_with_delimiter(@payslip.recoverable_amount.round(0)) %> remains after applying all settlement earnings.</p></div></div>
-  <% end %>
 </div>

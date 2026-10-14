@@ -39,10 +39,10 @@ class Payroll::PayslipPdfGenerator
       rule(pdf, HAIR_STRONG, 18)
       render_details(pdf)
       rule(pdf, HAIR, 16)
-      render_attendance(pdf) unless @payslip.off_cycle?
+      render_attendance(pdf)
       render_ledger(pdf)
       render_net_pay(pdf)
-      render_trio(pdf) unless @payslip.full_and_final?
+      render_trio(pdf)
       render_footer(pdf)
     end
 
@@ -147,18 +147,7 @@ class Payroll::PayslipPdfGenerator
       [ "PAN",             @employee.pan_number.presence || "—",  :mono ],
       [ "UAN",             @employee.uan_number.presence || "—",  :mono ]
     ]
-    period_rows = if @payslip.full_and_final?
-      [
-        [ "Last Day", fmt_date(@payslip.full_and_final_settlement&.last_working_date), :mono ],
-        [ "Settlement", period_range, :sans ],
-        [ "Pay Date", pay_date, :mono ],
-        [ "Mode", "Bank Transfer", :sans ],
-        [ "Bank", @employee.bank_name.presence || "—", :sans ],
-        [ "Account", mask_account(@employee.bank_account_number), :mono ],
-        [ "IFSC", @employee.ifsc_code.presence || "—", :mono ]
-      ]
-    else
-      [
+    period_rows = [
         [ "Month", "#{@payslip.month_name} #{@payslip.year}", :sans ],
         [ "Period", period_range, :mono ],
         [ "Pay Date", pay_date, :mono ],
@@ -167,7 +156,6 @@ class Payroll::PayslipPdfGenerator
         [ "Account", mask_account(@employee.bank_account_number), :mono ],
         [ "IFSC", @employee.ifsc_code.presence || "—", :mono ]
       ]
-    end
 
     eyebrow(pdf, "Employee", 0, top)
     eyebrow(pdf, "Pay Period", col_w + 30, top)
@@ -307,9 +295,8 @@ class Payroll::PayslipPdfGenerator
     top = pdf.cursor
     w   = pdf.bounds.width
     h   = 64
-    recovery = @payslip.recoverable_amount.round(0).to_i
-    amount = recovery.positive? ? recovery : @payslip.net_pay.round(0).to_i
-    label = recovery.positive? ? "AMOUNT RECOVERABLE" : "NET PAY"
+    amount = @payslip.net_pay.round(0).to_i
+    label = "NET PAY"
 
     pdf.stroke_color TEAL
     pdf.line_width 1.5
@@ -497,8 +484,6 @@ class Payroll::PayslipPdfGenerator
   end
 
   def period_range
-    return @payslip.payroll_run.title if @payslip.off_cycle?
-
     s = Date.new(@payslip.year, @payslip.month, 1)
     "#{s.strftime('%d %b')} – #{s.end_of_month.strftime('%d %b %Y')}"
   end

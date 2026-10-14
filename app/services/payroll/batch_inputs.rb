@@ -2,7 +2,7 @@ module Payroll
   # All inputs are scoped to one run and a bounded employee batch. No global cache.
   class BatchInputs
     # Amounts already paid this financial year, before the run's month, on
-    # approved or paid payslips (regular and off-cycle runs alike).
+    # approved or paid payslips from all payroll history.
     Ytd = Struct.new(:tds, :taxable_income, :employee_pf)
     NO_YTD = Ytd.new(0.to_d, 0.to_d, 0.to_d).freeze
 

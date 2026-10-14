@@ -59,9 +59,6 @@ module Admin
 
     # GET /admin/payroll_runs/:id
     def show
-      if @payroll_run.off_cycle?
-        return redirect_to admin_off_cycle_payroll_run_path(@payroll_run)
-      end
       authorize @payroll_run
       # Compute readiness while still in draft so the page can warn about
       # employees who will be skipped before HR clicks "Process".
@@ -203,7 +200,7 @@ module Admin
     private
 
     def set_payroll_run
-      @payroll_run = policy_scope(PayrollRun).find(params[:id])
+      @payroll_run = policy_scope(PayrollRun).regular_runs.find(params[:id])
     end
 
     def readiness_for(payroll_run)

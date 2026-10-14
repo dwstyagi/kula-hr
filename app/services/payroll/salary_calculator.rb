@@ -184,7 +184,7 @@ module Payroll
     # Annual taxable income is projected from what has actually been paid this
     # financial year, plus this month, plus a full month for every month the
     # employee is still expected to work. A mid-year joiner is therefore taxed
-    # on the months they work, not on twelve, and bonus/off-cycle pay already
+    # on the months they work, not on twelve, and additional earnings already
     # paid is included.
     def calculate_tds(prorated_earnings, full_earnings, pf_result)
       return Statutory::TdsCalculator::ZERO_RESULT unless @setting.tds_enabled?

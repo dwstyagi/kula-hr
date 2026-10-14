@@ -110,25 +110,3 @@ test("task polling resumes after a hidden tab becomes visible and stops on disco
   document.dispatchEvent(new Event("visibilitychange"))
   assert.equal(timers.size, 0)
 })
-
-test("off-cycle search ignores results that arrive after navigation", async () => {
-  let resolveRows
-  const rows = new Promise(resolve => { resolveRows = resolve })
-  const subject = controller("off_cycle_form", {
-    AbortController, URL,
-    clearTimeout() {},
-    window: { location: { origin: "https://example.com" } },
-    fetch: async () => ({ ok: true, json: () => rows })
-  })
-  subject.rowTargets = []
-  subject.connect()
-  subject.hasUrlValue = true
-  subject.urlValue = "/employees"
-  subject.searchTarget = { value: "employee" }
-  subject.element = { querySelector: () => assert.fail("Modified disconnected form") }
-  const pending = subject.loadCandidates()
-  await Promise.resolve()
-  subject.disconnect()
-  resolveRows([{id: 1, name: "Employee"}])
-  await pending
-})

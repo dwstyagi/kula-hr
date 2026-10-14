@@ -13,7 +13,7 @@ module Payroll
       PayslipPdfData.preload([ payslip ])
       totals = ytd || PayslipPdfData.ytd(employee_ids: [ payslip.employee_id ], month: payslip.month, year: payslip.year)[payslip.employee_id]
       employee, tenant = payslip.employee, payslip.tenant
-      records = [ payslip, payslip.payroll_run, payslip.full_and_final_settlement,
+      records = [ payslip, payslip.payroll_run,
         employee, employee.department, employee.designation, employee.current_salary,
         tenant, tenant.payroll_setting ]
       fingerprint = Digest::SHA256.hexdigest([

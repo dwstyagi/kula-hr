@@ -39,7 +39,7 @@ class MarketingPagesController < ApplicationController
           kicker: "Process",
           title: "Apply Indian payroll rules consistently",
           body: "Kula HR calculates earnings and deductions for every participant in the run, including proration for paid days and statutory eligibility. HR retains a clear line-item view instead of a hidden total.",
-          bullets: [ "CTC-based Basic, HRA and allowance breakup", "PF, ESI, PT and TDS line items", "On-cycle and off-cycle payroll support" ]
+          bullets: [ "CTC-based Basic, HRA and allowance breakup", "PF, ESI, PT and TDS line items", "Monthly payroll processing" ]
         },
         {
           kicker: "Pay & file",

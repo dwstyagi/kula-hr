@@ -10,7 +10,7 @@ module Payroll
         .where("year < ? OR (year = ? AND month <= ?)", run.year, run.year, run.month)
       items = PayslipLineItem.where(payslip_id: history.select(:id))
       records = [ run.attributes, run.tenant.attributes, run.tenant.payroll_setting&.attributes, PayslipPdfDocument::TEMPLATE_VERSION ]
-      [ employees, EmployeeSalary.where(employee_id: employees.select(:id)), history, items, Department.all, Designation.all, FullAndFinalSettlement.where(payroll_run_id: run.id) ].each do |scope|
+      [ employees, EmployeeSalary.where(employee_id: employees.select(:id)), history, items, Department.all, Designation.all ].each do |scope|
         records << scope.pick(Arel.sql("COUNT(*)"), Arel.sql("MAX(updated_at)"))
       end
       records << history.pick(Arel.sql("SUM(gross_pay)"), Arel.sql("SUM(net_pay)"))
