@@ -48,3 +48,6 @@ docs/
 
 # Generated export artifacts
 /outputs/
+
+# Rails generates the schema from database migrations.
+/db/schema.rb
