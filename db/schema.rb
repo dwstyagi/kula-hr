@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_05_110100) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_18_000000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "pg_catalog.plpgsql"
@@ -95,10 +95,22 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_05_110100) do
     t.bigint "tenant_id", null: false
     t.datetime "updated_at", null: false
     t.date "worked_date", null: false
+    t.decimal "remaining_days", precision: 5, scale: 2, default: "1.0", null: false
     t.index ["approved_by_id"], name: "index_comp_off_requests_on_approved_by_id"
     t.index ["employee_id", "worked_date"], name: "idx_comp_off_emp_worked_date"
     t.index ["employee_id"], name: "index_comp_off_requests_on_employee_id"
     t.index ["tenant_id"], name: "index_comp_off_requests_on_tenant_id"
+  end
+
+  create_table "comp_off_usages", force: :cascade do |t|
+    t.bigint "comp_off_request_id", null: false
+    t.bigint "leave_request_id", null: false
+    t.decimal "number_of_days", precision: 5, scale: 2, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["comp_off_request_id", "leave_request_id"], name: "idx_comp_off_usage_credit_leave", unique: true
+    t.index ["comp_off_request_id"], name: "index_comp_off_usages_on_comp_off_request_id"
+    t.index ["leave_request_id"], name: "index_comp_off_usages_on_leave_request_id"
   end
 
   create_table "departments", force: :cascade do |t|
@@ -267,6 +279,18 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_05_110100) do
     t.index ["tenant_id"], name: "index_leave_accruals_on_tenant_id"
   end
 
+  create_table "leave_balance_debits", force: :cascade do |t|
+    t.bigint "leave_request_id", null: false
+    t.bigint "leave_balance_id", null: false
+    t.decimal "number_of_days", precision: 8, scale: 2, null: false
+    t.datetime "reversed_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["leave_balance_id"], name: "index_leave_balance_debits_on_leave_balance_id"
+    t.index ["leave_request_id", "leave_balance_id"], name: "idx_leave_debits_request_balance", unique: true
+    t.index ["leave_request_id"], name: "index_leave_balance_debits_on_leave_request_id"
+  end
+
   create_table "leave_balances", force: :cascade do |t|
     t.decimal "carried_forward_days", precision: 5, scale: 1, default: "0.0", null: false
     t.datetime "created_at", null: false
@@ -278,6 +302,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_05_110100) do
     t.decimal "total_days", precision: 5, scale: 1, default: "0.0", null: false
     t.datetime "updated_at", null: false
     t.decimal "used_days", precision: 5, scale: 1, default: "0.0", null: false
+    t.decimal "encashed_days", precision: 8, scale: 2, default: "0.0", null: false
     t.index ["employee_id", "leave_type_id", "financial_year"], name: "idx_leave_bal_emp_type_fy", unique: true
     t.index ["employee_id"], name: "index_leave_balances_on_employee_id"
     t.index ["leave_type_id"], name: "index_leave_balances_on_leave_type_id"
@@ -298,6 +323,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_05_110100) do
     t.integer "status", default: 0, null: false
     t.bigint "tenant_id", null: false
     t.datetime "updated_at", null: false
+    t.boolean "balance_reserved", default: false, null: false
     t.index ["approved_by_id"], name: "index_leave_encashment_requests_on_approved_by_id"
     t.index ["employee_id", "leave_type_id", "financial_year"], name: "idx_encashment_emp_leavetype_fy", unique: true
     t.index ["employee_id"], name: "index_leave_encashment_requests_on_employee_id"
@@ -413,6 +439,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_05_110100) do
     t.bigint "tenant_id", null: false
     t.datetime "updated_at", null: false
     t.string "week_off_pattern", default: "all_saturdays_sundays", null: false
+    t.string "hdfc_corporate_code"
+    t.string "salary_debit_account"
     t.index ["tenant_id"], name: "index_payroll_settings_on_tenant_id", unique: true
   end
 
@@ -654,6 +682,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_05_110100) do
   add_foreign_key "comp_off_requests", "employees"
   add_foreign_key "comp_off_requests", "tenants"
   add_foreign_key "comp_off_requests", "users", column: "approved_by_id"
+  add_foreign_key "comp_off_usages", "comp_off_requests"
+  add_foreign_key "comp_off_usages", "leave_requests"
   add_foreign_key "departments", "tenants"
   add_foreign_key "designations", "tenants"
   add_foreign_key "employee_salaries", "employees"
@@ -674,6 +704,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_05_110100) do
   add_foreign_key "investment_declarations", "tax_declarations"
   add_foreign_key "investment_declarations", "tenants"
   add_foreign_key "leave_accruals", "tenants"
+  add_foreign_key "leave_balance_debits", "leave_balances"
+  add_foreign_key "leave_balance_debits", "leave_requests"
   add_foreign_key "leave_balances", "employees"
   add_foreign_key "leave_balances", "leave_types"
   add_foreign_key "leave_balances", "tenants"
