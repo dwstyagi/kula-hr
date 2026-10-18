@@ -100,6 +100,11 @@ RSpec.describe Employees::FileParser do
       it { expect(result.errors.first).to match(/Missing columns/i) }
     end
 
+    it "accepts older templates without the optional last working date column" do
+      file = build_xlsx(headers: valid_headers - %w[last_working_date], rows: valid_rows)
+      expect(described_class.new(file).call).to be_success
+    end
+
     context "with an invalid file" do
       let(:bad_file) do
         tmp = Tempfile.new([ "bad", ".xlsx" ])

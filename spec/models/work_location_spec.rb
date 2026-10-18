@@ -7,7 +7,7 @@ RSpec.describe WorkLocation, type: :model do
 
   describe "associations" do
     it { is_expected.to belong_to(:tenant).optional }
-    it { is_expected.to have_many(:holidays).dependent(:nullify) }
+    it { is_expected.to have_many(:holidays).dependent(:restrict_with_error) }
     it { is_expected.to have_many(:employees).dependent(:nullify) }
   end
 

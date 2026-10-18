@@ -48,4 +48,13 @@ RSpec.describe Employees::Importer do
     expect(result[:imported_count]).to eq(0)
     expect(LeaveBalance.count).to eq(2)
   end
+
+  it "imports an exited employee's final working date" do
+    input = rows(1).first.merge("employment_status" => "resigned", "last_working_date" => "20/10/2026")
+    result = described_class.new(rows: [ input ], tenant: tenant).call
+    expect(result[:imported_count]).to eq(1)
+    employee = Employee.find_by!(email: input.fetch("email"))
+    expect(employee.last_working_date).to eq(Date.new(2026, 10, 20))
+    expect(Employee.payable_in(Date.new(2026, 10, 1))).to include(employee)
+  end
 end

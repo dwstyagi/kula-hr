@@ -4,7 +4,7 @@ FactoryBot.define do
     association :employee
     association :salary_structure
     annual_ctc { 600_000 }
-    effective_from { Date.today }
+    effective_from { employee.joining_date }
     effective_to { nil }
 
     trait :with_history do

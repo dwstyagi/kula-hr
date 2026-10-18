@@ -82,7 +82,7 @@ RSpec.describe Leave::YearEndProcessingService, type: :service do
     end
 
     context "when employee is not active or probation" do
-      let!(:resigned_employee) { create(:employee, tenant: tenant, employment_status: :resigned) }
+      let!(:resigned_employee) { create(:employee, :resigned, tenant: tenant) }
 
       before do
         create(:leave_balance, tenant: tenant, employee: resigned_employee,

@@ -27,7 +27,9 @@ RSpec.describe Payroll::ReadinessCheck do
     end
 
     it "excludes resigned employees with no last working day this month" do
-      create(:employee, :resigned, tenant: tenant, last_working_date: nil)
+      # Legacy data can have an exited status without its final date.
+      legacy = create(:employee, tenant: tenant)
+      legacy.update_columns(employment_status: "resigned", last_working_date: nil)
       expect(result.eligible_count).to eq(0)
     end
 
