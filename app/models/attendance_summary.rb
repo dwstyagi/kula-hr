@@ -7,6 +7,9 @@ class AttendanceSummary < ApplicationRecord
 
   validates :month, presence: true, inclusion: { in: 1..12 }
   validates :year,  presence: true
+  validates :days_present, :half_days, :total_working_days, :non_employment_days,
+            numericality: { greater_than_or_equal_to: 0 }
+  validate :attendance_within_employment_days
   validates :employee_id, uniqueness: { scope: [ :month, :year ],
                                         message: "already has an attendance summary for this month" }
 
@@ -30,6 +33,14 @@ class AttendanceSummary < ApplicationRecord
   end
 
   private
+
+  def attendance_within_employment_days
+    return unless [ days_present, half_days, total_working_days, non_employment_days ].all? { |value| value.is_a?(Numeric) }
+
+    if non_employment_days > total_working_days || days_present + half_days * 0.5 > total_working_days - non_employment_days
+      errors.add(:base, "Attendance cannot exceed the working days during employment")
+    end
+  end
 
   # Working days before joining / after the last working day are neither
   # present nor absent: they are excluded from pay without counting as LOP.

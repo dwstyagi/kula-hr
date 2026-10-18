@@ -418,6 +418,7 @@ RSpec.describe "Admin::PayrollRuns", type: :request do
     end
 
     it "downloads a txt file for hdfc format" do
+      create(:payroll_setting, tenant: tenant, hdfc_corporate_code: "ACME123", salary_debit_account: "9988776655")
       get download_bank_file_admin_payroll_run_path(run, bank: "hdfc"), headers: headers
       expect(response).to have_http_status(:ok)
       expect(response.content_type).to include("text/plain")

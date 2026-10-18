@@ -133,12 +133,13 @@ RSpec.describe Dashboard::EmployeeDashboardService do
         else
                "#{Date.current.year - 1}-#{Date.current.year.to_s.last(2)}"
         end
-        create(:tax_declaration, tenant: tenant, employee: employee, financial_year: fy,
-               estimated_monthly_tds: 5_000, total_declared_investments: 150_000)
+        declaration = create(:tax_declaration, tenant: tenant, employee: employee, financial_year: fy,
+               estimated_monthly_tds: 5_000, total_declared_investments: 999_999)
+        create(:investment_declaration, tenant: tenant, tax_declaration: declaration, declared_amount: 150_000)
 
         result = described_class.new(employee: employee).call
 
-        expect(result.monthly_tds).to eq(5_000)
+        expect(result.monthly_tds).to eq(0) # No salary is available to estimate tax.
         expect(result.total_declared_investments).to eq(150_000)
       end
     end

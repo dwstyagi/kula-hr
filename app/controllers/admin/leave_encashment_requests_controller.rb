@@ -43,6 +43,8 @@ module Admin
       end
     rescue Leave::EncashmentCalculator::NoSalaryError => e
       redirect_to admin_leave_encashment_requests_path, alert: e.message
+    rescue ActiveRecord::RecordInvalid => e
+      redirect_to admin_leave_encashment_requests_path, alert: e.record.errors.full_messages.to_sentence
     end
 
     def reject

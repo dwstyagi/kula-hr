@@ -47,6 +47,7 @@ module Employees
           phone:               row["phone"]&.strip.presence,
           joining_date:        parse_date(row["joining_date"]),
           employment_status:   row["employment_status"]&.strip,
+          last_working_date:   parse_date(row["last_working_date"]),
           gender:              row["gender"]&.strip.presence,
           date_of_birth:       parse_date(row["date_of_birth"]),
           confirmation_date:   parse_date(row["confirmation_date"]),

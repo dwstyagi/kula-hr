@@ -24,7 +24,8 @@ module Employees
       "pincode",
       "emergency_contact_name",
       "emergency_contact_phone",
-      "emergency_contact_relation"
+      "emergency_contact_relation",
+      "last_working_date"
     ].freeze
 
     SAMPLE_ROW = [
@@ -51,7 +52,8 @@ module Employees
       "560001",
       "Jane Doe",
       "9876543211",
-      "Spouse"
+      "Spouse",
+      ""
     ].freeze
 
     NOTES_ROW = [
@@ -78,7 +80,8 @@ module Employees
       "Optional — 6 digits",
       "Optional",
       "Optional",
-      "Optional"
+      "Optional",
+      "Required for resigned/terminated — DD/MM/YYYY"
     ].freeze
 
     def call
@@ -124,7 +127,7 @@ module Employees
         sheet.column_widths 15, 15, 28, 14, 14, 10, 14, 16,
                             18, 20, 14, 16, 14, 12,
                             16, 20, 14, 25, 14, 14, 10,
-                            20, 16, 12
+                            20, 16, 12, 18
       end
 
       package

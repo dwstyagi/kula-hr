@@ -6,7 +6,7 @@ RSpec.describe Payroll::PayslipPdfGenerator do
   around { |ex| ActsAsTenant.with_tenant(tenant) { ex.run } }
 
   def payslip_with_lines(month:, year:, gross:, net:, employee: nil)
-    run = create(:payroll_run, tenant: tenant, month: month, year: year)
+    run = create(:payroll_run, :approved, tenant: tenant, month: month, year: year)
     employee ||= create(:employee, tenant: tenant, pan_number: "AAHAK6789M",
                         bank_account_number: "50100456789010", ifsc_code: "HDFC0009012")
     ps = create(:payslip, tenant: tenant, payroll_run: run, employee: employee,

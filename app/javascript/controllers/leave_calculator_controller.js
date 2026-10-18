@@ -33,7 +33,7 @@ export default class extends Controller {
     const current = new Date(start)
     while (current <= end) {
       if (this.isWorkingDay(current) && !this.isHoliday(current)) count++
-      current.setDate(current.getDate() + 1)
+      current.setUTCDate(current.getUTCDate() + 1)
     }
     return count
   }
@@ -45,7 +45,7 @@ export default class extends Controller {
 
   // Mirrors the Ruby WorkingDaysCalculator.working_day? logic
   isWorkingDay(date) {
-    const day = date.getDay() // 0=Sun, 1=Mon, ..., 6=Sat
+    const day = date.getUTCDay() // Date inputs are parsed at UTC midnight.
     const pattern = this.weekOffPatternValue || "all_saturdays_sundays"
 
     switch (pattern) {
@@ -56,7 +56,7 @@ export default class extends Controller {
         if (day === 0) return false           // Sunday always off
         if (day !== 6) return true            // Mon–Fri always working
         // 1st and 3rd Saturdays are working; 2nd and 4th are off
-        const weekNumber = Math.floor((date.getDate() - 1) / 7) + 1
+        const weekNumber = Math.floor((date.getUTCDate() - 1) / 7) + 1
         return weekNumber === 1 || weekNumber === 3
 
       default: // all_saturdays_sundays

@@ -20,31 +20,30 @@ module Leave
       comp_off_type = LeaveType.find_by(code: "CO")
       return unless comp_off_type
 
-      fy = LeaveBalance.current_financial_year
-
       CompOffRequest
         .where(status: :approved, balance_expired: false)
-        .where("expiry_date < ?", Date.today)
+        .where("expiry_date < ?", Date.current)
         .includes(:employee)
         .find_each do |request|
           balance = LeaveBalance.find_by(
             employee:       request.employee,
             leave_type:     comp_off_type,
-            financial_year: fy
+            financial_year: FinancialYear.label((request.approved_at || request.created_at).to_date)
           )
           next unless balance
 
           balance.with_lock do
-            days_to_expire = [ balance.remaining_days, 1 ].min
-            if days_to_expire > 0
-              balance.update!(
-                remaining_days: balance.remaining_days - days_to_expire,
-                total_days:     balance.total_days - days_to_expire
-              )
+            request.with_lock do
+              next if request.balance_expired?
+
+              days_to_expire = [ balance.remaining_days, request.remaining_days ].min
+              if days_to_expire > 0
+                balance.update!(remaining_days: balance.remaining_days - days_to_expire,
+                  total_days: balance.total_days - days_to_expire)
+              end
+              request.update!(balance_expired: true, remaining_days: 0)
             end
           end
-
-          request.update!(balance_expired: true)
         end
     end
   end

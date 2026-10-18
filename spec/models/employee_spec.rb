@@ -184,7 +184,7 @@ RSpec.describe Employee, type: :model do
     before do
       create(:employee, tenant: tenant, employment_status: "active",  email: "a@x.com")
       create(:employee, tenant: tenant, employment_status: "probation", email: "b@x.com")
-      create(:employee, tenant: tenant, employment_status: "resigned", email: "c@x.com")
+      create(:employee, :resigned, tenant: tenant, email: "c@x.com")
     end
 
     it ".active returns only active employees" do

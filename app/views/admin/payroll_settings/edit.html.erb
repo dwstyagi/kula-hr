@@ -147,6 +147,21 @@
       </div>
     </div>
 
+    <div class="card card-pad space-y-4">
+      <h2 class="text-base font-semibold text-stone-900">HDFC Salary Payments</h2>
+      <p class="text-sm text-stone-500">Enter the values supplied by your bank to enable HDFC payment files.</p>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <%= f.label :hdfc_corporate_code, "Corporate Code", class: "label" %>
+          <%= f.text_field :hdfc_corporate_code, class: "input", autocomplete: "off" %>
+        </div>
+        <div>
+          <%= f.label :salary_debit_account, "Salary Debit Account", class: "label" %>
+          <%= f.text_field :salary_debit_account, class: "input", autocomplete: "off", inputmode: "numeric" %>
+        </div>
+      </div>
+    </div>
+
     <%# Actions %>
     <div class="flex items-center gap-3">
       <%= f.submit "Save Settings",

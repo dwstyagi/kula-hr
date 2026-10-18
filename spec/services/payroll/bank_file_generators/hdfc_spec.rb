@@ -5,7 +5,10 @@ RSpec.describe Payroll::BankFileGenerators::Hdfc do
   let(:hr_user) { create(:user, :hr_admin) }
   let(:run)     { create(:payroll_run, :approved, tenant: tenant, initiated_by: hr_user, month: 1, year: 2026) }
 
-  before { set_tenant(tenant) }
+  before do
+    set_tenant(tenant)
+    create(:payroll_setting, tenant: tenant, hdfc_corporate_code: "ACME123", salary_debit_account: "9988776655")
+  end
 
   let(:employee) do
     create(:employee, tenant: tenant,
@@ -33,8 +36,8 @@ RSpec.describe Payroll::BankFileGenerators::Hdfc do
     expect(output.lines.first).to include("~NEFT~")
   end
 
-  it "includes CORP001 in header" do
-    expect(output.lines.first).to include("CORP001")
+  it "includes the configured corporate code in header" do
+    expect(output.lines.first).to include("ACME123")
   end
 
   it "includes batch code with month and year" do

@@ -173,8 +173,13 @@ module Admin
 
     def destroy
       authorize @employee
-      @employee.destroy!
-      redirect_to admin_employees_path, notice: "Employee deleted successfully."
+      if @employee.destroy
+        redirect_to admin_employees_path, notice: "Employee deleted successfully."
+      else
+        redirect_to admin_employee_path(@employee), alert: @employee.errors.full_messages.to_sentence
+      end
+    rescue ActiveRecord::InvalidForeignKey
+      redirect_to admin_employee_path(@employee), alert: "This employee has historical records and cannot be deleted. Update their employment status instead."
     end
 
     def assign_salary
@@ -254,7 +259,7 @@ module Admin
       params.require(:employee).permit(
         :first_name, :last_name, :email, :phone,
         :date_of_birth, :gender,
-        :joining_date, :confirmation_date, :employment_status,
+        :joining_date, :confirmation_date, :employment_status, :last_working_date,
         :department_id, :designation_id, :reporting_manager_id, :work_location_id,
         :bank_name, :bank_account_number, :ifsc_code,
         :pan_number, :aadhaar_number, :uan_number, :esi_number,

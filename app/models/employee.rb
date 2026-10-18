@@ -18,6 +18,7 @@ class Employee < ApplicationRecord
   has_many :leave_encashment_requests, dependent: :destroy
   has_many :comp_off_requests, dependent: :destroy
   has_many :attendance_summaries, dependent: :destroy
+  has_many :payslips, dependent: :restrict_with_error
   has_many :tax_declarations, dependent: :destroy
   has_many :announcement_reads, dependent: :destroy
 
@@ -42,6 +43,8 @@ class Employee < ApplicationRecord
                     format: { with: URI::MailTo::EMAIL_REGEXP }
   validates :joining_date, presence: true
   validates :employment_status, presence: true, inclusion: { in: EMPLOYMENT_STATUSES }
+  validates :last_working_date, presence: true,
+    if: -> { employment_status_changed? && EXITED_STATUSES.include?(employment_status) }
   validates :gender, inclusion: { in: GENDERS }, allow_blank: true
   validates :pan_number, format: { with: /\A[A-Z]{5}\d{4}[A-Z]\z/, message: "is not a valid PAN" }, allow_blank: true
   validates :aadhaar_number, format: { with: /\A\d{12}\z/, message: "must be 12 digits" }, allow_blank: true
@@ -90,6 +93,10 @@ class Employee < ApplicationRecord
     current_employee_salary
   end
 
+  def salary_for_period(month, year)
+    employee_salaries.for_payroll(month, year).order(effective_from: :desc, id: :desc).first
+  end
+
   def active?
     employment_status == "active"
   end
@@ -108,7 +115,12 @@ class Employee < ApplicationRecord
   # has no user/login account. This keeps HR as the catch-all and avoids a
   # deadlock where neither HR nor a login-less manager can approve.
   def hr_is_approver?
-    leave_approver_hr? || reporting_manager&.user.nil?
+    leave_approver_hr? || !reporting_manager_available?
+  end
+
+  def reporting_manager_available?
+    manager_user = reporting_manager&.user
+    manager_user&.account_active? && manager_user.member_of?(tenant)
   end
 
   def approver_label

@@ -181,7 +181,9 @@ RSpec.describe Payroll::PayrollProcessor do
       # validations — this test only cares about the payroll payout path.
       let!(:encashment) do
         er = build(:leave_encashment_request, :approved,
-                   tenant: tenant, employee: employee, encashment_amount: 3_000)
+                   tenant: tenant, employee: employee, encashment_amount: 3_000,
+                   financial_year: FinancialYear.for_period(payroll_run.month, payroll_run.year))
+        create(:leave_balance, tenant: tenant, employee: employee, leave_type: er.leave_type, financial_year: er.financial_year)
         er.save!(validate: false)
         er
       end

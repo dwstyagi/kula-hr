@@ -1,7 +1,7 @@
 module Employees
   class RowValidator
     REQUIRED_FIELDS = %w[first_name last_name email date_of_birth joining_date employment_status].freeze
-    DATE_FIELDS     = %w[joining_date date_of_birth confirmation_date].freeze
+    DATE_FIELDS     = %w[joining_date date_of_birth confirmation_date last_working_date].freeze
     DATE_FORMAT     = "%d/%m/%Y"
 
     def initialize(row)
@@ -51,6 +51,9 @@ module Employees
 
       unless Employee::EMPLOYMENT_STATUSES.include?(@row["employment_status"])
         @errors << "Employment status must be one of: #{Employee::EMPLOYMENT_STATUSES.join(', ')}"
+      end
+      if Employee::EXITED_STATUSES.include?(@row["employment_status"]) && @row["last_working_date"].blank?
+        @errors << "Last working date is required for resigned or terminated employees"
       end
     end
 

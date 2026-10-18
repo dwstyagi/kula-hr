@@ -22,11 +22,10 @@ module EmployeePortal
           alert: "#{@leave_request.employee.full_name}'s leave approver is HR, not their reporting manager."
       end
 
-      unless @leave_request.pending?
-        return redirect_to employee_portal_team_leave_requests_path, alert: "Only pending requests can be approved."
-      end
-
-      ActiveRecord::Base.transaction do
+      @leave_request.with_lock do
+        unless @leave_request.pending?
+          return redirect_to employee_portal_team_leave_requests_path, alert: "Only pending requests can be approved."
+        end
         Leave::LeaveBalanceAdjuster.new(leave_request: @leave_request).debit!
         @leave_request.update!(
           status:      :approved,
@@ -49,17 +48,18 @@ module EmployeePortal
           alert: "#{@leave_request.employee.full_name}'s leave approver is HR, not their reporting manager."
       end
 
-      unless @leave_request.pending?
-        return redirect_to employee_portal_team_leave_requests_path, alert: "Only pending requests can be rejected."
+      @leave_request.with_lock do
+        unless @leave_request.pending?
+          return redirect_to employee_portal_team_leave_requests_path, alert: "Only pending requests can be rejected."
+        end
+        @leave_request.update!(
+          status:           :rejected,
+          rejection_reason: params[:rejection_reason].to_s.strip,
+          approved_by:      current_user,
+          approved_at:      Time.current
+        )
+        Leave::NotificationBroadcaster.new(leave_request: @leave_request).broadcast_status_update!
       end
-
-      @leave_request.update!(
-        status:           :rejected,
-        rejection_reason: params[:rejection_reason].to_s.strip,
-        approved_by:      current_user,
-        approved_at:      Time.current
-      )
-      Leave::NotificationBroadcaster.new(leave_request: @leave_request).broadcast_status_update!
       redirect_to employee_portal_team_leave_requests_path,
         notice: "Leave rejected for #{@leave_request.employee.full_name}."
     end

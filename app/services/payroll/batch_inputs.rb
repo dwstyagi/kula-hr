@@ -6,7 +6,7 @@ module Payroll
     Ytd = Struct.new(:tds, :taxable_income, :employee_pf)
     NO_YTD = Ytd.new(0.to_d, 0.to_d, 0.to_d).freeze
 
-    attr_reader :attendance, :declarations, :pt_slabs, :esi_covered
+    attr_reader :attendance, :declarations, :pt_slabs, :esi_covered, :salaries, :encashment_employee_ids
 
     def initialize(employees:, payroll_run:)
       tenant = payroll_run.tenant
@@ -16,8 +16,9 @@ module Payroll
 
       ActsAsTenant.with_tenant(tenant) do
         employees.each { |employee| employee.association(:tenant).target = tenant }
-        ActiveRecord::Associations::Preloader.new(records: employees,
-          associations: { current_employee_salary: { salary_structure: { salary_structure_components: :salary_component } } }).call
+        @salaries = EmployeeSalary.for_payroll(month, year).where(employee_id: ids)
+          .includes(salary_structure: { salary_structure_components: :salary_component })
+          .order(effective_from: :desc, id: :desc).each_with_object({}) { |salary, selected| selected[salary.employee_id] ||= salary }
         # Only locked attendance is payable — the same rule ReadinessCheck uses.
         @attendance = AttendanceSummary.locked.where(employee_id: ids, month: month, year: year).index_by(&:employee_id)
         @declarations = TaxDeclaration.effective_for_tds.where(employee_id: ids, financial_year: fy)
@@ -25,6 +26,10 @@ module Payroll
         @pt_slabs = ProfessionalTaxSlab.order(:id).to_a
         @ytd = self.class.ytd_totals(employee_ids: ids, month: month, year: year)
         @esi_covered = self.class.esi_covered(employee_ids: ids, month: month, year: year)
+        @encashment_employee_ids = LeaveEncashmentRequest.payable.where(employee_id: ids)
+          .where("financial_year <= ?", fy)
+          .where("approved_at IS NULL OR approved_at <= ?", Date.new(year, month, 1).end_of_month.end_of_day)
+          .distinct.pluck(:employee_id).to_set
       end
     end
 

@@ -73,11 +73,11 @@ module Payroll
       end
       ActsAsTenant.with_tenant(@tenant) do
         scope = self.class.eligible_employees(month: @month, year: @year, tenant: @tenant)
-        salary = EmployeeSalary.where(effective_to: nil).select(:employee_id)
+        salary = EmployeeSalary.for_payroll(@month, @year).select(:employee_id)
         ready = scope.where(id: locked_scope).where(id: salary)
         blocking = scope.where(employment_status: Employee::IN_SERVICE_STATUSES).where.not(id: locked_scope)
         skip = scope.where.not(id: ready.select(:id)).where.not(id: blocking.select(:id))
-        variance = ready.where(id: EmployeeSalary.where(effective_to: nil)
+        variance = ready.where(id: EmployeeSalary.for_payroll(@month, @year)
           .where("effective_from >= ?", Date.new(@year, @month, 1).prev_month).select(:employee_id))
         Result.new(statuses: StatusList.new(scope, self), ready: StatusList.new(ready, self),
           blocking: StatusList.new(blocking, self), will_skip: StatusList.new(skip, self),
@@ -88,8 +88,10 @@ module Payroll
     def statuses_for(employees)
       ActsAsTenant.with_tenant(@tenant) do
         locked = locked_scope.where(employee_id: employees.map(&:id)).pluck(:employee_id).to_set
+        salaries = EmployeeSalary.for_payroll(@month, @year).where(employee_id: employees.map(&:id))
+          .order(effective_from: :desc, id: :desc).each_with_object({}) { |salary, selected| selected[salary.employee_id] ||= salary }
         employees.map do |employee|
-          salary = employee.current_salary
+          salary = salaries[employee.id]
           EmployeeStatus.new(employee: employee, has_attendance: locked.include?(employee.id),
             has_salary: salary.present?, current_salary: salary,
             salary_recently_changed: salary.present? && salary.effective_from >= Date.new(@year, @month, 1).prev_month)

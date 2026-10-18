@@ -70,6 +70,11 @@
           <%= f.select :employment_status, Employee::EMPLOYMENT_STATUSES.map { |s| [s.titleize, s] }, {}, class: "select" %>
         </div>
         <div>
+          <%= f.label :last_working_date, class: "label" %>
+          <%= f.date_field :last_working_date, class: "input" %>
+          <p class="text-xs text-stone-500 mt-1">Required when an employee resigns or is terminated so their final month can be paid.</p>
+        </div>
+        <div>
           <%= f.label :department_id, "Department", class: "label" %>
           <%= f.collection_select :department_id, @departments, :id, :name, { include_blank: "Select department" }, class: "select" %>
         </div>

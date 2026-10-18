@@ -8,6 +8,7 @@ RSpec.describe "Admin::LeaveEncashmentRequests", type: :request do
   let!(:request_record) do
     ActsAsTenant.with_tenant(tenant) do
       r = build(:leave_encashment_request, tenant: tenant, employee: employee)
+      create(:leave_balance, tenant: tenant, employee: employee, leave_type: r.leave_type, financial_year: r.financial_year)
       r.save(validate: false)
       r
     end

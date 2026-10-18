@@ -1,6 +1,10 @@
 import { Controller } from "@hotwired/stimulus"
 import consumer from "channels/consumer"
 
+const escapeHtml = (value) => String(value ?? "").replace(/[&<>"']/g, char => ({
+  "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+}[char]))
+
 const ICONS = {
   info:    { bg: "bg-blue-100",  text: "text-blue-600",  path: "M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" },
   success: { bg: "bg-green-100", text: "text-green-600", path: "M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" },
@@ -19,6 +23,7 @@ export default class extends Controller {
   }
 
   showToast({ title, message, kind = "info", url }) {
+    const safeUrl = typeof url === "string" && /^\/(?!\/)/.test(url) && !/[\\\u0000-\u001f]/.test(url) ? url : null
     const icon  = ICONS[kind] || ICONS.info
     const toast = document.createElement("div")
 
@@ -35,9 +40,9 @@ export default class extends Controller {
         </svg>
       </div>
       <div class="flex-1 min-w-0">
-        <p class="text-sm font-semibold text-gray-900">${title}</p>
-        <p class="text-xs text-gray-500 mt-0.5 leading-relaxed">${message}</p>
-        ${url ? `<a href="${url}" class="text-xs font-medium ${icon.text} hover:underline mt-1 inline-block">View →</a>` : ""}
+        <p class="text-sm font-semibold text-gray-900">${escapeHtml(title)}</p>
+        <p class="text-xs text-gray-500 mt-0.5 leading-relaxed">${escapeHtml(message)}</p>
+        ${safeUrl ? `<a href="${escapeHtml(safeUrl)}" class="text-xs font-medium ${icon.text} hover:underline mt-1 inline-block">View →</a>` : ""}
       </div>
       <button class="shrink-0 text-gray-300 hover:text-gray-500 transition-colors" onclick="this.closest('[data-dismiss]').remove()">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

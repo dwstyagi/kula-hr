@@ -39,8 +39,11 @@ module Admin
 
     def destroy
       authorize @work_location
-      @work_location.destroy!
-      redirect_to admin_work_locations_path, notice: "Work location deleted."
+      if @work_location.destroy
+        redirect_to admin_work_locations_path, notice: "Work location deleted."
+      else
+        redirect_to admin_work_locations_path, alert: @work_location.errors.full_messages.to_sentence
+      end
     end
 
     private

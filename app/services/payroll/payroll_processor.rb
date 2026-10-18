@@ -57,15 +57,18 @@ module Payroll
     # ── Per-employee processing ────────────────────────────────────────────────
 
     def process_employee(employee)
-      result = Payroll::SalaryCalculator.new(
-        employee:        employee,
-        payroll_run:     @run,
-        payroll_setting: @setting,
-        inputs:          @inputs
-      ).call
+      employee.with_lock do
+        employee.association(:tenant).target = @tenant
+        result = Payroll::SalaryCalculator.new(
+          employee:        employee,
+          payroll_run:     @run,
+          payroll_setting: @setting,
+          inputs:          @inputs
+        ).call
 
-      create_payslip(result)
-      @processed << employee.id
+        create_payslip(result)
+        @processed << employee.id
+      end
 
     rescue *Payroll::ProcessingErrors::INFRASTRUCTURE
       raise
@@ -85,6 +88,7 @@ module Payroll
 
     def create_payslip(result)
       ActiveRecord::Base.transaction do
+        result.encashments.each { |request| request.save! unless request.balance_reserved? }
         payslip = Payslip.create!(payroll_run: @run,
           tenant:             @tenant,
           employee:           result.employee,
@@ -103,16 +107,15 @@ module Payroll
         )
 
         create_line_items(payslip, result)
-        apply_encashments(payslip, result.employee)
+        apply_encashments(payslip, result.encashments)
       end
     end
 
     # Pays out any approved-but-unpaid leave encashments for this employee as a
     # separate (non-prorated) earning line item, then marks each request paid and
-    # links it to this payslip so it is never paid twice. Option A: encashment is
-    # not run through PF/ESI/PT/TDS — see docs/gaps.md #3 for the tax follow-up.
-    def apply_encashments(payslip, employee)
-      requests = LeaveEncashmentRequest.payable.where(employee: employee).includes(:leave_type).to_a
+    # links it to this payslip so it is never paid twice. SalaryCalculator has
+    # already included these taxable earnings in this month's TDS projection.
+    def apply_encashments(payslip, requests)
       return if requests.empty?
 
       now      = Time.current

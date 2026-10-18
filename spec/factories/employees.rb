@@ -14,6 +14,9 @@ FactoryBot.define do
 
     trait :with_user do
       association :user
+      after(:create) do |employee|
+        employee.user.tenant_users.find_or_create_by!(tenant: employee.tenant)
+      end
     end
 
     trait :with_department do
@@ -30,6 +33,7 @@ FactoryBot.define do
 
     trait :resigned do
       employment_status { "resigned" }
+      last_working_date { Date.today - 1 }
     end
 
     trait :pf_opted_out do

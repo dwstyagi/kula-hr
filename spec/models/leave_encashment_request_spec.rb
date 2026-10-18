@@ -95,6 +95,7 @@ RSpec.describe LeaveEncashmentRequest, type: :model do
         encashment_amount: amount,
         payslip:           payslip
       )
+      create(:leave_balance, tenant: tenant, employee: req.employee, leave_type: earned_type, financial_year: fy)
       req.save!(validate: false)
       req
     end
