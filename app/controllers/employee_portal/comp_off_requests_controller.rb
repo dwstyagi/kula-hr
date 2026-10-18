@@ -48,7 +48,8 @@ module EmployeePortal
     end
 
     def notify_approver
-      approver = current_employee.reporting_manager&.user ||
+      manager = current_employee.reporting_manager if current_employee.reporting_manager_available?
+      approver = manager&.user ||
                  hr_admin_user
 
       return unless approver
@@ -59,7 +60,7 @@ module EmployeePortal
           title:   "New Comp-Off Request",
           message: "#{current_employee.full_name} raised a comp-off request for #{@comp_off_request.worked_date.strftime('%d %b %Y')}.",
           kind:    "info",
-          url:     current_employee.reporting_manager ? "/portal/team_comp_off_requests" : "/admin/comp_off_requests"
+          url:     manager ? "/portal/team_comp_off_requests" : "/admin/comp_off_requests"
         }
       )
     end

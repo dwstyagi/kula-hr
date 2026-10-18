@@ -38,12 +38,14 @@ module EmployeePortal
     def cancel
       authorize @leave_request
 
-      if @leave_request.pending?
-        @leave_request.update!(status: :cancelled)
-        redirect_to employee_portal_leave_requests_path, notice: "Leave request cancelled."
-      else
-        redirect_to employee_portal_leave_requests_path,
-          alert: "Only pending requests can be cancelled."
+      @leave_request.with_lock do
+        if @leave_request.pending?
+          @leave_request.update!(status: :cancelled)
+          redirect_to employee_portal_leave_requests_path, notice: "Leave request cancelled."
+        else
+          redirect_to employee_portal_leave_requests_path,
+            alert: "Only pending requests can be cancelled."
+        end
       end
     end
 
@@ -65,6 +67,7 @@ module EmployeePortal
       @leave_balances   = current_employee.leave_balances.current.includes(:leave_type)
       @week_off_pattern = current_employee.tenant.payroll_setting&.week_off_pattern || "all_saturdays_sundays"
       @holiday_dates    = Holiday.active
+                                 .applicable_to(current_employee.work_location_id)
                                  .where("date >= ?", Date.today)
                                  .pluck(:date)
                                  .map { |d| d.strftime("%Y-%m-%d") }

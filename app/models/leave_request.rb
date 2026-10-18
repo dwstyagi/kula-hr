@@ -4,10 +4,12 @@ class LeaveRequest < ApplicationRecord
   belongs_to :employee
   belongs_to :leave_type
   belongs_to :approved_by, class_name: "User", optional: true
+  has_many :leave_balance_debits, dependent: :destroy
+  has_many :comp_off_usages, dependent: :destroy
 
   enum :status, { pending: 0, approved: 1, rejected: 2, cancelled: 3 }
 
-  before_validation :calculate_number_of_days
+  before_validation :calculate_number_of_days, if: -> { new_record? || from_date_changed? || to_date_changed? || leave_type_id_changed? }
 
   validates :from_date, :to_date, presence: true
   validates :number_of_days, numericality: { greater_than: 0 }, allow_nil: true
@@ -28,17 +30,27 @@ class LeaveRequest < ApplicationRecord
     where("from_date <= ? AND to_date >= ?", end_date, start_date)
   }
 
+  def working_dates
+    return [] unless from_date && to_date && to_date >= from_date
+
+    pattern = employee&.tenant&.payroll_setting&.week_off_pattern || "all_saturdays_sundays"
+    holidays = Holiday.active.applicable_to(employee&.work_location_id)
+      .where(date: from_date..to_date).pluck(:date).to_set
+    (from_date..to_date).select do |date|
+      Attendance::WorkingDaysCalculator.working_day?(date, pattern) && !holidays.include?(date)
+    end
+  end
+
+  def days_by_financial_year
+    working_dates.group_by { |date| FinancialYear.label(date) }.transform_values(&:size)
+  end
+
   private
 
   def calculate_number_of_days
     return unless from_date.present? && to_date.present? && to_date >= from_date
 
-    pattern       = employee&.tenant&.payroll_setting&.week_off_pattern || "all_saturdays_sundays"
-    holiday_dates = Holiday.active.where(date: from_date..to_date).pluck(:date).to_set
-
-    self.number_of_days = (from_date..to_date).count do |d|
-      Attendance::WorkingDaysCalculator.working_day?(d, pattern) && !holiday_dates.include?(d)
-    end
+    self.number_of_days = working_dates.size
   end
 
   def working_days_present
@@ -75,21 +87,18 @@ class LeaveRequest < ApplicationRecord
     return unless leave_type.present? && number_of_days.present?
     return if leave_type.lop?
 
-    balance = LeaveBalance.find_by(
-      employee: employee,
-      leave_type: leave_type,
-      financial_year: LeaveBalance.current_financial_year
-    )
-
-    if balance.nil?
-      errors.add(:base, "No #{leave_type.name} balance found for the current financial year")
-    elsif balance.remaining_days < number_of_days
-      errors.add(:base, "Insufficient #{leave_type.name} balance. You have #{balance.remaining_days} days remaining but requested #{number_of_days} days")
+    days_by_financial_year.each do |financial_year, days|
+      balance = LeaveBalance.find_by(employee: employee, leave_type: leave_type, financial_year: financial_year)
+      if balance.nil?
+        errors.add(:base, "No #{leave_type.name} balance found for financial year #{financial_year}")
+      elsif balance.remaining_days < days
+        errors.add(:base, "Insufficient #{leave_type.name} balance for #{financial_year}. You have #{balance.remaining_days} days remaining but requested #{days} days")
+      end
     end
   end
 
   def employee_is_active
     return unless employee.present?
-    errors.add(:base, "Cannot apply leave for an inactive employee") unless employee.active?
+    errors.add(:base, "Cannot apply leave for an inactive employee") unless Employee::IN_SERVICE_STATUSES.include?(employee.employment_status)
   end
 end

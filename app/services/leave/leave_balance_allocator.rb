@@ -6,8 +6,7 @@ module Leave
   class LeaveBalanceAllocator
     def initialize(employee: nil, employees: nil)
       @employees = Array(employee || employees)
-      @tenant    = @employees.first.tenant
-      @setting   = @tenant.payroll_setting
+      @tenant    = @employees.first&.tenant
     end
 
     def call

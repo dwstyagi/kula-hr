@@ -16,6 +16,7 @@ module Admin
       authorize @leave_type
 
       if @leave_type.save
+        allocate_balances
         redirect_to admin_leave_types_path, notice: "Leave type created successfully."
       else
         render :new, status: :unprocessable_content
@@ -30,6 +31,7 @@ module Admin
       authorize @leave_type
 
       if @leave_type.update(leave_type_params)
+        allocate_balances
         redirect_to admin_leave_types_path, notice: "Leave type updated successfully."
       else
         render :edit, status: :unprocessable_content
@@ -50,11 +52,20 @@ module Admin
     def toggle_active
       authorize @leave_type, :update?
       @leave_type.update!(is_active: !@leave_type.is_active?)
+      allocate_balances
       redirect_to admin_leave_types_path,
         notice: "#{@leave_type.name} #{@leave_type.is_active? ? 'activated' : 'deactivated'}."
     end
 
     private
+
+    def allocate_balances
+      return unless @leave_type.is_active? && @leave_type.is_paid?
+
+      Employee.in_service.find_in_batches(batch_size: 100) do |employees|
+        Leave::LeaveBalanceAllocator.new(employees: employees).call
+      end
+    end
 
     def set_leave_type
       @leave_type = LeaveType.find(params[:id])

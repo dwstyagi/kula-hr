@@ -3,6 +3,7 @@ class CompOffRequest < ApplicationRecord
   belongs_to :tenant
   belongs_to :employee
   belongs_to :approved_by, class_name: "User", optional: true
+  has_many :comp_off_usages, dependent: :destroy
 
   enum :status, { pending: 0, approved: 1, rejected: 2 }
 
@@ -26,7 +27,7 @@ class CompOffRequest < ApplicationRecord
 
     pattern  = employee.tenant.payroll_setting&.week_off_pattern || "all_saturdays_sundays"
     is_weekend = !Attendance::WorkingDaysCalculator.working_day?(worked_date, pattern)
-    is_holiday = Holiday.active.exists?(date: worked_date)
+    is_holiday = Holiday.active.applicable_to(employee.work_location_id).exists?(date: worked_date)
 
     unless is_weekend || is_holiday
       errors.add(:worked_date, "must be a public holiday or weekend — regular working days are not eligible for comp-off")

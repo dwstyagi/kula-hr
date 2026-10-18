@@ -2,7 +2,7 @@ class WorkLocation < ApplicationRecord
   acts_as_tenant :tenant
   belongs_to :tenant
 
-  has_many :holidays, dependent: :nullify
+  has_many :holidays, dependent: :restrict_with_error
   has_many :employees, dependent: :nullify
 
   validates :name, presence: true, uniqueness: { scope: :tenant_id }

@@ -20,6 +20,27 @@ class LeaveEncashmentRequest < ApplicationRecord
   # Approved encashments not yet paid out through a payslip — picked up by PayrollProcessor.
   scope :payable,  -> { where(status: :approved, payslip_id: nil).where.not(encashment_amount: nil) }
 
+  before_save :reserve_balance!, if: -> { approved? && !balance_reserved? }
+
+  def reserve_balance!
+    return if balance_reserved?
+
+    balance = LeaveBalance.find_by(employee: employee, leave_type: leave_type, financial_year: financial_year)
+    unless balance
+      errors.add(:base, "No leave balance is available to reserve for encashment")
+      raise ActiveRecord::RecordInvalid, self
+    end
+    balance.with_lock do
+      if balance.remaining_days < number_of_days
+        errors.add(:base, "Insufficient leave balance to reserve #{number_of_days} encashment days")
+        raise ActiveRecord::RecordInvalid, self
+      end
+      balance.update!(remaining_days: balance.remaining_days - number_of_days,
+        encashed_days: balance.encashed_days + number_of_days)
+      self.balance_reserved = true
+    end
+  end
+
   private
 
   def leave_type_must_be_encashable
@@ -52,7 +73,7 @@ class LeaveEncashmentRequest < ApplicationRecord
     )
 
     eligible = balance ? [ leave_type.max_carry_forward, balance.remaining_days ].min : 0
-    if eligible <= 0
+    if eligible <= 0 || number_of_days.to_d > eligible
       errors.add(:base, "You have no carry-forward eligible #{leave_type.name} days to encash")
     end
   end

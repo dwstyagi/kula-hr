@@ -64,7 +64,7 @@ module Leave
     # Returns [[user, url], ...] pairs for whoever should receive the new-request notification.
     # Routing is based on the employee's leave_approver setting.
     def recipients_for_new_request
-      if @employee.leave_approver_reporting_manager? && (manager = @employee.reporting_manager&.user)
+      if !@employee.hr_is_approver? && (manager = @employee.reporting_manager&.user)
         [ [ manager, "/portal/team_leave_requests" ] ]
       else
         hr_and_admin_users.map { |u| [ u, "/admin/leave_requests" ] }

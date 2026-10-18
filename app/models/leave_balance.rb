@@ -3,6 +3,7 @@ class LeaveBalance < ApplicationRecord
   belongs_to :tenant
   belongs_to :employee
   belongs_to :leave_type
+  has_many :leave_balance_debits, dependent: :destroy
 
   validates :financial_year, presence: true
   validates :total_days, :used_days, :remaining_days, :carried_forward_days,
