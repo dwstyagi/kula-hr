@@ -80,7 +80,7 @@ class PayrollMailer < ApplicationMailer
 
   def super_admin_email_addresses(payroll_run)
     ActsAsTenant.with_tenant(payroll_run.tenant) do
-      User.with_role(:super_admin).pluck(:email)
+      payroll_run.tenant.users.with_role(:super_admin).distinct.pluck(:email)
     end
   end
 end

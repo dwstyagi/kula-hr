@@ -1,5 +1,9 @@
 import { Controller } from "@hotwired/stimulus"
 
+const escapeHtml = (value) => String(value ?? "").replace(/[&<>"']/g, char => ({
+  "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+}[char]))
+
 export default class extends Controller {
   static targets = ["structureSelect", "ctcInput", "breakup"]
   static values = { url: String }
@@ -70,7 +74,7 @@ export default class extends Controller {
 
     data.earnings.forEach(e => {
       html += `<tr>
-        <td class="px-4 py-2 text-sm text-gray-900">${e.name}</td>
+        <td class="px-4 py-2 text-sm text-gray-900">${escapeHtml(e.name)}</td>
         <td class="px-4 py-2 text-sm text-gray-900 text-right font-mono">${fmt(e.monthly)}</td>
         <td class="px-4 py-2 text-sm text-gray-500 text-right font-mono">${fmt(e.annual)}</td>
       </tr>`
@@ -100,7 +104,7 @@ export default class extends Controller {
 
     data.deductions.forEach(d => {
       html += `<tr>
-        <td class="px-4 py-2 text-sm text-gray-900">${d.name}</td>
+        <td class="px-4 py-2 text-sm text-gray-900">${escapeHtml(d.name)}</td>
         <td class="px-4 py-2 text-sm text-gray-900 text-right font-mono">${fmt(d.monthly)}</td>
         <td class="px-4 py-2 text-sm text-gray-500 text-right font-mono">${fmt(d.annual)}</td>
       </tr>`
@@ -130,7 +134,7 @@ export default class extends Controller {
 
     data.employer_contributions.forEach(c => {
       html += `<tr>
-        <td class="px-4 py-2 text-sm text-gray-900">${c.name}</td>
+        <td class="px-4 py-2 text-sm text-gray-900">${escapeHtml(c.name)}</td>
         <td class="px-4 py-2 text-sm text-gray-900 text-right font-mono">${fmt(c.monthly)}</td>
         <td class="px-4 py-2 text-sm text-gray-500 text-right font-mono">${fmt(c.annual)}</td>
       </tr>`

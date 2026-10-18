@@ -4,9 +4,14 @@ class KulaDeviseMailer < Devise::Mailer
     super
   end
 
+  def reset_password_instructions(record, token, opts = {})
+    @tenant = record.tenants.first
+    super
+  end
+
   def url_options
     if @tenant
-      domain = ENV.fetch("APP_DOMAIN", "lvh.me")
+      domain = ENV.fetch("APP_DOMAIN", Rails.env.production? ? "kula-hr.com" : "lvh.me")
       options = { host: "#{@tenant.subdomain}.#{domain}" }
       options[:port] = ENV.fetch("PORT", 3000).to_i if Rails.env.development?
       super.merge(options)

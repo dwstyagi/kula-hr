@@ -17,7 +17,7 @@ class LeaveMailer < ApplicationMailer
 
     mail(
       to:      @employee.email,
-      subject: "Leave Encashment Approved — ₹#{number_with_delimiter(@request.encashment_amount.to_i)}"
+      subject: "Leave Encashment Approved — ₹#{ActiveSupport::NumberHelper.number_to_delimited(@request.encashment_amount.to_i)}"
     )
   end
 
