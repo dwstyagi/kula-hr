@@ -53,7 +53,21 @@ class JobDispatch < ApplicationRecord
       return false
     end
 
-    update_columns(failed_at: Time.current)
+    if job_class == "BackgroundTaskJob"
+      task = ActsAsTenant.without_tenant { BackgroundTask.find_by(id: arguments.first) }
+      if task
+        ActsAsTenant.with_tenant(task.tenant) do
+          task.with_lock do
+            task.update!(status: "failed", result: task.result.merge("error" => reason)) if task.pending?
+            self.class.where(id: id).update_all(failed_at: Time.current)
+          end
+        end
+      else
+        self.class.where(id: id).update_all(failed_at: Time.current)
+      end
+    else
+      update_columns(failed_at: Time.current)
+    end
     Rails.logger.error("[JobDispatch] #{id} gave up: #{reason}")
     false
   end

@@ -59,7 +59,9 @@ module Admin
       end
 
       @admin_user.remove_role(:hr_admin)
-      TenantUser.find_by(tenant: ActsAsTenant.current_tenant, user: @admin_user)&.destroy!
+      unless Employee.exists?(user: @admin_user)
+        TenantUser.find_by(tenant: ActsAsTenant.current_tenant, user: @admin_user)&.destroy!
+      end
 
       redirect_to admin_admin_users_path, notice: "#{@admin_user.full_name}'s access has been revoked."
     end
