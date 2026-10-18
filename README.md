@@ -157,13 +157,6 @@ In development, subdomains are served via `lvh.me`, which resolves to `127.0.0.1
 
 If you run `bin/rails db:seed`, the app creates a sample platform admin and a sample tenant.
 
-### Demo Credentials
-
-| Role | Email | Password |
-| --- | --- | --- |
-| Platform admin | `admin@kulahr.com` | `password123` |
-| Tenant super admin | `admin@acme.com` | `password123` |
-
 The sample tenant uses the `acme` subdomain and includes departments, designations, employees, and sample bank details.
 
 ## Typical Payroll Flow
