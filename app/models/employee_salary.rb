@@ -10,6 +10,11 @@ class EmployeeSalary < ApplicationRecord
 
   scope :current, -> { where(effective_to: nil) }
   scope :history, -> { where.not(effective_to: nil).order(effective_from: :desc) }
+  scope :for_payroll, ->(month, year) {
+    from = Date.new(year.to_i, month.to_i, 1)
+    where("effective_from <= ?", from.end_of_month)
+      .where("effective_to IS NULL OR effective_to >= ?", from)
+  }
 
   def current?
     effective_to.nil?

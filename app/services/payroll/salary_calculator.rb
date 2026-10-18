@@ -13,6 +13,7 @@ module Payroll
       :attendance,        # { working_days: 22, paid_days: 21, lop_days: 1, proration_factor: 0.9545 }
       :proration_factor,
       :non_taxable_components, # earning names the salary structure marks non-taxable
+      :encashments,
       keyword_init: true
     )
 
@@ -43,7 +44,16 @@ module Payroll
       pf_result  = calculate_pf(prorated_earnings)
       esi_result = calculate_esi(gross)
       pt_result  = calculate_pt(gross)
+      @encashments = if @inputs && !@inputs.encashment_employee_ids.include?(@employee.id)
+        []
+      else
+        LeaveEncashmentRequest.payable.where(employee: @employee)
+          .where("financial_year <= ?", current_fy)
+          .where("approved_at IS NULL OR approved_at <= ?", Date.new(@year, @month, 1).end_of_month.end_of_day)
+          .includes(:leave_type).lock.to_a
+      end
       tds_result = calculate_tds(prorated_earnings, full_earnings, pf_result)
+      gross += @encashments.sum(&:encashment_amount)
 
       deductions = build_deductions(pf_result, esi_result, pt_result, tds_result)
       total_deductions = deductions.values.sum
@@ -65,7 +75,8 @@ module Payroll
         },
         attendance:        attendance,
         proration_factor:  proration,
-        non_taxable_components: @non_taxable_components.to_a
+        non_taxable_components: @non_taxable_components.to_a,
+        encashments: @encashments
       )
     end
 
@@ -96,7 +107,7 @@ module Payroll
     # ── Step 2: Earnings ───────────────────────────────────────────────────────
 
     def fetch_earnings
-      employee_salary = @employee.current_salary
+      employee_salary = @inputs ? @inputs.salaries[@employee.id] : @employee.salary_for_period(@month, @year)
       raise CalculationError, "No salary assigned for #{@employee.full_name}" unless employee_salary
 
       result = Salary::CtcBreakupCalculator.call(
@@ -194,7 +205,7 @@ module Payroll
       full_pf      = full_month_employee_pf(full_earnings)
 
       projected_income = ytd.taxable_income + taxable_total(prorated_earnings) +
-                         taxable_total(full_earnings) * months_ahead
+                         taxable_total(full_earnings) * months_ahead + @encashments.sum(&:encashment_amount)
       projected_pf     = ytd.employee_pf + pf_result.employee_pf + full_pf * months_ahead
 
       Statutory::TdsCalculator.new(

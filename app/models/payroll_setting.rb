@@ -16,4 +16,6 @@ class PayrollSetting < ApplicationRecord
   validates :week_off_pattern,  inclusion: { in: WEEK_OFF_PATTERNS }
   validates :pt_state, presence: true, if: :pt_enabled?
   validates :pt_state, inclusion: { in: SUPPORTED_PT_STATES }, allow_blank: true
+  validates :hdfc_corporate_code, format: { with: /\A[A-Za-z0-9_-]+\z/ }, allow_blank: true
+  validates :salary_debit_account, format: { with: /\A[0-9]{6,34}\z/ }, allow_blank: true
 end

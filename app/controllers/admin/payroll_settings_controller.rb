@@ -32,7 +32,7 @@ class Admin::PayrollSettingsController < Admin::BaseController
       :esi_enabled, :esi_employee_rate, :esi_employer_rate, :esi_ceiling,
       :pt_enabled, :pt_state,
       :tds_enabled,
-      :week_off_pattern
+      :week_off_pattern, :hdfc_corporate_code, :salary_debit_account
     )
   end
 end

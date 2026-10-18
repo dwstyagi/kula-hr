@@ -3,7 +3,7 @@ module Admin
     before_action :authenticate_user!
     before_action :verify_admin_or_hr!
     before_action :set_pending_leave_count
-    before_action :verify_tenant_write_access!, unless: -> { action_name.in?(%w[index show bank_file export template progress]) }
+    before_action :verify_tenant_write_access!, unless: -> { request.get? || request.head? }
 
     layout "admin"
 
@@ -30,6 +30,8 @@ module Admin
     def verify_tenant_write_access!
       tenant = ActsAsTenant.current_tenant
       return if tenant.nil? || tenant.write_allowed?
+      # Finishing an already approved trial run does not create another payroll.
+      return if tenant.trial? && controller_name == "payroll_runs" && action_name == "mark_paid"
       msg = if tenant.trial?
         "Your trial has ended — #{ActionController::Base.helpers.pluralize(Tenant::TRIAL_PAYROLL_RUN_LIMIT, 'payroll run')} completed. Upgrade to continue."
       else
