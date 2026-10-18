@@ -31,6 +31,30 @@ class TaxDeclaration < ApplicationRecord
   validate :landlord_pan_required_for_high_rent
   validate :hra_fields_only_for_old_regime
 
+  def total_declared_investments
+    investment_declarations.reject(&:marked_for_destruction?).sum { |investment| investment.declared_amount.to_d }
+  end
+
+  def estimated_monthly_tds
+    period = Date.new(financial_year.to_s.first(4).to_i, 4, 1)
+    salary = employee.salary_for_period(Date.current.month, Date.current.year)
+    setting = tenant.payroll_setting
+    return 0 unless salary && setting&.tds_enabled?
+
+    breakup = Salary::CtcBreakupCalculator.call(annual_ctc: salary.annual_ctc,
+      salary_structure: salary.salary_structure, payroll_setting: setting)
+    taxable_names = salary.salary_structure.salary_structure_components
+      .select { |component| component.salary_component.taxable? }.map(&:name)
+    taxable = breakup.earnings.select { |item| taxable_names.include?(item.name) }.sum(&:annual)
+    basic = breakup.earnings.find { |item| item.name == "Basic" }&.monthly || 0
+    hra = breakup.earnings.find { |item| item.name == "HRA" }&.monthly || 0
+    pf = breakup.deductions.find { |item| item.name == "Employee PF" }&.annual || 0
+    Statutory::TdsCalculator.new(employee: employee, annual_gross: taxable,
+      monthly_basic: basic, monthly_hra: hra, annual_employee_pf: pf,
+      financial_year: financial_year, month: period.month, declaration: self,
+      remaining_months: 12).call.monthly_tds
+  end
+
   # Completeness meter for the employee portal dashboard. A submitted/verified
   # declaration is done; a draft only earns partial credit once the employee
   # has actually entered something — no fabricated progress on a blank draft.

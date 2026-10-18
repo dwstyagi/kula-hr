@@ -11,7 +11,7 @@ module Admin
       scope = policy_scope(TaxDeclaration).where(financial_year: @financial_year)
       @status_counts = scope.group(:status).count.transform_keys { |key| TaxDeclaration.statuses.key(key) || key.to_s }
       scope = scope.where(status: params[:status]) if params[:status].present?
-      @pagy, @declarations = pagy(:offset, scope.includes(:employee).order(updated_at: :desc), limit: 25)
+      @pagy, @declarations = pagy(:offset, scope.includes(:employee, :investment_declarations).order(updated_at: :desc), limit: 25)
     end
 
     def show

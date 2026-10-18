@@ -52,7 +52,7 @@ module Reports
           employee_contribution: esi_deduction.round(0),
           employer_contribution: employer_esi.round(0),
           total_contribution: (esi_deduction + employer_esi).round(0),
-          ip_number: ""
+          ip_number: emp.esi_number.to_s
         )
         if block_given?
           yield row

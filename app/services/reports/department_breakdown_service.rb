@@ -22,7 +22,7 @@ module Reports
       return self unless run
 
       data = Payslip.where(payroll_run: run)
-                    .joins(employee: :department)
+                    .left_joins(employee: :department)
                     .group("departments.name")
                     .select(
                       "departments.name AS dept_name",
@@ -31,13 +31,14 @@ module Reports
                       "SUM(payslips.total_deductions) AS sum_deductions",
                       "SUM(payslips.net_pay) AS sum_net",
                       "SUM(payslips.employer_pf) AS sum_employer_pf",
-                      "SUM(payslips.employer_esi) AS sum_employer_esi"
+                      "SUM(payslips.employer_esi) AS sum_employer_esi",
+                      "SUM(payslips.employer_pf_admin + payslips.employer_edli) AS sum_other_employer_costs"
                     )
 
       data.each do |d|
-        ctc = d.sum_gross.to_f + d.sum_employer_pf.to_f + d.sum_employer_esi.to_f
+        ctc = d.sum_gross.to_f + d.sum_employer_pf.to_f + d.sum_employer_esi.to_f + d.sum_other_employer_costs.to_f
         row = Row.new(
-          department_name: d.dept_name,
+          department_name: d.dept_name || "Unassigned",
           employee_count: d.emp_count.to_i,
           total_gross: d.sum_gross.to_f,
           total_deductions: d.sum_deductions.to_f,
