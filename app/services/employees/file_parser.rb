@@ -91,7 +91,8 @@ module Employees
     end
 
     def validate_headers!(headers)
-      missing = EXPECTED_HEADERS - headers
+      # Existing templates remain valid for in-service employees.
+      missing = EXPECTED_HEADERS - headers - %w[last_working_date]
       return if missing.empty?
 
       raise ParseError, "Missing columns: #{missing.join(', ')}. Please use the official template."

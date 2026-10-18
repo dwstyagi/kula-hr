@@ -40,6 +40,9 @@ module Attendance
             present = Float(row["days_present"].presence || 0, exception: false)
             half = Float(row["half_days"].presence || 0, exception: false)
             error ||= "Invalid attendance for #{code}" unless present&.finite? && half&.finite? && present >= 0 && half >= 0
+            if !error && present + half * 0.5 > summary.total_working_days - summary.non_employment_days
+              error = "Attendance for #{code} exceeds the working days during employment"
+            end
             if error
               errors << error if errors.size < 100
               next
