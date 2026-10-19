@@ -4,6 +4,7 @@
       canonical_path: blog_path,
       schema_type: "Blog" %>
 
+<% cache public_page_cache_key(@posts.map(&:cache_key)), expires_in: 1.day do %>
 <%= render "home/landing/styles" %>
 <%= render "resources/styles" %>
 <%= render "blogs/styles" %>
@@ -141,3 +142,4 @@
 </main>
 
 <%= render "home/landing/footer" %>
+<% end %>

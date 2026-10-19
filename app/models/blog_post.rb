@@ -76,6 +76,15 @@ class BlogPost
     @faqs         = Array(meta["faqs"])
   end
 
+  # File-backed posts have no updated_at timestamp. Hash all source content so
+  # even an edit that leaves updated_on unchanged invalidates rendered pages.
+  def cache_key
+    @cache_key ||= "blog-posts/#{slug}/#{Digest::SHA256.hexdigest([
+      title, description, summary, category, weight, published_on, updated_on,
+      takeaways, faqs, hero_image, markdown
+    ].to_json)}"
+  end
+
   def published?
     published_on <= Date.current
   end

@@ -12,6 +12,7 @@
   <%= render "home/structured_data", homepage_url: homepage_url, homepage_description: homepage_description %>
 <% end %>
 
+<% cache public_page_cache_key(@app_domain), expires_in: 1.day do %>
 <%= render "home/landing/styles" %>
 <%= render "home/landing/nav" %>
 <main>
@@ -28,3 +29,4 @@
 </main>
 <%= render "home/landing/footer" %>
 <%= render "home/landing/scripts" %>
+<% end %>

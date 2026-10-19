@@ -4,6 +4,7 @@
       canonical_path: resources_path,
       schema_type: "CollectionPage" %>
 
+<% cache public_page_cache_key(@official_sources, @last_reviewed, @states), expires_in: 1.day do %>
 <%= render "home/landing/styles" %>
 <%= render "resources/styles" %>
 <%= render "home/landing/nav" %>
@@ -82,3 +83,4 @@
 
 <%= render "home/landing/footer" %>
 <%= render "marketing_pages/scripts" %>
+<% end %>
