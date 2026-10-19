@@ -3,6 +3,7 @@
       description: "Use this printable Indian payroll checklist for financial-year setup, monthly inputs, statutory review, salary payment, filing and payslips.",
       canonical_path: payroll_checklist_path %>
 
+<% cache public_page_cache_key(@official_sources, @last_reviewed, @states), expires_in: 1.day do %>
 <%= render "home/landing/styles" %>
 <%= render "resources/styles" %>
 <%= render "home/landing/nav" %>
@@ -86,3 +87,4 @@
 
 <%= render "home/landing/footer" %>
 <%= render "marketing_pages/scripts" %>
+<% end %>

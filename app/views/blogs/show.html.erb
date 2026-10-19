@@ -44,6 +44,7 @@
   <% end %>
 <% end %>
 
+<% cache public_page_cache_key(@post.cache_key, BlogPost.published.map(&:cache_key)), expires_in: 1.day do %>
 <%= render "home/landing/styles" %>
 <%= render "resources/styles" %>
 <%= render "blogs/styles" %>
@@ -180,3 +181,4 @@
 </main>
 
 <%= render "home/landing/footer" %>
+<% end %>
