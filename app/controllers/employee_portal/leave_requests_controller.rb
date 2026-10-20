@@ -14,6 +14,8 @@ module EmployeePortal
       skip_authorization
     end
 
+
+
     def new
       @leave_request = LeaveRequest.new
       authorize @leave_request
@@ -38,15 +40,10 @@ module EmployeePortal
     def cancel
       authorize @leave_request
 
-      @leave_request.with_lock do
-        if @leave_request.pending?
-          @leave_request.update!(status: :cancelled)
-          redirect_to employee_portal_leave_requests_path, notice: "Leave request cancelled."
-        else
-          redirect_to employee_portal_leave_requests_path,
-            alert: "Only pending requests can be cancelled."
-        end
-      end
+      Leave::RequestTransition.new(leave_request: @leave_request, actor: current_user).call(:cancel, reason: "Withdrawn by employee")
+      redirect_to employee_portal_leave_requests_path, notice: "Leave request cancelled."
+    rescue Leave::RequestTransition::Error => e
+      redirect_to employee_portal_leave_requests_path, alert: e.message
     end
 
     private

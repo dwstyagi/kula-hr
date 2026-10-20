@@ -45,6 +45,14 @@ class LeaveRequest < ApplicationRecord
     working_dates.group_by { |date| FinancialYear.label(date) }.transform_values(&:size)
   end
 
+  # Shared transition calculations use whole-day units until sessions are added.
+  def half_day? = false
+  def hr_approval_required? = employee.hr_is_approver?
+
+  def daily_units
+    working_dates.index_with { 1.to_d }
+  end
+
   private
 
   def calculate_number_of_days

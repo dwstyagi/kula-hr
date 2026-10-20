@@ -23,11 +23,20 @@ class LeaveEncashmentRequest < ApplicationRecord
   before_save :reserve_balance!, if: -> { approved? && !balance_reserved? }
 
   def reserve_balance!
+    tenant.with_lock { reserve_open_balance! }
+  end
+
+  def reserve_open_balance!
     return if balance_reserved?
 
     balance = LeaveBalance.find_by(employee: employee, leave_type: leave_type, financial_year: financial_year)
     unless balance
       errors.add(:base, "No leave balance is available to reserve for encashment")
+      raise ActiveRecord::RecordInvalid, self
+    end
+    next_year = FinancialYear.label_for_start_year(financial_year.first(4).to_i + 1)
+    if LeaveBalance.exists?(employee: employee, leave_type: leave_type, financial_year: next_year)
+      errors.add(:base, "This financial year has already rolled over; these days cannot also be encashed")
       raise ActiveRecord::RecordInvalid, self
     end
     balance.with_lock do

@@ -80,7 +80,8 @@ RSpec.describe "Performance query budgets" do
   it "skips a locked month without querying leave requests" do
     10.times { add_employee }
     queries = sql_count { Attendance::SummaryGenerator.new(month: 4, year: 2026, tenant: tenant).call }
-    expect(queries).to eq(1)
+    # One tenant row lock serializes leave changes; one query checks employees.
+    expect(queries).to eq(2)
   end
 
   it "resets a payroll in a bounded number of queries" do

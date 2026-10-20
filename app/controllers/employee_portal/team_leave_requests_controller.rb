@@ -11,60 +11,31 @@ module EmployeePortal
         .where(employee: current_employee.direct_reports)
         .includes(:employee, :leave_type, :approved_by)
         .order(created_at: :desc)
-      @leave_requests = @leave_requests.where(status: params[:status]) if params[:status].present?
+      @leave_requests = @leave_requests.where(status: params[:status]) if LeaveRequest.statuses.key?(params[:status])
     end
 
     def approve
-      authorize @leave_request
-
-      unless @leave_request.employee.leave_approver_reporting_manager?
-        return redirect_to employee_portal_team_leave_requests_path,
-          alert: "#{@leave_request.employee.full_name}'s leave approver is HR, not their reporting manager."
-      end
-
-      @leave_request.with_lock do
-        unless @leave_request.pending?
-          return redirect_to employee_portal_team_leave_requests_path, alert: "Only pending requests can be approved."
-        end
-        Leave::LeaveBalanceAdjuster.new(leave_request: @leave_request).debit!
-        @leave_request.update!(
-          status:      :approved,
-          approved_by: current_user,
-          approved_at: Time.current
-        )
-        Leave::NotificationBroadcaster.new(leave_request: @leave_request).broadcast_status_update!
-      end
-      redirect_to employee_portal_team_leave_requests_path,
-        notice: "Leave approved for #{@leave_request.employee.full_name}."
-    rescue Leave::LeaveBalanceAdjuster::InsufficientBalance => e
-      redirect_to employee_portal_team_leave_requests_path, alert: e.message
+      review(:approve)
     end
 
     def reject
-      authorize @leave_request
-
-      unless @leave_request.employee.leave_approver_reporting_manager?
-        return redirect_to employee_portal_team_leave_requests_path,
-          alert: "#{@leave_request.employee.full_name}'s leave approver is HR, not their reporting manager."
-      end
-
-      @leave_request.with_lock do
-        unless @leave_request.pending?
-          return redirect_to employee_portal_team_leave_requests_path, alert: "Only pending requests can be rejected."
-        end
-        @leave_request.update!(
-          status:           :rejected,
-          rejection_reason: params[:rejection_reason].to_s.strip,
-          approved_by:      current_user,
-          approved_at:      Time.current
-        )
-        Leave::NotificationBroadcaster.new(leave_request: @leave_request).broadcast_status_update!
-      end
-      redirect_to employee_portal_team_leave_requests_path,
-        notice: "Leave rejected for #{@leave_request.employee.full_name}."
+      review(:reject)
     end
 
     private
+
+    def review(action)
+      authorize @leave_request, "#{action}?"
+      if @leave_request.hr_approval_required?
+        return redirect_to employee_portal_team_leave_requests_path, alert: "This request requires HR approval."
+      end
+      Leave::RequestTransition.new(leave_request: @leave_request, actor: current_user)
+        .call(action, reason: params[:rejection_reason])
+      Leave::NotificationBroadcaster.new(leave_request: @leave_request).broadcast_status_update!(notify_hr: true)
+      redirect_to employee_portal_team_leave_requests_path, notice: "Leave #{action == :approve ? 'approved' : 'rejected'}."
+    rescue Leave::RequestTransition::Error, Leave::LeaveBalanceAdjuster::InsufficientBalance => e
+      redirect_to employee_portal_team_leave_requests_path, alert: e.message
+    end
 
     def ensure_manager!
       unless current_employee&.direct_reports&.exists?

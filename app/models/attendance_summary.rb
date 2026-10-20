@@ -16,6 +16,7 @@ class AttendanceSummary < ApplicationRecord
   scope :for_month, ->(month, year) { where(month: month, year: year) }
   scope :for_tenant_month, ->(tenant, month, year) { where(tenant: tenant, month: month, year: year) }
 
+  before_validation :reset_leave_adjustment, if: -> { persisted? && will_save_change_to_days_present? }
   before_save :recalculate_derived_fields
 
   def month_name
@@ -33,6 +34,10 @@ class AttendanceSummary < ApplicationRecord
   end
 
   private
+
+  def reset_leave_adjustment
+    self.leave_adjusted_present_days = 0
+  end
 
   def attendance_within_employment_days
     return unless [ days_present, half_days, total_working_days, non_employment_days ].all? { |value| value.is_a?(Numeric) }

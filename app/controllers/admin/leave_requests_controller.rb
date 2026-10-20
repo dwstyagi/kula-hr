@@ -1,6 +1,7 @@
 module Admin
   class LeaveRequestsController < BaseController
-    before_action :set_leave_request, only: [ :approve, :reject, :cancel ]
+    before_action :set_leave_request, only: [ :show, :approve, :reject, :cancel ]
+    rescue_from Leave::RequestTransition::Error, Leave::LeaveBalanceAdjuster::InsufficientBalance, with: :transition_failed
 
     def index
       requests = policy_scope(LeaveRequest)
@@ -13,131 +14,75 @@ module Admin
       @pagy, @leave_requests = pagy(:offset, requests, limit: 20)
     end
 
-    # GET /admin/leave_requests/:id — detail drawer (turbo-frame) on the queue
+
+
     def show
-      @leave_request = policy_scope(LeaveRequest)
-        .includes(:leave_type, :approved_by, employee: { reporting_manager: :user })
-        .find(params[:id])
       authorize @leave_request
       render layout: false if turbo_frame_request?
     end
 
-    # PATCH /admin/leave_requests/bulk_approve — approve every selected pending
-    # request this admin is allowed to approve; report what was skipped.
     def bulk_approve
       authorize LeaveRequest, :bulk_approve?
-
-      requests = policy_scope(LeaveRequest)
-        .where(id: params[:ids], status: :pending)
-        .includes(:leave_type, employee: { reporting_manager: :user })
-
-      approved = 0
-      skipped  = []
-
-      requests.each do |leave_request|
-        unless leave_request.employee.hr_is_approver? && policy(leave_request).approve?
-          skipped << "#{leave_request.employee.full_name} (manager approves)"
+      approved, skipped = 0, []
+      policy_scope(LeaveRequest).where(id: params[:ids], status: :pending).find_each do |request|
+        unless request.hr_approval_required? && policy(request).approve?
+          skipped << "#{request.employee.full_name} (manager approves)"
           next
         end
-
         begin
-          leave_request.with_lock do
-            next unless leave_request.pending?
-
-            Leave::LeaveBalanceAdjuster.new(leave_request: leave_request).debit!
-            leave_request.update!(
-              status:      :approved,
-              approved_by: current_user,
-              approved_at: Time.current
-            )
-            Leave::NotificationBroadcaster.new(leave_request: leave_request).broadcast_status_update!
-            approved += 1
-          end
-        rescue Leave::LeaveBalanceAdjuster::InsufficientBalance
-          skipped << "#{leave_request.employee.full_name} (insufficient balance)"
+          Leave::RequestTransition.new(leave_request: request, actor: current_user).call(:approve)
+          Leave::NotificationBroadcaster.new(leave_request: request).broadcast_status_update!
+          approved += 1
+        rescue Leave::RequestTransition::Error, Leave::LeaveBalanceAdjuster::InsufficientBalance => e
+          skipped << "#{request.employee.full_name} (#{e.message})"
         end
       end
-
-      message = "#{approved} leave request#{"s" unless approved == 1} approved."
-      message += " Skipped: #{skipped.join(", ")}." if skipped.any?
-
-      redirect_to admin_leave_requests_path(status: params[:status].presence),
-                  approved.positive? ? { notice: message } : { alert: message }
+      message = "#{approved} leave request#{'s' unless approved == 1} approved."
+      message += " Skipped: #{skipped.join(', ')}." if skipped.any?
+      redirect_to admin_leave_requests_path(status: params[:status].presence), approved.positive? ? { notice: message } : { alert: message }
     end
 
     def approve
       authorize @leave_request
+      return wrong_approver unless @leave_request.hr_approval_required?
 
-      unless @leave_request.employee.hr_is_approver?
-        return redirect_to admin_leave_requests_path,
-          alert: "#{@leave_request.employee.full_name}'s leave approver is their reporting manager, not HR."
-      end
-
-      @leave_request.with_lock do
-        unless @leave_request.pending?
-          return redirect_to admin_leave_requests_path, alert: "Only pending requests can be approved."
-        end
-        Leave::LeaveBalanceAdjuster.new(leave_request: @leave_request).debit!
-        @leave_request.update!(
-          status:      :approved,
-          approved_by: current_user,
-          approved_at: Time.current
-        )
-        Leave::NotificationBroadcaster.new(leave_request: @leave_request).broadcast_status_update!
-      end
+      transition(:approve)
       redirect_to admin_leave_requests_path, notice: "Leave approved for #{@leave_request.employee.full_name}."
-    rescue Leave::LeaveBalanceAdjuster::InsufficientBalance => e
-      redirect_to admin_leave_requests_path, alert: e.message
     end
 
     def reject
       authorize @leave_request
+      return wrong_approver unless @leave_request.hr_approval_required?
 
-      unless @leave_request.employee.hr_is_approver?
-        return redirect_to admin_leave_requests_path,
-          alert: "#{@leave_request.employee.full_name}'s leave approver is their reporting manager, not HR."
-      end
-
-      @leave_request.with_lock do
-        unless @leave_request.pending?
-          return redirect_to admin_leave_requests_path, alert: "Only pending requests can be rejected."
-        end
-        @leave_request.update!(
-          status:           :rejected,
-          rejection_reason: params[:rejection_reason].to_s.strip,
-          approved_by:      current_user,
-          approved_at:      Time.current
-        )
-        Leave::NotificationBroadcaster.new(leave_request: @leave_request).broadcast_status_update!
-      end
+      transition(:reject, reason: params[:rejection_reason])
       redirect_to admin_leave_requests_path, notice: "Leave rejected for #{@leave_request.employee.full_name}."
     end
 
     def cancel
       authorize @leave_request
-
-      if @leave_request.to_date < Date.today
-        return redirect_to admin_leave_requests_path, alert: "Cannot cancel a leave whose dates have already passed."
-      end
-
-      @leave_request.with_lock do
-        if @leave_request.approved?
-          Leave::LeaveBalanceAdjuster.new(leave_request: @leave_request).credit!
-          @leave_request.update!(status: :cancelled)
-          return redirect_to admin_leave_requests_path, notice: "Approved leave cancelled and balance restored."
-        elsif @leave_request.pending?
-          @leave_request.update!(status: :cancelled)
-          return redirect_to admin_leave_requests_path, notice: "Leave request cancelled."
-        else
-          return redirect_to admin_leave_requests_path, alert: "This request cannot be cancelled."
-        end
-      end
+      transition(:cancel, reason: params[:reason].presence || "Cancelled directly by HR")
+      redirect_to admin_leave_requests_path, notice: "Leave cancelled; any debited balance has been restored."
     end
+
 
     private
 
+
     def set_leave_request
-      @leave_request = LeaveRequest.find(params[:id])
+      @leave_request = policy_scope(LeaveRequest).find(params[:id])
+    end
+
+    def transition(action, reason: nil)
+      Leave::RequestTransition.new(leave_request: @leave_request, actor: current_user).call(action, reason: reason)
+      Leave::NotificationBroadcaster.new(leave_request: @leave_request).broadcast_status_update!
+    end
+
+    def transition_failed(error)
+      redirect_to admin_leave_requests_path, alert: error.message
+    end
+
+    def wrong_approver
+      redirect_to admin_leave_requests_path, alert: "#{@leave_request.employee.full_name}'s leave approver is their reporting manager, not HR."
     end
   end
 end

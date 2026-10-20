@@ -56,12 +56,15 @@ RSpec.describe "Review regression protections" do
 
   it "rolls back the monthly marker if the credit fails, allowing retry" do
     create(:leave_type, :casual, tenant: tenant)
+    create(:employee, tenant: tenant, joining_date: Date.new(2025, 1, 1))
     service = Leave::MonthlyLeaveAccrualService.new(tenant: tenant, period: Date.new(2026, 5, 1))
-    allow(LeaveBalance).to receive(:where).and_raise("database interruption")
+    allow(LeaveBalance).to receive(:find_or_create_by!).and_raise("database interruption")
     expect { service.call }.to raise_error("database interruption")
     expect(LeaveAccrual.count).to eq(0)
-    allow(LeaveBalance).to receive(:where).and_call_original
+    expect(LeaveBalance.count).to eq(0)
+    allow(LeaveBalance).to receive(:find_or_create_by!).and_call_original
     expect { service.call }.to change(LeaveAccrual, :count).by(1)
+    expect(LeaveBalance.first.remaining_days).to eq(1)
   end
 
   it "allocates numerically past EMP9999 and shares the sequence with bulk reservations" do

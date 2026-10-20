@@ -22,7 +22,7 @@ module Leave
     end
 
     def call
-      ActsAsTenant.with_tenant(@tenant) { process_balances }
+      ActsAsTenant.with_tenant(@tenant) { @tenant.with_lock { process_balances } }
     end
 
     private
@@ -53,7 +53,7 @@ module Leave
             current = current_balances[[ employee_id, leave_type.id ]]
             encashed = approved_encashments.include?([ employee_id, leave_type.id ])
             carried = encashed ? 0.0 : carried_days(leave_type, current)
-            first_month = (leave_type.annual_quota / 12.0).round(2)
+            first_month = AccrualAmount.for(leave_type, Date.new(opening_year, 4, 1))
             total = first_month + carried
 
             {
@@ -71,7 +71,12 @@ module Leave
           end
         end
 
-        LeaveBalance.insert_all(records, unique_by: %i[employee_id leave_type_id financial_year]) if records.any?
+        records.each do |attributes|
+          key = attributes.slice(:employee_id, :leave_type_id, :financial_year)
+          LeaveAuditContext.set(kind: "rollover", reason: "Financial year opening #{new_fy}") do
+            LeaveBalance.find_or_create_by!(key) { |balance| balance.assign_attributes(attributes) }
+          end
+        end
       end
     end
 

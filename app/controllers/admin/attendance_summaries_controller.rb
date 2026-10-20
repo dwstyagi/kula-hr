@@ -50,10 +50,9 @@ module Admin
     def lock_month
       authorize AttendanceSummary, :lock_month?
 
-      count = policy_scope(AttendanceSummary)
-        .for_month(@month, @year)
-        .where(status: :draft)
-        .update_all(status: :locked)
+      count = ActsAsTenant.current_tenant.with_lock do
+        policy_scope(AttendanceSummary).for_month(@month, @year).where(status: :draft).update_all(status: :locked)
+      end
 
       redirect_to admin_attendance_summaries_path(month: @month, year: @year),
         notice: "#{count} attendance #{"record".pluralize(count)} locked for #{Date::MONTHNAMES[@month]} #{@year}."

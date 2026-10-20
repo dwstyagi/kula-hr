@@ -35,7 +35,12 @@ module Leave
       end
 
       # skip_duplicates: existing balances (e.g. re-imports) are left untouched
-      LeaveBalance.insert_all(records, unique_by: %i[employee_id leave_type_id financial_year]) if records.any?
+      records.each do |attributes|
+        key = attributes.slice(:employee_id, :leave_type_id, :financial_year)
+        LeaveAuditContext.set(reason: "Joining allocation") do
+          LeaveBalance.find_or_create_by!(key) { |balance| balance.assign_attributes(attributes) }
+        end
+      end
     end
 
     private
@@ -43,7 +48,7 @@ module Leave
     # On joining, employees receive the first month's allocation.
     # Subsequent months are credited automatically by MonthlyLeaveAccrualService.
     def calculate_allocation(leave_type, _employee)
-      (leave_type.annual_quota / 12.0).round(2)
+      AccrualAmount.for(leave_type, Date.current)
     end
   end
 end
