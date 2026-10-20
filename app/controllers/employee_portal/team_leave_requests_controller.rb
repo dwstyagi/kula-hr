@@ -12,6 +12,7 @@ module EmployeePortal
         .includes(:employee, :leave_type, :approved_by)
         .order(created_at: :desc)
       @leave_requests = @leave_requests.where(status: params[:status]) if LeaveRequest.statuses.key?(params[:status])
+      @pagy, @leave_requests = pagy(:offset, @leave_requests, limit: 20)
     end
 
     def approve

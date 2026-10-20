@@ -6,6 +6,13 @@ module Admin
     def index
       requests = policy_scope(LeaveRequest).includes(:leave_type, :approved_by, employee: { reporting_manager: :user })
         .order(created_at: :desc)
+      if params[:employee].present?
+        query = "%#{Employee.sanitize_sql_like(params[:employee].strip)}%"
+        requests = requests.joins(:employee).where("employees.first_name ILIKE :q OR employees.last_name ILIKE :q OR employees.employee_code ILIKE :q OR CONCAT(employees.first_name, ' ', employees.last_name) ILIKE :q", q: query)
+      end
+      requests = requests.where(leave_type_id: params[:leave_type_id]) if params[:leave_type_id].present?
+      requests = requests.where("to_date >= ?", filter_date(:from_date)) if filter_date(:from_date)
+      requests = requests.where("from_date <= ?", filter_date(:to_date)) if filter_date(:to_date)
       @status_counts = requests.reorder(nil).group(:status).count
       @cancellation_count = requests.where(status: :approved).where.not(cancellation_requested_at: nil).count
       requests = if params[:status] == "cancellation_requested"
@@ -97,6 +104,11 @@ module Admin
 
     private
 
+    def filter_date(key)
+      Date.iso8601(params[key]) if params[key].present?
+    rescue Date::Error
+      nil
+    end
 
     def set_leave_request
       @leave_request = policy_scope(LeaveRequest).find(params[:id])

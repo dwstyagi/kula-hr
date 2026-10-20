@@ -7,9 +7,8 @@ module EmployeePortal
 
     def index
       # Own requests only, also for an HR admin with an employee profile.
-      @leave_requests = policy_scope(LeaveRequest).where(employee: current_employee)
-        .includes(:leave_type, :approved_by)
-        .order(created_at: :desc)
+      requests = policy_scope(LeaveRequest).where(employee: current_employee).includes(:leave_type, :approved_by).order(created_at: :desc)
+      @pagy, @leave_requests = pagy(:offset, requests, limit: 20)
       @leave_balances = current_employee.leave_balances.current.includes(:leave_type).order("leave_types.name")
       skip_authorization
     end

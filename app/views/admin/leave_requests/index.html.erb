@@ -7,13 +7,12 @@
       <p class="page-sub">Click a request for details; select rows to approve in bulk.</p>
     </div>
 
-    <%= link_to "Record leave", new_admin_leave_request_path, class: "btn btn-primary" %>
-    <%= link_to "Balances / adjustments", admin_leave_balances_path, class: "btn btn-ghost" %>
+    <div class="flex gap-2"><%= link_to "Record leave", new_admin_leave_request_path, class: "btn btn-primary" %><%= link_to "Balances / adjustments", admin_leave_balances_path, class: "btn btn-ghost" %></div>
     <%# Status filter tabs with live counts %>
     <div class="flex items-center gap-1 bg-stone-100 rounded-lg p-1">
       <% [["All", ""], ["Pending", "pending"], ["Approved", "approved"], ["Rejected", "rejected"], ["Cancelled", "cancelled"], ["Cancellation requests", "cancellation_requested"]].each do |label, value| %>
         <% count = value == "cancellation_requested" ? @cancellation_count : (value.blank? ? @status_counts.values.sum : @status_counts.fetch(value, 0)) %>
-        <%= link_to admin_leave_requests_path(status: value.presence),
+        <%= link_to admin_leave_requests_path(request.query_parameters.except("page").merge(status: value.presence)),
             class: "px-3 py-1.5 text-sm font-medium rounded-md transition-colors flex items-center gap-1.5 #{params[:status].to_s == value ? 'bg-white text-stone-900 shadow-sm' : 'text-stone-500 hover:text-stone-900'}" do %>
           <%= label %>
           <% if value == "pending" && count.positive? %>
@@ -25,6 +24,15 @@
       <% end %>
     </div>
   </div>
+
+  <%= form_with url: admin_leave_requests_path, method: :get, class: "card card-pad mb-5 flex flex-wrap items-end gap-3" do |f| %>
+    <%= f.hidden_field :status, value: params[:status] %>
+    <div><%= f.label :employee, "Employee name or code", class: "label" %><%= f.search_field :employee, value: params[:employee], class: "input" %></div>
+    <div><%= f.label :leave_type_id, "Leave type", class: "label" %><%= f.collection_select :leave_type_id, @leave_types, :id, :name, {include_blank: "All types", selected: params[:leave_type_id]}, class: "select" %></div>
+    <div><%= f.label :from_date, "From date", class: "label" %><%= f.date_field :from_date, value: params[:from_date], class: "input" %></div>
+    <div><%= f.label :to_date, "To date", class: "label" %><%= f.date_field :to_date, value: params[:to_date], class: "input" %></div>
+    <%= f.submit "Filter", class: "btn btn-primary" %><%= link_to "Clear", admin_leave_requests_path, class: "btn btn-ghost" %>
+  <% end %>
 
   <%= form_with url: bulk_approve_admin_leave_requests_path(status: params[:status].presence),
         method: :patch, data: { turbo_confirm: "Approve all selected leave requests?" } do %>
@@ -76,12 +84,9 @@
                   <td class="num text-sm font-semibold text-stone-900"><%= number_with_precision(lr.number_of_days, precision: 1, strip_insignificant_zeros: true) %></td>
                   <td><%= status_badge(lr.status) %></td>
                   <td class="text-xs text-stone-500 whitespace-nowrap">
-                    <% mgr = lr.employee.reporting_manager %>
-                    <% if mgr&.user.present? %>
-                      <%= mgr.full_name %>
-                    <% else %>
-                      HR admin
-                    <% end %>
+                    <%= lr.hr_approval_required? ? "HR admin" : lr.employee.reporting_manager&.full_name %>
+                    <% if lr.regularization? %><p>Regularization</p><% end %>
+                    <% if lr.cancellation_pending? %><p class="text-amber-700">Cancellation awaiting review</p><% end %>
                   </td>
                   <td class="text-stone-300">
                     <svg class="size-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>

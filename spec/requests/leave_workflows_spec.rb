@@ -26,6 +26,30 @@ RSpec.describe "Leave workflow access and screens", type: :request do
     create(:leave_request, tenant: tenant, employee: employee, leave_type: type, from_date: date, to_date: date, **attributes)
   end
 
+  it "renders HR request, balance, adjustment and employee details screens" do
+    request = create_request(duration: "morning")
+    login(admin)
+    get admin_leave_requests_path, headers: headers
+    expect(response).to have_http_status(:ok)
+    expect(response.body).to include("0.5", "Employee name or code", "Cancellation requests")
+    get new_admin_leave_request_path, headers: headers
+    expect(response).to have_http_status(:ok)
+    get admin_leave_balances_path, headers: headers
+    expect(response).to have_http_status(:ok)
+    get admin_leave_balance_path(balance), headers: headers
+    expect(response).to have_http_status(:ok)
+    expect(response.body).to include("Adjust balance")
+    get admin_leave_request_path(request), headers: headers
+    expect(response).to have_http_status(:ok)
+    login(employee_user)
+    get employee_portal_leave_request_path(request), headers: headers
+    expect(response).to have_http_status(:ok)
+    expect(response.body).to include("Half day", "morning", "Request history")
+    get employee_portal_leave_balance_path(balance), headers: headers
+    expect(response).to have_http_status(:ok)
+    expect(response.body).not_to include("Record adjustment")
+  end
+
   it "supports the employee half-day submit, HR approve, employee cancellation and HR refund flow" do
     login(employee_user)
     post employee_portal_leave_requests_path, headers: headers, params: { leave_request: { leave_type_id: type.id, from_date: date, to_date: date, duration: "afternoon", reason: "Appointment" } }
@@ -57,6 +81,21 @@ RSpec.describe "Leave workflow access and screens", type: :request do
     request = LeaveRequest.last
     expect(request).to be_regularization
     expect(request.leave_request_events.first.actor).to eq(admin)
+  end
+
+  it "filters employee names, date overlap and leave type, preserving filters on status links" do
+    matching = create_request
+    other = create(:employee, tenant: tenant, first_name: "Different", last_name: "Person")
+    create(:leave_balance, tenant: tenant, employee: other, leave_type: type)
+    create(:leave_request, tenant: tenant, employee: other, leave_type: type, from_date: date, to_date: date)
+    login(admin)
+    get admin_leave_requests_path(employee: "LeaveTest Employee", from_date: date, to_date: date, leave_type_id: type.id), headers: headers
+    expect(response.body).to include("leave_request_#{matching.id}")
+    expect(response.body).not_to include(other.full_name)
+    get admin_leave_requests_path(employee: employee.employee_code, from_date: date + 1), headers: headers
+    expect(response.body).not_to include("leave_request_#{matching.id}")
+    get admin_leave_requests_path(from_date: "bad-date", status: "bogus"), headers: headers
+    expect(response).to have_http_status(:ok)
   end
 
   it "blocks HR bulk approval against locked attendance" do

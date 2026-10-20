@@ -149,3 +149,5 @@
     <% end %>
   </div>
 </div>
+
+<%= render "shared/pagy_nav", pagy: @pagy if @pagy.pages > 1 %>

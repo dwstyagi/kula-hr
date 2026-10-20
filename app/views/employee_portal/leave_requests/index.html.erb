@@ -95,6 +95,7 @@
     <% end %>
   <% end %>
 
+  <%= render "shared/pagy_nav", pagy: @pagy if @pagy.pages > 1 %>
   <%# Request History %>
   <div class="card overflow-hidden">
     <div class="px-6 py-4 border-b border-stone-100">
