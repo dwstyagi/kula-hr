@@ -65,13 +65,12 @@ module EmployeePortal
       @week_off_pattern = current_employee.tenant.payroll_setting&.week_off_pattern || "all_saturdays_sundays"
       @holiday_dates    = Holiday.active
                                  .applicable_to(current_employee.work_location_id)
-                                 .where("date >= ?", Date.today)
                                  .pluck(:date)
                                  .map { |d| d.strftime("%Y-%m-%d") }
     end
 
     def leave_request_params
-      params.require(:leave_request).permit(:leave_type_id, :from_date, :to_date, :duration, :reason)
+      params.require(:leave_request).permit(:leave_type_id, :from_date, :to_date, :duration, :reason, :regularization_note)
     end
   end
 end

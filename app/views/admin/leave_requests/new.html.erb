@@ -1,0 +1,17 @@
+<div class="max-w-xl mx-auto space-y-5">
+  <%= link_to "← Leave requests", admin_leave_requests_path, class: "btn btn-ghost" %>
+  <div class="card card-pad">
+    <h1 class="page-title text-2xl mb-4">Record employee leave</h1>
+    <p class="text-sm text-stone-500 mb-4">Submit a request on the employee's behalf. Past dates require a regularization explanation and HR approval; closed periods cannot be changed.</p>
+    <% if @leave_request.errors.any? %><div class="alert alert-error"><%= @leave_request.errors.full_messages.to_sentence %></div><% end %>
+    <%= form_with model: @leave_request, url: admin_leave_requests_path, class: "space-y-4" do |f| %>
+      <div><%= label_tag :employee_code, "Employee code", class: "label" %><%= text_field_tag :employee_code, params[:employee_code], required: true, class: "input" %></div>
+      <div><%= f.label :leave_type_id, "Leave type", class: "label" %><%= f.collection_select :leave_type_id, @leave_types, :id, :name, {}, class: "select" %></div>
+      <div><%= f.label :duration, "Duration", class: "label" %><%= f.select :duration, [["Full day(s)", "full_day"], ["Half day — morning", "morning"], ["Half day — afternoon", "afternoon"]], {}, class: "select" %></div>
+      <div class="grid grid-cols-2 gap-4"><div><%= f.label :from_date, "From", class: "label" %><%= f.date_field :from_date, required: true, class: "input" %></div><div><%= f.label :to_date, "To", class: "label" %><%= f.date_field :to_date, required: true, class: "input" %></div></div>
+      <div><%= f.label :reason, "Leave reason", class: "label" %><%= f.text_area :reason, maxlength: 500, class: "input" %></div>
+      <div><%= f.label :regularization_note, "Regularization explanation (required for past dates)", class: "label" %><%= f.text_area :regularization_note, maxlength: 1000, class: "input" %></div>
+      <%= f.submit "Submit for review", class: "btn btn-primary" %>
+    <% end %>
+  </div>
+</div>

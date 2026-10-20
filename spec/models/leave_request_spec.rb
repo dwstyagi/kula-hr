@@ -128,7 +128,7 @@ RSpec.describe LeaveRequest, type: :model do
         lr = build(:leave_request, tenant: tenant, employee: employee, leave_type: leave_type,
                    from_date: Date.today - 1, to_date: Date.today)
         expect(lr).not_to be_valid
-        expect(lr.errors[:from_date]).to include("cannot be in the past")
+        expect(lr.errors[:regularization_note]).to include("is required for past dates; HR must review the correction")
       end
     end
 

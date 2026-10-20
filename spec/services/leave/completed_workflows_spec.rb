@@ -32,6 +32,14 @@ RSpec.describe "Leave accounting and transitions" do
     expect { request_for(duration: "morning") }.to raise_error(ActiveRecord::RecordInvalid, /non-working/)
   end
 
+  it "requires an explanation for backdated requests and routes them to HR" do
+    manager = create(:employee, :with_user, tenant: tenant)
+    employee.update!(leave_approver: :reporting_manager, reporting_manager: manager)
+    expect { request_for(from: date - 7, to: date - 7) }.to raise_error(ActiveRecord::RecordInvalid, /Regularization note/)
+    request = request_for(from: date - 7, to: date - 7, regularization_note: "Emergency illness reported late")
+    expect(request).to be_hr_approval_required
+  end
+
   it "blocks approval and balance changes when attendance is locked" do
     request = request_for
     summary = create(:attendance_summary, :locked, tenant: tenant, employee: employee, month: 10, year: 2026)

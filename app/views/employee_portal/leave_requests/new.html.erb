@@ -54,14 +54,12 @@
         <div>
           <%= f.label :from_date, "From", class: "label" %>
           <%= f.date_field :from_date,
-              min: Date.today,
               class: "input",
               data: { leave_calculator_target: "fromDate", action: "change->leave-calculator#recalculate" } %>
         </div>
         <div>
           <%= f.label :to_date, "To", class: "label" %>
           <%= f.date_field :to_date,
-              min: Date.today,
               class: "input",
               data: { leave_calculator_target: "toDate", action: "change->leave-calculator#recalculate" } %>
         </div>
@@ -85,6 +83,11 @@
             placeholder: "Optional — briefly describe the reason for your leave" %>
       </div>
 
+      <div>
+        <%= f.label :regularization_note, "Regularization explanation (required for past dates)", class: "label" %>
+        <%= f.text_area :regularization_note, rows: 2, maxlength: 1000, class: "input" %>
+        <p class="text-xs text-stone-500">Explain late reporting or the correction needed. Backdated requests always go to HR; closed payroll periods cannot be changed.</p>
+      </div>
       <div class="flex items-center gap-3 pt-1">
         <%= f.submit "Submit Request",
             class: "px-5 py-2 bg-kula-700 text-white text-sm font-medium rounded-lg hover:bg-kula-800 cursor-pointer" %>

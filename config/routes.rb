@@ -116,7 +116,7 @@ Rails.application.routes.draw do
         end
       end
       get "leave_calendar", to: "leave_calendar#index", as: :leave_calendar
-      resources :leave_requests, only: [ :index, :show ] do
+      resources :leave_requests, only: [ :index, :show, :new, :create ] do
         member do
           patch :approve
           patch :reject

@@ -14,7 +14,24 @@ module Admin
       @pagy, @leave_requests = pagy(:offset, requests, limit: 20)
     end
 
+    def new
+      @leave_request = LeaveRequest.new
+      authorize @leave_request
+      @leave_types = LeaveType.active.order(:name)
+    end
 
+    def create
+      @leave_request = LeaveRequest.new(params.require(:leave_request).permit(:leave_type_id, :from_date, :to_date, :duration, :reason, :regularization_note))
+      @leave_request.employee = Employee.find_by(employee_code: params[:employee_code].to_s.strip)
+      authorize @leave_request
+      if @leave_request.save
+        Leave::NotificationBroadcaster.new(leave_request: @leave_request).broadcast_new_request!
+        redirect_to admin_leave_requests_path, notice: "Leave request submitted for HR review."
+      else
+        @leave_types = LeaveType.active.order(:name)
+        render :new, status: :unprocessable_content
+      end
+    end
 
     def show
       authorize @leave_request

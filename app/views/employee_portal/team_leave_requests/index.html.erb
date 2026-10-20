@@ -51,7 +51,7 @@
                     <%= lr.from_date.strftime(", %Y") %>
                   <% end %>
                 </td>
-                <td class="text-sm font-medium text-stone-900"><%= number_with_precision(lr.number_of_days, precision: 4, strip_insignificant_zeros: true) %><p class="text-xs text-stone-500"><%= lr.duration_label %></p></td>
+                <td class="text-sm font-medium text-stone-900"><%= number_with_precision(lr.number_of_days, precision: 4, strip_insignificant_zeros: true) %><p class="text-xs text-stone-500"><%= lr.duration_label %></p><% if lr.regularization? %><p class="text-xs text-amber-700">HR regularization review</p><% end %></td>
                 <td class="text-sm text-stone-500 max-w-xs truncate"><%= lr.reason.presence || "—" %></td>
                 <td>
                   <% badge = {

@@ -8,10 +8,12 @@ class LeaveRequest < ApplicationRecord
   has_many :comp_off_usages, dependent: :destroy
 
   enum :duration, { full_day: "full_day", morning: "morning", afternoon: "afternoon" }, prefix: true, validate: true
+  validates :regularization_note, length: { maximum: 1000 }
   validate :half_day_is_single_date
 
   def half_day? = !duration_full_day?
-  def hr_approval_required? = employee.hr_is_approver?
+  def regularization? = regularization_note.present?
+  def hr_approval_required? = regularization? || employee.hr_is_approver?
   def duration_label = half_day? ? "Half day — #{duration}" : "Full day"
 
   def daily_units
@@ -84,7 +86,12 @@ class LeaveRequest < ApplicationRecord
 
   def from_date_not_in_past
     return unless from_date.present?
-    errors.add(:from_date, "cannot be in the past") if from_date < Date.today
+    if from_date < Date.current && regularization_note.blank?
+      errors.add(:regularization_note, "is required for past dates; HR must review the correction")
+    end
+    if employee && from_date < employee.joining_date
+      errors.add(:from_date, "cannot be before the joining date")
+    end
   end
 
   def no_overlapping_requests

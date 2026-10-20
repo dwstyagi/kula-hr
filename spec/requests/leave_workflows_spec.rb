@@ -26,6 +26,15 @@ RSpec.describe "Leave workflow access and screens", type: :request do
     create(:leave_request, tenant: tenant, employee: employee, leave_type: type, from_date: date, to_date: date, **attributes)
   end
 
+  it "allows HR to record a backdated request on an employee's behalf" do
+    login(admin)
+    post admin_leave_requests_path, headers: headers, params: { employee_code: employee.employee_code,
+      leave_request: { leave_type_id: type.id, from_date: date - 7, to_date: date - 7, regularization_note: "Sick leave reported late" } }
+    expect(response).to redirect_to(admin_leave_requests_path)
+    request = LeaveRequest.last
+    expect(request).to be_regularization
+  end
+
   it "blocks HR bulk approval against locked attendance" do
     request = create_request
     create(:attendance_summary, :locked, tenant: tenant, employee: employee, month: 10, year: 2026)
@@ -34,6 +43,19 @@ RSpec.describe "Leave workflow access and screens", type: :request do
     expect(request.reload).to be_pending
     expect(balance.reload.remaining_days).to eq(12)
     expect(flash[:alert]).to include("locked")
+  end
+
+  it "blocks a manager from approving backdated regularization but lets HR review it" do
+    manager = create(:employee, :with_user, tenant: tenant)
+    employee.update!(leave_approver: :reporting_manager, reporting_manager: manager)
+    request = create(:leave_request, tenant: tenant, employee: employee, leave_type: type, from_date: date - 7, to_date: date - 7, regularization_note: "Emergency illness")
+    login(manager.user)
+    patch approve_employee_portal_team_leave_request_path(request), headers: headers
+    expect(request.reload).to be_pending
+    expect(flash[:alert]).to include("HR approval")
+    login(admin)
+    patch approve_admin_leave_request_path(request), headers: headers
+    expect(request.reload).to be_approved
   end
 
   it "prevents a manager approval after attendance is locked" do

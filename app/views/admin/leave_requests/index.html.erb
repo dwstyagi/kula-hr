@@ -7,6 +7,7 @@
       <p class="page-sub">Click a request for details; select rows to approve in bulk.</p>
     </div>
 
+    <%= link_to "Record leave", new_admin_leave_request_path, class: "btn btn-primary" %>
     <%# Status filter tabs with live counts %>
     <div class="flex items-center gap-1 bg-stone-100 rounded-lg p-1">
       <% [["All", ""], ["Pending", "pending"], ["Approved", "approved"], ["Rejected", "rejected"], ["Cancelled", "cancelled"]].each do |label, value| %>
@@ -51,7 +52,7 @@
                     data-action="click->drawer#open"
                     data-drawer-url-param="<%= admin_leave_request_path(lr) %>">
                   <td onclick="event.stopPropagation()">
-                    <% if lr.pending? && lr.employee.hr_is_approver? %>
+                    <% if lr.pending? && lr.hr_approval_required? %>
                       <input type="checkbox" name="ids[]" value="<%= lr.id %>" aria-label="Select <%= lr.employee.full_name %>"
                              class="checkbox cursor-pointer" data-bulk-target="item" data-action="bulk#refresh">
                     <% end %>
