@@ -1,0 +1,21 @@
+<div class="max-w-2xl mx-auto space-y-5">
+  <%= link_to "← My leaves", employee_portal_leave_requests_path, class: "btn btn-ghost" %>
+  <div class="card card-pad space-y-4">
+    <h1 class="page-title text-2xl"><%= @leave_request.leave_type.name %> request</h1>
+    <p><%= @leave_request.from_date.strftime("%d %b %Y") %> – <%= @leave_request.to_date.strftime("%d %b %Y") %> · <%= @leave_request.duration_label %></p>
+    <p><%= number_with_precision(@leave_request.number_of_days, precision: 1, strip_insignificant_zeros: true) %> days · <%= @leave_request.status.humanize %></p>
+    <p class="whitespace-pre-wrap break-words"><%= @leave_request.reason %></p>
+    <% if @leave_request.regularization? %><p class="alert alert-info">HR regularization: <%= @leave_request.regularization_note %></p><% end %>
+    <% if @leave_request.rejection_reason.present? %><p class="alert alert-error whitespace-pre-wrap break-words"><%= @leave_request.rejection_reason %></p><% end %>
+    <% if @leave_request.cancellation_pending? %>
+      <p class="alert alert-warning">Cancellation awaiting HR review. Your approved leave and balance remain unchanged.</p>
+      <p class="whitespace-pre-wrap break-words"><%= @leave_request.cancellation_reason %></p>
+    <% elsif @leave_request.approved? %>
+      <%= form_with url: request_cancellation_employee_portal_leave_request_path(@leave_request), method: :patch, class: "space-y-3" do |f| %>
+        <h2 class="text-sm font-semibold">Request cancellation</h2>
+        <div><%= f.label :reason, "Cancellation reason", class: "label" %><%= f.text_area :reason, required: true, maxlength: 1000, class: "input" %></div>
+        <%= f.submit "Send cancellation to HR", class: "btn btn-ghost" %>
+      <% end %>
+    <% end %>
+  </div>
+</div>

@@ -59,6 +59,19 @@ module Leave
       end
     end
 
+    def broadcast_workflow_update!(action)
+      return broadcast_status_update! unless action.to_sym == :reject_cancellation
+      return unless @employee.user
+
+      broadcast_to(@employee.user, { title: "Cancellation rejected", message: "Your cancellation request was rejected. The original approved leave remains in place. Open the request for HR's reason.", kind: "warning", url: "/portal/leave_requests/#{@leave_request.id}" })
+    end
+
+    def broadcast_cancellation_request!
+      hr_and_admin_users.each do |user|
+        broadcast_to(user, { title: "Leave cancellation requested", message: "#{@employee.full_name} requested cancellation of approved leave.", kind: "info", url: "/admin/leave_requests?status=cancellation_requested" })
+      end
+    end
+
     private
 
     # Returns [[user, url], ...] pairs for whoever should receive the new-request notification.

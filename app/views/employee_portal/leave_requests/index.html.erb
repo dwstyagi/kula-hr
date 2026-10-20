@@ -160,6 +160,8 @@
                 <% end %>
               </td>
               <td class="text-right">
+                <%= link_to "Details", employee_portal_leave_request_path(lr), class: "text-xs text-kula-700 underline" %>
+                <% if lr.cancellation_pending? %><p class="text-xs text-amber-700">Cancellation awaiting HR</p><% end %>
                 <% if lr.pending? %>
                   <%= button_to cancel_employee_portal_leave_request_path(lr),
                       method: :patch,

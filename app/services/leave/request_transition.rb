@@ -35,6 +35,16 @@ module Leave
               end
               @request.update!(status: :cancelled, cancellation_requested_at: nil)
               refresh_attendance! if was_approved
+            when :request_cancellation
+              raise Error, "Only approved leave can be submitted for cancellation." unless @request.approved?
+              raise Error, "A cancellation request is already awaiting HR review." if @request.cancellation_pending?
+              raise Error, "Please explain why the approved leave should be cancelled." if reason.blank?
+              PeriodGuard.new(@request).check!
+              @request.update!(cancellation_requested_at: Time.current, cancellation_reason: reason.to_s.strip)
+            when :reject_cancellation
+              raise Error, "No cancellation request is awaiting review." unless @request.cancellation_pending?
+              raise Error, "Please explain why the cancellation was rejected." if reason.blank?
+              @request.update!(cancellation_requested_at: nil)
             else
               raise ArgumentError, "Unknown leave action"
             end

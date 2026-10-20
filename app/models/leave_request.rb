@@ -8,10 +8,11 @@ class LeaveRequest < ApplicationRecord
   has_many :comp_off_usages, dependent: :destroy
 
   enum :duration, { full_day: "full_day", morning: "morning", afternoon: "afternoon" }, prefix: true, validate: true
-  validates :regularization_note, length: { maximum: 1000 }
+  validates :regularization_note, :cancellation_reason, length: { maximum: 1000 }
   validate :half_day_is_single_date
 
   def half_day? = !duration_full_day?
+  def cancellation_pending? = approved? && cancellation_requested_at.present?
   def regularization? = regularization_note.present?
   def hr_approval_required? = regularization? || employee.hr_is_approver?
   def duration_label = half_day? ? "Half day — #{duration}" : "Full day"

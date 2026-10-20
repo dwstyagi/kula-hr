@@ -1,16 +1,21 @@
 module Admin
   class LeaveRequestsController < BaseController
-    before_action :set_leave_request, only: [ :show, :approve, :reject, :cancel ]
+    before_action :set_leave_request, only: [ :show, :approve, :reject, :cancel, :reject_cancellation ]
     rescue_from Leave::RequestTransition::Error, Leave::LeaveBalanceAdjuster::InsufficientBalance, with: :transition_failed
 
     def index
-      requests = policy_scope(LeaveRequest)
-        .includes(:leave_type, :approved_by, employee: { reporting_manager: :user })
+      requests = policy_scope(LeaveRequest).includes(:leave_type, :approved_by, employee: { reporting_manager: :user })
         .order(created_at: :desc)
-
-      @status_counts = policy_scope(LeaveRequest).group(:status).count
-      requests = requests.where(status: params[:status]) if params[:status].present?
-
+      @status_counts = requests.reorder(nil).group(:status).count
+      @cancellation_count = requests.where(status: :approved).where.not(cancellation_requested_at: nil).count
+      requests = if params[:status] == "cancellation_requested"
+        requests.where(status: :approved).where.not(cancellation_requested_at: nil)
+      elsif LeaveRequest.statuses.key?(params[:status])
+        requests.where(status: params[:status])
+      else
+        requests
+      end
+      @leave_types = LeaveType.order(:name)
       @pagy, @leave_requests = pagy(:offset, requests, limit: 20)
     end
 
@@ -77,10 +82,18 @@ module Admin
 
     def cancel
       authorize @leave_request
+      if @leave_request.cancellation_pending? && params[:reason].blank?
+        raise Leave::RequestTransition::Error, "Please record the reason for approving this cancellation."
+      end
       transition(:cancel, reason: params[:reason].presence || "Cancelled directly by HR")
       redirect_to admin_leave_requests_path, notice: "Leave cancelled; any debited balance has been restored."
     end
 
+    def reject_cancellation
+      authorize @leave_request, :cancel?
+      transition(:reject_cancellation, reason: params[:reason])
+      redirect_to admin_leave_requests_path, notice: "Cancellation rejected; approved leave remains unchanged."
+    end
 
     private
 
@@ -91,7 +104,7 @@ module Admin
 
     def transition(action, reason: nil)
       Leave::RequestTransition.new(leave_request: @leave_request, actor: current_user).call(action, reason: reason)
-      Leave::NotificationBroadcaster.new(leave_request: @leave_request).broadcast_status_update!
+      Leave::NotificationBroadcaster.new(leave_request: @leave_request).broadcast_workflow_update!(action)
     end
 
     def transition_failed(error)

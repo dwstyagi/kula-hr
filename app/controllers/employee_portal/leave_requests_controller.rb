@@ -1,9 +1,9 @@
 module EmployeePortal
   class LeaveRequestsController < BaseController
     before_action :ensure_employee!
-    before_action :set_leave_request, only: [ :cancel ]
+    before_action :set_leave_request, only: [ :show, :cancel, :request_cancellation ]
 
-    skip_after_action :verify_policy_scoped, only: [ :new, :create, :cancel ]
+    skip_after_action :verify_policy_scoped, only: [ :new, :create, :show, :cancel, :request_cancellation ]
 
     def index
       # Own requests only, also for an HR admin with an employee profile.
@@ -14,7 +14,19 @@ module EmployeePortal
       skip_authorization
     end
 
+    def show
+      authorize @leave_request
+    end
 
+    def request_cancellation
+      authorize @leave_request, :request_cancellation?
+      Leave::RequestTransition.new(leave_request: @leave_request, actor: current_user)
+        .call(:request_cancellation, reason: params[:reason])
+      Leave::NotificationBroadcaster.new(leave_request: @leave_request).broadcast_cancellation_request!
+      redirect_to employee_portal_leave_request_path(@leave_request), notice: "Cancellation requested. Your leave and balance stay unchanged until HR approves."
+    rescue Leave::RequestTransition::Error, ActiveRecord::RecordInvalid => e
+      redirect_to employee_portal_leave_request_path(@leave_request), alert: e.message
+    end
 
     def new
       @leave_request = LeaveRequest.new

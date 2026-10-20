@@ -26,6 +26,28 @@ RSpec.describe "Leave workflow access and screens", type: :request do
     create(:leave_request, tenant: tenant, employee: employee, leave_type: type, from_date: date, to_date: date, **attributes)
   end
 
+  it "supports the employee half-day submit, HR approve, employee cancellation and HR refund flow" do
+    login(employee_user)
+    post employee_portal_leave_requests_path, headers: headers, params: { leave_request: { leave_type_id: type.id, from_date: date, to_date: date, duration: "afternoon", reason: "Appointment" } }
+    request = LeaveRequest.last
+    expect(request.number_of_days).to eq(0.5)
+    login(admin)
+    patch approve_admin_leave_request_path(request), headers: headers
+    expect(request.reload).to be_approved
+    login(employee_user)
+    patch request_cancellation_employee_portal_leave_request_path(request), headers: headers, params: { reason: "Appointment moved" }
+    expect(request.reload).to be_cancellation_pending
+    expect(balance.reload.remaining_days).to eq(11.5)
+    login(admin)
+    get admin_leave_request_path(request), headers: headers
+    expect(response.body).to include('id="cancellation_approval_reason"', 'id="cancellation_rejection_reason"')
+    get admin_leave_requests_path(status: "cancellation_requested"), headers: headers
+    expect(response.body).to include(employee.full_name)
+    patch cancel_admin_leave_request_path(request), headers: headers, params: { reason: "Accepted by HR" }
+    expect(request.reload).to be_cancelled
+    expect(balance.reload.remaining_days).to eq(12)
+  end
+
   it "allows HR to record a backdated request on an employee's behalf" do
     login(admin)
     post admin_leave_requests_path, headers: headers, params: { employee_code: employee.employee_code,

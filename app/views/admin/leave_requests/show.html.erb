@@ -55,6 +55,7 @@
     <% end %>
 
     <% if lr.regularization? %><div class="alert alert-info text-sm">Regularization requiring HR review: <%= lr.regularization_note %></div><% end %>
+    <% if lr.cancellation_pending? %><div class="alert alert-warning text-sm">Cancellation requested: <%= lr.cancellation_reason %></div><% end %>
     <% if lr.reason.present? %>
       <div>
         <p class="eyebrow mb-1.5">Reason</p>
@@ -109,7 +110,16 @@
       <% end %>
     <% end %>
 
-    <% if (lr.pending? || lr.approved?) && policy(lr).cancel? && lr.to_date >= Date.today %>
+    <% if lr.cancellation_pending? && policy(lr).cancel? %>
+      <%= form_with url: cancel_admin_leave_request_path(lr), method: :patch, data: {turbo_frame: "_top"}, class: "space-y-2" do |f| %>
+        <%= f.label :reason, "Cancellation approval note", for: "cancellation_approval_reason", class: "label" %><%= f.text_field :reason, id: "cancellation_approval_reason", required: true, maxlength: 1000, class: "input" %>
+        <%= f.submit "Approve cancellation and restore balance", class: "btn btn-primary w-full" %>
+      <% end %>
+      <%= form_with url: reject_cancellation_admin_leave_request_path(lr), method: :patch, data: {turbo_frame: "_top"}, class: "space-y-2" do |f| %>
+        <%= f.label :reason, "Cancellation rejection reason", for: "cancellation_rejection_reason", class: "label" %><%= f.text_field :reason, id: "cancellation_rejection_reason", required: true, maxlength: 1000, class: "input" %>
+        <%= f.submit "Reject cancellation", class: "btn btn-danger w-full" %>
+      <% end %>
+    <% elsif (lr.pending? || lr.approved?) && policy(lr).cancel? %>
       <%= button_to "Cancel this leave", cancel_admin_leave_request_path(lr), method: :patch,
             class: "btn btn-ghost btn-sm w-full cursor-pointer",
             form: { data: { turbo_frame: "_top", turbo_confirm: "Cancel this leave request?#{" The balance will be restored." if lr.approved?}" } } %>

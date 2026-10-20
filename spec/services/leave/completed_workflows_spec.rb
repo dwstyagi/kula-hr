@@ -40,6 +40,18 @@ RSpec.describe "Leave accounting and transitions" do
     expect(request).to be_hr_approval_required
   end
 
+  it "rejects missing cancellation reasons and keeps approved leave when cancellation is rejected" do
+    request = request_for
+    transition(request, :approve)
+    expect { transition(request, :request_cancellation) }.to raise_error(Leave::RequestTransition::Error, /explain/)
+    transition(request, :request_cancellation, reason: "Plans changed")
+    expect { transition(request, :request_cancellation, reason: "Again") }.to raise_error(Leave::RequestTransition::Error, /already/)
+    transition(request, :reject_cancellation, reason: "Coverage still requires this leave")
+    expect(request.reload).to be_approved
+    expect(request).not_to be_cancellation_pending
+    expect(balance.reload.remaining_days).to eq(11)
+  end
+
   it "blocks approval and balance changes when attendance is locked" do
     request = request_for
     summary = create(:attendance_summary, :locked, tenant: tenant, employee: employee, month: 10, year: 2026)

@@ -118,6 +118,7 @@ Rails.application.routes.draw do
       get "leave_calendar", to: "leave_calendar#index", as: :leave_calendar
       resources :leave_requests, only: [ :index, :show, :new, :create ] do
         member do
+          patch :reject_cancellation
           patch :approve
           patch :reject
           patch :cancel
@@ -201,8 +202,9 @@ Rails.application.routes.draw do
 
     namespace :employee_portal, path: "portal" do
       root "dashboard#index"
-      resources :leave_requests, only: [ :index, :new, :create ] do
+      resources :leave_requests, only: [ :index, :show, :new, :create ] do
         member do
+          patch :request_cancellation
           patch :cancel
         end
       end

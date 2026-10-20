@@ -32,6 +32,10 @@ class LeaveRequestPolicy < ApplicationPolicy
     admin_or_hr? || is_reporting_manager?
   end
 
+  def request_cancellation?
+    own_record? && record.approved?
+  end
+
   class Scope < ApplicationPolicy::Scope
     def resolve
       if user.has_role?(:super_admin) || user.has_role?(:hr_admin)
