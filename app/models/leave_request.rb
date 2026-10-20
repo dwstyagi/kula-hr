@@ -7,12 +7,23 @@ class LeaveRequest < ApplicationRecord
   has_many :leave_balance_debits, dependent: :destroy
   has_many :comp_off_usages, dependent: :destroy
 
+  enum :duration, { full_day: "full_day", morning: "morning", afternoon: "afternoon" }, prefix: true, validate: true
+  validate :half_day_is_single_date
+
+  def half_day? = !duration_full_day?
+  def hr_approval_required? = employee.hr_is_approver?
+  def duration_label = half_day? ? "Half day — #{duration}" : "Full day"
+
+  def daily_units
+    working_dates.index_with { half_day? ? 0.5.to_d : 1.to_d }
+  end
+
   enum :status, { pending: 0, approved: 1, rejected: 2, cancelled: 3 }
 
-  before_validation :calculate_number_of_days, if: -> { new_record? || from_date_changed? || to_date_changed? || leave_type_id_changed? }
+  before_validation :calculate_number_of_days, if: -> { new_record? || from_date_changed? || to_date_changed? || leave_type_id_changed? || duration_changed? }
 
   validates :from_date, :to_date, presence: true
-  validates :number_of_days, numericality: { greater_than: 0 }, allow_nil: true
+  validates :number_of_days, numericality: { greater_than_or_equal_to: 0 }, allow_nil: true
   validates :reason, length: { maximum: 500 }
 
   validate :to_date_on_or_after_from_date
@@ -42,23 +53,19 @@ class LeaveRequest < ApplicationRecord
   end
 
   def days_by_financial_year
-    working_dates.group_by { |date| FinancialYear.label(date) }.transform_values(&:size)
-  end
-
-  # Shared transition calculations use whole-day units until sessions are added.
-  def half_day? = false
-  def hr_approval_required? = employee.hr_is_approver?
-
-  def daily_units
-    working_dates.index_with { 1.to_d }
+    daily_units.group_by { |date, _units| FinancialYear.label(date) }.transform_values { |days| days.sum { |_date, units| units } }
   end
 
   private
 
+  def half_day_is_single_date
+    errors.add(:duration, "requires the same From and To date") if half_day? && from_date != to_date
+  end
+
   def calculate_number_of_days
     return unless from_date.present? && to_date.present? && to_date >= from_date
 
-    self.number_of_days = working_dates.size
+    self.number_of_days = daily_units.values.sum
   end
 
   def working_days_present
@@ -88,6 +95,9 @@ class LeaveRequest < ApplicationRecord
       .where.not(status: [ :rejected, :cancelled ])
       .where("from_date <= ? AND to_date >= ?", to_date, from_date)
 
+    if half_day?
+      overlapping = overlapping.where(duration: [ "full_day", duration ])
+    end
     errors.add(:base, "overlaps with an existing leave request for those dates") if overlapping.exists?
   end
 

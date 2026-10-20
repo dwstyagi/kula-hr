@@ -120,7 +120,7 @@
           </div>
           <div>
             <p class="text-xs text-stone-500">Leave Balance</p>
-            <p class="text-lg font-bold text-stone-900"><%= @leave_balances.sum(&:remaining_days).to_i %> <span class="text-xs font-normal text-stone-400">days</span></p>
+            <p class="text-lg font-bold text-stone-900"><%= number_with_precision(@leave_balances.sum(&:remaining_days), precision: 4, strip_insignificant_zeros: true) %> <span class="text-xs font-normal text-stone-400">days</span></p>
           </div>
         </div>
       </div>
@@ -295,8 +295,8 @@
 
               <div class="flex items-end justify-between">
                 <div>
-                  <p class="text-3xl font-bold text-stone-900 leading-none"><%= balance.remaining_days.to_i %></p>
-                  <p class="text-xs text-stone-400 mt-1">of <%= balance.total_days.to_i %> remaining</p>
+                  <p class="text-3xl font-bold text-stone-900 leading-none"><%= number_with_precision(balance.remaining_days, precision: 4, strip_insignificant_zeros: true) %></p>
+                  <p class="text-xs text-stone-400 mt-1">of <%= number_with_precision(balance.total_days, precision: 4, strip_insignificant_zeros: true) %> remaining</p>
                 </div>
                 <div class="text-right text-xs text-stone-400 space-y-0.5">
                   <p><%= balance.used_days.to_i %> used</p>
@@ -362,7 +362,7 @@
                   <%= req.leave_type.name %> &middot;
                   <%= req.from_date.strftime("%d %b") %>
                   <% if req.from_date != req.to_date %>–<%= req.to_date.strftime("%d %b") %><% end %>
-                  &middot; <%= req.number_of_days.to_i %> day(s)
+                  &middot; <%= number_with_precision(req.number_of_days, precision: 4, strip_insignificant_zeros: true) %> day(s)
                 </p>
               <% end %>
             </div>
@@ -400,7 +400,7 @@
                     <% else %>
                       <%= req.from_date.strftime(", %Y") %>
                     <% end %>
-                    <span class="text-stone-400">&middot; <%= req.number_of_days.to_i %> day(s)</span>
+                    <span class="text-stone-400">&middot; <%= number_with_precision(req.number_of_days, precision: 4, strip_insignificant_zeros: true) %> day(s)</span>
                   </p>
                   <% if req.approved_by.present? %>
                     <p class="text-xs text-stone-400 mt-0.5">

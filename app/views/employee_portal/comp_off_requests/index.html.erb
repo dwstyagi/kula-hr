@@ -5,7 +5,7 @@
       <p class="text-sm text-stone-500 mt-1">
         Worked on a weekend or holiday? Request a comp-off day.
         <% if @comp_off_balance %>
-          Balance: <strong class="text-stone-900"><%= @comp_off_balance.remaining_days.to_i %></strong> day(s).
+          Balance: <strong class="text-stone-900"><%= number_with_precision(@comp_off_balance.remaining_days, precision: 4, strip_insignificant_zeros: true) %></strong> day(s).
         <% end %>
       </p>
     </div>

@@ -51,7 +51,7 @@
                     <%= lr.from_date.strftime(", %Y") %>
                   <% end %>
                 </td>
-                <td class="text-sm font-medium text-stone-900"><%= lr.number_of_days.to_i %></td>
+                <td class="text-sm font-medium text-stone-900"><%= number_with_precision(lr.number_of_days, precision: 4, strip_insignificant_zeros: true) %><p class="text-xs text-stone-500"><%= lr.duration_label %></p></td>
                 <td class="text-sm text-stone-500 max-w-xs truncate"><%= lr.reason.presence || "—" %></td>
                 <td>
                   <% badge = {
@@ -70,7 +70,7 @@
                   <% end %>
                 </td>
                 <td class="text-right">
-                  <% if lr.pending? %>
+                  <% if lr.pending? && !lr.hr_approval_required? %>
                     <div class="flex items-center justify-end gap-2">
                       <%# Approve %>
                       <%= button_to approve_employee_portal_team_leave_request_path(lr),
@@ -99,7 +99,7 @@
               </tr>
 
               <%# Reject Modal %>
-              <% if lr.pending? %>
+              <% if lr.pending? && !lr.hr_approval_required? %>
                 <div id="reject-modal-<%= lr.id %>" data-controller="modal">
                   <div data-modal-target="dialog"
                        class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50"
@@ -110,7 +110,7 @@
                         <%= lr.employee.full_name %> &middot;
                         <%= lr.leave_type.name %> &middot;
                         <%= lr.from_date.strftime("%d %b") %>&ndash;<%= lr.to_date.strftime("%d %b %Y") %>
-                        (<%= lr.number_of_days.to_i %> days)
+                        (<%= number_with_precision(lr.number_of_days, precision: 4, strip_insignificant_zeros: true) %> days)
                       </p>
                       <%= form_with url: reject_employee_portal_team_leave_request_path(lr), method: :patch do |f| %>
                         <div class="mb-4">

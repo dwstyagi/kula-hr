@@ -46,4 +46,11 @@ RSpec.describe "Leave workflow access and screens", type: :request do
     expect(request.reload).to be_pending
     expect(flash[:alert]).to include("locked")
   end
+
+  it "returns a validation error for an unsupported duration instead of raising" do
+    login(employee_user)
+    post employee_portal_leave_requests_path, headers: headers, params: { leave_request: { leave_type_id: type.id, from_date: date, to_date: date, duration: "invalid" } }
+    expect(response).to have_http_status(:unprocessable_content)
+    expect(LeaveRequest.count).to eq(0)
+  end
 end

@@ -34,7 +34,7 @@ module Attendance
               # total (week-off pattern + holidays), and only while employed.
               paid, lop = 0, 0
               Array(leaves[employee.id]).each do |request|
-                days = calendar.count { |day| day.between?(request.from_date, request.to_date) && window.cover?(day) }
+                days = calendar.sum { |day| day.between?(request.from_date, request.to_date) && window.cover?(day) ? (request.half_day? ? 0.5 : 1) : 0 }
                 request.leave_type.is_paid? ? paid += days : lop += days
               end
 

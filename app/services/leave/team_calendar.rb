@@ -12,7 +12,7 @@ module Leave
   #   cal.days  # => [DayMeta, ...] one per calendar day
   #   cal.rows  # => [[employee, { Date => Cell }], ...]
   class TeamCalendar
-    Cell = Struct.new(:status, :leave_code, :leave_name, keyword_init: true)
+    Cell = Struct.new(:status, :leave_code, :leave_name, :duration, :sessions, keyword_init: true)
 
     DayMeta = Struct.new(:date, :week_off, :holiday_name, keyword_init: true) do
       def non_working?
@@ -76,14 +76,24 @@ module Leave
         overlap_end   = [ req.to_date,   @end_date ].min
 
         (overlap_start..overlap_end).each do |date|
-          # Approved wins over pending when an employee has overlapping requests.
-          next if cells[date]&.status == "approved"
+          incoming = Cell.new(status: req.status, leave_code: req.leave_type.code,
+            leave_name: req.leave_type.name, duration: req.duration)
+          current = cells[date]
+          if current && req.half_day? && current.duration != "full_day"
+            sessions = current.sessions || [ current ]
+            same_session = sessions.find { |cell| cell.duration == req.duration }
+            next if same_session&.status == "approved"
 
-          cells[date] = Cell.new(
-            status:     req.status,
-            leave_code: req.leave_type.code,
-            leave_name: req.leave_type.name
-          )
+            sessions = sessions.reject { |cell| cell.duration == req.duration } + [ incoming ]
+            cells[date] = Cell.new(status: sessions.any? { |cell| cell.status == "approved" } ? "approved" : "pending",
+              leave_code: sessions.map(&:leave_code).join("/"), leave_name: sessions.map(&:leave_name).join(" / "),
+              duration: "split", sessions: sessions.sort_by { |cell| cell.duration == "morning" ? 0 : 1 })
+          else
+            # Approved wins over legacy overlapping pending requests.
+            next if current&.status == "approved"
+
+            cells[date] = incoming
+          end
         end
       end
       cells

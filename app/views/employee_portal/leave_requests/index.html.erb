@@ -34,8 +34,8 @@
               <div class="h-1 rounded-full <%= used_pct > 80 ? 'bg-red-400' : 'bg-kula-600' %>"
                    style="width: <%= used_pct %>%"></div>
             </div>
-            <p class="page-title text-2xl"><%= balance.remaining_days.to_i %></p>
-            <p class="text-xs text-stone-400">of <%= balance.total_days.to_i %> days</p>
+            <p class="page-title text-2xl"><%= number_with_precision(balance.remaining_days, precision: 4, strip_insignificant_zeros: true) %></p>
+            <p class="text-xs text-stone-400">of <%= number_with_precision(balance.total_days, precision: 4, strip_insignificant_zeros: true) %> days</p>
           </div>
         <% end %>
       </div>
@@ -129,7 +129,7 @@
                   <%= lr.from_date.strftime(", %Y") %>
                 <% end %>
               </td>
-              <td class="text-sm font-medium text-stone-900"><%= lr.number_of_days.to_i %></td>
+              <td class="text-sm font-medium text-stone-900"><%= number_with_precision(lr.number_of_days, precision: 1, strip_insignificant_zeros: true) %></td>
               <td>
                 <% badge = {
                   "pending"   => ["badge-warning", "⏳"],

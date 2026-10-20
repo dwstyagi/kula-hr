@@ -318,8 +318,8 @@
                 </div>
                 <div class="flex items-end justify-between">
                   <div>
-                    <p class="amount text-2xl font-bold text-stone-900"><%= balance.remaining_days.to_i %></p>
-                    <p class="text-xs text-stone-400">remaining of <%= balance.total_days.to_i %></p>
+                    <p class="amount text-2xl font-bold text-stone-900"><%= number_with_precision(balance.remaining_days, precision: 4, strip_insignificant_zeros: true) %></p>
+                    <p class="text-xs text-stone-400">remaining of <%= number_with_precision(balance.total_days, precision: 4, strip_insignificant_zeros: true) %></p>
                   </div>
                   <div class="text-right text-xs text-stone-400">
                     <p><%= balance.used_days.to_i %> used</p>

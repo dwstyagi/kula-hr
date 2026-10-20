@@ -67,18 +67,23 @@ module Leave
 
     def consume_comp_off!(financial_year)
       year_start = Date.new(financial_year.first(4).to_i, 4, 1)
-      @request.working_dates.select { |date| FinancialYear.label(date) == financial_year }.each do |date|
-        credit = CompOffRequest.approved.where(employee: @request.employee, balance_expired: false)
-          .where("approved_at >= ?", year_start.beginning_of_day)
-          .where("remaining_days >= 1 AND expiry_date >= ?", date)
-          .where("approved_at <= ?", date.end_of_day)
-          .order(:expiry_date, :id).lock.first
-        raise InsufficientBalance, "No unexpired comp-off credit is available for #{date}" unless credit
+      @request.daily_units.select { |date, _units| FinancialYear.label(date) == financial_year }.each do |date, units|
+        unallocated = units
+        while unallocated.positive?
+          credit = CompOffRequest.approved.where(employee: @request.employee, balance_expired: false)
+            .where("approved_at >= ?", year_start.beginning_of_day)
+            .where("remaining_days > 0 AND expiry_date >= ?", date)
+            .where("approved_at <= ?", date.end_of_day)
+            .order(:expiry_date, :id).lock.first
+          raise InsufficientBalance, "No unexpired comp-off credit is available for #{date}" unless credit
 
-        credit.update!(remaining_days: credit.remaining_days - 1)
-        usage = @request.comp_off_usages.find_or_initialize_by(comp_off_request: credit)
-        usage.number_of_days = (usage.number_of_days || 0) + 1
-        usage.save!
+          consumed = [ credit.remaining_days, unallocated ].min
+          credit.update!(remaining_days: credit.remaining_days - consumed)
+          usage = @request.comp_off_usages.find_or_initialize_by(comp_off_request: credit)
+          usage.number_of_days = (usage.number_of_days || 0) + consumed
+          usage.save!
+          unallocated -= consumed
+        end
       end
     end
 

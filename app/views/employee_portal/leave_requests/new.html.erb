@@ -36,7 +36,7 @@
       <div>
         <%= f.label :leave_type_id, "Leave Type", class: "label" %>
         <%= f.select :leave_type_id,
-            @leave_types.map { |lt| [lt.name, lt.id] },
+            @leave_types.map { |lt| [lt.name, lt.id, { "data-unlimited" => lt.lop? }] },
             { include_blank: "Select leave type" },
             class: "select",
             data: { leave_type: true, action: "change->leave-calculator#leaveTypeChanged" } %>
@@ -45,6 +45,11 @@
         </p>
       </div>
 
+      <div>
+        <%= f.label :duration, "Duration", class: "label" %>
+        <%= f.select :duration, [["Full day(s)", "full_day"], ["Half day — morning", "morning"], ["Half day — afternoon", "afternoon"]], {}, class: "select", data: {leave_calculator_target: "duration", action: "change->leave-calculator#recalculate"} %>
+        <p class="text-xs text-stone-500">Half-day requests must start and end on the same working day.</p>
+      </div>
       <div class="grid grid-cols-2 gap-4">
         <div>
           <%= f.label :from_date, "From", class: "label" %>

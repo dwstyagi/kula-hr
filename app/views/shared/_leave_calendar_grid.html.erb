@@ -34,12 +34,10 @@
               <% calendar.days.each do |day| %>
                 <% cell = cells[day.date] %>
                 <td class="px-1 py-1 text-center border-b border-stone-100 <%= day.non_working? ? 'bg-stone-50' : '' %>">
-                  <% if cell&.status == "approved" %>
-                    <span class="inline-block w-full rounded bg-kula-500 px-1 py-0.5 text-[10px] font-medium text-white"
-                          title="<%= cell.leave_name %> (Approved)"><%= cell.leave_code %></span>
-                  <% elsif cell %>
-                    <span class="inline-block w-full rounded border border-dashed border-amber-400 bg-amber-50 px-1 py-0.5 text-[10px] font-medium text-amber-700"
-                          title="<%= cell.leave_name %> (Pending)"><%= cell.leave_code %></span>
+                  <% (cell ? (cell.sessions || [cell]) : []).each do |session| %>
+                    <% label = {"morning" => "AM", "afternoon" => "PM"}[session.duration] %>
+                    <span class="block rounded px-1 py-0.5 text-[10px] font-medium mb-0.5 <%= session.status == "approved" ? "bg-kula-500 text-white" : "border border-dashed border-amber-400 bg-amber-50 text-amber-700" %>"
+                          title="<%= session.leave_name %> — <%= label || "Full day" %> (<%= session.status.humanize %>)"><%= session.leave_code %> <%= label %></span>
                   <% end %>
                 </td>
               <% end %>

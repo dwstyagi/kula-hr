@@ -94,4 +94,13 @@ RSpec.describe Leave::TeamCalendar do
       expect(empty).to be_empty
     end
   end
+  it "shows both morning and afternoon half-day sessions in the same cell" do
+    morning = make_leave(emp1, Date.new(2025, 1, 6), Date.new(2025, 1, 6), :approved)
+    morning.update_columns(duration: "morning", number_of_days: 0.5)
+    afternoon = make_leave(emp1, Date.new(2025, 1, 6), Date.new(2025, 1, 6), :pending)
+    afternoon.update_columns(duration: "afternoon", number_of_days: 0.5)
+    cell = calendar.rows.find { |employee, _| employee == emp1 }.last[Date.new(2025, 1, 6)]
+    expect(cell.sessions.map(&:duration)).to eq(%w[morning afternoon])
+    expect(cell.sessions.map(&:status)).to eq(%w[approved pending])
+  end
 end

@@ -71,7 +71,7 @@ module EmployeePortal
     end
 
     def leave_request_params
-      params.require(:leave_request).permit(:leave_type_id, :from_date, :to_date, :reason)
+      params.require(:leave_request).permit(:leave_type_id, :from_date, :to_date, :duration, :reason)
     end
   end
 end

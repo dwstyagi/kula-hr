@@ -13,7 +13,7 @@ module Leave
     # Notifies only the configured approver: HR admins or the reporting manager.
     def broadcast_new_request!
       message = "#{@employee.full_name} applied for " \
-                "#{@leave_request.number_of_days.to_i} day(s) of #{@leave_type.name}"
+                "#{@leave_request.number_of_days.to_f} day(s) of #{@leave_type.name}"
 
       recipients_for_new_request.each do |user, url|
         broadcast_to(user, {
@@ -34,7 +34,7 @@ module Leave
       status  = @leave_request.status
       title   = "Leave #{status.titleize}"
       message = "Your #{@leave_type.name} request " \
-                "(#{@leave_request.number_of_days.to_i} day(s)) has been #{status}."
+                "(#{@leave_request.number_of_days.to_f} day(s)) has been #{status}."
       message += " Reason: #{@leave_request.rejection_reason}" if @leave_request.rejected? && @leave_request.rejection_reason.present?
 
       broadcast_to(@employee.user, {
@@ -47,7 +47,7 @@ module Leave
       if notify_hr
         manager_name = @leave_request.approved_by&.full_name || "A manager"
         hr_message = "#{manager_name} #{status} #{@employee.full_name}'s " \
-                     "#{@leave_type.name} request (#{@leave_request.number_of_days.to_i} day(s))."
+                     "#{@leave_type.name} request (#{@leave_request.number_of_days.to_f} day(s))."
         hr_and_admin_users.each do |hr_user|
           broadcast_to(hr_user, {
             title:   "Leave #{status.titleize} by Manager",

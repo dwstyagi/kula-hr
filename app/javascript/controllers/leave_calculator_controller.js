@@ -2,7 +2,7 @@ import { Controller } from "@hotwired/stimulus"
 
 // Calculates business days between from/to dates and shows remaining balance
 export default class extends Controller {
-  static targets = ["fromDate", "toDate", "days", "balance", "warning"]
+  static targets = ["fromDate", "toDate", "days", "balance", "warning", "duration"]
   static values  = { balances: Object, weekOffPattern: String, holidayDates: Array }
 
   connect() {
@@ -14,8 +14,15 @@ export default class extends Controller {
     const to   = this.toDateTarget.value
 
     if (from && to) {
-      const days = this.countBusinessDays(new Date(from), new Date(to))
-      this.daysTarget.textContent = days > 0 ? `${days} day${days !== 1 ? "s" : ""}` : "—"
+      let days = this.countBusinessDays(new Date(from), new Date(to))
+      const halfDay = this.hasDurationTarget && this.durationTarget.value !== "full_day"
+      if (halfDay && from !== to) {
+        this.daysTarget.textContent = "Half days require one date"
+        this.warningTarget.classList.add("hidden")
+        return
+      }
+      if (halfDay && days > 0) days = 0.5
+      this.daysTarget.textContent = `${days} day${days !== 1 ? "s" : ""}`
       this.checkBalance(days)
     } else {
       this.daysTarget.textContent = "—"
@@ -72,9 +79,9 @@ export default class extends Controller {
     const remaining = this.balancesValue[leaveTypeId]
 
     if (remaining === undefined) {
-      // LOP or type with no balance record — always allowed
-      this.balanceTarget.textContent = "Unlimited"
-      this.warningTarget.classList.add("hidden")
+      const unlimited = select.selectedOptions?.[0]?.dataset.unlimited === "true"
+      this.balanceTarget.textContent = unlimited ? "Unlimited (unpaid leave)" : "No balance available for this financial year"
+      this.warningTarget.classList.toggle("hidden", unlimited)
       return
     }
 

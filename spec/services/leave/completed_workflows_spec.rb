@@ -19,6 +19,19 @@ RSpec.describe "Leave accounting and transitions" do
     Leave::RequestTransition.new(leave_request: request, actor: actor).call(action, reason: reason)
   end
 
+  it "permits opposite half-day sessions, but prevents duplicate sessions and full-day overlap" do
+    request_for(duration: "morning")
+    expect(request_for(duration: "afternoon")).to be_persisted
+    expect { request_for(duration: "morning") }.to raise_error(ActiveRecord::RecordInvalid, /overlaps/)
+    expect { request_for }.to raise_error(ActiveRecord::RecordInvalid, /overlaps/)
+  end
+
+  it "rejects half-day spans over multiple dates and a half-day on a holiday" do
+    expect { request_for(duration: "morning", to: date + 1) }.to raise_error(ActiveRecord::RecordInvalid, /same From/)
+    create(:holiday, tenant: tenant, date: date)
+    expect { request_for(duration: "morning") }.to raise_error(ActiveRecord::RecordInvalid, /non-working/)
+  end
+
   it "blocks approval and balance changes when attendance is locked" do
     request = request_for
     summary = create(:attendance_summary, :locked, tenant: tenant, employee: employee, month: 10, year: 2026)
@@ -53,6 +66,45 @@ RSpec.describe "Leave accounting and transitions" do
     expect(balance.reload.remaining_days).to eq(11)
   end
 
+  it "refreshes draft attendance for half-day LOP and restores its automatically adjusted presence on cancellation" do
+    create(:payroll_setting, tenant: tenant)
+    lop = create(:leave_type, :lop, tenant: tenant)
+    summary = create(:attendance_summary, tenant: tenant, employee: employee, month: 10, year: 2026, total_working_days: 22, days_present: 22)
+    request = request_for(duration: "afternoon", leave_type: lop)
+    transition(request, :approve)
+    expect(summary.reload.lop_leaves).to eq(0.5)
+    expect(summary.days_present).to eq(21.5)
+    expect(summary.paid_days).to eq(21.5)
+    expect(summary.leave_adjusted_present_days).to eq(0.5)
+    transition(request, :cancel)
+    expect(summary.reload.days_present).to eq(22)
+    expect(summary.paid_days).to eq(22)
+    expect(summary.lop_leaves).to eq(0)
+  end
+
+  it "preserves manual attendance edits while refreshing paid leave" do
+    create(:payroll_setting, tenant: tenant)
+    summary = create(:attendance_summary, tenant: tenant, employee: employee, month: 10, year: 2026, total_working_days: 22, days_present: 18)
+    request = request_for(duration: "morning")
+    transition(request, :approve)
+    expect(summary.reload.days_present).to eq(18)
+    expect(summary.approved_leaves).to eq(0.5)
+    expect(summary.unapproved_absences).to eq(3.5)
+    transition(request, :cancel)
+    expect(summary.reload.days_present).to eq(18)
+    expect(summary.unapproved_absences).to eq(4)
+  end
+
+  it "does not re-add an automatic adjustment after HR replaces present days manually" do
+    create(:payroll_setting, tenant: tenant)
+    summary = create(:attendance_summary, tenant: tenant, employee: employee, month: 10, year: 2026)
+    request = request_for(duration: "morning")
+    transition(request, :approve)
+    summary.reload.update!(days_present: 18)
+    transition(request, :cancel)
+    expect(summary.reload.days_present).to eq(18)
+  end
+
   it "rechecks balances under lock and cannot approve the same request twice" do
     request = request_for
     balance.update!(remaining_days: 0)
@@ -61,6 +113,19 @@ RSpec.describe "Leave accounting and transitions" do
     transition(request, :approve)
     expect { transition(request, :approve) }.to raise_error(Leave::RequestTransition::Error)
     expect(balance.reload.used_days).to eq(1)
+  end
+
+  it "backs half-day comp-off usage with exactly half a credit" do
+    comp_type = create(:leave_type, tenant: tenant, code: "CO", annual_quota: 0)
+    create(:leave_balance, tenant: tenant, employee: employee, leave_type: comp_type, total_days: 1, remaining_days: 1, used_days: 0)
+    credit = create(:comp_off_request, tenant: tenant, employee: employee, status: :approved,
+      approved_at: Time.current, expiry_date: date + 3, remaining_days: 1)
+    request = request_for(duration: "morning", leave_type: comp_type)
+    transition(request, :approve)
+    expect(credit.reload.remaining_days).to eq(0.5)
+    expect(request.comp_off_usages.sum(:number_of_days)).to eq(0.5)
+    transition(request, :cancel)
+    expect(credit.reload.remaining_days).to eq(1)
   end
 
   [ 10, 15, 17 ].each do |quota|
@@ -102,5 +167,31 @@ RSpec.describe "Leave accounting and transitions" do
     expect(joining_balance.reload.total_days).to eq(Leave::AccrualAmount.for(type, Date.current))
     Leave::MonthlyLeaveAccrualService.new(tenant: tenant, period: Date.current.next_month.beginning_of_month).call
     expect(joining_balance.reload.total_days).to eq(Leave::AccrualAmount.for(type, Date.current) + Leave::AccrualAmount.for(type, Date.current.next_month))
+  end
+
+  it "never counts newly generated unpaid leave as presence" do
+    create(:payroll_setting, tenant: tenant)
+    lop = create(:leave_type, :lop, tenant: tenant)
+    request = request_for(duration: "morning", leave_type: lop)
+    transition(request, :approve)
+    Attendance::SummaryGenerator.new(month: 10, year: 2026, tenant: tenant).call
+    summary = AttendanceSummary.find_by!(employee: employee, month: 10, year: 2026)
+    expect(summary.days_present).to eq(21.5)
+    expect(summary.lop_leaves).to eq(0.5)
+    expect(summary.paid_days).to eq(21.5)
+  end
+  it "uses multiple unexpired fractional comp-off credits for a full-day request" do
+    comp_type = create(:leave_type, tenant: tenant, code: "CO", annual_quota: 0)
+    create(:leave_balance, tenant: tenant, employee: employee, leave_type: comp_type, total_days: 1, remaining_days: 1, used_days: 0)
+    credits = 2.times.map do |index|
+      create(:comp_off_request, tenant: tenant, employee: employee, status: :approved,
+        worked_date: Date.current.prev_occurring(:sunday) - index * 7, approved_at: Time.current, expiry_date: date + 3, remaining_days: 0.5)
+    end
+    request = request_for(leave_type: comp_type)
+    transition(request, :approve)
+    expect(credits.map { |credit| credit.reload.remaining_days }).to eq([ 0, 0 ])
+    expect(request.comp_off_usages.sum(:number_of_days)).to eq(1)
+    transition(request, :cancel)
+    expect(credits.map { |credit| credit.reload.remaining_days }).to eq([ 0.5, 0.5 ])
   end
 end
