@@ -1,0 +1,9 @@
+<section class="space-y-3">
+  <h2 class="text-sm font-semibold">Request history</h2>
+  <ul class="space-y-3">
+    <% request.leave_request_events.includes(:actor).order(:id).each do |event| %>
+      <li class="border-l-2 border-stone-200 pl-3 text-sm"><strong><%= {"submitted" => "Submitted", "approve" => "Approved", "reject" => "Rejected", "cancel" => "Cancelled", "request_cancellation" => "Cancellation requested", "reject_cancellation" => "Cancellation rejected"}.fetch(event.action, event.action.humanize) %></strong> · <%= event.actor&.full_name || "System" %><p class="text-xs text-stone-500"><%= event.created_at.strftime("%d %b %Y %H:%M") %></p><p class="whitespace-pre-wrap break-words"><%= event.reason %></p></li>
+    <% end %>
+  </ul>
+  <% if request.leave_request_events.empty? %><p class="text-xs text-stone-500">This request predates detailed audit history.</p><% end %>
+</section>

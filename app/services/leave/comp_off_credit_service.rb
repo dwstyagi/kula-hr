@@ -28,10 +28,9 @@ module Leave
       end
 
       balance.with_lock do
-        balance.update!(
-          total_days:     balance.total_days + 1,
-          remaining_days: balance.remaining_days + 1
-        )
+        LeaveAuditContext.set(kind: "comp_off_credit", reason: "Approved comp-off ##{@request.id}") do
+          balance.update!(total_days: balance.total_days + 1, remaining_days: balance.remaining_days + 1)
+        end
       end
 
       @request.update!(expiry_date: Date.today + EXPIRY_DAYS)

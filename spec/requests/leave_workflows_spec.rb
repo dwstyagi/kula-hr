@@ -46,6 +46,7 @@ RSpec.describe "Leave workflow access and screens", type: :request do
     patch cancel_admin_leave_request_path(request), headers: headers, params: { reason: "Accepted by HR" }
     expect(request.reload).to be_cancelled
     expect(balance.reload.remaining_days).to eq(12)
+    expect(request.leave_request_events.last.actor).to eq(admin)
   end
 
   it "allows HR to record a backdated request on an employee's behalf" do
@@ -55,6 +56,7 @@ RSpec.describe "Leave workflow access and screens", type: :request do
     expect(response).to redirect_to(admin_leave_requests_path)
     request = LeaveRequest.last
     expect(request).to be_regularization
+    expect(request.leave_request_events.first.actor).to eq(admin)
   end
 
   it "blocks HR bulk approval against locked attendance" do
@@ -67,6 +69,27 @@ RSpec.describe "Leave workflow access and screens", type: :request do
     expect(flash[:alert]).to include("locked")
   end
 
+  it "prevents an employee from reading another employee's details or posting an HR adjustment" do
+    other = create(:employee, tenant: tenant)
+    other_balance = create(:leave_balance, tenant: tenant, employee: other, leave_type: type)
+    other_request = create(:leave_request, tenant: tenant, employee: other, leave_type: type, from_date: date, to_date: date)
+    login(employee_user)
+    get employee_portal_leave_request_path(other_request), headers: headers
+    expect(response).to have_http_status(:not_found)
+    get employee_portal_leave_balance_path(other_balance), headers: headers
+    expect(response).to have_http_status(:not_found)
+    post adjust_admin_leave_balance_path(balance), headers: headers, params: { days: "5", reason: "Unauthorized", reference: SecureRandom.uuid }
+    expect(balance.reload.remaining_days).to eq(12)
+  end
+
+  it "records an authorized HR adjustment with its actor and prevents duplicate submissions" do
+    login(admin)
+    params = { days: "-0.5", reason: "Imported opening correction", reference: SecureRandom.uuid }
+    2.times { post adjust_admin_leave_balance_path(balance), headers: headers, params: params }
+    expect(balance.reload.remaining_days).to eq(11.5)
+    expect(balance.leave_balance_entries.last.actor).to eq(admin)
+    expect(balance.leave_balance_entries.where(kind: "hr_adjustment").count).to eq(1)
+  end
   it "blocks a manager from approving backdated regularization but lets HR review it" do
     manager = create(:employee, :with_user, tenant: tenant)
     employee.update!(leave_approver: :reporting_manager, reporting_manager: manager)
@@ -91,6 +114,21 @@ RSpec.describe "Leave workflow access and screens", type: :request do
     expect(flash[:alert]).to include("locked")
   end
 
+  it "prevents cross-tenant access to balances and requests" do
+    other_tenant = create(:tenant, :active)
+    foreign_balance, foreign_request = ActsAsTenant.with_tenant(other_tenant) do
+      emp = create(:employee, tenant: other_tenant)
+      leave_type = create(:leave_type, :casual, tenant: other_tenant)
+      bal = create(:leave_balance, tenant: other_tenant, employee: emp, leave_type: leave_type)
+      req = create(:leave_request, tenant: other_tenant, employee: emp, leave_type: leave_type, from_date: date, to_date: date)
+      [ bal, req ]
+    end
+    login(admin)
+    get admin_leave_balance_path(foreign_balance), headers: headers
+    expect(response).to have_http_status(:not_found)
+    get admin_leave_request_path(foreign_request), headers: headers
+    expect(response).to have_http_status(:not_found)
+  end
   it "returns a validation error for an unsupported duration instead of raising" do
     login(employee_user)
     post employee_portal_leave_requests_path, headers: headers, params: { leave_request: { leave_type_id: type.id, from_date: date, to_date: date, duration: "invalid" } }

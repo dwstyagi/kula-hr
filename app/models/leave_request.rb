@@ -6,10 +6,12 @@ class LeaveRequest < ApplicationRecord
   belongs_to :approved_by, class_name: "User", optional: true
   has_many :leave_balance_debits, dependent: :destroy
   has_many :comp_off_usages, dependent: :destroy
+  has_many :leave_request_events, dependent: :delete_all
 
   enum :duration, { full_day: "full_day", morning: "morning", afternoon: "afternoon" }, prefix: true, validate: true
   validates :regularization_note, :cancellation_reason, length: { maximum: 1000 }
   validate :half_day_is_single_date
+  after_create :record_submission
 
   def half_day? = !duration_full_day?
   def cancellation_pending? = approved? && cancellation_requested_at.present?
@@ -60,6 +62,11 @@ class LeaveRequest < ApplicationRecord
   end
 
   private
+
+  def record_submission
+    leave_request_events.create!(tenant: tenant, actor: LeaveAuditContext.actor,
+      action: "submitted", reason: regularization_note.presence || reason)
+  end
 
   def half_day_is_single_date
     errors.add(:duration, "requires the same From and To date") if half_day? && from_date != to_date

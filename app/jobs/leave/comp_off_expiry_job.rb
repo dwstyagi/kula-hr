@@ -38,8 +38,10 @@ module Leave
 
               days_to_expire = [ balance.remaining_days, request.remaining_days ].min
               if days_to_expire > 0
-                balance.update!(remaining_days: balance.remaining_days - days_to_expire,
-                  total_days: balance.total_days - days_to_expire)
+                LeaveAuditContext.set(kind: "comp_off_expiry", reason: "Expired comp-off ##{request.id}") do
+                  balance.update!(remaining_days: balance.remaining_days - days_to_expire,
+                    total_days: balance.total_days - days_to_expire)
+                end
               end
               request.update!(balance_expired: true, remaining_days: 0)
             end

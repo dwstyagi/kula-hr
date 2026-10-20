@@ -8,6 +8,7 @@
     </div>
 
     <%= link_to "Record leave", new_admin_leave_request_path, class: "btn btn-primary" %>
+    <%= link_to "Balances / adjustments", admin_leave_balances_path, class: "btn btn-ghost" %>
     <%# Status filter tabs with live counts %>
     <div class="flex items-center gap-1 bg-stone-100 rounded-lg p-1">
       <% [["All", ""], ["Pending", "pending"], ["Approved", "approved"], ["Rejected", "rejected"], ["Cancelled", "cancelled"], ["Cancellation requests", "cancellation_requested"]].each do |label, value| %>

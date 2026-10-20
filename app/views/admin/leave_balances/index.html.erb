@@ -1,0 +1,12 @@
+<div class="max-w-6xl mx-auto space-y-5">
+  <div class="flex justify-between"><h1 class="page-title text-2xl">Leave balances</h1><%= link_to "Leave requests", admin_leave_requests_path, class: "btn btn-ghost" %></div>
+  <%= form_with url: admin_leave_balances_path, method: :get, class: "card card-pad flex flex-wrap gap-3 items-end" do |f| %>
+    <div><%= f.label :employee, "Employee name or code", class: "label" %><%= f.search_field :employee, value: params[:employee], class: "input" %></div>
+    <div><%= f.label :financial_year, "Financial year", class: "label" %><%= f.text_field :financial_year, value: params[:financial_year].presence || FinancialYear.label, class: "input", placeholder: "2026-27" %></div>
+    <%= f.submit "Filter", class: "btn btn-primary" %>
+  <% end %>
+  <div class="card overflow-x-auto"><table class="tbl"><thead><tr><th>Employee</th><th>Type</th><th>Year</th><th>Remaining</th><th>History</th></tr></thead><tbody>
+    <% @leave_balances.each do |balance| %><tr><td><%= balance.employee.full_name %> · <%= balance.employee.employee_code %></td><td><%= balance.leave_type.name %></td><td><%= balance.financial_year %></td><td><%= number_with_precision(balance.remaining_days, precision: 4, strip_insignificant_zeros: true) %></td><td><%= link_to "History / adjust", admin_leave_balance_path(balance), class: "text-kula-700 underline" %></td></tr><% end %>
+  </tbody></table></div>
+  <%= render "shared/pagy_nav", pagy: @pagy if @pagy.pages > 1 %>
+</div>

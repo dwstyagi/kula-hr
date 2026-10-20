@@ -1,0 +1,32 @@
+<div class="card card-pad space-y-4">
+  <h1 class="page-title text-2xl"><%= @balance.leave_type.name %> balance history</h1>
+  <p class="text-sm text-stone-600"><%= @balance.employee.full_name %> · <%= @balance.financial_year %></p>
+  <dl class="grid grid-cols-2 sm:grid-cols-5 gap-4 text-sm">
+    <% {"Credited" => @balance.total_days, "Used" => @balance.used_days, "Encashed" => @balance.encashed_days, "Carried in" => @balance.carried_forward_days, "Remaining" => @balance.remaining_days}.each do |label, value| %>
+      <div><dt class="text-stone-500"><%= label %></dt><dd class="font-semibold"><%= number_with_precision(value, precision: 4, strip_insignificant_zeros: true) %> days</dd></div>
+    <% end %>
+  </dl>
+  <p class="text-xs text-stone-500">Credited includes carry-forward. Remaining = credited − used − encashed. Pending leave is not deducted until approved.</p>
+  <div class="overflow-x-auto">
+    <table class="tbl">
+      <thead><tr><th>When</th><th>Action / reason</th><th>Actor</th><th>Changes (days)</th><th>Balance after</th></tr></thead>
+      <tbody>
+        <% @entries.each do |entry| %>
+          <tr>
+            <td class="whitespace-nowrap align-top"><%= entry.created_at.strftime("%d %b %Y") %><p class="text-xs text-stone-400"><%= entry.created_at.strftime("%H:%M") %></p></td>
+            <td class="min-w-48 align-top"><strong><%= entry.kind == "hr_adjustment" ? "HR adjustment" : entry.kind.humanize %></strong><p class="text-xs text-stone-500 whitespace-normal break-words mt-1"><%= entry.reason %></p></td>
+            <td class="align-top"><%= entry.actor&.full_name || "System / historical opening" %></td>
+            <td class="whitespace-nowrap align-top text-xs">
+              <% {"Credited" => entry.change_total_days, "Used" => entry.change_used_days, "Encashed" => entry.change_encashed_days, "Remaining" => entry.change_remaining_days}.each do |label, value| %>
+                <% unless value.zero? %><p><%= label %>: <%= "+" if value.positive? %><%= number_with_precision(value, precision: 4, strip_insignificant_zeros: true) %></p><% end %>
+              <% end %>
+            </td>
+            <td class="font-semibold align-top"><%= number_with_precision(entry.remaining_days, precision: 4, strip_insignificant_zeros: true) %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+  <% if @entries.empty? %><p class="text-sm text-stone-500">No recorded changes yet.</p><% end %>
+  <%= render "shared/pagy_nav", pagy: @pagy if @pagy.pages > 1 %>
+</div>

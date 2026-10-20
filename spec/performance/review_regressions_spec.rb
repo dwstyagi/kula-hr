@@ -58,11 +58,16 @@ RSpec.describe "Review regression protections" do
     create(:leave_type, :casual, tenant: tenant)
     create(:employee, tenant: tenant, joining_date: Date.new(2025, 1, 1))
     service = Leave::MonthlyLeaveAccrualService.new(tenant: tenant, period: Date.new(2026, 5, 1))
-    allow(LeaveBalance).to receive(:find_or_create_by!).and_raise("database interruption")
+    allow(LeaveBalanceEntry).to receive(:create!).and_raise("database interruption")
+    # Raise from the audit association after the credit, so the marker,
+    # balance creation and credit must all roll back together.
+    allow_any_instance_of(LeaveBalance).to receive(:record_balance_entry).and_raise("database interruption")
     expect { service.call }.to raise_error("database interruption")
     expect(LeaveAccrual.count).to eq(0)
     expect(LeaveBalance.count).to eq(0)
-    allow(LeaveBalance).to receive(:find_or_create_by!).and_call_original
+    expect(LeaveBalanceEntry.count).to eq(0)
+    allow_any_instance_of(LeaveBalance).to receive(:record_balance_entry).and_call_original
+    allow(LeaveBalanceEntry).to receive(:create!).and_call_original
     expect { service.call }.to change(LeaveAccrual, :count).by(1)
     expect(LeaveBalance.first.remaining_days).to eq(1)
   end

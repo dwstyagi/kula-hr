@@ -19,6 +19,28 @@ RSpec.describe "Leave accounting and transitions" do
     Leave::RequestTransition.new(leave_request: request, actor: actor).call(action, reason: reason)
   end
 
+  it "debits and refunds precisely half a day, retaining actor/reason and immutable history" do
+    request = request_for(duration: "morning")
+    expect(request.number_of_days).to eq(0.5)
+    transition(request, :approve)
+    expect(balance.reload.remaining_days).to eq(11.5)
+    expect(balance.used_days).to eq(0.5)
+    debit = balance.leave_balance_entries.last
+    expect(debit.actor).to eq(actor)
+    expect(debit.change_remaining_days).to eq(-0.5)
+    expect(debit.reason).to include(request.id.to_s)
+    expect { debit.update!(reason: "tamper") }.to raise_error(ActiveRecord::ReadOnlyRecord)
+    transition(request, :request_cancellation, reason: "Plans changed")
+    expect(balance.reload.remaining_days).to eq(11.5)
+    expect(request.reload).to be_cancellation_pending
+    transition(request, :cancel, reason: "HR accepted the change")
+    expect(balance.reload.remaining_days).to eq(12)
+    expect(request.reload).to be_cancelled
+    expect(request.leave_request_events.pluck(:action)).to eq(%w[submitted approve request_cancellation cancel])
+    expect { transition(request, :cancel) }.to raise_error(Leave::RequestTransition::Error)
+    expect(balance.reload.remaining_days).to eq(12)
+  end
+
   it "permits opposite half-day sessions, but prevents duplicate sessions and full-day overlap" do
     request_for(duration: "morning")
     expect(request_for(duration: "afternoon")).to be_persisted
@@ -50,6 +72,7 @@ RSpec.describe "Leave accounting and transitions" do
     expect(request.reload).to be_approved
     expect(request).not_to be_cancellation_pending
     expect(balance.reload.remaining_days).to eq(11)
+    expect(request.leave_request_events.last.reason).to include("Coverage")
   end
 
   it "blocks approval and balance changes when attendance is locked" do
@@ -148,6 +171,18 @@ RSpec.describe "Leave accounting and transitions" do
     expect(credit.reload.remaining_days).to eq(1)
   end
 
+  it "records HR adjustments once and refuses to remove used days" do
+    reference = SecureRandom.uuid
+    args = { balance: balance, days: "0.5", reason: "Opening balance correction", actor: actor, reference: reference }
+    2.times { Leave::BalanceAdjustment.call(**args) }
+    expect(balance.reload.remaining_days).to eq(12.5)
+    expect(balance.leave_balance_entries.where(kind: "hr_adjustment").count).to eq(1)
+    expect(balance.leave_balance_entries.last.actor).to eq(actor)
+    expect { Leave::BalanceAdjustment.call(**args.merge(days: "-13", reference: SecureRandom.uuid)) }.to raise_error(Leave::BalanceAdjustment::Error)
+    expect { Leave::BalanceAdjustment.call(**args.merge(reason: "")) }.to raise_error(Leave::BalanceAdjustment::Error)
+    expect { Leave::BalanceAdjustment.call(**args.merge(days: "0.12345")) }.to raise_error(Leave::BalanceAdjustment::Error)
+  end
+
   [ 10, 15, 17 ].each do |quota|
     it "credits exactly #{quota} days across a year, including repeating fractions and reruns" do
       type.update!(annual_quota: quota)
@@ -159,6 +194,7 @@ RSpec.describe "Leave accounting and transitions" do
       next_balance = LeaveBalance.find_by!(employee: employee, leave_type: type, financial_year: "2027-28")
       expect(next_balance.total_days).to eq(quota)
       expect(next_balance.remaining_days).to eq(quota)
+      expect(next_balance.leave_balance_entries.sum(:change_total_days)).to eq(quota)
     end
   end
 
@@ -183,6 +219,7 @@ RSpec.describe "Leave accounting and transitions" do
     2.times { Leave::LeaveBalanceAllocator.new(employee: joiner).call }
     joining_balance = LeaveBalance.find_by!(employee: joiner, leave_type: type)
     expect(joining_balance.total_days).to eq(Leave::AccrualAmount.for(type, Date.current))
+    expect(joining_balance.leave_balance_entries.count).to eq(1)
     Leave::MonthlyLeaveAccrualService.new(tenant: tenant, period: Date.current.beginning_of_month).call
     expect(joining_balance.reload.total_days).to eq(Leave::AccrualAmount.for(type, Date.current))
     Leave::MonthlyLeaveAccrualService.new(tenant: tenant, period: Date.current.next_month.beginning_of_month).call

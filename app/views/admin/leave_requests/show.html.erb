@@ -56,6 +56,7 @@
 
     <% if lr.regularization? %><div class="alert alert-info text-sm">Regularization requiring HR review: <%= lr.regularization_note %></div><% end %>
     <% if lr.cancellation_pending? %><div class="alert alert-warning text-sm">Cancellation requested: <%= lr.cancellation_reason %></div><% end %>
+    <%= render "shared/leave_request_history", request: lr %>
     <% if lr.reason.present? %>
       <div>
         <p class="eyebrow mb-1.5">Reason</p>

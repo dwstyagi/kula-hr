@@ -1,0 +1,15 @@
+<div class="max-w-6xl mx-auto space-y-6">
+  <%= link_to "← Leave balances", admin_leave_balances_path, class: "btn btn-ghost" %>
+  <%= render "shared/leave_balance_history" %>
+  <% if policy(@balance).adjust? && @balance.leave_type.is_paid? && @balance.financial_year == FinancialYear.label && @balance.leave_type.code != "CO" %>
+    <div class="card card-pad">
+      <h2 class="text-lg font-semibold mb-3">Adjust balance</h2>
+      <%= form_with url: adjust_admin_leave_balance_path(@balance), class: "space-y-4" do |f| %>
+        <%= f.hidden_field :reference, value: @adjustment_reference %>
+        <div><%= f.label :days, "Days to add or remove", class: "label" %><%= f.number_field :days, step: "0.0001", min: -10000, max: 10000, required: true, class: "input" %><p class="text-xs text-stone-500">Use a negative number to remove unused days. Existing usage and encashment stay recorded.</p></div>
+        <div><%= f.label :reason, "Adjustment reason", class: "label" %><%= f.text_area :reason, required: true, maxlength: 1000, class: "input" %></div>
+        <%= f.submit "Record adjustment", class: "btn btn-primary" %>
+      <% end %>
+    </div>
+  <% end %>
+</div>

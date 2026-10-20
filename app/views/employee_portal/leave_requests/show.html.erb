@@ -17,5 +17,6 @@
         <%= f.submit "Send cancellation to HR", class: "btn btn-ghost" %>
       <% end %>
     <% end %>
+    <%= render "shared/leave_request_history", request: @leave_request %>
   </div>
 </div>

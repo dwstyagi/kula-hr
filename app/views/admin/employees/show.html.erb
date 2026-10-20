@@ -319,6 +319,7 @@
                 <div class="flex items-end justify-between">
                   <div>
                     <p class="amount text-2xl font-bold text-stone-900"><%= number_with_precision(balance.remaining_days, precision: 4, strip_insignificant_zeros: true) %></p>
+                    <%= link_to "History / adjust", admin_leave_balance_path(balance), class: "text-xs text-kula-700 underline" %>
                     <p class="text-xs text-stone-400">remaining of <%= number_with_precision(balance.total_days, precision: 4, strip_insignificant_zeros: true) %></p>
                   </div>
                   <div class="text-right text-xs text-stone-400">

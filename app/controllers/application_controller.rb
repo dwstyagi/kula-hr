@@ -37,6 +37,8 @@ class ApplicationController < ActionController::Base
   before_action :set_current_tenant_from_subdomain
   before_action :verify_tenant_membership!
 
+  around_action :with_leave_audit_actor
+
   after_action :verify_authorized, unless: :skip_authorization_verification?
   after_action :verify_policy_scoped, unless: :skip_policy_scope_verification?
 
@@ -51,6 +53,10 @@ class ApplicationController < ActionController::Base
   end
 
   private
+
+  def with_leave_audit_actor(&block)
+    LeaveAuditContext.set(actor: current_user, &block)
+  end
 
   # Keep production-facing links on the public canonical domain even if an old
   # local or pre-launch APP_DOMAIN value survives in the environment.

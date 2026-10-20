@@ -48,6 +48,7 @@ module Leave
             else
               raise ArgumentError, "Unknown leave action"
             end
+            @request.leave_request_events.create!(tenant: @request.tenant, actor: @actor, action: action, reason: reason)
           end
         end
       end

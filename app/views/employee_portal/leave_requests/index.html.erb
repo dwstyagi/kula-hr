@@ -36,12 +36,14 @@
             </div>
             <p class="page-title text-2xl"><%= number_with_precision(balance.remaining_days, precision: 4, strip_insignificant_zeros: true) %></p>
             <p class="text-xs text-stone-400">of <%= number_with_precision(balance.total_days, precision: 4, strip_insignificant_zeros: true) %> days</p>
+            <%= link_to "Balance history", employee_portal_leave_balance_path(balance), class: "text-xs text-kula-700 underline" %>
           </div>
         <% end %>
       </div>
     <% end %>
   </div>
 
+  <p class="text-xs text-stone-500">Pending requests are not deducted from your balance until approval. Open Details to view the request history or request cancellation of approved leave.</p>
   <%# March Encashment Banner %>
   <% if Date.today.month == 3 %>
     <% fy = LeaveBalance.current_financial_year %>
@@ -108,7 +110,7 @@
             <th>Dates</th>
             <th>Days</th>
             <th>Status</th>
-            <th>Approved By</th>
+            <th>Reviewed By</th>
             <th class="text-right">Action</th>
           </tr>
         </thead>
@@ -149,7 +151,7 @@
                     <p class="text-stone-400 mt-0.5"><%= lr.approved_at.strftime("%d %b, %I:%M %p") %></p>
                   <% end %>
                   <% if lr.rejected? && lr.rejection_reason.present? %>
-                    <p class="text-red-500 mt-0.5 max-w-40 truncate" title="<%= lr.rejection_reason %>">
+                    <p class="text-red-500 mt-0.5 whitespace-pre-wrap break-words" title="<%= lr.rejection_reason %>">
                       "<%= lr.rejection_reason %>"
                     </p>
                   <% end %>
