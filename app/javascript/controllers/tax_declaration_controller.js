@@ -18,6 +18,7 @@ export default class extends Controller {
 
     this.regimeSectionTargets.forEach(el => {
       el.classList.toggle("hidden", !isOldRegime)
+      el.disabled = !isOldRegime
     })
   }
 

@@ -53,14 +53,16 @@
           <div>
             <span class="text-sm font-medium text-stone-900">New Regime</span>
             <p class="text-xs text-stone-500 mt-0.5">Lower slabs, standard deduction ₹75,000 only — no other deductions</p>
+            <p class="text-xs text-stone-500 mt-0.5">Saving New Regime clears HRA and home-loan claims.</p>
           </div>
         </label>
       </div>
     </div>
 
     <%# ── Old Regime Sections (hidden when New Regime selected) ─────────── %>
-    <div data-tax-declaration-target="regimeSection"
-         class="<%= @declaration.regime_new_regime? ? 'hidden' : '' %> space-y-5">
+    <fieldset data-tax-declaration-target="regimeSection"
+              <%= "disabled" if @declaration.regime_new_regime? %>
+              class="<%= @declaration.regime_new_regime? ? 'hidden' : '' %> space-y-5">
 
       <%# ── Section 80C ──────────────────────────────────────────────────── %>
       <%= render "investment_section", f: f,
@@ -160,7 +162,7 @@
         </div>
       </div>
 
-    </div><%# end regime section %>
+    </fieldset><%# end regime section %>
 
     <%# ── Actions ────────────────────────────────────────────────────────── %>
     <div class="flex items-center gap-3 pb-6">

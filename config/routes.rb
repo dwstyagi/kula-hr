@@ -1,4 +1,5 @@
 require "sidekiq/web"
+require_relative "../lib/middleware/development_sidekiq_web" if Rails.env.development?
 
 Rails.application.routes.draw do
   if Rails.env.development?
@@ -299,6 +300,7 @@ Rails.application.routes.draw do
   end unless defined?(PLATFORM_ADMIN_CONSTRAINT)
 
   constraints(PLATFORM_ADMIN_CONSTRAINT) do
-    mount Sidekiq::Web => "/platform_admin/sidekiq"
+    sidekiq_web = Rails.env.development? ? DevelopmentSidekiqWeb : Sidekiq::Web
+    mount sidekiq_web => "/platform_admin/sidekiq"
   end
 end

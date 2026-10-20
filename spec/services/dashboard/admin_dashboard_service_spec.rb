@@ -108,5 +108,43 @@ RSpec.describe Dashboard::AdminDashboardService do
         end
       end
     end
+
+    context "with retired payroll types" do
+      let!(:regular) do
+        create(:payroll_run, :paid, tenant: tenant, month: 8, year: 2026,
+          total_gross: 100_000, total_net_pay: 90_000)
+      end
+
+      before do
+        create(:payroll_run, :paid, tenant: tenant, month: 10, year: 2026,
+          run_type: "full_and_final", total_net_pay: 500_000)
+        create(:payroll_run, :approved, tenant: tenant, month: 9, year: 2026,
+          run_type: "bonus", total_net_pay: 200_000)
+      end
+
+      it "uses the latest regular payroll for current period, totals, trend and activity" do
+        result = described_class.new(tenant: tenant).call
+
+        expect(result.current_run).to eq(regular)
+        expect(result.current_run_net).to eq(90_000)
+        expect(result.payroll_trend).to eq([
+          { label: "Aug 2026", gross: 100_000.0, net: 90_000.0, ctc: regular.total_employer_cost.to_f }
+        ])
+        expect(result.recent_activity.map { |entry| entry[:period] }).to eq([ "August 2026" ])
+      end
+    end
+
+    context "with only retired payroll runs" do
+      it "shows the no-payroll state" do
+        create(:payroll_run, :paid, tenant: tenant, run_type: "full_and_final")
+
+        result = described_class.new(tenant: tenant).call
+
+        expect(result.current_run).to be_nil
+        expect(result.current_run_net).to eq(0)
+        expect(result.payroll_trend).to be_empty
+        expect(result.recent_activity).to be_empty
+      end
+    end
   end
 end

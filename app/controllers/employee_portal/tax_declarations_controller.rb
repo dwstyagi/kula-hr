@@ -61,7 +61,7 @@ module EmployeePortal
     end
 
     def declaration_params
-      params.require(:tax_declaration).permit(
+      attributes = params.require(:tax_declaration).permit(
         :regime, :claiming_hra, :monthly_rent,
         :landlord_name, :landlord_pan, :rental_city,
         :home_loan_interest, :home_loan_principal,
@@ -69,6 +69,15 @@ module EmployeePortal
           :id, :section, :description, :declared_amount, :_destroy
         ]
       )
+
+      # Hidden Old Regime fields still arrive from the form. Clear incompatible
+      # claims when saving New Regime, including claims already in the draft.
+      if attributes.fetch(:regime, @declaration.regime) == "new_regime"
+        attributes = attributes.except(:monthly_rent, :landlord_name, :landlord_pan, :rental_city,
+          :investment_declarations_attributes)
+        attributes.merge!(claiming_hra: false, home_loan_interest: 0, home_loan_principal: 0)
+      end
+      attributes
     end
   end
 end

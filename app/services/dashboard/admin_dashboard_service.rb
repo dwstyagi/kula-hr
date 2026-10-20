@@ -31,11 +31,11 @@ module Dashboard
     private
 
     def current_payroll_run
-      PayrollRun.order(year: :desc, month: :desc).first
+      PayrollRun.regular_runs.order(year: :desc, month: :desc).first
     end
 
     def payroll_trend
-      PayrollRun.where(status: %w[approved paid])
+      PayrollRun.regular_runs.where(status: %w[approved paid])
                 .order(year: :desc, month: :desc)
                 .limit(6)
                 .reverse
@@ -76,7 +76,7 @@ module Dashboard
     end
 
     def recent_activity
-      PayrollRun.order(updated_at: :desc).limit(5).map do |run|
+      PayrollRun.regular_runs.order(updated_at: :desc).limit(5).map do |run|
         {
           period: run.period_label,
           status: run.status,
